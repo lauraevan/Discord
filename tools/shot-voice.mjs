@@ -1,0 +1,28 @@
+import { chromium } from 'playwright'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 743 } })
+const errs = []
+p.on('pageerror', (e) => errs.push(String(e).split('\n')[0]))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(400)
+await p.evaluate(() => {
+  const r = [...document.querySelectorAll('.row')].find((x) => x.querySelector('.row-name')?.textContent === 'General')
+  r?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+})
+await p.waitForSelector('.voice-view', { timeout: 3000 })
+await p.screenshot({ path: process.argv[2] })
+// forum channel
+await p.click('.cat-add')
+await p.waitForSelector('.type-picker')
+await p.click('.type-opt:has-text("Forum")')
+await p.fill('#chn', 'help-and-questions')
+await p.click('.modal-foot .btn-primary')
+await p.waitForSelector('.forum', { timeout: 3000 })
+await p.click('.btn-primary:has-text("New Post")')
+await p.fill('[aria-label="Post title"]', 'How do I make this look like Discord?')
+await p.fill('[aria-label="Post body"]', 'Read the **client bundle**, apparently.')
+await p.click('.forum-composer-foot .btn-primary')
+await p.waitForSelector('.forum-post', { timeout: 3000 })
+await p.screenshot({ path: process.argv[3] })
+console.log('errors:', errs.length ? errs : 'none')
+await b.close()

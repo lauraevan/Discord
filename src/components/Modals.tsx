@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
+  CHANNEL_TYPES,
   serverColors,
   statusColor,
   statusLabel,
@@ -7,7 +8,14 @@ import {
   type Channel,
   type Status,
 } from '../data'
-import { HashIcon, SpeakerIcon } from '../ui/Icons'
+import {
+  ForumIcon,
+  HashIcon,
+  MegaphoneIcon,
+  SpeakerIcon,
+  StageIcon,
+  VideoIcon,
+} from '../ui/Icons'
 
 /** Escape closes any open overlay, the way Discord's own dialogs do. */
 function useEscape(onClose: () => void) {
@@ -141,19 +149,34 @@ export function ChannelModal({
     >
       <span className="field-label">Channel type</span>
       <div className="type-picker">
-        {(['text', 'voice'] as const).map((k) => (
-          <button
-            key={k}
-            className={'type-opt' + (kind === k ? ' on' : '')}
-            onClick={() => setKind(k)}
-          >
-            {k === 'text' ? <HashIcon /> : <SpeakerIcon />}
-            <span>
-              <b>{k === 'text' ? 'Text' : 'Voice'}</b>
-              <i>{k === 'text' ? 'Send messages, images and GIFs' : 'Hang out together with voice'}</i>
-            </span>
-          </button>
-        ))}
+        {CHANNEL_TYPES.map(([k, label, note]) => {
+          const Icon =
+            k === 'text'
+              ? HashIcon
+              : k === 'voice'
+                ? SpeakerIcon
+                : k === 'announcement'
+                  ? MegaphoneIcon
+                  : k === 'stage'
+                    ? StageIcon
+                    : k === 'forum'
+                      ? ForumIcon
+                      : VideoIcon
+          return (
+            <button
+              key={k}
+              className={'type-opt' + (kind === k ? ' on' : '')}
+              onClick={() => setKind(k)}
+            >
+              <Icon />
+              <span>
+                <b>{label}</b>
+                <i>{note}</i>
+              </span>
+              <span className="type-radio" />
+            </button>
+          )
+        })}
       </div>
       <label className="field-label" htmlFor="chn">Channel name</label>
       <input

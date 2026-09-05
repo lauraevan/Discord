@@ -9,6 +9,8 @@ const cases = {
   'bad messages': { 'discord-ui:messages': '{"a/b":[{"id":1}]}' },
   'bad account status': { 'discord-ui:account': '{"name":"N","handle":"n","color":"#fff","status":"asleep"}' },
   'channels missing kind': { 'discord-ui:servers': '[{"id":"s","name":"X","initials":"X","color":"#000","categories":[],"channels":[{"id":"c","name":"g"}]}]' },
+  'v3 server (no roles)': { 'discord-ui:v3:servers': '[{"id":"s","name":"X","initials":"X","color":"#000","categories":[],"channels":[]}]' },
+  'v4 server missing audit': { 'discord-ui:v4:servers': '[{"id":"s","name":"X","initials":"X","color":"#000","categories":[],"channels":[],"roles":[],"emojis":[],"invites":[]}]' },
   'nothing stored': {},
 }
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })

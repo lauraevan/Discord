@@ -4,8 +4,10 @@ import { ChannelSettings } from './components/ChannelSettings'
 import { ChatFeed, ChatHeader } from './components/Chat'
 import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
+import { ForumView, makePost } from './components/Forum'
 import { EmojiPicker } from './components/EmojiPicker'
 import { FriendsPage, HomeSidebar, ProfileModal } from './components/Home'
+import { Inbox } from './components/Inbox'
 import { MemberList } from './components/MemberList'
 import {
   ChannelModal,
@@ -21,6 +23,7 @@ import { SearchResults } from './components/SearchResults'
 import { ServerSettings } from './components/ServerSettings'
 import { ServerRail } from './components/ServerRail'
 import { ThemePanel } from './components/ThemePanel'
+import { VoiceView } from './components/Voice'
 import { TitleBar } from './components/TitleBar'
 import { UserSettings } from './components/UserSettings'
 import { ProfilePopout, UserArea } from './components/UserArea'
@@ -107,6 +110,7 @@ export default function App() {
   const [pollModal, setPollModal] = useState(false)
   const [channelSettings, setChannelSettings] = useState<string | null>(null)
   const [customStatus, setCustomStatus] = useState(false)
+  const [inboxOpen, setInboxOpen] = useState(false)
   /** channelId -> mute expiry (null = until turned back on) */
   const [mutes, setMutes] = useState<Record<string, number | null>>({})
   const [serverSettings, setServerSettings] = useState(false)
@@ -448,7 +452,23 @@ export default function App() {
         title={activeServer === null ? 'Friends' : (server?.name ?? 'Discord')}
         initials={activeServer === null ? '' : (server?.initials ?? 'D')}
         color={activeServer === null ? '#5865f2' : (server?.color ?? '#5865f2')}
+        onInbox={() => setInboxOpen((v) => !v)}
       />
+      {inboxOpen ? (
+        <Inbox
+          server={server}
+          account={account}
+          unreadChannels={server?.channels.filter((c) => unread[c.id]) ?? []}
+          messagesFor={(c) => (server ? (messages[keyOf(server, c)] ?? []) : [])}
+          onJump={(c, id) => {
+            setActiveChannel(c.id)
+            setInboxOpen(false)
+            jumpTo(id)
+          }}
+          onMarkRead={markServerRead}
+          onClose={() => setInboxOpen(false)}
+        />
+      ) : null}
       <div className="app-body">
         <div className="left-col">
           <ServerRail
@@ -476,8 +496,10 @@ export default function App() {
               }
               onSelect={(id) => {
                 const c = server.channels.find((x) => x.id === id)
-                if (c?.kind === 'voice') setVoice((v) => (v === id ? null : id))
-                else setActiveChannel(id)
+                if (c?.kind === 'voice') {
+                  setVoice(id)
+                  setActiveChannel(id)
+                } else setActiveChannel(id)
               }}
               onAddChannel={(categoryId) => setChannelModal({ mode: 'create', categoryId })}
               onEditChannel={(id) => setChannelSettings(id)}
@@ -624,6 +646,29 @@ export default function App() {
               ) : null}
               <div className="chat-body">
                 <div className="chat-main">
+                  {voice === channel.id ? (
+                    <VoiceView
+                      channel={channel}
+                      account={account}
+                      muted={muted}
+                      deafened={deafened}
+                      onMute={() => setMuted((m) => !m)}
+                      onDeafen={() => setDeafened((d) => !d)}
+                      onLeave={() => setVoice(null)}
+                    />
+                  ) : channel.kind === 'forum' ? (
+                    <ForumView
+                      channel={channel}
+                      posts={thread}
+                      account={account}
+                      md={md}
+                      onCreate={(title, body) =>
+                        patchThread((list) => [...list, makePost(account.handle, title, body)])
+                      }
+                      onOpen={jumpTo}
+                    />
+                  ) : (
+                  <>
                   <ChatFeed
                     channel={channel}
                     messages={thread}
@@ -662,6 +707,8 @@ export default function App() {
                       ])
                     }
                   />
+                  </>
+                  )}
                 </div>
                 {query.trim() ? (
                   <SearchResults

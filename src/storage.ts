@@ -11,7 +11,7 @@
 import type { Account, Message, Server, Status } from './data'
 
 /** Bump when the shape of anything below changes. */
-const SCHEMA = 3
+const SCHEMA = 4
 const PREFIX = `discord-ui:v${SCHEMA}:`
 const LEGACY = 'discord-ui:'
 
@@ -43,6 +43,10 @@ export function isServers(v: unknown): v is Server[] {
         isStr(s.color) &&
         Array.isArray(s.categories) &&
         Array.isArray(s.channels) &&
+        Array.isArray(s.roles) &&
+        Array.isArray(s.emojis) &&
+        Array.isArray(s.invites) &&
+        Array.isArray(s.audit) &&
         s.channels.every((c) => isObj(c) && isStr(c.id) && isStr(c.name) && isStr(c.kind)),
     )
   )

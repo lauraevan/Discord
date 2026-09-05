@@ -71,7 +71,20 @@ export const statusColor: Record<Status, string> = {
 
 /* --------------------------------------------------------------- servers */
 
-export type ChannelKind = 'text' | 'voice' | 'announcement' | 'forum' | 'rules'
+export type ChannelKind = 'text' | 'voice' | 'announcement' | 'stage' | 'forum' | 'media' | 'rules'
+
+/**
+ * The channel types Create Channel offers, with the client's own descriptions.
+ * Discord's numeric type is in the comment; see docs/discord-reference.md.
+ */
+export const CHANNEL_TYPES: [ChannelKind, string, string][] = [
+  ['text', 'Text', 'Send messages, images, GIFs, emoji, opinions, and puns'],
+  ['voice', 'Voice', 'Hang out together with voice, video, and screen share'],
+  ['announcement', 'Announcement', 'Important updates for people in and out of the server'],
+  ['stage', 'Stage', 'Host events with an audience of listeners'],
+  ['forum', 'Forum', 'Create a space for organised discussions'],
+  ['media', 'Media', 'A gallery-style space for images and video'],
+]
 
 export type Channel = {
   id: string

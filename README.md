@@ -7,53 +7,66 @@ rounded design tokens.
 
 ## What is real here
 
-No invented cast and no invented servers — the realism is in the behaviour. The
-app opens on your own empty server, and everything below actually works.
+Every section list, enum and menu below was extracted from Discord's own
+shipped client bundle rather than reconstructed from memory — see
+[`docs/discord-reference.md`](docs/discord-reference.md) for what was pulled and
+from where. Where a surface needs Discord's servers, a payment or a device, it
+says so on the page instead of faking a control.
 
 ### Messages
 
-| Feature | Detail |
+Discord-flavour markdown (not CommonMark): `**b**` `*i*` `__u__` `~~s~~`
+`||spoiler||` `` `code` `` ```` ```lang ```` `> q` `>>> q` `# ## ###`
+`-# subtext` `- ` `1. ` `[text](url)` `\` escape, nesting via a recursive
+parser, and no tables/images/task lists — which Discord also omits. 178 Twemoji
+by `:shortcode:` or character, jumbo when a message is only emoji (capped at 27).
+
+Grouping breaks at 7 minutes · date dividers · gutter timestamps on hover ·
+reactions · replies with the elbow spine · inline editing with `(edited)` ·
+`↑` to edit your last · pins · click-to-reveal spoilers · image paste and upload
+as data URLs · **polls** (up to 10 answers, single or multi, the client's
+duration list, live bars, Show results, closed state) · **threads** nested under
+their parent · **system messages** using Discord's MessageType values, including
+the rotating join lines.
+
+### Screens
+
+| Screen | What's real |
 | --- | --- |
-| Discord-flavour markdown | `**b**` `*i*` `__u__` `~~s~~` `\|\|spoiler\|\|` `` `code` `` ```` ```lang ```` `> q` `>>> q` `# ## ###` `-# subtext` `- ` `1. ` `[text](url)` `\` escape — and no tables, images or task lists, which Discord also omits |
-| Nesting | `***__~~x~~__***` stacks, because it is a recursive parser rather than a regex pass |
-| Emoji | 178 Twemoji, by `:shortcode:` or by character; a message that is only emoji renders jumbo, capped at 27 as in the client |
-| Grouping | consecutive messages from one author merge, and the group breaks after 7 minutes |
-| Timestamps | date dividers, "Today at 4:32 PM", and the gutter time that appears on a grouped message on hover |
-| Reactions | add from the picker or the hover bar, click to toggle, your own are highlighted |
-| Replies | reply bar in the composer, the quoted line above the message, and the elbow spine |
-| Editing | inline, with escape/enter hints and the `(edited)` tag; `↑` in an empty composer edits your last message |
-| Pins | pin from the hover bar, pinned messages get a highlight, and the header's pin button opens the popover |
-| Spoilers | click to reveal |
+| **User Settings** | The client's own 25 sections in its own groups. Appearance drives message display, font scale, group spacing, zoom, saturation and link underlines through live CSS variables — compact mode really is compact. Accessibility drives reduced motion. Streamer Mode really blurs invite codes and email. Keybinds, Language (30 locales), Notifications, Voice & Video, Text & Images, Data & Privacy, Advanced. |
+| **Server Settings** | Overview, Roles (a working editor over Discord's real permission list, grouped and worded as the client groups it), Emoji, Members, Invites (Discord-shaped codes), Bans, Audit Log — which is real, written by your own actions — and Delete Server. |
+| **Channel Settings** | Name, topic, the real slowmode steps, age restriction; voice channels explain what is missing. |
+| **Home** | Friends with the client's Online / All / Pending / Blocked tabs and empty-state copy, Add Friend, the Active Now panel and the DM sidebar. |
+| **Profile modal** | Banner, avatar, names, About Me, Member Since, Roles, Note, message box. |
+| **Forum channels** | Post cards, New Post composer, sort by Latest Activity or Date Posted. |
+| **Voice channels** | Join, participant tile, the control tray (camera, screen, activities, soundboard, mute, deafen, disconnect) and the Voice Connected strip. |
+| **Inbox** | Unreads / For You / Mentions with mark-all-as-read. |
 
 ### Getting around
 
-| Feature | Detail |
-| --- | --- |
-| Quick switcher | `Ctrl`/`⌘`+`K` — servers and channels together, prefix matches ranked first |
-| Autocomplete | `#` channels, `@` members, `:` emoji, `/` commands; arrows to move, tab or enter to accept |
-| Slash commands | `/shrug` `/tableflip` `/unflip` `/me` `/spoiler` expand client-side, as they do in Discord |
-| Search | filters the whole server and shows hits in the right panel with Jump |
-| Unread | bold channel names with a pip, the red NEW divider, `Esc` marks the channel read, `Shift`+`Esc` the server |
-| Member list | hoisted-role layout with the status dot and role colour; toggled from the header |
-| Context menus | right-click a message or a channel |
-| Voice | click a voice channel to join; the user area grows a Voice Connected strip |
-| Emoji picker | search, category rail, sticky headings, and the hovered shortcode in the footer |
-| Shortcuts | `Ctrl`+`K`, `Esc`, `Shift`+`Esc`, `Ctrl`+`Shift`+`M`, `↑` |
-
-### Server and profile
-
-| Feature | Where |
-| --- | --- |
-| Create a server | `+` in the rail |
-| Create a channel | `+` on a category header |
-| Edit / delete a channel | gear on the row, right-click, or **Edit Channel** in the empty state |
-| Profile popout | click your name in the user area |
-| Edit profile | popout -> Edit Profile (name, username, pronouns, bio, colour) |
-| Set status | popout -> status row (online / idle / dnd / invisible) |
-| Appearance | gear in the user area — 4 default themes + 18 colour themes |
-| Mute / deafen | user area toggles |
+Quick switcher (`Ctrl`/`⌘`+`K`) · autocomplete on `#` `@` `:` `/` · `/shrug`
+`/tableflip` `/unflip` `/me` `/spoiler` · search with Discord's filters
+(`from:` `mentions:` `has:` `before:` `during:` `after:` `in:` `pinned:`) and
+the SEARCH OPTIONS list · unread pips, the red NEW divider, `Esc` to mark a
+channel read and `Shift`+`Esc` the server · member list · nested right-click
+menus, including Mute Channel with the client's six durations · custom status ·
+Developer Mode adding Copy ID · every channel type in Create Channel.
 
 Everything persists to localStorage.
+
+## What is not here, and why
+
+A page cannot do these, so rather than mock them up they are drawn where they
+belong and labelled:
+
+- **Voice and video transport**, screen share, Go Live, soundboard audio — no
+  media server, and no microphone permission.
+- **Anything with another person** — friends, DMs, mentions from others, the
+  member list beyond you. Inventing a cast would be the lie this project is
+  trying not to tell.
+- **Payments** — Nitro, Server Boost, the shop, gift inventory.
+- **Bots, apps, webhooks, AutoMod, integrations** — all server-side.
+- **The game overlay and game detection** — desktop-app features.
 
 ## Measured geometry (px, window 1558x743)
 
