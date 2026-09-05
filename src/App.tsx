@@ -13,6 +13,7 @@ import {
   StatusMenu,
 } from './components/Modals'
 import { Pins } from './components/Pins'
+import { CreatePoll } from './components/Poll'
 import { QuickSwitcher } from './components/QuickSwitcher'
 import { SearchResults } from './components/SearchResults'
 import { ServerSettings } from './components/ServerSettings'
@@ -99,6 +100,7 @@ export default function App() {
   const [userSettings, setUserSettings] = useState(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [profileModal, setProfileModal] = useState(false)
+  const [pollModal, setPollModal] = useState(false)
   const [serverSettings, setServerSettings] = useState(false)
   const [query, setQuery] = useState('')
 
@@ -272,7 +274,70 @@ export default function App() {
     )
 
   const togglePin = (id: string) =>
-    patchThread((list) => list.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m)))
+    patchThread((list) => {
+      const target = list.find((m) => m.id === id)
+      const next = list.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m))
+      // Discord posts a system message when something is pinned
+      return target?.pinned
+        ? next
+        : [
+            ...next,
+            {
+              id: uid('m'),
+              author: account.handle,
+              time: Date.now(),
+              text: '',
+              type: 'CHANNEL_PINNED_MESSAGE' as const,
+            },
+          ]
+    })
+
+  const vote = (id: string, answer: number) =>
+    patchThread((list) =>
+      list.map((m) => {
+        if (m.id !== id || !m.poll) return m
+        const votes = { ...m.poll.votes }
+        const already = (votes[answer] ?? []).includes(account.handle)
+        // single-answer polls clear the other picks first, as Discord's do
+        if (!m.poll.multi)
+          for (const k of Object.keys(votes))
+            votes[Number(k)] = votes[Number(k)].filter((h) => h !== account.handle)
+        votes[answer] = already
+          ? (votes[answer] ?? []).filter((h) => h !== account.handle)
+          : [...(votes[answer] ?? []), account.handle]
+        return { ...m, poll: { ...m.poll, votes } }
+      }),
+    )
+
+  const createThread = (m: Message, name: string) => {
+    if (!server) return
+    const id = uid('ch')
+    patchServer(server.id, (s) => ({
+      ...s,
+      channels: [
+        ...s.channels,
+        {
+          id,
+          name,
+          kind: 'text' as const,
+          categoryId: channel?.categoryId ?? null,
+          parentId: channel?.id,
+          rootMessageId: m.id,
+        },
+      ],
+    }))
+    patchThread((list) => [
+      ...list.map((x) => (x.id === m.id ? { ...x, threadId: id } : x)),
+      {
+        id: uid('m'),
+        author: account.handle,
+        time: Date.now(),
+        text: name,
+        type: 'THREAD_CREATED' as const,
+      },
+    ])
+    setActiveChannel(id)
+  }
 
   const jumpTo = (id: string) => {
     setPinsOpen(false)
@@ -336,12 +401,25 @@ export default function App() {
     { label: 'Add Reaction', onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 } }) },
     { label: 'Edit Message', onPick: () => setEditingId(m.id) },
     { label: 'Reply', onPick: () => setReplyTo(m) },
+    {
+      label: 'Create Thread',
+      onPick: () =>
+        createThread(m, m.text.slice(0, 40).replace(/\s+/g, '-').toLowerCase() || 'thread'),
+    },
     { label: m.pinned ? 'Unpin Message' : 'Pin Message', onPick: () => togglePin(m.id) },
     { sep: true },
     { label: 'Copy Text', onPick: () => navigator.clipboard?.writeText(m.text) },
+    {
+      label: 'Copy Message Link',
+      onPick: () =>
+        navigator.clipboard?.writeText(`${location.origin}/channels/${server?.id}/${channel?.id}/${m.id}`),
+    },
     { label: 'Mark Unread', onPick: () => setLastRead((r) => ({ ...r, [key]: m.time - 1 })) },
     { sep: true },
     { label: 'Delete Message', danger: true, onPick: () => deleteMessage(m.id) },
+    ...(prefs.developerMode
+      ? [{ sep: true as const }, { label: 'Copy Message ID', onPick: () => navigator.clipboard?.writeText(m.id) }]
+      : []),
   ]
 
   const results = useMemo(() => {
@@ -496,6 +574,7 @@ export default function App() {
                     onReact={react}
                     onPin={togglePin}
                     onOpenPicker={(id, at) => setPicker({ target: id, at })}
+                    onVote={vote}
                     onContext={(m, at) => setCtx({ at, items: messageMenu(m) })}
                   />
                   <Composer
@@ -510,6 +589,13 @@ export default function App() {
                       if (mine) setEditingId(mine.id)
                     }}
                     onOpenPicker={(at) => setPicker({ target: 'composer', at })}
+                    onPoll={() => setPollModal(true)}
+                    onAttach={(a) =>
+                      patchThread((list) => [
+                        ...list,
+                        { id: uid('m'), author: account.handle, time: Date.now(), text: '', attachments: [a] },
+                      ])
+                    }
                   />
                 </div>
                 {query.trim() ? (
@@ -541,6 +627,19 @@ export default function App() {
           />
         ) : null}
       </div>
+
+      {pollModal ? (
+        <CreatePoll
+          onClose={() => setPollModal(false)}
+          onCreate={(poll) => {
+            patchThread((list) => [
+              ...list,
+              { id: uid('m'), author: account.handle, time: Date.now(), text: '', poll },
+            ])
+            setPollModal(false)
+          }}
+        />
+      ) : null}
 
       {profileModal ? (
         <ProfileModal

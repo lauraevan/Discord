@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { Category, Channel, Server } from '../data'
 import {
   AddMemberIcon,
@@ -14,10 +15,12 @@ import {
   PlusIcon,
   RulesIcon,
   SpeakerIcon,
+  ThreadsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
-function Glyph({ kind }: { kind: Channel['kind'] }) {
+function Glyph({ kind, thread }: { kind: Channel['kind']; thread?: boolean }) {
+  if (thread) return <ThreadsIcon />
   if (kind === 'announcement') return <MegaphoneIcon />
   if (kind === 'forum') return <ForumIcon />
   if (kind === 'rules') return <RulesIcon />
@@ -45,7 +48,11 @@ function ChannelRow({
   return (
     <div
       className={
-        'row' + (active ? ' active' : '') + (unread ? ' unread' : '') + (inVoice ? ' in-voice' : '')
+        'row' +
+        (active ? ' active' : '') +
+        (unread ? ' unread' : '') +
+        (inVoice ? ' in-voice' : '') +
+        (channel.parentId ? ' thread' : '')
       }
       onClick={onSelect}
       onContextMenu={(e) => {
@@ -54,7 +61,7 @@ function ChannelRow({
       }}
     >
       {unread && !active ? <span className="unread-pip" /> : null}
-      <Glyph kind={channel.kind} />
+      <Glyph kind={channel.kind} thread={!!channel.parentId} />
       <span className="row-name">{channel.name}</span>
       <span className="row-actions">
         <Tooltip label="Create Invite" side="below">
@@ -103,8 +110,37 @@ export function ChannelSidebar({
   onContext: (id: string, at: { x: number; y: number }) => void
   onHeader: (at: { x: number; y: number }) => void
 }) {
-  const loose = server.channels.filter((c) => c.categoryId === null)
-  const inCat = (cat: Category) => server.channels.filter((c) => c.categoryId === cat.id)
+  // threads hang off their parent channel rather than sitting in the list
+  const top = server.channels.filter((c) => !c.parentId)
+  const loose = top.filter((c) => c.categoryId === null)
+  const inCat = (cat: Category) => top.filter((c) => c.categoryId === cat.id)
+  const threadsOf = (id: string) => server.channels.filter((c) => c.parentId === id)
+
+  const row = (c: Channel) => (
+    <Fragment key={c.id}>
+      <ChannelRow
+        channel={c}
+        active={c.id === activeChannel}
+        unread={!!unread[c.id]}
+        inVoice={voice === c.id}
+        onSelect={() => onSelect(c.id)}
+        onSettings={() => onEditChannel(c.id)}
+        onContext={(at) => onContext(c.id, at)}
+      />
+      {threadsOf(c.id).map((t) => (
+        <ChannelRow
+          key={t.id}
+          channel={t}
+          active={t.id === activeChannel}
+          unread={!!unread[t.id]}
+          inVoice={false}
+          onSelect={() => onSelect(t.id)}
+          onSettings={() => onEditChannel(t.id)}
+          onContext={(at) => onContext(t.id, at)}
+        />
+      ))}
+    </Fragment>
+  )
 
   return (
     <div className="sidebar">
@@ -147,18 +183,7 @@ export function ChannelSidebar({
 
         <div className="side-rule" />
 
-        {loose.map((c) => (
-          <ChannelRow
-            key={c.id}
-            channel={c}
-            active={c.id === activeChannel}
-            unread={!!unread[c.id]}
-            inVoice={voice === c.id}
-            onSelect={() => onSelect(c.id)}
-            onSettings={() => onEditChannel(c.id)}
-            onContext={(at) => onContext(c.id, at)}
-          />
-        ))}
+        {loose.map(row)}
 
         {server.categories.map((cat) => (
           <div key={cat.id}>
@@ -173,18 +198,7 @@ export function ChannelSidebar({
                 </button>
               </Tooltip>
             </div>
-            {(collapsed.includes(cat.id) ? [] : inCat(cat)).map((c) => (
-              <ChannelRow
-                key={c.id}
-                channel={c}
-                active={c.id === activeChannel}
-                unread={!!unread[c.id]}
-                inVoice={voice === c.id}
-                onSelect={() => onSelect(c.id)}
-                onSettings={() => onEditChannel(c.id)}
-                onContext={(at) => onContext(c.id, at)}
-              />
-            ))}
+            {(collapsed.includes(cat.id) ? [] : inCat(cat)).map(row)}
           </div>
         ))}
       </div>

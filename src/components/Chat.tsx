@@ -1,9 +1,11 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import {
   groupsWith,
+  joinLine,
   type Account,
   type Channel,
   type Message,
+  type Poll,
   type Reaction,
 } from '../data'
 import { byName } from '../emoji'
@@ -20,11 +22,14 @@ import {
   ReactIcon,
   ReplyIcon,
   RulesIcon,
+  SparkleIcon,
+  ThreadsIcon as ThreadGlyph,
   SearchIcon,
   SpeakerIcon,
   ThreadsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { PollView } from './Poll'
 import { Avatar } from './UserArea'
 
 export function Glyph({ kind }: { kind: Channel['kind'] }) {
@@ -172,6 +177,52 @@ function Reactions({
   )
 }
 
+/**
+ * System messages. Discord renders these as a single centred line with a small
+ * glyph instead of an avatar and author.
+ */
+function SystemRow({ m, name }: { m: Message; name: string }) {
+  const line =
+    m.type === 'USER_JOIN'
+      ? joinLine(name, m.time)
+      : m.type === 'CHANNEL_PINNED_MESSAGE'
+        ? `${name} pinned a message to this channel.`
+        : m.type === 'THREAD_CREATED'
+          ? `${name} started a thread: ${m.text}`
+          : m.type === 'GUILD_BOOST'
+            ? `${name} just boosted the server!`
+            : m.type === 'CHANNEL_NAME_CHANGE'
+              ? `${name} changed the channel name: ${m.text}`
+              : m.text
+  const Glyph =
+    m.type === 'CHANNEL_PINNED_MESSAGE'
+      ? PinIcon
+      : m.type === 'THREAD_CREATED'
+        ? ThreadGlyph
+        : m.type === 'GUILD_BOOST'
+          ? SparkleIcon
+          : ArrowJoin
+  return (
+    <div className="system-msg">
+      <span className="system-glyph">
+        <Glyph />
+      </span>
+      <span className="system-text">{line}</span>
+      <span className="system-time">{time(m.time)}</span>
+    </div>
+  )
+}
+
+/** The little join arrow Discord uses on USER_JOIN lines. */
+const ArrowJoin = () => (
+  <svg viewBox="0 0 24 24" width={16} height={16} aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M12.5 3.2a1.2 1.2 0 0 0 0 2.4h5.1a1.1 1.1 0 0 1 1.1 1.1v10.6a1.1 1.1 0 0 1-1.1 1.1h-5.1a1.2 1.2 0 0 0 0 2.4h5.1a3.5 3.5 0 0 0 3.5-3.5V6.7a3.5 3.5 0 0 0-3.5-3.5h-5.1Zm-1.06 5.55a1.2 1.2 0 0 0-1.7 1.7l.85.85H3.7a1.2 1.2 0 0 0 0 2.4h6.89l-.85.85a1.2 1.2 0 1 0 1.7 1.7l2.9-2.9a1.2 1.2 0 0 0 0-1.7l-2.9-2.9Z"
+    />
+  </svg>
+)
+
 /* ----------------------------------------------------------------- feed */
 
 export function ChatFeed({
@@ -190,6 +241,7 @@ export function ChatFeed({
   onPin,
   onOpenPicker,
   onContext,
+  onVote,
 }: {
   channel: Channel
   messages: Message[]
@@ -206,6 +258,7 @@ export function ChatFeed({
   onPin: (id: string) => void
   onOpenPicker: (id: string, at: { x: number; y: number }) => void
   onContext: (m: Message, at: { x: number; y: number }) => void
+  onVote: (id: string, answer: number) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
@@ -248,6 +301,19 @@ export function ChatFeed({
         lastDay = day
         const parent = m.replyTo ? all.find((x) => x.id === m.replyTo) : undefined
         const isUnread = unreadFrom !== null && m.time >= unreadFrom
+
+        if (m.type && m.type !== 'DEFAULT') {
+          return (
+            <div key={m.id} data-msg={m.id}>
+              {newDay ? (
+                <div className="divider">
+                  <span>{dayLabel(m.time)}</span>
+                </div>
+              ) : null}
+              <SystemRow m={m} name={account.name} />
+            </div>
+          )
+        }
 
         return (
           <div key={m.id} data-msg={m.id}>
@@ -323,6 +389,30 @@ export function ChatFeed({
                   ) : null}
                 </div>
               )}
+
+              {m.poll ? (
+                <PollView
+                  poll={m.poll as Poll}
+                  account={account}
+                  onVote={(a) => onVote(m.id, a)}
+                />
+              ) : null}
+
+              {m.attachments?.length ? (
+                <div className="attachments">
+                  {m.attachments.map((a) => (
+                    <a
+                      key={a.id}
+                      className={'attachment' + (a.spoiler ? ' spoiler-file' : '')}
+                      href={a.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                    >
+                      <img src={a.url} alt={a.name} />
+                    </a>
+                  ))}
+                </div>
+              ) : null}
 
               <Reactions
                 reactions={m.reactions ?? []}

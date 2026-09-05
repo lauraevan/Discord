@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { SLASH, type Account, type Channel, type Message } from '../data'
+import { uid, SLASH, type Account, type Attachment, type Channel, type Message } from '../data'
 import { EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
 import {
@@ -60,6 +60,8 @@ export function Composer({
   onSend,
   onEditLast,
   onOpenPicker,
+  onPoll,
+  onAttach,
 }: {
   channel: Channel
   channels: Channel[]
@@ -69,11 +71,23 @@ export function Composer({
   onSend: (text: string) => void
   onEditLast: () => void
   onOpenPicker: (at: { x: number; y: number }) => void
+  onPoll: () => void
+  onAttach: (a: Attachment) => void
 }) {
   const [value, setValue] = useState('')
   const [caret, setCaret] = useState(0)
   const [pick, setPick] = useState(0)
+  const [plusOpen, setPlusOpen] = useState(false)
   const input = useRef<HTMLTextAreaElement>(null)
+  const file = useRef<HTMLInputElement>(null)
+
+  /** Images pasted or picked become data URLs; nothing leaves the browser. */
+  const take = (f: File) => {
+    if (!f.type.startsWith('image/')) return
+    const r = new FileReader()
+    r.onload = () => onAttach({ id: uid('att'), name: f.name, url: String(r.result) })
+    r.readAsDataURL(f)
+  }
   const ac = useAutocomplete(value, caret, channels, account)
 
   useEffect(() => {
@@ -169,9 +183,56 @@ export function Composer({
         </div>
       ) : null}
 
+      {plusOpen ? (
+        <>
+          <div className="plus-scrim" onMouseDown={() => setPlusOpen(false)} />
+          <div className="plus-menu">
+            <button
+              onClick={() => {
+                file.current?.click()
+                setPlusOpen(false)
+              }}
+            >
+              Upload a File
+            </button>
+            <button
+              onClick={() => {
+                onPoll()
+                setPlusOpen(false)
+              }}
+            >
+              Create Poll
+            </button>
+            <button disabled title="Voice messages need a microphone and a file host">
+              Send a Voice Message
+            </button>
+            <button disabled title="Apps run on Discord's servers">
+              Use Apps
+            </button>
+          </div>
+        </>
+      ) : null}
+
+      <input
+        ref={file}
+        type="file"
+        accept="image/*"
+        hidden
+        aria-hidden="true"
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) take(f)
+          e.target.value = ''
+        }}
+      />
+
       <div className={'composer' + (replyTo ? ' replying' : '')}>
         <Tooltip label="Upload a File" side="above">
-          <button className="plus" aria-label="Upload a file">
+          <button
+            className={'plus' + (plusOpen ? ' on' : '')}
+            aria-label="Upload a file"
+            onClick={() => setPlusOpen((v) => !v)}
+          >
             <PlusIcon />
           </button>
         </Tooltip>
@@ -186,6 +247,13 @@ export function Composer({
             setValue(e.target.value)
             setCaret(e.target.selectionStart)
             setPick(0)
+          }}
+          onPaste={(e) => {
+            const f = [...e.clipboardData.files][0]
+            if (f) {
+              e.preventDefault()
+              take(f)
+            }
           }}
           onKeyUp={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart)}
           onClick={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart)}

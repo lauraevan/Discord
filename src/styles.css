@@ -3739,3 +3739,293 @@ body.streamer .invite-row code {
   height: 14px;
   color: var(--muted);
 }
+
+/* ==========================================================================
+   System messages, polls, attachments, plus menu
+   ========================================================================== */
+
+.system-msg {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-left: 52px;
+  position: relative;
+  margin-top: var(--msg-gap, 14px);
+  min-height: 24px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.system-glyph {
+  position: absolute;
+  left: 20px;
+  top: 3px;
+  color: var(--muted);
+}
+
+.system-glyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.system-text {
+  color: var(--text);
+}
+
+.system-time {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* --- polls -------------------------------------------------------------- */
+
+.poll {
+  margin-top: 8px;
+  max-width: 440px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.poll-q {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.poll-kind {
+  margin: 2px 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.poll-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  background: var(--chat);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+  overflow: hidden;
+}
+
+.poll-opt:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.poll-opt.picked {
+  border-color: var(--blurple);
+}
+
+.poll-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--blurple) 26%, transparent);
+  transition: width 0.25s ease-out;
+}
+
+.poll-mark {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.poll-opt.picked .poll-mark {
+  background: var(--blurple);
+  border-color: var(--blurple);
+}
+
+.poll-mark svg {
+  width: 11px;
+  height: 11px;
+}
+
+.poll-text {
+  position: relative;
+  flex: 1;
+}
+
+.poll-pct {
+  position: relative;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.poll-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.poll-foot button {
+  margin-left: auto;
+  color: #00a8fc;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.poll-modal {
+  width: 460px;
+}
+
+.poll-answer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.poll-answer-row input {
+  flex: 1;
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 4px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.poll-answer-row button {
+  color: var(--muted);
+}
+
+.poll-answer-row svg {
+  width: 13px;
+  height: 13px;
+}
+
+.poll-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #00a8fc;
+}
+
+.poll-add svg {
+  width: 13px;
+  height: 13px;
+}
+
+.poll-opts label {
+  display: block;
+  margin: 8px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.poll-opts select {
+  display: block;
+  margin-top: 6px;
+  width: 100%;
+  height: 38px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  text-transform: none;
+}
+
+/* --- attachments -------------------------------------------------------- */
+
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.attachment img {
+  max-width: 400px;
+  max-height: 300px;
+  border-radius: 8px;
+  display: block;
+}
+
+.attachment.spoiler-file img {
+  filter: blur(36px);
+}
+
+/* --- composer plus menu -------------------------------------------------- */
+
+.plus-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+}
+
+.plus-menu {
+  position: absolute;
+  left: 6px;
+  bottom: 100%;
+  margin-bottom: 8px;
+  z-index: 5;
+  min-width: 200px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+}
+
+.plus-menu button {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+}
+
+.plus-menu button:hover:not(:disabled) {
+  background: var(--blurple);
+  color: #fff;
+}
+
+.plus-menu button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.composer .plus.on {
+  opacity: 1;
+  transform: rotate(45deg);
+}
+
+/* threads show nested under their parent channel */
+.row.thread {
+  margin-left: 26px;
+  width: 214px;
+}
+
+.row.thread > svg {
+  width: 13px;
+  height: 13px;
+}

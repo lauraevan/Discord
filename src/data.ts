@@ -75,7 +75,36 @@ export type Channel = {
   name: string
   kind: ChannelKind
   categoryId: string | null
+  topic?: string
+  nsfw?: boolean
+  /** seconds; Discord calls this rateLimitPerUser */
+  slowmode?: number
+  /** set on threads: the channel the thread hangs off */
+  parentId?: string
+  /** set on threads: the message the thread was started from */
+  rootMessageId?: string
+  archived?: boolean
 }
+
+/** Discord's slowmode steps, as the channel settings slider offers them. */
+export const SLOWMODE_STEPS = [0, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 21600]
+
+export const slowmodeLabel = (s: number) => {
+  if (!s) return 'Off'
+  if (s < 60) return `${s}s`
+  if (s < 3600) return `${s / 60} min`
+  return `${s / 3600} hr`
+}
+
+/** Mute durations, in the order the client's notification menu lists them. */
+export const MUTE_DURATIONS: [string, number | null][] = [
+  ['For 15 Minutes', 15 * 60_000],
+  ['For 1 Hour', 60 * 60_000],
+  ['For 3 Hours', 3 * 60 * 60_000],
+  ['For 8 Hours', 8 * 60 * 60_000],
+  ['For 24 Hours', 24 * 60 * 60_000],
+  ['Until I turn it back on', null],
+]
 
 export type Category = { id: string; name: string }
 
@@ -175,11 +204,48 @@ export const inviteCode = () => {
 /** A reaction is a shortcode plus the people who added it. */
 export type Reaction = { name: string; by: string[] }
 
+/** A poll, shaped the way Discord's poll object is. */
+export type Poll = {
+  question: string
+  answers: { id: number; text: string; emoji?: string }[]
+  /** answer id -> voters */
+  votes: Record<number, string[]>
+  multi: boolean
+  expiresAt: number
+}
+
+export type Attachment = {
+  id: string
+  name: string
+  /** data URL — everything stays in the browser */
+  url: string
+  width?: number
+  height?: number
+  spoiler?: boolean
+}
+
+/**
+ * Message types Discord renders differently. Numbers are Discord's own
+ * MessageType values; see docs/discord-reference.md.
+ */
+export type MessageType =
+  | 'DEFAULT'
+  | 'USER_JOIN'
+  | 'CHANNEL_PINNED_MESSAGE'
+  | 'THREAD_CREATED'
+  | 'GUILD_BOOST'
+  | 'CHANNEL_NAME_CHANGE'
+
 export type Message = {
   id: string
   author: string
   time: number
   text: string
+  type?: MessageType
+  poll?: Poll
+  attachments?: Attachment[]
+  /** id of the thread started from this message */
+  threadId?: string
   /** set when the message has been edited, so the client can tag it */
   editedAt?: number
   /** id of the message this one replies to */
@@ -287,6 +353,29 @@ export const ROLE_COLORS = [
   '#11806a', '#1f8b4c', '#206694', '#71368a', '#ad1457',
   '#c27c0e', '#a84300', '#992d22', '#979c9f', '#546e7a',
 ]
+
+/**
+ * Discord's rotating join lines. The client picks one by the message
+ * timestamp, so the same message always shows the same line.
+ */
+export const JOIN_LINES = [
+  '%s joined the party.',
+  '%s is here.',
+  'Welcome, %s. We hope you brought pizza.',
+  'A wild %s appeared.',
+  '%s just landed.',
+  '%s just slid into the server.',
+  '%s just showed up!',
+  'Welcome %s. Say hi!',
+  '%s hopped into the server.',
+  'Everyone welcome %s!',
+  "Glad you're here, %s.",
+  'Good to see you, %s.',
+  'Yay you made it, %s!',
+]
+
+export const joinLine = (name: string, time: number) =>
+  JOIN_LINES[time % JOIN_LINES.length].replace('%s', name)
 
 export const serverColors = [
   '#5865f2',
