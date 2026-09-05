@@ -22,34 +22,37 @@ import {
   type Server,
   type Status,
 } from './data'
+import {
+  isAccount,
+  isMessages,
+  isServers,
+  isThemeId,
+  K,
+  load,
+  purgeOldSchemas,
+  save,
+} from './storage'
 import { allThemes, applyTheme, defaultThemes } from './themes'
 
-const K = {
-  servers: 'discord-ui:servers',
-  messages: 'discord-ui:messages',
-  theme: 'discord-ui:theme',
-  account: 'discord-ui:account',
-}
-
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key)
-    return raw ? (JSON.parse(raw) as T) : fallback
-  } catch {
-    return fallback
-  }
-}
+purgeOldSchemas()
+const themeIds = allThemes.map((t) => t.id)
 
 export default function App() {
   const [servers, setServers] = useState<Server[]>(() =>
-    load<Server[]>(K.servers, [makeServer("Nebula's Server")]),
+    load(K.servers, [makeServer("Nebula's Server")], isServers),
   )
-  const [account, setAccount] = useState<Account>(() => load<Account>(K.account, defaultAccount))
-  const [messages, setMessages] = useState<Record<string, Message[]>>(() => load(K.messages, {}))
-  const [themeId, setThemeId] = useState<string>(() => load<string>(K.theme, 'dark'))
+  const [account, setAccount] = useState<Account>(() =>
+    load(K.account, defaultAccount, isAccount),
+  )
+  const [messages, setMessages] = useState<Record<string, Message[]>>(() =>
+    load<Record<string, Message[]>>(K.messages, {}, isMessages),
+  )
+  const [themeId, setThemeId] = useState<string>(() =>
+    load(K.theme, 'dark', isThemeId(themeIds)),
+  )
 
   const [activeServer, setActiveServer] = useState<string | null>(servers[0]?.id ?? null)
-  const [activeChannel, setActiveChannel] = useState<string>(servers[0]?.channels[0]?.id ?? '')
+  const [activeChannel, setActiveChannel] = useState<string>(servers[0]?.channels?.[0]?.id ?? '')
   const [collapsed, setCollapsed] = useState<string[]>([])
   const [muted, setMuted] = useState(true)
   const [deafened, setDeafened] = useState(false)
@@ -65,15 +68,16 @@ export default function App() {
 
   const theme = allThemes.find((t) => t.id === themeId) ?? defaultThemes[2]
   useEffect(() => applyTheme(theme), [theme])
-  useEffect(() => localStorage.setItem(K.theme, JSON.stringify(themeId)), [themeId])
-  useEffect(() => localStorage.setItem(K.servers, JSON.stringify(servers)), [servers])
-  useEffect(() => localStorage.setItem(K.account, JSON.stringify(account)), [account])
-  useEffect(() => localStorage.setItem(K.messages, JSON.stringify(messages)), [messages])
+  useEffect(() => save(K.theme, themeId), [themeId])
+  useEffect(() => save(K.servers, servers), [servers])
+  useEffect(() => save(K.account, account), [account])
+  useEffect(() => save(K.messages, messages), [messages])
 
   const server = servers.find((s) => s.id === activeServer) ?? servers[0]
   const channel: Channel | undefined =
     server?.channels.find((c) => c.id === activeChannel) ??
     server?.channels.find((c) => c.kind !== 'voice')
+
 
   const key = server && channel ? `${server.id}/${channel.id}` : ''
   const thread = useMemo(() => messages[key] ?? [], [messages, key])
@@ -85,7 +89,7 @@ export default function App() {
     const s = { ...makeServer(name, color), color, initials: initialsOf(name) }
     setServers((all) => [...all, s])
     setActiveServer(s.id)
-    setActiveChannel(s.channels[0].id)
+    setActiveChannel(s.channels[0]?.id ?? '')
     setCreatingServer(false)
   }
 

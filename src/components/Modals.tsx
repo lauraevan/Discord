@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   serverColors,
   statusColor,
@@ -8,6 +8,20 @@ import {
   type Status,
 } from '../data'
 import { HashIcon, SpeakerIcon } from '../ui/Icons'
+
+/** Escape closes any open overlay, the way Discord's own dialogs do. */
+function useEscape(onClose: () => void) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation()
+        onClose()
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+}
 
 function Shell({
   title,
@@ -22,6 +36,7 @@ function Shell({
   children: React.ReactNode
   footer: React.ReactNode
 }) {
+  useEscape(onClose)
   return (
     <div className="overlay" onMouseDown={onClose}>
       <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
@@ -215,6 +230,7 @@ export function StatusMenu({
   onClose: () => void
 }) {
   const list: Status[] = ['online', 'idle', 'dnd', 'invisible']
+  useEscape(onClose)
   return (
     <div className="overlay soft" onMouseDown={onClose}>
       <div className="status-menu" onMouseDown={(e) => e.stopPropagation()}>

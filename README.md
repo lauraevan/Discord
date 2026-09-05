@@ -83,6 +83,30 @@ node tools/boxes.mjs '.intro' '.composer'   # layout boxes for a selector
 `gen-icons.mjs` expects a checkout of `totallytavi/discord-app-icons` — set
 `SRC` at the top of the file to point at its `2023/tabs-v1` directory.
 
+```bash
+node tools/flow.mjs    # click through every interaction, report pass/fail
+node tools/stale.mjs   # load with corrupt / outdated saved data
+node tools/smoke.mjs out.png   # console errors on a clean load
+```
+
+## Saved state
+
+State lives in localStorage, and the shape of it changed while this was being
+built — a value written by an earlier build crashed the app on load, leaving a
+white screen the reader had no way to clear, since the only copy of the bad data
+was in their own browser. Two defences now:
+
+- **Versioned keys.** `discord-ui:v3:*`. A schema bump orphans the old data
+  instead of feeding it to code that can't read it, and keys from earlier
+  versions are dropped on the next load.
+- **Validated reads.** Every value is checked against the shape the app expects
+  (`src/storage.ts`); anything unparseable, mistyped or malformed is discarded
+  and the default is used. `tools/stale.mjs` covers ten such cases.
+
+Behind both, an error boundary catches any render that still throws and offers a
+**Clear saved data and reload** button, so nothing here can put the page into a
+state a reader can't get out of.
+
 ## Greys
 
 Discord tints each surface separately, so the icon and placeholder greys are
