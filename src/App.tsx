@@ -14,9 +14,11 @@ import {
 import { Pins } from './components/Pins'
 import { QuickSwitcher } from './components/QuickSwitcher'
 import { SearchResults } from './components/SearchResults'
+import { ServerSettings } from './components/ServerSettings'
 import { ServerRail } from './components/ServerRail'
 import { ThemePanel } from './components/ThemePanel'
 import { TitleBar } from './components/TitleBar'
+import { UserSettings } from './components/UserSettings'
 import { ProfilePopout, UserArea } from './components/UserArea'
 import {
   defaultAccount,
@@ -30,10 +32,12 @@ import {
   type Status,
 } from './data'
 import { SPRITE } from './emoji'
+import { defaultPrefs, type Prefs } from './prefs'
 import type { MdContext } from './markdown'
 import {
   isAccount,
   isMessages,
+  isRecord,
   isServers,
   isThemeId,
   K,
@@ -58,6 +62,10 @@ export default function App() {
     load<Record<string, Message[]>>(K.messages, {}, isMessages),
   )
   const [themeId, setThemeId] = useState<string>(() => load(K.theme, 'dark', isThemeId(themeIds)))
+  const [prefs, setPrefs] = useState<Prefs>(() => ({
+    ...defaultPrefs,
+    ...load<Record<string, unknown>>(K.prefs, {}, isRecord),
+  }))
   const [lastRead, setLastRead] = useState<Record<string, number>>(() =>
     load<Record<string, number>>(K.reads, {}, (v): v is Record<string, number> => !!v && typeof v === 'object'),
   )
@@ -87,6 +95,8 @@ export default function App() {
   // last state per user, so start where the reference does
   const [membersOpen, setMembersOpen] = useState(false)
   const [pinsOpen, setPinsOpen] = useState(false)
+  const [userSettings, setUserSettings] = useState(false)
+  const [serverSettings, setServerSettings] = useState(false)
   const [query, setQuery] = useState('')
 
   const theme = allThemes.find((t) => t.id === themeId) ?? defaultThemes[2]
@@ -96,6 +106,20 @@ export default function App() {
   useEffect(() => save(K.account, account), [account])
   useEffect(() => save(K.messages, messages), [messages])
   useEffect(() => save(K.reads, lastRead), [lastRead])
+  useEffect(() => save(K.prefs, prefs), [prefs])
+
+  // the appearance pane drives real CSS variables, not a mock preview
+  useEffect(() => {
+    const r = document.documentElement.style
+    r.setProperty('--msg-font', `${prefs.fontScale}px`)
+    r.setProperty('--msg-gap', `${prefs.spaceBetween}px`)
+    r.setProperty('--app-zoom', String(prefs.zoom / 100))
+    r.setProperty('--app-saturate', String(prefs.saturation / 100))
+    r.setProperty('--link-underline', prefs.underlineLinks ? 'underline' : 'none')
+    document.body.classList.toggle('compact', prefs.messageDisplay === 'compact')
+    document.body.classList.toggle('reduced-motion', prefs.reducedMotion)
+    document.body.classList.toggle('streamer', prefs.streamerMode)
+  }, [prefs])
 
   const server = servers.find((s) => s.id === activeServer) ?? servers[0]
   const channel: Channel | undefined =
@@ -151,6 +175,26 @@ export default function App() {
 
   const patchServer = (id: string, fn: (s: Server) => Server) =>
     setServers((all) => all.map((s) => (s.id === id ? fn(s) : s)))
+
+  /** Server edits go through here so the audit log records them, as Discord's does. */
+  const patchActiveServer = (
+    fn: (s: Server) => Server,
+    audit?: { action: string; target: string },
+  ) => {
+    if (!server) return
+    patchServer(server.id, (s) => {
+      const next = fn(s)
+      return audit
+        ? {
+            ...next,
+            audit: [
+              { id: uid('a'), time: Date.now(), action: audit.action, target: audit.target },
+              ...next.audit,
+            ].slice(0, 60),
+          }
+        : next
+    })
+  }
 
   const patchThread = (fn: (list: Message[]) => Message[]) =>
     setMessages((all) => ({ ...all, [key]: fn(all[key] ?? []) }))
@@ -345,6 +389,29 @@ export default function App() {
               }}
               onAddChannel={(categoryId) => setChannelModal({ mode: 'create', categoryId })}
               onEditChannel={(id) => setChannelModal({ mode: 'edit', id })}
+              onHeader={(at) =>
+                setCtx({
+                  at,
+                  items: [
+                    { label: 'Server Boost', onPick: () => setServerSettings(true) },
+                    { label: 'Invite People', onPick: () => setServerSettings(true) },
+                    { label: 'Server Settings', onPick: () => setServerSettings(true) },
+                    { label: 'Create Channel', onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
+                    { label: 'Create Category', onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
+                    { sep: true },
+                    { label: 'Notification Settings', onPick: () => setServerSettings(true) },
+                    { label: 'Privacy Settings', onPick: () => setUserSettings(true) },
+                    { label: 'Edit Server Profile', onPick: () => setUserSettings(true) },
+                    { sep: true },
+                    { label: 'Mark As Read', onPick: markServerRead },
+                    ...(prefs.developerMode
+                      ? [{ label: 'Copy Server ID', onPick: () => navigator.clipboard?.writeText(server.id) }]
+                      : []),
+                    { sep: true },
+                    { label: 'Delete Server', danger: true, onPick: () => setServerSettings(true) },
+                  ],
+                })
+              }
               onContext={(id, at) =>
                 setCtx({
                   at,
@@ -366,7 +433,7 @@ export default function App() {
             onLeaveVoice={() => setVoice(null)}
             onMute={() => setMuted((m) => !m)}
             onDeafen={() => setDeafened((d) => !d)}
-            onSettings={() => setThemePanel((v) => !v)}
+            onSettings={() => setUserSettings(true)}
             onOpenProfile={() => setPopout((v) => !v)}
           />
           {popout ? (
@@ -465,6 +532,34 @@ export default function App() {
           />
         ) : null}
       </div>
+
+      {userSettings ? (
+        <UserSettings
+          account={account}
+          prefs={prefs}
+          themeId={themeId}
+          onAccount={setAccount}
+          onPrefs={(p) => setPrefs((old) => ({ ...old, ...p }))}
+          onTheme={(t) => setThemeId(t.id)}
+          onClose={() => setUserSettings(false)}
+        />
+      ) : null}
+
+      {serverSettings && server ? (
+        <ServerSettings
+          server={server}
+          account={account}
+          onPatch={patchActiveServer}
+          onDelete={() => {
+            const rest = servers.filter((s) => s.id !== server.id)
+            setServers(rest)
+            setActiveServer(rest[0]?.id ?? null)
+            setActiveChannel(rest[0]?.channels.find((c) => c.kind !== 'voice')?.id ?? '')
+            setServerSettings(false)
+          }}
+          onClose={() => setServerSettings(false)}
+        />
+      ) : null}
 
       {switcher ? (
         <QuickSwitcher

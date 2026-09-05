@@ -21,6 +21,7 @@ export const K = {
   theme: `${PREFIX}theme`,
   account: `${PREFIX}account`,
   reads: `${PREFIX}reads`,
+  prefs: `${PREFIX}prefs`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -56,6 +57,8 @@ export function isAccount(v: unknown): v is Account {
     STATUSES.includes(v.status as Status)
   )
 }
+
+export const isRecord = (v: unknown): v is Record<string, unknown> => isObj(v)
 
 export function isMessages(v: unknown): v is Record<string, Message[]> {
   return (

@@ -89,6 +89,7 @@ export function ChannelSidebar({
   onAddChannel,
   onEditChannel,
   onContext,
+  onHeader,
 }: {
   server: Server
   activeChannel: string
@@ -100,13 +101,20 @@ export function ChannelSidebar({
   onAddChannel: (categoryId: string | null) => void
   onEditChannel: (id: string) => void
   onContext: (id: string, at: { x: number; y: number }) => void
+  onHeader: (at: { x: number; y: number }) => void
 }) {
   const loose = server.channels.filter((c) => c.categoryId === null)
   const inCat = (cat: Category) => server.channels.filter((c) => c.categoryId === cat.id)
 
   return (
     <div className="sidebar">
-      <button className="server-header">
+      <button
+        className="server-header"
+        onClick={(e) => {
+          const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+          onHeader({ x: r.left + 8, y: r.bottom + 4 })
+        }}
+      >
         <VerifiedIcon className="badge-mark" />
         <h1>{server.name}</h1>
         <ChevronDownIcon className="chevron" />
