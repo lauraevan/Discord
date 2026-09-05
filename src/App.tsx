@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ChannelSidebar } from './components/ChannelSidebar'
+import { ChannelSettings } from './components/ChannelSettings'
 import { ChatFeed, ChatHeader } from './components/Chat'
 import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
@@ -13,6 +14,7 @@ import {
   StatusMenu,
 } from './components/Modals'
 import { Pins } from './components/Pins'
+import { CustomStatus } from './components/CustomStatus'
 import { CreatePoll } from './components/Poll'
 import { QuickSwitcher } from './components/QuickSwitcher'
 import { SearchResults } from './components/SearchResults'
@@ -23,6 +25,7 @@ import { TitleBar } from './components/TitleBar'
 import { UserSettings } from './components/UserSettings'
 import { ProfilePopout, UserArea } from './components/UserArea'
 import {
+  MUTE_DURATIONS,
   defaultAccount,
   initialsOf,
   makeServer,
@@ -36,6 +39,7 @@ import {
 import { SPRITE } from './emoji'
 import { defaultPrefs, type Prefs } from './prefs'
 import type { MdContext } from './markdown'
+import { matches, parseQuery } from './search'
 import {
   isAccount,
   isMessages,
@@ -101,6 +105,10 @@ export default function App() {
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [profileModal, setProfileModal] = useState(false)
   const [pollModal, setPollModal] = useState(false)
+  const [channelSettings, setChannelSettings] = useState<string | null>(null)
+  const [customStatus, setCustomStatus] = useState(false)
+  /** channelId -> mute expiry (null = until turned back on) */
+  const [mutes, setMutes] = useState<Record<string, number | null>>({})
   const [serverSettings, setServerSettings] = useState(false)
   const [query, setQuery] = useState('')
 
@@ -423,14 +431,15 @@ export default function App() {
   ]
 
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q || !server) return []
+    if (!query.trim() || !server) return []
+    const q = parseQuery(query)
     return server.channels.flatMap((c) =>
       (messages[keyOf(server, c)] ?? [])
-        .filter((m) => m.text.toLowerCase().includes(q))
+        .filter((m) => !m.type || m.type === 'DEFAULT')
+        .filter((m) => matches(q, m, c, account.name))
         .map((m) => ({ channel: c, message: m })),
     )
-  }, [query, server, messages, keyOf])
+  }, [query, server, messages, keyOf, account.name])
 
   return (
     <div className="app">
@@ -471,7 +480,7 @@ export default function App() {
                 else setActiveChannel(id)
               }}
               onAddChannel={(categoryId) => setChannelModal({ mode: 'create', categoryId })}
-              onEditChannel={(id) => setChannelModal({ mode: 'edit', id })}
+              onEditChannel={(id) => setChannelSettings(id)}
               onHeader={(at) =>
                 setCtx({
                   at,
@@ -495,17 +504,69 @@ export default function App() {
                   ],
                 })
               }
-              onContext={(id, at) =>
+              onContext={(id, at) => {
+                const c = server.channels.find((x) => x.id === id)
+                const muted = id in mutes
                 setCtx({
                   at,
                   items: [
                     { label: 'Mark As Read', onPick: markRead },
-                    { label: 'Edit Channel', onPick: () => setChannelModal({ mode: 'edit', id }) },
+                    { sep: true },
+                    { label: 'Invite People', onPick: () => setServerSettings(true) },
+                    {
+                      label: 'Copy Link',
+                      onPick: () =>
+                        navigator.clipboard?.writeText(
+                          `${location.origin}/channels/${server.id}/${id}`,
+                        ),
+                    },
+                    { sep: true },
+                    muted
+                      ? {
+                          label: 'Unmute Channel',
+                          onPick: () =>
+                            setMutes(({ [id]: _drop, ...rest }) => rest),
+                        }
+                      : {
+                          label: 'Mute Channel',
+                          sub: MUTE_DURATIONS.map(([label, ms]) => ({
+                            label,
+                            onPick: () =>
+                              setMutes((m) => ({ ...m, [id]: ms === null ? null : Date.now() + ms })),
+                          })),
+                        },
+                    {
+                      label: 'Notification Settings',
+                      sub: [
+                        { head: 'Notification Settings' },
+                        { label: 'Use Server Default', check: true },
+                        { label: 'All Messages' },
+                        { label: 'Only @mentions' },
+                        { label: 'Nothing' },
+                      ],
+                    },
+                    { sep: true },
+                    { label: 'Edit Channel', onPick: () => setChannelSettings(id) },
+                    {
+                      label: 'Duplicate Channel',
+                      onPick: () =>
+                        c &&
+                        patchServer(server.id, (s) => ({
+                          ...s,
+                          channels: [...s.channels, { ...c, id: uid('ch'), name: `${c.name}-2` }],
+                        })),
+                    },
                     { sep: true },
                     { label: 'Delete Channel', danger: true, onPick: () => deleteChannel(id) },
+                    ...(prefs.developerMode
+                      ? [
+                          { sep: true as const },
+                          { label: 'Copy Channel ID', onPick: () => navigator.clipboard?.writeText(id) },
+                        ]
+                      : []),
                   ],
                 })
-              }
+              }}
             />
           ) : null}
           <UserArea
@@ -527,6 +588,10 @@ export default function App() {
                 setEditingProfile(true)
               }}
               onStatus={() => setStatusMenu(true)}
+              onCustomStatus={() => {
+                setPopout(false)
+                setCustomStatus(true)
+              }}
               onClose={() => setPopout(false)}
             />
           ) : null}
@@ -627,6 +692,35 @@ export default function App() {
           />
         ) : null}
       </div>
+
+      {customStatus ? (
+        <CustomStatus
+          account={account}
+          onClose={() => setCustomStatus(false)}
+          onSave={(text, emoji) => {
+            setAccount((a) => ({ ...a, customStatus: text || undefined, customEmoji: emoji }))
+            setCustomStatus(false)
+          }}
+        />
+      ) : null}
+
+      {channelSettings && server ? (
+        <ChannelSettings
+          channel={server.channels.find((c) => c.id === channelSettings)!}
+          server={server}
+          onPatch={(fn, audit) =>
+            patchActiveServer(
+              (s) => ({ ...s, channels: s.channels.map((c) => (c.id === channelSettings ? fn(c) : c)) }),
+              audit,
+            )
+          }
+          onDelete={() => {
+            deleteChannel(channelSettings)
+            setChannelSettings(null)
+          }}
+          onClose={() => setChannelSettings(null)}
+        />
+      ) : null}
 
       {pollModal ? (
         <CreatePoll

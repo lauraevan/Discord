@@ -28,6 +28,7 @@ import {
   SpeakerIcon,
   ThreadsIcon,
 } from '../ui/Icons'
+import { FILTERS } from '../search'
 import { Tooltip } from '../ui/Tooltip'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
@@ -88,17 +89,60 @@ export function ChatHeader({
             <MemberListIcon />
           </button>
         </Tooltip>
-        <div className="searchbox">
-          <input
-            value={query}
-            placeholder={`Search ${serverName}`}
-            aria-label="Search"
-            onChange={(e) => onQuery(e.target.value)}
-          />
-          <SearchIcon />
-        </div>
+        <SearchBox serverName={serverName} query={query} onQuery={onQuery} />
       </div>
     </header>
+  )
+}
+
+/** The search field, with Discord's filter list under it while focused. */
+function SearchBox({
+  serverName,
+  query,
+  onQuery,
+}: {
+  serverName: string
+  query: string
+  onQuery: (q: string) => void
+}) {
+  const [focus, setFocus] = useState(false)
+  // Discord shows the options list while you are at the start of a term or
+  // partway through a filter name, not over your search results
+  const last = query.split(/\s+/).pop() ?? ''
+  const partial = !query.trim() || FILTERS.some(([t]) => t.startsWith(last.toLowerCase()) && !last.includes(':'))
+  const open = focus && partial
+  return (
+    <div className="searchbox-wrap">
+      <div className="searchbox">
+        <input
+          value={query}
+          placeholder={`Search ${serverName}`}
+          aria-label="Search"
+          onFocus={() => setFocus(true)}
+          onBlur={() => setTimeout(() => setFocus(false), 140)}
+          onChange={(e) => onQuery(e.target.value)}
+        />
+        <SearchIcon />
+      </div>
+      {open ? (
+        <div className="search-hints">
+          <div className="search-hints-head">SEARCH OPTIONS</div>
+          {FILTERS.map(([token, hint]) => (
+            <button
+              key={token}
+              className="search-hint"
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onQuery(query ? `${query.replace(/\s*$/, '')} ${token}` : token)
+              }}
+            >
+              <span className="search-token">{token}</span>
+              <span className="search-hint-note">{hint}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   )
 }
 

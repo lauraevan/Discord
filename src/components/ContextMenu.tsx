@@ -1,12 +1,17 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { ChevronRightIcon } from '../ui/Icons'
 
 export type MenuItem =
   | { sep: true }
+  | { head: string }
   | {
       label: string
       icon?: ReactNode
       danger?: boolean
-      onPick: () => void
+      check?: boolean
+      /** a submenu, the way Discord's Mute Channel and Notification Settings work */
+      sub?: MenuItem[]
+      onPick?: () => void
     }
 
 /**
@@ -53,16 +58,46 @@ export function ContextMenu({
 
   return (
     <div className="ctx" style={{ left: at.x, top: at.y }} ref={ref} role="menu">
+      <Items items={items} onClose={onClose} />
+    </div>
+  )
+}
+
+function Items({ items, onClose }: { items: MenuItem[]; onClose: () => void }) {
+  const [open, setOpen] = useState<number | null>(null)
+  return (
+    <>
       {items.map((it, i) =>
         'sep' in it ? (
           <div key={i} className="ctx-sep" />
+        ) : 'head' in it ? (
+          <div key={i} className="ctx-head">
+            {it.head}
+          </div>
+        ) : it.sub ? (
+          <div
+            key={i}
+            className="ctx-wrap"
+            onMouseEnter={() => setOpen(i)}
+            onMouseLeave={() => setOpen((o) => (o === i ? null : o))}
+          >
+            <button role="menuitem" aria-haspopup="menu" className="ctx-item">
+              <span>{it.label}</span>
+              <ChevronRightIcon />
+            </button>
+            {open === i ? (
+              <div className="ctx ctx-sub" role="menu">
+                <Items items={it.sub} onClose={onClose} />
+              </div>
+            ) : null}
+          </div>
         ) : (
           <button
             key={i}
             role="menuitem"
-            className={'ctx-item' + (it.danger ? ' danger' : '')}
+            className={'ctx-item' + (it.danger ? ' danger' : '') + (it.check ? ' checked' : '')}
             onClick={() => {
-              it.onPick()
+              it.onPick?.()
               onClose()
             }}
           >
@@ -71,6 +106,6 @@ export function ContextMenu({
           </button>
         ),
       )}
-    </div>
+    </>
   )
 }

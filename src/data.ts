@@ -41,6 +41,9 @@ export type Account = {
   status: Status
   /** avatar + profile accent, chosen from the palette below */
   color: string
+  /** the custom status line and its emoji shortcode */
+  customStatus?: string
+  customEmoji?: string
 }
 
 export const defaultAccount: Account = {

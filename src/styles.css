@@ -4029,3 +4029,205 @@ body.streamer .invite-row code {
   width: 13px;
   height: 13px;
 }
+
+/* context submenus + custom status + channel settings */
+
+.ctx-wrap {
+  position: relative;
+}
+
+.ctx-sub {
+  position: absolute;
+  left: 100%;
+  top: -6px;
+  margin-left: 4px;
+}
+
+.ctx-head {
+  padding: 6px 8px 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.ctx-item svg {
+  width: 13px;
+  height: 13px;
+  margin-left: auto;
+}
+
+.ctx-item.checked::after {
+  content: '✓';
+  margin-left: auto;
+  color: var(--strong);
+}
+
+.status-modal {
+  width: 440px;
+}
+
+.set-field-label {
+  display: block;
+  margin: 12px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.cs-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+}
+
+.cs-emoji {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+}
+
+.cs-emoji-empty {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.cs-row input {
+  flex: 1;
+  height: 40px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.cs-clear {
+  color: var(--muted);
+}
+
+.cs-clear svg {
+  width: 13px;
+  height: 13px;
+}
+
+.cs-picker {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  margin-top: 8px;
+  padding: 8px;
+  max-height: 160px;
+  overflow-y: auto;
+  border-radius: 4px;
+  background: var(--rail);
+}
+
+.cs-picker button {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+}
+
+.cs-picker button:hover {
+  background: var(--hover);
+}
+
+.status-modal select {
+  width: 100%;
+  height: 40px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+}
+
+.modal-x {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.modal-x svg {
+  width: 14px;
+  height: 14px;
+}
+
+.slowmode {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.slowmode input {
+  flex: 1;
+  accent-color: var(--blurple);
+}
+
+.slowmode span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 60px;
+}
+
+/* the custom status line under your name in the account panel */
+.user-card .state.custom {
+  color: var(--text);
+}
+
+.searchbox-wrap {
+  position: relative;
+}
+
+.search-hints {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;
+  width: 300px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.5);
+  z-index: 40;
+}
+
+.search-hints-head {
+  padding: 4px 6px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.search-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  text-align: left;
+}
+
+.search-hint:hover {
+  background: var(--hover);
+}
+
+.search-token {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--blurple);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.search-hint-note {
+  font-size: 13px;
+  color: var(--muted);
+}

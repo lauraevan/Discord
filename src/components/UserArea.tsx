@@ -4,6 +4,7 @@ import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
   CloseIcon,
+  SmileyIcon,
   ChevronRightIcon,
   GearIcon,
   HeadphonesIcon,
@@ -35,11 +36,13 @@ export function ProfilePopout({
   account,
   onEdit,
   onStatus,
+  onCustomStatus,
   onClose,
 }: {
   account: Account
   onEdit: () => void
   onStatus: () => void
+  onCustomStatus: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -81,6 +84,10 @@ export function ProfilePopout({
             <span className="p-dot" style={{ background: statusColor[account.status] }} />
             <span>{statusLabel[account.status]}</span>
             <ChevronRightIcon className="p-caret" />
+          </button>
+          <button className="p-btn" onClick={onCustomStatus}>
+            <SmileyIcon />
+            <span>{account.customStatus ? 'Edit Custom Status' : 'Set Custom Status'}</span>
           </button>
           <button className="p-btn">
             <MembersIcon />
