@@ -438,3 +438,158 @@ export const CloseIcon = (p: P) => (
     />
   </Svg>
 )
+
+/* ------------------------------------------------------------- additions */
+
+/** Notification bell (unmuted). */
+export const BellIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M12 2.2c-3.9 0-7 3.1-7 7v3.4l-1.5 2.8a1.3 1.3 0 0 0 1.2 2h14.6a1.3 1.3 0 0 0 1.2-2L19 12.6V9.2c0-3.9-3.1-7-7-7Z"
+    />
+    <path fill="currentColor" d="M9.3 19a2.7 2.7 0 0 0 5.4 0H9.3Z" />
+  </Svg>
+)
+
+/** Overflow "..." button. */
+export const MoreIcon = (p: P) => (
+  <Svg {...p}>
+    <circle cx="5.2" cy="12" r="2.1" fill="currentColor" />
+    <circle cx="12" cy="12" r="2.1" fill="currentColor" />
+    <circle cx="18.8" cy="12" r="2.1" fill="currentColor" />
+  </Svg>
+)
+
+/** Voice channel speaker. */
+export const SpeakerIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M11.4 3.3a1 1 0 0 1 .6.9v15.6a1 1 0 0 1-1.63.78L6.3 17H3.5A1.5 1.5 0 0 1 2 15.5v-7A1.5 1.5 0 0 1 3.5 7h2.8l4.07-3.58a1 1 0 0 1 1.03-.12Z"
+    />
+    <path
+      d="M15.6 8.4a5 5 0 0 1 0 7.2M18.4 5.6a9 9 0 0 1 0 12.8"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      fill="none"
+    />
+  </Svg>
+)
+
+export const CalendarIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a2 2 0 0 1 2 2v2H3V6a2 2 0 0 1 2-2h1V3a1 1 0 0 1 1-1ZM3 10h18v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9Zm4 3a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2H7Zm6 0a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-4Zm-6 4a1 1 0 1 0 0 2h2a1 1 0 1 0 0-2H7Zm6 0a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-4Z"
+    />
+  </Svg>
+)
+
+export const FolderIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M3 6a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.5.7l1.1 1.3H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6Z"
+    />
+  </Svg>
+)
+
+/** Server verified rosette. */
+export const VerifiedIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M11.03 1.4a1.4 1.4 0 0 1 1.94 0l.9.87c.28.27.66.4 1.04.36l1.25-.12a1.4 1.4 0 0 1 1.5 1.09l.28 1.22c.08.37.33.68.68.83l1.15.5a1.4 1.4 0 0 1 .74 1.8l-.46 1.17c-.14.35-.1.75.1 1.07l.67 1.06a1.4 1.4 0 0 1-.34 1.9l-1 .74c-.31.23-.49.6-.48.98l.04 1.25a1.4 1.4 0 0 1-1.32 1.44l-1.25.07c-.38.02-.72.23-.92.55l-.65 1.07a1.4 1.4 0 0 1-1.83.54l-1.12-.56a1.2 1.2 0 0 0-1.08 0l-1.12.56a1.4 1.4 0 0 1-1.83-.54l-.65-1.07a1.2 1.2 0 0 0-.92-.55l-1.25-.07a1.4 1.4 0 0 1-1.32-1.44l.04-1.25a1.2 1.2 0 0 0-.48-.98l-1-.74a1.4 1.4 0 0 1-.34-1.9l.67-1.06c.2-.32.24-.72.1-1.07l-.46-1.17a1.4 1.4 0 0 1 .74-1.8l1.15-.5c.35-.15.6-.46.68-.83l.28-1.22a1.4 1.4 0 0 1 1.5-1.09l1.25.12c.38.04.76-.09 1.03-.36l.91-.87Zm5.38 6.9a1 1 0 0 1 .1 1.4l-5.2 6a1 1 0 0 1-1.46.05l-2.8-2.8a1 1 0 1 1 1.4-1.4l2.04 2.03 4.51-5.2a1 1 0 0 1 1.41-.08Z"
+      clipRule="evenodd"
+    />
+  </Svg>
+)
+
+export const GiftIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M12 6.2c-.6-1.4-1.5-2.9-3-3.5-1.8-.7-3.6.3-3.9 2-.2 1 .2 1.9.9 2.5H4a2 2 0 0 0-2 2v1.6c0 .6.4 1 1 1h8V6.2Zm1.9 0h-.9v5.6h8c.6 0 1-.4 1-1V9.2a2 2 0 0 0-2-2h-2c.7-.6 1.1-1.5.9-2.5-.3-1.7-2.1-2.7-3.9-2-1.1.4-1.9 1.4-2.5 2.5.2.3.3.7.4 1ZM3.6 13.4V19a2 2 0 0 0 2 2H11v-7.6H3.6Zm9.4 0V21h5.4a2 2 0 0 0 2-2v-5.6H13Z"
+    />
+  </Svg>
+)
+
+export const GifIcon = (p: P) => (
+  <Svg {...p}>
+    <rect
+      x="2.2"
+      y="4.6"
+      width="19.6"
+      height="14.8"
+      rx="3"
+      stroke="currentColor"
+      strokeWidth="2"
+      fill="none"
+    />
+    <path
+      fill="currentColor"
+      d="M9.1 11.3H7.4c-.1-.5-.5-.8-1.1-.8-.8 0-1.3.6-1.3 1.6s.5 1.6 1.4 1.6c.6 0 1-.3 1.1-.8h-1v-1h2.6v.9c0 1.4-1 2.4-2.7 2.4-1.8 0-3-1.2-3-3.1s1.2-3.1 3-3.1c1.5 0 2.5.8 2.7 2.3Zm1.5-2.2h1.6v6h-1.6v-6Zm3 0h4.2v1.4h-2.6v1.1h2.3v1.3h-2.3v2.2h-1.6v-6Z"
+    />
+  </Svg>
+)
+
+export const StickerIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M4 3.5h16a1.5 1.5 0 0 1 1.5 1.5v8.2h-4.6a3.7 3.7 0 0 0-3.7 3.7v4.6H4A1.5 1.5 0 0 1 2.5 20V5A1.5 1.5 0 0 1 4 3.5Zm10.7 17.7v-4a2.5 2.5 0 0 1 2.5-2.5h4l-6.5 6.5Z"
+    />
+  </Svg>
+)
+
+/** Apps / activities launcher. */
+export const AppsIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M7.5 3a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm9 11a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm-9 0a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Zm9-11a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7Z"
+    />
+  </Svg>
+)
+
+export const SendIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M3.2 4.3c-.5-.9.4-1.9 1.3-1.5l16.2 7.3c.9.4.9 1.6 0 2l-16.2 7.3c-.9.4-1.8-.6-1.3-1.5L6.6 12 3.2 4.3Z"
+    />
+  </Svg>
+)
+
+export const VideoIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M4 6h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm13.2 4.3 3.4-2.4a.9.9 0 0 1 1.4.7v6.8a.9.9 0 0 1-1.4.7l-3.4-2.4v-3.4Z"
+    />
+  </Svg>
+)
+
+export const MinimizeIcon = (p: P) => (
+  <Svg {...p}>
+    <path d="M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+  </Svg>
+)
+
+export const MaximizeIcon = (p: P) => (
+  <Svg {...p}>
+    <rect
+      x="5.5"
+      y="5.5"
+      width="13"
+      height="13"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      fill="none"
+    />
+  </Svg>
+)

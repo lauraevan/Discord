@@ -1,22 +1,27 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChannelHeader } from './components/ChannelHeader'
 import { ChannelSidebar } from './components/ChannelSidebar'
-import { ChatFeed } from './components/Chat'
+import { ChatFeed, ChatHeader } from './components/Chat'
+import { Composer, TypingIndicator } from './components/Composer'
 import { CreateServerModal } from './components/CreateServerModal'
-import { Dock } from './components/Dock'
-import { MessageComposer } from './components/MessageComposer'
-import { ServerRail } from './components/ServerRail'
-import { TopBar } from './components/TopBar'
+import { ServerArt, ServerRail } from './components/ServerRail'
+import { ThemePanel } from './components/ThemePanel'
+import { TitleBar } from './components/TitleBar'
+import { UserCard } from './components/UserCard'
 import {
-  starterCategories,
-  type Category,
+  crew,
+  folderServers,
+  messHall,
+  railServers,
+  tailServers,
+  type Channel,
   type Message,
   type Server,
 } from './data'
-import { ClydeIcon } from './ui/Icons'
+import { allThemes, applyTheme, defaultThemes } from './themes'
 
 const STORE_SERVERS = 'discord-ui:servers'
 const STORE_MESSAGES = 'discord-ui:messages'
+const STORE_THEME = 'discord-ui:theme'
 
 function load<T>(key: string, fallback: T): T {
   try {
@@ -27,39 +32,61 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 
+const starterCategories = () => [
+  {
+    id: 'text',
+    name: 'Text Channels',
+    channels: [
+      { id: 'general', name: 'general', kind: 'text' as const },
+      { id: 'off-topic', name: 'off-topic', kind: 'text' as const },
+    ],
+  },
+  {
+    id: 'voice',
+    name: 'Voice Channels',
+    channels: [{ id: 'general-voice', name: 'General', kind: 'voice' as const }],
+  },
+]
+
 export default function App() {
-  const [servers, setServers] = useState<Server[]>(() =>
-    load<Server[]>(STORE_SERVERS, []),
-  )
+  const [custom, setCustom] = useState<Server[]>(() => load<Server[]>(STORE_SERVERS, []))
   const [messages, setMessages] = useState<Record<string, Message[]>>(() =>
     load<Record<string, Message[]>>(STORE_MESSAGES, {}),
   )
-  const [activeServer, setActiveServer] = useState<string | null>(null)
-  const [activeChannel, setActiveChannel] = useState('general')
+  const [themeId, setThemeId] = useState<string>(() => load<string>(STORE_THEME, 'dark'))
+  const [activeServer, setActiveServer] = useState<string>('crew')
+  const [activeChannel, setActiveChannel] = useState('mess-hall')
   const [collapsed, setCollapsed] = useState<string[]>([])
-  const [muted, setMuted] = useState(true)
+  const [muted, setMuted] = useState(false)
   const [deafened, setDeafened] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [themePanel, setThemePanel] = useState(false)
 
+  const theme = allThemes.find((t) => t.id === themeId) ?? defaultThemes[2]
+
+  useEffect(() => applyTheme(theme), [theme])
   useEffect(() => {
-    localStorage.setItem(STORE_SERVERS, JSON.stringify(servers))
-  }, [servers])
+    localStorage.setItem(STORE_THEME, JSON.stringify(themeId))
+  }, [themeId])
+  useEffect(() => {
+    localStorage.setItem(STORE_SERVERS, JSON.stringify(custom))
+  }, [custom])
   useEffect(() => {
     localStorage.setItem(STORE_MESSAGES, JSON.stringify(messages))
   }, [messages])
 
-  const server = servers.find((s) => s.id === activeServer) ?? null
-  const categories: Category[] = useMemo(
-    () => (server ? starterCategories() : []),
-    [server],
-  )
-  const channel =
-    categories.flatMap((c) => c.channels).find((c) => c.id === activeChannel) ??
-    categories.flatMap((c) => c.channels)[0] ??
-    null
+  const servers = useMemo(() => [crew, ...railServers, ...folderServers, ...tailServers, ...custom], [custom])
+  const server = servers.find((s) => s.id === activeServer) ?? crew
 
-  const key = server && channel ? `${server.id}/${channel.id}` : ''
-  const thread = messages[key] ?? []
+  const channels: Channel[] = server.categories.flatMap((c) => c.channels)
+  const channel =
+    channels.find((c) => c.id === activeChannel && c.kind !== 'voice') ??
+    channels.find((c) => c.kind !== 'voice') ??
+    channels[0]
+
+  const key = `${server.id}/${channel?.id ?? ''}`
+  const seeded = server.id === 'crew' && channel?.id === 'mess-hall' ? messHall : []
+  const thread = [...seeded, ...(messages[key] ?? [])]
 
   const createServer = (name: string, color: string) => {
     const id = `srv-${Date.now().toString(36)}`
@@ -70,18 +97,29 @@ export default function App() {
       .map((w) => [...w][0])
       .join('')
       .toUpperCase()
-    setServers((s) => [...s, { id, name, initials, color }])
+    setCustom((s) => [
+      ...s,
+      {
+        id,
+        name,
+        square: true,
+        art: { kind: 'initials', initials, color },
+        categories: starterCategories(),
+      },
+    ])
     setActiveServer(id)
     setActiveChannel('general')
     setCreating(false)
   }
 
   const send = (text: string) => {
-    if (!key) return
     const msg: Message = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      author: 'vice',
-      time: Date.now(),
+      author: 'wumpus',
+      time: `Today at ${new Date().toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+      })}`,
       text,
     }
     setMessages((m) => ({ ...m, [key]: [...(m[key] ?? []), msg] }))
@@ -89,69 +127,62 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopBar
-          title={server ? server.name : 'Discord'}
-          initials={server?.initials}
-          color={server?.color}
-        />
+      <TitleBar title={server.name} mark={<ServerArt server={server} />} />
       <div className="app-body">
         <div className="left-col">
           <ServerRail
-            servers={servers}
+            head={railServers}
+            tail={[crew]}
+            folder={folderServers}
+            custom={[...tailServers, ...custom]}
             activeId={activeServer}
             onSelect={(id) => {
               setActiveServer(id)
-              setActiveChannel('general')
+              const s = servers.find((x) => x.id === id)
+              const first = s?.categories.flatMap((c) => c.channels).find((c) => c.kind !== 'voice')
+              setActiveChannel(first?.id ?? '')
             }}
-            onHome={() => setActiveServer(null)}
+            onHome={() => setActiveServer('crew')}
             onCreate={() => setCreating(true)}
           />
           <ChannelSidebar
             server={server}
-            categories={categories}
             activeChannel={channel?.id ?? ''}
             collapsed={collapsed}
             onToggle={(id) =>
-              setCollapsed((c) =>
-                c.includes(id) ? c.filter((x) => x !== id) : [...c, id],
-              )
+              setCollapsed((c) => (c.includes(id) ? c.filter((x) => x !== id) : [...c, id]))
             }
             onSelect={setActiveChannel}
-            onCreate={() => setCreating(true)}
           />
-          <Dock
+          <UserCard
             muted={muted}
             deafened={deafened}
             onMute={() => setMuted((m) => !m)}
             onDeafen={() => setDeafened((d) => !d)}
+            onSettings={() => setThemePanel((v) => !v)}
           />
         </div>
 
         <main className="chat">
-          {server && channel ? (
+          {channel ? (
             <>
-              <ChannelHeader channel={channel} serverName={server.name} />
+              <ChatHeader channel={channel} />
               <ChatFeed channel={channel} messages={thread} />
-              <MessageComposer
-                channelName={channel.name}
-                readOnly={!!channel.readOnly}
-                onSend={send}
+              <Composer channelName={channel.name} onSend={send} />
+              <TypingIndicator
+                who={server.id === 'crew' && channel.id === 'mess-hall' ? ['Moatmonsturr', 'Phibi'] : []}
               />
             </>
-          ) : (
-            <div className="home-empty">
-              <ClydeIcon size={86} />
-              <h3>No servers yet</h3>
-              <p>
-                Hit the <b>+</b> button on the left to create your first server.
-                Channels, messages and everything else land here.
-              </p>
-              <button className="btn-primary" onClick={() => setCreating(true)}>
-                Create a server
-              </button>
-            </div>
-          )}
+          ) : null}
         </main>
+
+        {themePanel ? (
+          <ThemePanel
+            current={themeId}
+            onPick={(t) => setThemeId(t.id)}
+            onClose={() => setThemePanel(false)}
+          />
+        ) : null}
       </div>
 
       {creating ? (

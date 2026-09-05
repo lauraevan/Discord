@@ -1,178 +1,129 @@
-import { emoji, type Category, type Channel, type Server } from '../data'
+import type { Category, Channel, Server } from '../data'
+import { people } from '../data'
+import { CharacterAvatar } from '../ui/Art'
 import {
-  AddMemberIcon,
   BrowseChannelsIcon,
+  CalendarIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
   ForumIcon,
   HashIcon,
   MegaphoneIcon,
-  PlusIcon,
+  MicOffIcon,
   RulesIcon,
-  ServerHomeIcon,
-  SparkleIcon,
+  SpeakerIcon,
+  VerifiedIcon,
+  VideoIcon,
 } from '../ui/Icons'
-import { Tooltip } from '../ui/Tooltip'
 
-function ChannelGlyph({ kind }: { kind: Channel['kind'] }) {
-  if (kind === 'rules') return <RulesIcon className="ch-icon" />
-  if (kind === 'announcement') return <MegaphoneIcon className="ch-icon" />
-  if (kind === 'forum') return <ForumIcon className="ch-icon" />
-  return <HashIcon className="ch-icon" />
+function Glyph({ kind }: { kind: Channel['kind'] }) {
+  if (kind === 'announcement') return <MegaphoneIcon />
+  if (kind === 'forum') return <ForumIcon />
+  if (kind === 'rules') return <RulesIcon />
+  if (kind === 'voice') return <SpeakerIcon />
+  return <HashIcon />
 }
 
-export function ServerHeader({ name }: { name: string }) {
+export function ServerHeader({ server }: { server: Server }) {
   return (
-    <div className="server-header">
-      <ServerHomeIcon className="home-mark" />
-      <h1>{name}</h1>
+    <button className="server-header">
+      {server.verified ? <VerifiedIcon className="badge-mark" /> : null}
+      <h1>{server.name}</h1>
       <ChevronDownIcon className="chevron" />
-      <Tooltip label="Create Invite" side="below">
-        <AddMemberIcon className="invite" />
-      </Tooltip>
-    </div>
-  )
-}
-
-export function BoostGoal() {
-  return (
-    <div className="boost-card">
-      <span className="label">Boost Goal</span>
-      <span className="value">0/36 Boosts</span>
-      <ChevronRightIcon className="chevron" />
-    </div>
-  )
-}
-
-export function BrowseChannels() {
-  return (
-    <div className="browse-row">
-      <BrowseChannelsIcon />
-      <span>Browse Channels</span>
-    </div>
-  )
-}
-
-export function ChannelRow({
-  channel,
-  active,
-  onSelect,
-}: {
-  channel: Channel
-  active: boolean
-  onSelect: () => void
-}) {
-  const cls =
-    'channel' +
-    (active ? ' active' : '') +
-    (channel.unread && !active ? ' unread' : '') +
-    (channel.muted && !active ? ' muted' : '')
-  return (
-    <button className={cls} onClick={onSelect}>
-      {channel.unread && !active ? <span className="channel-dot" /> : null}
-      <ChannelGlyph kind={channel.kind} />
-      {channel.emoji ? <img className="ch-emoji" src={emoji[channel.emoji]} alt="" /> : null}
-      <span className="channel-name">{channel.name}</span>
-      {channel.trailingEmoji ? (
-        <img className="trailing-emoji" src={emoji[channel.trailingEmoji]} alt="" />
-      ) : null}
-      {channel.badge ? <span className="badge-count ch-badge">{channel.badge}</span> : null}
-      {channel.invite && active ? <AddMemberIcon className="ch-action" /> : null}
     </button>
   )
 }
 
-export function ChannelCategory({
-  category,
-  collapsed,
-  activeChannel,
-  onToggle,
-  onSelect,
+function VoiceMember({
+  id,
+  video,
+  muted,
 }: {
-  category: Category
-  collapsed: boolean
-  activeChannel: string
-  onToggle: () => void
-  onSelect: (id: string) => void
+  id: string
+  video?: boolean
+  muted?: boolean
 }) {
+  const p = people[id]
   return (
-    <>
-      <button className={'category' + (collapsed ? ' collapsed' : '')} onClick={onToggle}>
-        {category.icon === 'sparkle' ? (
-          <SparkleIcon className="cat-icon" />
-        ) : (
-          <img className="cat-emoji" src={emoji.globe} alt="" />
-        )}
-        <span className="category-name">{category.name}</span>
-        <ChevronDownIcon className="chevron" />
-      </button>
-      {category.channels
-        .filter((c) => !collapsed || c.id === activeChannel || c.unread)
-        .map((c) => (
-          <ChannelRow
-            key={c.id}
-            channel={c}
-            active={c.id === activeChannel}
-            onSelect={() => onSelect(c.id)}
-          />
-        ))}
-    </>
+    <div className="voice-member">
+      <span className="pfp">
+        <CharacterAvatar p={p.palette} variant={p.variant} glasses={p.glasses} />
+      </span>
+      <span className="vname">{p.name}</span>
+      {video || muted ? (
+        <span className="vicons">
+          {video ? <VideoIcon /> : null}
+          {muted ? <MicOffIcon className="off" /> : null}
+        </span>
+      ) : null}
+    </div>
   )
 }
 
 export function ChannelSidebar({
   server,
-  categories,
   activeChannel,
   collapsed,
   onToggle,
   onSelect,
-  onCreate,
 }: {
-  server: Server | null
-  categories: Category[]
+  server: Server
   activeChannel: string
   collapsed: string[]
   onToggle: (id: string) => void
   onSelect: (id: string) => void
-  onCreate: () => void
 }) {
-  if (!server) {
-    return (
-      <div className="sidebar">
-        <div className="server-header plain">
-          <h1>Home</h1>
-        </div>
-        <div className="sidebar-scroll">
-          <button className="add-server-row" onClick={onCreate}>
-            <PlusIcon />
-            <span>Create a server</span>
-          </button>
-          <p className="sidebar-hint">
-            Servers you create show up in the rail on the left.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="sidebar">
-      <ServerHeader name={server.name} />
+      <ServerHeader server={server} />
       <div className="sidebar-scroll">
-        <BoostGoal />
-        <div className="side-rule" />
-        <BrowseChannels />
-        <div className="side-rule" style={{ marginTop: '13.5px' }} />
-        {categories.map((cat) => (
-          <ChannelCategory
-            key={cat.id}
-            category={cat}
-            collapsed={collapsed.includes(cat.id)}
-            activeChannel={activeChannel}
-            onToggle={() => onToggle(cat.id)}
-            onSelect={onSelect}
-          />
+        <div style={{ height: 18 }} />
+        <button className="row">
+          <CalendarIcon />
+          <span className="row-name">2 Events</span>
+        </button>
+        <button className="row">
+          <BrowseChannelsIcon />
+          <span className="row-name">Browse Channels</span>
+        </button>
+        <div className="section-gap" />
+
+        {server.categories.map((cat: Category) => (
+          <div key={cat.id}>
+            {cat.name ? (
+              <button
+                className={'category' + (collapsed.includes(cat.id) ? ' collapsed' : '')}
+                onClick={() => onToggle(cat.id)}
+              >
+                <span>{cat.name}</span>
+                <ChevronDownIcon className="chevron" />
+              </button>
+            ) : null}
+            {(collapsed.includes(cat.id) ? [] : cat.channels).map((c) => (
+              <div key={c.id}>
+                <button
+                  className={
+                    'row' +
+                    (c.id === activeChannel ? ' active' : '') +
+                    (c.unread ? ' unread' : '') +
+                    (c.connected?.length ? ' in-voice' : '')
+                  }
+                  onClick={() => onSelect(c.id)}
+                >
+                  {c.unread && c.id !== activeChannel ? <span className="dot" /> : null}
+                  <Glyph kind={c.kind} />
+                  <span className="row-name">{c.name}</span>
+                </button>
+                {c.threads?.map((t) => (
+                  <button key={t.id} className="thread">
+                    {t.name}
+                  </button>
+                ))}
+                {c.connected?.map((m) => (
+                  <VoiceMember key={m.person} id={m.person} video={m.video} muted={m.muted} />
+                ))}
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </div>

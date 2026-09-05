@@ -10,13 +10,10 @@ export function CreateServerModal({
 }) {
   const [name, setName] = useState('')
   const [color, setColor] = useState(serverColors[0])
-
   const submit = () => {
     const clean = name.trim()
-    if (!clean) return
-    onCreate(clean, color)
+    if (clean) onCreate(clean, color)
   }
-
   return (
     <div className="overlay" onMouseDown={onClose}>
       <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
@@ -36,7 +33,7 @@ export function CreateServerModal({
             className="field"
             value={name}
             autoFocus
-            placeholder="vice's server"
+            placeholder="Wumpus's server"
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') submit()
