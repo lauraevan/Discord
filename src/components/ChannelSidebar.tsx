@@ -1,19 +1,20 @@
 import type { Category, Channel, Server } from '../data'
-import { people } from '../data'
-import { CharacterAvatar } from '../ui/Art'
 import {
+  AddMemberIcon,
+  BoostIcon,
   BrowseChannelsIcon,
   CalendarIcon,
   ChevronDownIcon,
   ForumIcon,
+  GearIcon,
   HashIcon,
   MegaphoneIcon,
-  MicOffIcon,
+  MembersIcon,
+  PlusIcon,
   RulesIcon,
   SpeakerIcon,
-  VerifiedIcon,
-  VideoIcon,
 } from '../ui/Icons'
+import { Tooltip } from '../ui/Tooltip'
 
 function Glyph({ kind }: { kind: Channel['kind'] }) {
   if (kind === 'announcement') return <MegaphoneIcon />
@@ -23,38 +24,39 @@ function Glyph({ kind }: { kind: Channel['kind'] }) {
   return <HashIcon />
 }
 
-export function ServerHeader({ server }: { server: Server }) {
-  return (
-    <button className="server-header">
-      {server.verified ? <VerifiedIcon className="badge-mark" /> : null}
-      <h1>{server.name}</h1>
-      <ChevronDownIcon className="chevron" />
-    </button>
-  )
-}
-
-function VoiceMember({
-  id,
-  video,
-  muted,
+function ChannelRow({
+  channel,
+  active,
+  onSelect,
+  onSettings,
 }: {
-  id: string
-  video?: boolean
-  muted?: boolean
+  channel: Channel
+  active: boolean
+  onSelect: () => void
+  onSettings: () => void
 }) {
-  const p = people[id]
   return (
-    <div className="voice-member">
-      <span className="pfp">
-        <CharacterAvatar p={p.palette} variant={p.variant} glasses={p.glasses} />
+    <div className={'row' + (active ? ' active' : '')} onClick={onSelect}>
+      <Glyph kind={channel.kind} />
+      <span className="row-name">{channel.name}</span>
+      <span className="row-actions">
+        <Tooltip label="Create Invite" side="below">
+          <button aria-label="Create invite" onClick={(e) => e.stopPropagation()}>
+            <AddMemberIcon />
+          </button>
+        </Tooltip>
+        <Tooltip label="Edit Channel" side="below">
+          <button
+            aria-label="Edit channel"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSettings()
+            }}
+          >
+            <GearIcon />
+          </button>
+        </Tooltip>
       </span>
-      <span className="vname">{p.name}</span>
-      {video || muted ? (
-        <span className="vicons">
-          {video ? <VideoIcon /> : null}
-          {muted ? <MicOffIcon className="off" /> : null}
-        </span>
-      ) : null}
     </div>
   )
 }
@@ -65,63 +67,86 @@ export function ChannelSidebar({
   collapsed,
   onToggle,
   onSelect,
+  onAddChannel,
+  onEditChannel,
 }: {
   server: Server
   activeChannel: string
   collapsed: string[]
   onToggle: (id: string) => void
   onSelect: (id: string) => void
+  onAddChannel: (categoryId: string | null) => void
+  onEditChannel: (id: string) => void
 }) {
+  const loose = server.channels.filter((c) => c.categoryId === null)
+  const inCat = (cat: Category) => server.channels.filter((c) => c.categoryId === cat.id)
+
   return (
     <div className="sidebar">
-      <ServerHeader server={server} />
-      <div className="sidebar-scroll">
-        <div style={{ height: 18 }} />
-        <button className="row">
-          <CalendarIcon />
-          <span className="row-name">2 Events</span>
-        </button>
-        <button className="row">
-          <BrowseChannelsIcon />
-          <span className="row-name">Browse Channels</span>
-        </button>
-        <div className="section-gap" />
+      <button className="server-header">
+        <BoostIcon className="badge-mark" />
+        <h1>{server.name}</h1>
+        <ChevronDownIcon className="chevron" />
+        <Tooltip label="Create Invite" side="below">
+          <span className="invite" aria-label="Create invite">
+            <AddMemberIcon />
+          </span>
+        </Tooltip>
+      </button>
 
-        {server.categories.map((cat: Category) => (
+      <div className="sidebar-scroll">
+        <div className="nav-block">
+          <div className="row nav">
+            <CalendarIcon />
+            <span className="row-name">Events</span>
+          </div>
+          <div className="row nav">
+            <BrowseChannelsIcon />
+            <span className="row-name">Browse Channels</span>
+          </div>
+          <div className="row nav">
+            <MembersIcon />
+            <span className="row-name">Members</span>
+          </div>
+          <div className="row nav">
+            <BoostIcon />
+            <span className="row-name">Server Boosts</span>
+          </div>
+        </div>
+
+        <div className="side-rule" />
+
+        {loose.map((c) => (
+          <ChannelRow
+            key={c.id}
+            channel={c}
+            active={c.id === activeChannel}
+            onSelect={() => onSelect(c.id)}
+            onSettings={() => onEditChannel(c.id)}
+          />
+        ))}
+
+        {server.categories.map((cat) => (
           <div key={cat.id}>
-            {cat.name ? (
-              <button
-                className={'category' + (collapsed.includes(cat.id) ? ' collapsed' : '')}
-                onClick={() => onToggle(cat.id)}
-              >
+            <div className={'category' + (collapsed.includes(cat.id) ? ' collapsed' : '')}>
+              <button className="cat-label" onClick={() => onToggle(cat.id)}>
                 <span>{cat.name}</span>
                 <ChevronDownIcon className="chevron" />
               </button>
-            ) : null}
-            {(collapsed.includes(cat.id) ? [] : cat.channels).map((c) => (
-              <div key={c.id}>
-                <button
-                  className={
-                    'row' +
-                    (c.id === activeChannel ? ' active' : '') +
-                    (c.unread ? ' unread' : '') +
-                    (c.connected?.length ? ' in-voice' : '')
-                  }
-                  onClick={() => onSelect(c.id)}
-                >
-                  {c.unread && c.id !== activeChannel ? <span className="dot" /> : null}
-                  <Glyph kind={c.kind} />
-                  <span className="row-name">{c.name}</span>
+              <Tooltip label="Create Channel" side="below">
+                <button className="cat-add" onClick={() => onAddChannel(cat.id)} aria-label="Create channel">
+                  <PlusIcon />
                 </button>
-                {c.threads?.map((t) => (
-                  <button key={t.id} className="thread">
-                    {t.name}
-                  </button>
-                ))}
-                {c.connected?.map((m) => (
-                  <VoiceMember key={m.person} id={m.person} video={m.video} muted={m.muted} />
-                ))}
-              </div>
+              </Tooltip>
+            </div>
+            {(collapsed.includes(cat.id) ? [] : inCat(cat)).map((c) => (
+              <ChannelRow
+                key={c.id}
+                channel={c}
+                active={c.id === activeChannel}
+                onSelect={() => onSelect(c.id)}
+                onSettings={() => onEditChannel(c.id)}
+              />
             ))}
           </div>
         ))}

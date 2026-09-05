@@ -593,3 +593,45 @@ export const MaximizeIcon = (p: P) => (
     />
   </Svg>
 )
+
+/** Download / desktop-app rail button. */
+export const DownloadIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M12 2a1 1 0 0 1 1 1v10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4l3.3 3.3V3a1 1 0 0 1 1-1ZM4 18a1 1 0 0 1 1 1v1h14v-1a1 1 0 1 1 2 0v1.5A1.5 1.5 0 0 1 19.5 22h-15A1.5 1.5 0 0 1 3 20.5V19a1 1 0 0 1 1-1Z"
+    />
+  </Svg>
+)
+
+/** Server boosts (the "rocket in a shield" mark). */
+export const BoostIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="M12 1.6 3 6v6.2c0 5 3.7 9.2 9 10.2 5.3-1 9-5.2 9-10.2V6l-9-4.4Zm0 3.9 5.2 5.2-1.4 1.4-2.8-2.8v7.3h-2V9.3l-2.8 2.8-1.4-1.4L12 5.5Z"
+      clipRule="evenodd"
+    />
+  </Svg>
+)
+
+/** Window "expand / restore" control from the title bar. */
+export const ExpandIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M4 4h6v2H6.4l4.3 4.3-1.4 1.4L5 7.4V11H3V5a1 1 0 0 1 1-1Zm10 0h6a1 1 0 0 1 1 1v6h-2V7.4l-4.3 4.3-1.4-1.4L17.6 6H14V4ZM3 13h2v3.6l4.3-4.3 1.4 1.4L6.4 18H10v2H4a1 1 0 0 1-1-1v-6Zm16 0h2v6a1 1 0 0 1-1 1h-6v-2h3.6l-4.3-4.3 1.4-1.4L19 16.6V13Z"
+    />
+  </Svg>
+)
+
+/** Pencil, used by Edit Profile / Edit Channel. */
+export const PencilIcon = (p: P) => (
+  <Svg {...p}>
+    <path
+      fill="currentColor"
+      d="M19.3 3.3a2.5 2.5 0 0 1 3.5 3.5l-1.3 1.3-3.5-3.5 1.3-1.3ZM16.6 6l3.5 3.5-9.6 9.6-4.4.9.9-4.4L16.6 6Z"
+    />
+  </Svg>
+)
