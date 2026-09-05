@@ -219,7 +219,7 @@ input {
 .server-tile {
   width: 33px;
   height: 33px;
-  border-radius: 50%;
+  border-radius: 11px;
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -234,9 +234,13 @@ input {
 }
 
 .server-tile.home {
+  background: var(--card);
+  color: var(--strong);
+}
+
+.server.active .server-tile.home {
   background: var(--blurple);
   color: #fff;
-  border-radius: 11px;
 }
 
 .server-tile.srv {
@@ -245,12 +249,12 @@ input {
 
 .server-tile.plain {
   background: var(--card);
-  color: var(--green);
+  color: var(--strong);
 }
 
 .server:hover .server-tile.plain {
-  background: var(--green);
-  color: #fff;
+  background: var(--selected);
+  color: var(--strong);
 }
 
 .server-initials {
@@ -283,11 +287,11 @@ input {
 }
 
 .server-header {
-  height: 39px;
-  flex: 0 0 39px;
+  height: 40px;
+  flex: 0 0 40px;
   display: flex;
   align-items: center;
-  padding: 0 12px 0 14px;
+  padding: 2px 12px 0 14px;
   cursor: pointer;
   border-bottom: 1px solid var(--border);
   text-align: left;
@@ -306,7 +310,7 @@ input {
 }
 
 .server-header h1 {
-  font-size: 15px;
+  font-size: 13.4px;
   font-weight: 600;
   color: var(--strong);
   white-space: nowrap;
@@ -363,7 +367,7 @@ input {
   display: flex;
   align-items: center;
   padding: 0 7px;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--text) 47%, transparent);
   cursor: pointer;
   width: 232px;
 }
@@ -383,7 +387,7 @@ input {
   width: 15px;
   height: 15px;
   flex: 0 0 15px;
-  color: var(--muted);
+  color: inherit;
 }
 
 .row.active > svg {
@@ -392,7 +396,7 @@ input {
 
 .row-name {
   margin-left: 8px;
-  font-size: 14px;
+  font-size: 13.3px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -437,8 +441,9 @@ input {
   display: flex;
   align-items: center;
   height: 22px;
-  margin: 10px 10px 2px 12px;
-  color: var(--muted);
+  /* measured: 12px above the label, and the next channel row tucks back 2px */
+  margin: 12px 10px -2px 14px;
+  color: color-mix(in srgb, var(--text) 47%, transparent);
   width: 227px;
 }
 
@@ -451,7 +456,7 @@ input {
 }
 
 .cat-label span {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.2px;
   white-space: nowrap;
@@ -768,17 +773,19 @@ input {
   display: flex;
   align-items: center;
   gap: 15.3px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .chat-tools button {
   display: grid;
   place-items: center;
   color: inherit;
+  /* measured off the reference: the header glyphs sit at 63.5% of --text */
+  opacity: 0.635;
 }
 
 .chat-tools button:hover {
-  color: var(--text);
+  opacity: 1;
 }
 
 .chat-tools svg {
@@ -787,12 +794,13 @@ input {
 }
 
 .searchbox {
-  margin-left: 0;
+  margin-left: -1px;
   width: 198px;
-  height: 24px;
+  height: 26px;
   flex: 0 0 198px;
   border-radius: 4px;
-  background: var(--side);
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.085);
   display: flex;
   align-items: center;
   padding: 0 6px 0 7px;
@@ -806,7 +814,7 @@ input {
 }
 
 .searchbox input::placeholder {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--text) 53.5%, transparent);
 }
 
 .searchbox svg {
@@ -844,7 +852,7 @@ input {
 }
 
 .intro {
-  padding: 12px 0 8px;
+  padding: 15px 0 11px;
   flex: 0 0 auto;
 }
 
@@ -856,32 +864,32 @@ input {
   color: var(--strong);
   display: grid;
   place-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 13px;
 }
 
 .intro-glyph svg {
-  width: 28px;
-  height: 28px;
+  width: 37px;
+  height: 37px;
 }
 
 .intro h3 {
-  font-size: 25px;
-  font-weight: 700;
+  font-size: 26.5px;
+  font-weight: 800;
   color: var(--strong);
-  letter-spacing: -0.2px;
+  letter-spacing: 0.28px;
 }
 
 .intro p {
-  margin-top: 6px;
+  margin-top: 2px;
   font-size: 14px;
   color: var(--text);
 }
 
 .intro-btn {
-  margin-top: 14px;
+  margin-top: 11px;
   height: 26px;
   border-radius: 4px;
-  background: var(--card);
+  background: var(--selected);
   color: var(--strong);
   font-size: 13px;
   font-weight: 500;
@@ -892,7 +900,7 @@ input {
 }
 
 .intro-btn:hover {
-  background: var(--selected);
+  background: var(--hover);
 }
 
 .intro-btn svg {
@@ -966,49 +974,57 @@ input {
   background: var(--composer);
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 16px 0 14.7px;
 }
 
 .composer .plus {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
-  color: var(--muted);
-  display: grid;
-  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--text);
+  opacity: 0.79;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.composer .plus svg {
+  width: 16px;
+  height: 16px;
 }
 
 .composer .plus:hover {
-  color: var(--strong);
+  opacity: 1;
 }
 
 .composer-input {
   flex: 1;
   min-width: 0;
-  margin-left: 22px;
+  margin-left: 21.5px;
   font-size: 14px;
   color: var(--text);
 }
 
 .composer-input::placeholder {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--text) 35.5%, transparent);
 }
 
 .composer-acts {
   display: flex;
   align-items: center;
   gap: 17px;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .composer-acts button {
   display: grid;
   place-items: center;
   color: inherit;
+  opacity: 0.72;
 }
 
 .composer-acts button:hover {
-  color: var(--text);
+  opacity: 1;
 }
 
 .composer-acts svg {

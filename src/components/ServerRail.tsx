@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Server } from '../data'
-import { ClydeIcon, CompassIcon, DownloadIcon, PlusIcon } from '../ui/Icons'
+import { AddServerIcon, ClydeIcon, CompassIcon, DownloadIcon } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
 function RailItem({
@@ -62,10 +62,10 @@ export function ServerRail({
           </RailItem>
         ))}
         <RailItem label="Add a Server" className="plain green" onClick={onCreate}>
-          <PlusIcon size={17} />
+          <AddServerIcon size={19} />
         </RailItem>
         <RailItem label="Discover" className="plain green">
-          <CompassIcon size={18} />
+          <CompassIcon size={19} />
         </RailItem>
         <RailItem label="Download Apps" className="plain green">
           <DownloadIcon size={17} />

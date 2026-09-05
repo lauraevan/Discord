@@ -3,6 +3,7 @@ import {
   AddMemberIcon,
   BoostIcon,
   BrowseChannelsIcon,
+  VerifiedIcon,
   CalendarIcon,
   ChevronDownIcon,
   ForumIcon,
@@ -84,7 +85,7 @@ export function ChannelSidebar({
   return (
     <div className="sidebar">
       <button className="server-header">
-        <BoostIcon className="badge-mark" />
+        <VerifiedIcon className="badge-mark" />
         <h1>{server.name}</h1>
         <ChevronDownIcon className="chevron" />
         <Tooltip label="Create Invite" side="below">
