@@ -28,16 +28,32 @@ function Glyph({ kind }: { kind: Channel['kind'] }) {
 function ChannelRow({
   channel,
   active,
+  unread,
+  inVoice,
   onSelect,
   onSettings,
+  onContext,
 }: {
   channel: Channel
   active: boolean
+  unread: boolean
+  inVoice: boolean
   onSelect: () => void
   onSettings: () => void
+  onContext: (at: { x: number; y: number }) => void
 }) {
   return (
-    <div className={'row' + (active ? ' active' : '')} onClick={onSelect}>
+    <div
+      className={
+        'row' + (active ? ' active' : '') + (unread ? ' unread' : '') + (inVoice ? ' in-voice' : '')
+      }
+      onClick={onSelect}
+      onContextMenu={(e) => {
+        e.preventDefault()
+        onContext({ x: e.clientX, y: e.clientY })
+      }}
+    >
+      {unread && !active ? <span className="unread-pip" /> : null}
       <Glyph kind={channel.kind} />
       <span className="row-name">{channel.name}</span>
       <span className="row-actions">
@@ -65,19 +81,25 @@ function ChannelRow({
 export function ChannelSidebar({
   server,
   activeChannel,
+  unread,
+  voice,
   collapsed,
   onToggle,
   onSelect,
   onAddChannel,
   onEditChannel,
+  onContext,
 }: {
   server: Server
   activeChannel: string
+  unread: Record<string, boolean>
+  voice: string | null
   collapsed: string[]
   onToggle: (id: string) => void
   onSelect: (id: string) => void
   onAddChannel: (categoryId: string | null) => void
   onEditChannel: (id: string) => void
+  onContext: (id: string, at: { x: number; y: number }) => void
 }) {
   const loose = server.channels.filter((c) => c.categoryId === null)
   const inCat = (cat: Category) => server.channels.filter((c) => c.categoryId === cat.id)
@@ -122,8 +144,11 @@ export function ChannelSidebar({
             key={c.id}
             channel={c}
             active={c.id === activeChannel}
+            unread={!!unread[c.id]}
+            inVoice={voice === c.id}
             onSelect={() => onSelect(c.id)}
             onSettings={() => onEditChannel(c.id)}
+            onContext={(at) => onContext(c.id, at)}
           />
         ))}
 
@@ -145,8 +170,11 @@ export function ChannelSidebar({
                 key={c.id}
                 channel={c}
                 active={c.id === activeChannel}
+                unread={!!unread[c.id]}
+                inVoice={voice === c.id}
                 onSelect={() => onSelect(c.id)}
                 onSettings={() => onEditChannel(c.id)}
+                onContext={(at) => onContext(c.id, at)}
               />
             ))}
           </div>

@@ -5,24 +5,53 @@ TypeScript + Vite. Panel boundaries, row heights and type sizes are literal
 pixel values measured off the reference frame (a 1558x743 window) rather than
 rounded design tokens.
 
-There is no invented cast and no invented servers. The app opens on **your own
-empty server** with real channels, and every list is something you can change:
-create servers and channels, rename or delete a channel, edit your profile, set
-your status, switch themes.
-
 ## What is real here
+
+No invented cast and no invented servers — the realism is in the behaviour. The
+app opens on your own empty server, and everything below actually works.
+
+### Messages
+
+| Feature | Detail |
+| --- | --- |
+| Discord-flavour markdown | `**b**` `*i*` `__u__` `~~s~~` `\|\|spoiler\|\|` `` `code` `` ```` ```lang ```` `> q` `>>> q` `# ## ###` `-# subtext` `- ` `1. ` `[text](url)` `\` escape — and no tables, images or task lists, which Discord also omits |
+| Nesting | `***__~~x~~__***` stacks, because it is a recursive parser rather than a regex pass |
+| Emoji | 178 Twemoji, by `:shortcode:` or by character; a message that is only emoji renders jumbo, capped at 27 as in the client |
+| Grouping | consecutive messages from one author merge, and the group breaks after 7 minutes |
+| Timestamps | date dividers, "Today at 4:32 PM", and the gutter time that appears on a grouped message on hover |
+| Reactions | add from the picker or the hover bar, click to toggle, your own are highlighted |
+| Replies | reply bar in the composer, the quoted line above the message, and the elbow spine |
+| Editing | inline, with escape/enter hints and the `(edited)` tag; `↑` in an empty composer edits your last message |
+| Pins | pin from the hover bar, pinned messages get a highlight, and the header's pin button opens the popover |
+| Spoilers | click to reveal |
+
+### Getting around
+
+| Feature | Detail |
+| --- | --- |
+| Quick switcher | `Ctrl`/`⌘`+`K` — servers and channels together, prefix matches ranked first |
+| Autocomplete | `#` channels, `@` members, `:` emoji, `/` commands; arrows to move, tab or enter to accept |
+| Slash commands | `/shrug` `/tableflip` `/unflip` `/me` `/spoiler` expand client-side, as they do in Discord |
+| Search | filters the whole server and shows hits in the right panel with Jump |
+| Unread | bold channel names with a pip, the red NEW divider, `Esc` marks the channel read, `Shift`+`Esc` the server |
+| Member list | hoisted-role layout with the status dot and role colour; toggled from the header |
+| Context menus | right-click a message or a channel |
+| Voice | click a voice channel to join; the user area grows a Voice Connected strip |
+| Emoji picker | search, category rail, sticky headings, and the hovered shortcode in the footer |
+| Shortcuts | `Ctrl`+`K`, `Esc`, `Shift`+`Esc`, `Ctrl`+`Shift`+`M`, `↑` |
+
+### Server and profile
 
 | Feature | Where |
 | --- | --- |
 | Create a server | `+` in the rail |
 | Create a channel | `+` on a category header |
-| Edit / delete a channel | gear on the channel row, or **Edit Channel** in the empty state |
+| Edit / delete a channel | gear on the row, right-click, or **Edit Channel** in the empty state |
 | Profile popout | click your name in the user area |
 | Edit profile | popout -> Edit Profile (name, username, pronouns, bio, colour) |
 | Set status | popout -> status row (online / idle / dnd / invisible) |
 | Appearance | gear in the user area — 4 default themes + 18 colour themes |
 | Mute / deafen | user area toggles |
-| Send a message | the composer; history persists per channel |
 
 Everything persists to localStorage.
 
@@ -45,24 +74,21 @@ Everything persists to localStorage.
 
 Nothing is cropped out of a screenshot.
 
-- **Icons** — Discord's own UI glyphs, taken verbatim from
+- **Icons** — one hand-authored modern set in `src/ui/Icons.tsx`, drawn against
+  the reference frame. An earlier pass generated these from
   [totallytavi/discord-app-icons](https://github.com/totallytavi/discord-app-icons)
-  (`2023/tabs-v1`). `tools/gen-icons.mjs` reads each SVG, keeps its `viewBox`
-  and inner markup byte-for-byte, and re-emits it as a React component whose
-  only addition is a wrapper that takes size and `currentColor` from CSS —
-  the output is `src/ui/DiscordIcons.tsx`, which is generated, not edited.
-- **Two glyphs are drawn by hand** in `src/ui/Icons.tsx`, because the reference
-  frame is a 2025 client and that set is from 2023: the channel header's
-  **Threads** icon (a four-bar comb tilted 45°, where the 2023 set has the older
-  hash-and-speech-bubble) and **Browse Channels** (a stack of rules with a
-  magnifier, where the 2023 set has a hash and a magnifier). Both were fitted
-  numerically to the reference — bar lengths, thickness and spacing measured off
-  the 17px and 15px glyphs.
+  (`2023/tabs-v1`); auditing every glyph against the reference showed that set
+  is a different generation of the design — one-person "members", an inverted
+  GIF chip, a solid "add server" disc, four dots for "apps" — so it was retired
+  rather than patched. House style follows the reference: solid shapes with the
+  detail knocked out, generous weight, rounded terminals, 24x24, `currentColor`.
+- **Emoji** — 178 Twemoji from
+  [jdecked/twemoji](https://github.com/jdecked/twemoji), bundled by
+  `tools/gen-emoji.mjs` as a single `<symbol>` sprite (231KB) rather than 178
+  data URIs (~960KB), since the same glyph repeats all over a channel.
 - **Artwork** — the profile banner (arches, orbs, sparkles) and the avatars are
   hand-drawn SVG in `src/ui/Art.tsx`.
 - **Badges** — from [mezotv/discord-badges](https://github.com/mezotv/discord-badges).
-- **Emoji** — Twemoji SVGs from [jdecked/twemoji](https://github.com/jdecked/twemoji),
-  rendered as images in message text exactly as Discord does.
 - **Type** — Source Sans 3 (SIL OFL 1.1), self-hosted as base64 so the page makes
   no external requests; it stands in for Discord's proprietary gg sans and fits
   the reference metrics to ~0.3%.
@@ -74,14 +100,12 @@ npm install
 npm run dev
 npm run build                       # single self-contained dist/index.html
 
-node tools/gen-icons.mjs            # regenerate src/ui/DiscordIcons.tsx
+node tools/fetch-emoji.mjs          # download the Twemoji in the catalogue
+node tools/gen-emoji.mjs            # rebuild src/emoji.ts from them
 node tools/screenshot.mjs out.png 1558 743
 node tools/shot-popout.mjs pop.png  # same, with the profile popout open
 node tools/boxes.mjs '.intro' '.composer'   # layout boxes for a selector
 ```
-
-`gen-icons.mjs` expects a checkout of `totallytavi/discord-app-icons` — set
-`SRC` at the top of the file to point at its `2023/tabs-v1` directory.
 
 ```bash
 node tools/flow.mjs    # click through every interaction, report pass/fail

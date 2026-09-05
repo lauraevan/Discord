@@ -20,6 +20,7 @@ export const K = {
   messages: `${PREFIX}messages`,
   theme: `${PREFIX}theme`,
   account: `${PREFIX}account`,
+  reads: `${PREFIX}reads`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>

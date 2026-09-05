@@ -1,0 +1,37 @@
+import { statusColor, statusLabel, type Account } from '../data'
+import { Avatar } from './UserArea'
+
+/**
+ * The member list.
+ *
+ * Discord splits it by hoisted role, then a plain "Online" group, then
+ * "Offline", and colours each name by the member's highest coloured role. This
+ * server has one member — you — so it renders the honest version of that rather
+ * than a cast of invented people.
+ */
+export function MemberList({
+  account,
+  onOpenProfile,
+}: {
+  account: Account
+  onOpenProfile: () => void
+}) {
+  const offline = account.status === 'invisible'
+  return (
+    <aside className="members">
+      <div className="members-head">{offline ? 'OFFLINE — 1' : 'ONLINE — 1'}</div>
+      <button className="member" onClick={onOpenProfile}>
+        <span className="member-avatar">
+          <Avatar account={account} size={32} />
+        </span>
+        <span className="member-body">
+          <span className="member-name" style={{ color: account.color }}>
+            {account.name}
+          </span>
+          <span className="member-sub">{statusLabel[account.status]}</span>
+        </span>
+        <span className="member-dot" style={{ background: statusColor[account.status] }} />
+      </button>
+    </aside>
+  )
+}

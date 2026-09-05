@@ -1,0 +1,239 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { SLASH, type Account, type Channel, type Message } from '../data'
+import { EMOJI } from '../emoji'
+import { EmojiGlyph } from '../markdown'
+import {
+  AppsIcon,
+  CloseIcon,
+  GifIcon,
+  GiftIcon,
+  PlusIcon,
+  SmileyIcon,
+  StickerIcon,
+} from '../ui/Icons'
+import { Tooltip } from '../ui/Tooltip'
+
+type Suggestion = { key: string; label: string; hint?: string; insert: string; code?: string }
+
+/**
+ * The composer's autocomplete. Discord opens it on `@`, `#`, `:` and `/` while
+ * the token is still being typed, filters as you go, and commits on Tab/Enter.
+ */
+function useAutocomplete(value: string, caret: number, channels: Channel[], account: Account) {
+  return useMemo(() => {
+    const upto = value.slice(0, caret)
+    const m = /(^|\s)([@#:/])([\w+-]*)$/.exec(upto)
+    if (!m) return null
+    const [, , sigil, term] = m
+    const start = caret - term.length - 1
+    const q = term.toLowerCase()
+    let items: Suggestion[] = []
+
+    if (sigil === '#') {
+      items = channels
+        .filter((c) => c.kind !== 'voice' && c.name.includes(q))
+        .map((c) => ({ key: c.id, label: `#${c.name}`, insert: `#${c.name} ` }))
+    } else if (sigil === '@') {
+      items = [{ key: 'self', label: account.name, hint: account.handle, insert: `@${account.name} ` }]
+        .filter((s) => s.label.toLowerCase().includes(q) || s.hint!.includes(q))
+    } else if (sigil === ':') {
+      if (term.length < 1) return null
+      items = EMOJI.filter((e) => e.name.includes(q))
+        .slice(0, 10)
+        .map((e) => ({ key: e.code, label: `:${e.name}:`, insert: `:${e.name}: `, code: e.code }))
+    } else {
+      items = Object.keys(SLASH)
+        .filter((n) => n.startsWith(q))
+        .map((n) => ({ key: n, label: `/${n}`, hint: 'built-in', insert: `/${n} ` }))
+    }
+    if (!items.length) return null
+    return { sigil, start, items: items.slice(0, 10) }
+  }, [value, caret, channels, account])
+}
+
+export function Composer({
+  channel,
+  channels,
+  account,
+  replyTo,
+  onCancelReply,
+  onSend,
+  onEditLast,
+  onOpenPicker,
+}: {
+  channel: Channel
+  channels: Channel[]
+  account: Account
+  replyTo: Message | null
+  onCancelReply: () => void
+  onSend: (text: string) => void
+  onEditLast: () => void
+  onOpenPicker: (at: { x: number; y: number }) => void
+}) {
+  const [value, setValue] = useState('')
+  const [caret, setCaret] = useState(0)
+  const [pick, setPick] = useState(0)
+  const input = useRef<HTMLTextAreaElement>(null)
+  const ac = useAutocomplete(value, caret, channels, account)
+
+  useEffect(() => {
+    if (replyTo) input.current?.focus()
+  }, [replyTo])
+
+  // the composer grows with the message, the way Discord's does
+  useEffect(() => {
+    const el = input.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, 260)}px`
+  }, [value])
+
+  // clamp rather than reset from an effect: the list shrinks as you type
+  const sel = ac ? Math.min(pick, ac.items.length - 1) : 0
+
+  const accept = (s: Suggestion) => {
+    if (!ac) return
+    const next = value.slice(0, ac.start) + s.insert + value.slice(caret)
+    setValue(next)
+    const at = ac.start + s.insert.length
+    requestAnimationFrame(() => {
+      input.current?.setSelectionRange(at, at)
+      setCaret(at)
+    })
+  }
+
+  const submit = () => {
+    const raw = value.trim()
+    if (!raw) return
+    const slash = /^\/(\w+)\s*([\s\S]*)$/.exec(raw)
+    const run = slash && SLASH[slash[1]]
+    onSend(run ? run(slash[2]) : raw)
+    setValue('')
+    setCaret(0)
+  }
+
+  const acts = [
+    { label: 'Gift a Nitro subscription', Icon: GiftIcon, on: () => {} },
+    { label: 'GIF', Icon: GifIcon, on: () => {} },
+    { label: 'Sticker', Icon: StickerIcon, on: () => {} },
+    {
+      label: 'Emoji',
+      Icon: SmileyIcon,
+      on: (e: React.MouseEvent) => {
+        const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+        onOpenPicker({ x: r.right - 360, y: r.top - 440 })
+      },
+    },
+    { label: 'Apps', Icon: AppsIcon, on: () => {} },
+  ]
+
+  return (
+    <div className="composer-wrap">
+      {replyTo ? (
+        <div className="reply-bar">
+          <span>
+            Replying to <b>{account.name}</b>
+          </span>
+          <button onClick={onCancelReply} aria-label="Cancel reply">
+            <CloseIcon />
+          </button>
+        </div>
+      ) : null}
+
+      {ac ? (
+        <div className="autocomplete">
+          <div className="ac-head">
+            {ac.sigil === '#'
+              ? 'CHANNELS'
+              : ac.sigil === '@'
+                ? 'MEMBERS'
+                : ac.sigil === ':'
+                  ? 'EMOJI MATCHING'
+                  : 'BUILT-IN COMMANDS'}
+          </div>
+          {ac.items.map((s, i) => (
+            <button
+              key={s.key}
+              className={'ac-row' + (i === sel ? ' on' : '')}
+              onMouseEnter={() => setPick(i)}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                accept(s)
+              }}
+            >
+              {s.code ? <EmojiGlyph code={s.code} alt={s.label} /> : null}
+              <span className="ac-label">{s.label}</span>
+              {s.hint ? <span className="ac-hint">{s.hint}</span> : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <div className={'composer' + (replyTo ? ' replying' : '')}>
+        <Tooltip label="Upload a File" side="above">
+          <button className="plus" aria-label="Upload a file">
+            <PlusIcon />
+          </button>
+        </Tooltip>
+        <textarea
+          ref={input}
+          rows={1}
+          className="composer-input"
+          value={value}
+          placeholder={`Message #${channel.name}`}
+          aria-label={`Message #${channel.name}`}
+          onChange={(e) => {
+            setValue(e.target.value)
+            setCaret(e.target.selectionStart)
+            setPick(0)
+          }}
+          onKeyUp={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart)}
+          onClick={(e) => setCaret((e.target as HTMLTextAreaElement).selectionStart)}
+          onKeyDown={(e) => {
+            if (ac) {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                setPick((p) => (p + 1) % ac.items.length)
+                return
+              }
+              if (e.key === 'ArrowUp') {
+                e.preventDefault()
+                setPick((p) => (p - 1 + ac.items.length) % ac.items.length)
+                return
+              }
+              if (e.key === 'Tab' || e.key === 'Enter') {
+                e.preventDefault()
+                accept(ac.items[sel])
+                return
+              }
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                setCaret(-1)
+                return
+              }
+            }
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              submit()
+              return
+            }
+            if (e.key === 'ArrowUp' && !value) {
+              e.preventDefault()
+              onEditLast()
+            }
+            if (e.key === 'Escape' && replyTo) onCancelReply()
+          }}
+        />
+        <div className="composer-acts">
+          {acts.map(({ label, Icon, on }) => (
+            <Tooltip key={label} label={label} side="above">
+              <button aria-label={label} onClick={on}>
+                <Icon />
+              </button>
+            </Tooltip>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

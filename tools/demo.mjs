@@ -1,0 +1,53 @@
+import { chromium } from 'playwright'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 743 } })
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(400)
+const say = async (t) => {
+  await p.click('.composer-input')
+  await p.fill('.composer-input', t)
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(90)
+}
+await say('# Formatting')
+await say('**bold**, *italic*, __underline__, ~~strike~~, `inline code`, ||a spoiler||')
+await say('> Discord uses its own dialect, not CommonMark.\n> `__x__` is underline here, not bold.')
+await say('```ts\nconst groupsWith = (prev, m) =>\n  prev?.author === m.author && m.time - prev.time < 7 * 60_000\n```')
+await say('- lists nest\n  - two spaces per level\n- and `1.` renumbers itself')
+await say('-# subtext is the small grey line')
+await say('links: [the docs](https://discord.com) · https://example.com · #general :fire:')
+await say(':joy::fire::100:')
+// react to the code block message
+await p.locator('.group').nth(3).hover()
+await p.locator('.group').nth(3).locator('.msg-actions button').first().click()
+await p.waitForSelector('.picker')
+await p.fill('.picker-search input', 'fire')
+await p.click('.picker-cell')
+await p.waitForTimeout(150)
+await p.locator('.group').nth(3).hover()
+await p.locator('.group').nth(3).locator('.msg-actions button').first().click()
+await p.waitForSelector('.picker')
+await p.fill('.picker-search input', '100')
+await p.click('.picker-cell')
+await p.waitForTimeout(150)
+// reply to it
+await p.locator('.group').nth(3).hover()
+await p.locator('.group').nth(3).locator('[aria-label="Reply"]').click()
+await say('and replies quote the message above')
+await p.mouse.move(760, 200)
+await p.waitForTimeout(400)
+await p.screenshot({ path: process.argv[2] })
+if (process.argv[3]) {
+  await p.keyboard.press('Control+k')
+  await p.waitForTimeout(300)
+  await p.screenshot({ path: process.argv[3] })
+  await p.keyboard.press('Escape')
+}
+if (process.argv[4]) {
+  await p.locator('.group').last().hover()
+  await p.locator('.group').last().locator('.msg-actions button').first().click()
+  await p.waitForSelector('.picker')
+  await p.waitForTimeout(300)
+  await p.screenshot({ path: process.argv[4] })
+}
+await b.close()

@@ -3,6 +3,7 @@ import { statusColor, statusLabel, type Account } from '../data'
 import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
+  CloseIcon,
   ChevronRightIcon,
   GearIcon,
   HeadphonesIcon,
@@ -96,6 +97,8 @@ export function UserArea({
   account,
   muted,
   deafened,
+  voice,
+  onLeaveVoice,
   onMute,
   onDeafen,
   onSettings,
@@ -104,13 +107,27 @@ export function UserArea({
   account: Account
   muted: boolean
   deafened: boolean
+  voice: string | null
+  onLeaveVoice: () => void
   onMute: () => void
   onDeafen: () => void
   onSettings: () => void
   onOpenProfile: () => void
 }) {
   return (
-    <div className="user-card">
+    <div className={'user-card' + (voice ? ' with-voice' : '')}>
+      {voice ? (
+        <div className="voice-strip">
+          <span className="voice-dot" />
+          <span className="voice-meta">
+            <b>Voice Connected</b>
+            <span>{voice}</span>
+          </span>
+          <button className="voice-leave" onClick={onLeaveVoice} aria-label="Disconnect">
+            <CloseIcon />
+          </button>
+        </div>
+      ) : null}
       <button className="id" onClick={onOpenProfile}>
         <Avatar account={account} size={28} />
         <span className="user-meta">

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
-type Side = 'right' | 'below'
+type Side = 'right' | 'below' | 'above'
 
 /**
  * Discord's tooltips: instant, tiny, no spring. Rendered in a portal so the
@@ -28,7 +28,9 @@ export function Tooltip({
           setPos(
             side === 'right'
               ? { x: r.right + 12, y: r.top + r.height / 2 }
-              : { x: r.left + r.width / 2, y: r.bottom + 8 },
+              : side === 'above'
+                ? { x: r.left + r.width / 2, y: r.top - 8 }
+                : { x: r.left + r.width / 2, y: r.bottom + 8 },
           )
         }}
         onMouseLeave={() => setPos(null)}
@@ -38,7 +40,7 @@ export function Tooltip({
       {pos
         ? createPortal(
             <div
-              className={side === 'below' ? 'tip below' : 'tip'}
+              className={'tip' + (side === 'right' ? '' : ` ${side}`)}
               style={{ left: pos.x, top: pos.y }}
             >
               {label}

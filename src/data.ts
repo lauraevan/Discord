@@ -116,11 +116,41 @@ export const makeServer = (name: string, color = '#5865f2'): Server => ({
   ],
 })
 
+/** A reaction is a shortcode plus the people who added it. */
+export type Reaction = { name: string; by: string[] }
+
 export type Message = {
   id: string
   author: string
   time: number
   text: string
+  /** set when the message has been edited, so the client can tag it */
+  editedAt?: number
+  /** id of the message this one replies to */
+  replyTo?: string
+  reactions?: Reaction[]
+  pinned?: boolean
+}
+
+/**
+ * Discord groups consecutive messages from one author, and breaks the group
+ * after about seven minutes.
+ */
+export const GROUP_WINDOW = 7 * 60 * 1000
+
+export const groupsWith = (prev: Message | undefined, m: Message) =>
+  !!prev &&
+  prev.author === m.author &&
+  !m.replyTo &&
+  m.time - prev.time < GROUP_WINDOW
+
+/** Discord's own slash commands that need no server round-trip. */
+export const SLASH: Record<string, (arg: string) => string> = {
+  shrug: (a) => `${a} ¯\\_(ツ)_/¯`.trim(),
+  tableflip: (a) => `${a} (╯°□°）╯︵ ┻━┻`.trim(),
+  unflip: (a) => `${a} ┬─┬ノ( º _ ºノ)`.trim(),
+  me: (a) => `*${a}*`,
+  spoiler: (a) => `||${a}||`,
 }
 
 export const serverColors = [
