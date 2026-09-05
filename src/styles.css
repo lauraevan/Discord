@@ -3358,3 +3358,384 @@ body.streamer .acct-field b,
 body.streamer .invite-row code {
   filter: blur(5px);
 }
+
+/* ==========================================================================
+   Home: DM sidebar, Friends, profile modal
+   ========================================================================== */
+
+.dm-sidebar {
+  width: 247px;
+  flex: 0 0 247px;
+  background: var(--side);
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+
+.dm-search {
+  height: 28px;
+  margin: 8px 10px 10px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+}
+
+.dm-nav {
+  padding: 0 0 6px;
+}
+
+.dm-head {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 10px 10px 2px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.dm-head button {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.dm-head svg {
+  width: 12px;
+  height: 12px;
+}
+
+.dm-empty {
+  padding: 10px 18px;
+  color: var(--muted);
+}
+
+.dm-empty p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.dm-empty span {
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.dm-self {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--rail);
+}
+
+.dm-self b {
+  display: block;
+  font-size: 14px;
+  color: var(--strong);
+}
+
+.dm-self i {
+  font-size: 12px;
+  font-style: normal;
+  color: var(--muted);
+}
+
+.friends-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 16px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
+}
+
+.friends-tab,
+.friends-add {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.friends-tab:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.friends-tab.on {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.friends-add {
+  background: #248046;
+  color: #fff;
+}
+
+.friends-add.on {
+  background: transparent;
+  color: #23a55a;
+}
+
+.friends-main {
+  padding: 16px 30px;
+  overflow-y: auto;
+}
+
+.friends-search {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+}
+
+.friends-search input {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.friends-search svg {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+}
+
+.friends-count {
+  margin: 20px 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.friends-empty {
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: var(--muted);
+}
+
+.friends-empty svg {
+  width: 340px;
+  height: 200px;
+  opacity: 0.9;
+}
+
+.friends-empty p {
+  font-size: 15px;
+}
+
+.add-friend h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--strong);
+  margin-bottom: 8px;
+}
+
+.add-friend p {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.add-friend-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+}
+
+.add-friend-box input {
+  flex: 1;
+  height: 34px;
+  padding: 0 8px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.add-friend-box .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-friend-note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #f0b232;
+}
+
+.add-friend-art {
+  margin-top: 60px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-friend-art svg {
+  width: 300px;
+  height: 180px;
+  opacity: 0.6;
+}
+
+.active-now {
+  width: 340px;
+  flex: 0 0 340px;
+  padding: 16px;
+  border-left: 1px solid var(--border);
+}
+
+.active-now h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--strong);
+  margin-bottom: 12px;
+}
+
+.active-empty {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.active-empty b {
+  display: block;
+  font-size: 15px;
+  color: var(--strong);
+  margin-bottom: 6px;
+}
+
+.active-empty span {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+/* --- profile modal ------------------------------------------------------ */
+
+.profile-modal {
+  position: relative;
+  width: 600px;
+  max-width: calc(100vw - 32px);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.55);
+}
+
+.profile-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 2;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.profile-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.profile-banner-lg {
+  height: 120px;
+}
+
+.profile-avatar-lg {
+  display: block;
+  margin: -46px 0 0 22px;
+  width: 104px;
+  border: 6px solid var(--card);
+  border-radius: 50%;
+  line-height: 0;
+}
+
+.profile-more {
+  position: absolute;
+  right: 16px;
+  top: 132px;
+  color: var(--muted);
+}
+
+.profile-card {
+  padding: 8px 22px 22px;
+}
+
+.profile-names b {
+  display: block;
+  font-size: 22px;
+  color: var(--strong);
+}
+
+.profile-names span {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.profile-names i {
+  font-size: 13px;
+  font-style: normal;
+  color: var(--muted);
+  margin-left: 8px;
+}
+
+.profile-section {
+  margin-top: 16px;
+}
+
+.profile-section h4 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--strong);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.profile-section p {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.profile-roles {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.profile-note,
+.profile-msg input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 4px;
+  background: var(--rail);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.profile-msg {
+  position: relative;
+  margin-top: 16px;
+}
+
+.profile-msg svg {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+}

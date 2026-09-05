@@ -4,6 +4,7 @@ import { ChatFeed, ChatHeader } from './components/Chat'
 import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
 import { EmojiPicker } from './components/EmojiPicker'
+import { FriendsPage, HomeSidebar, ProfileModal } from './components/Home'
 import { MemberList } from './components/MemberList'
 import {
   ChannelModal,
@@ -96,6 +97,8 @@ export default function App() {
   const [membersOpen, setMembersOpen] = useState(false)
   const [pinsOpen, setPinsOpen] = useState(false)
   const [userSettings, setUserSettings] = useState(false)
+  const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
+  const [profileModal, setProfileModal] = useState(false)
   const [serverSettings, setServerSettings] = useState(false)
   const [query, setQuery] = useState('')
 
@@ -355,9 +358,9 @@ export default function App() {
     <div className="app">
       <span style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: SPRITE }} />
       <TitleBar
-        title={server?.name ?? 'Discord'}
-        initials={server?.initials ?? 'D'}
-        color={server?.color ?? '#5865f2'}
+        title={activeServer === null ? 'Friends' : (server?.name ?? 'Discord')}
+        initials={activeServer === null ? '' : (server?.initials ?? 'D')}
+        color={activeServer === null ? '#5865f2' : (server?.color ?? '#5865f2')}
       />
       <div className="app-body">
         <div className="left-col">
@@ -369,10 +372,12 @@ export default function App() {
               const s = servers.find((x) => x.id === id)
               setActiveChannel(s?.channels.find((c) => c.kind !== 'voice')?.id ?? '')
             }}
-            onHome={() => setActiveServer(servers[0]?.id ?? null)}
+            onHome={() => setActiveServer(null)}
             onCreate={() => setCreatingServer(true)}
           />
-          {server ? (
+          {activeServer === null ? (
+            <HomeSidebar tab={friendsTab} onTab={setFriendsTab} />
+          ) : server ? (
             <ChannelSidebar
               server={server}
               activeChannel={channel?.id ?? ''}
@@ -449,6 +454,9 @@ export default function App() {
           ) : null}
         </div>
 
+        {activeServer === null ? (
+          <FriendsPage tab={friendsTab} onTab={setFriendsTab} />
+        ) : (
         <main className="chat">
           {server && channel ? (
             <>
@@ -517,12 +525,13 @@ export default function App() {
                     onClose={() => setQuery('')}
                   />
                 ) : membersOpen ? (
-                  <MemberList account={account} onOpenProfile={() => setPopout(true)} />
+                  <MemberList account={account} onOpenProfile={() => setProfileModal(true)} />
                 ) : null}
               </div>
             </>
           ) : null}
         </main>
+        )}
 
         {themePanel ? (
           <ThemePanel
@@ -532,6 +541,14 @@ export default function App() {
           />
         ) : null}
       </div>
+
+      {profileModal ? (
+        <ProfileModal
+          account={account}
+          roles={server?.roles ?? []}
+          onClose={() => setProfileModal(false)}
+        />
+      ) : null}
 
       {userSettings ? (
         <UserSettings

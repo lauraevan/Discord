@@ -78,12 +78,46 @@ export function ProfileBanner() {
 }
 
 /** Empty-state artwork used where a channel has no messages yet. */
+/**
+ * The empty-state mascot.
+ *
+ * Discord's Wumpus is its own artwork, so this is an original drawing in the
+ * same spirit — a rounded, legless creature with a pale body — rather than a
+ * copy of theirs.
+ */
 export function WumpusMark({ color = 'currentColor' }: { color?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className="art" aria-hidden="true">
+    <svg viewBox="0 0 340 200" fill="none" aria-hidden="true">
+      <ellipse cx="170" cy="182" rx="96" ry="10" fill={color} opacity="0.12" />
+      {/* body */}
       <path
+        d="M108 178c-14 0-24-11-22-25l6-44c5-38 36-66 74-66h8c38 0 69 28 74 66l6 44c2 14-8 25-22 25H108Z"
         fill={color}
-        d="M10.99 3.16A1 1 0 1 0 9 2.84L8.15 8H4a1 1 0 0 0 0 2h3.82l-.67 4H3a1 1 0 1 0 0 2h3.82l-.8 4.84a1 1 0 0 0 1.97.32L8.85 16h3.97l-.8 4.84a1 1 0 0 0 1.97.32l.86-5.16H19a1 1 0 1 0 0-2h-4.82l.67-4H19a1 1 0 1 0 0-2h-3.82l.8-4.84a1 1 0 1 0-1.97-.32L13.15 8H9.18l.8-4.84ZM13.15 14l.67-4H9.85l-.67 4h3.97Z"
+        opacity="0.35"
+      />
+      {/* belly */}
+      <path
+        d="M134 178c-9 0-16-8-14-17l4-26c3-21 20-36 41-36s38 15 41 36l4 26c2 9-5 17-14 17h-62Z"
+        fill={color}
+        opacity="0.18"
+      />
+      {/* arms */}
+      <path
+        d="M92 118c-11 3-18 13-16 24 2 10 12 16 22 13l10-3-16-34Zm156 0 16 34 10 3c10 3 20-3 22-13 2-11-5-21-16-24Z"
+        fill={color}
+        opacity="0.35"
+      />
+      {/* eyes */}
+      <ellipse cx="142" cy="92" rx="9" ry="12" fill={color} opacity="0.75" />
+      <ellipse cx="198" cy="92" rx="9" ry="12" fill={color} opacity="0.75" />
+      {/* mouth */}
+      <path
+        d="M152 122c5 7 12 11 18 11s13-4 18-11"
+        stroke={color}
+        strokeOpacity="0.6"
+        strokeWidth="5"
+        strokeLinecap="round"
+        fill="none"
       />
     </svg>
   )
