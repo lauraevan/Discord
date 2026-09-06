@@ -590,15 +590,17 @@ textarea {
 
 .user-meta .name {
   display: block;
-  font-size: 12.27px;
-  font-weight: 600;
+  position: relative;
+  top: 1px;
+  font-size: 12.85px;
+  font-weight: 550;
   color: var(--strong);
   line-height: 1.44;
 }
 
 .user-meta .state {
   display: block;
-  font-size: 9.86px;
+  font-size: 10.2px;
   color: var(--muted);
   line-height: 1.4;
   margin-top: 2px;
@@ -685,7 +687,9 @@ textarea {
   overflow: hidden;
   background: var(--pop-card);
   color: var(--pop-label);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  /* the reference's rail beside the popout is a single unit darker than
+     bare rail, so the drop shadow is far tighter than it looks */
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.09);
   z-index: 20;
 }
 
