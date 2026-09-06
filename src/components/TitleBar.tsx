@@ -1,4 +1,4 @@
-import { ExpandIcon, HelpIcon, InboxIcon } from '../ui/Icons'
+import { HelpIcon, InboxIcon, ToolsIcon } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
 export function TitleBar({
@@ -23,10 +23,10 @@ export function TitleBar({
           <button aria-label="Inbox" onClick={onInbox}><InboxIcon size={15} /></button>
         </Tooltip>
         <Tooltip label="Help" side="below">
-          <button aria-label="Help"><HelpIcon size={15} /></button>
+          <button aria-label="Help" className="help"><HelpIcon size={16.1} /></button>
         </Tooltip>
-        <Tooltip label="Toggle Full Screen" side="below">
-          <button aria-label="Toggle full screen"><ExpandIcon size={14} /></button>
+        <Tooltip label="Support Tools" side="below">
+          <button aria-label="Support tools"><ToolsIcon size={20.2} /></button>
         </Tooltip>
       </div>
     </header>

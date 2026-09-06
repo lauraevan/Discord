@@ -401,12 +401,44 @@ export const ExpandIcon = (p: P) => (
   </Svg>
 )
 
+/**
+ * Help: a filled disc with the question mark knocked out, so the bar colour
+ * shows through it. The reference's title bar draws it green.
+ */
 export const HelpIcon = solid(
   'M12 2.3a9.7 9.7 0 1 0 0 19.4 9.7 9.7 0 0 0 0-19.4Zm0 3.9a3.7 3.7 0 0 1 3.7 3.7c0 1.5-.8 2.35-1.9 3.05-.6.4-.85.65-.85 1.05a.95.95 0 0 1-1.9 0c0-1.4.83-2.2 1.72-2.78.75-.5 1.03-.78 1.03-1.32a1.8 1.8 0 1 0-3.6 0 .95.95 0 0 1-1.9 0A3.7 3.7 0 0 1 12 6.2Zm0 10.1a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5Z',
 )
 
+/**
+ * The crossed screwdriver and wrench the reference's title bar carries as its
+ * third action, where the old build guessed a full-screen toggle.
+ */
+export function ToolsIcon(p: P) {
+  return (
+    <Svg {...p}>
+      <g fill="currentColor">
+        {/* screwdriver, top-left to bottom-right */}
+        <g transform="rotate(45 12 12)">
+          <rect x="10.75" y="9.2" width="2.5" height="11.4" rx="0.5" />
+          <rect x="9.5" y="3.4" width="5" height="6.2" rx="1.7" />
+        </g>
+        {/* wrench, bottom-left to top-right, with an open ring head */}
+        <g transform="rotate(-45 12 12)">
+          <rect x="10.75" y="8.6" width="2.5" height="12" rx="0.5" />
+          <path
+            fillRule="evenodd"
+            d="M12 2.6a4.1 4.1 0 1 1 0 8.2 4.1 4.1 0 0 1 0-8.2Zm0 2.15a1.95 1.95 0 1 0 0 3.9 1.95 1.95 0 0 0 0-3.9Z"
+          />
+        </g>
+      </g>
+    </Svg>
+  )
+}
+
+/** Inbox: a rounded square with the tray notched out of its lower half. */
 export const InboxIcon = solid(
-  'M5.4 3h13.2a2.4 2.4 0 0 1 2.35 1.9l1.5 7.1a2.4 2.4 0 0 1 .05.5v5.1a2.4 2.4 0 0 1-2.4 2.4H3.9a2.4 2.4 0 0 1-2.4-2.4v-5.1c0-.17.02-.34.05-.5l1.5-7.1A2.4 2.4 0 0 1 5.4 3Zm0 2.4-1.27 6h3.4a1.2 1.2 0 0 1 1.1.73l.63 1.47h5.48l.63-1.47a1.2 1.2 0 0 1 1.1-.73h3.4l-1.27-6H5.4Z',
+  'M7 1.6h10a4.4 4.4 0 0 1 4.4 4.4v12a4.4 4.4 0 0 1-4.4 4.4H7a4.4 4.4 0 0 1-4.4-4.4V6A4.4 4.4 0 0 1 7 1.6Zm0 2.4A2 2 0 0 0 5 6v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H7Z' +
+    'M5 12.8h3.5a1.2 1.2 0 0 1 1.07.66l.55 1.1a1.2 1.2 0 0 0 1.07.66h1.62a1.2 1.2 0 0 0 1.07-.66l.55-1.1a1.2 1.2 0 0 1 1.07-.66H19V18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-5.2Z',
 )
 
 export const MoreIcon = solid(

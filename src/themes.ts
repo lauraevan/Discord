@@ -29,15 +29,15 @@ export type Theme = { id: string; name: string; swatch: string; tokens: Tokens }
 const dark: Tokens = {
   rail: '#121214',
   side: '#121214',
-  chat: '#1a191e',
+  chat: '#1a1a1e',
   card: '#222327',
   composer: '#222327',
-  selected: '#2c2b30',
-  hover: '#1e1d22',
+  selected: '#2c2c30',
+  hover: '#1e1e22',
   text: '#e4e4e8',
   muted: '#85858a',
   strong: '#fdfdfe',
-  border: '#232228',
+  border: '#232328',
   titlebar: '#121214',
   scheme: 'dark',
 }
@@ -93,7 +93,7 @@ const light: Tokens = {
 export const defaultThemes: Theme[] = [
   { id: 'light', name: 'Light', swatch: '#ffffff', tokens: light },
   { id: 'ash', name: 'Ash', swatch: '#313338', tokens: ash },
-  { id: 'dark', name: 'Dark', swatch: '#1a191e', tokens: dark },
+  { id: 'dark', name: 'Dark', swatch: '#1a1a1e', tokens: dark },
   { id: 'onyx', name: 'Onyx', swatch: '#000000', tokens: onyx },
 ]
 
