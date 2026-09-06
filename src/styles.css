@@ -782,11 +782,12 @@ textarea {
   line-height: 1;
 }
 
-/* twelve 14px badges on an 18px pitch, matching the reference row */
+/* twelve 14px badges: the reference's run puts the pitch at 17.82, not the 18
+   an even 4px gap gives, which drifts three pixels across the row */
 .p-badges {
   display: flex;
-  gap: 4px;
-  margin-top: 5px;
+  gap: 3.82px;
+  margin-top: 4px;
   height: 14px;
 }
 
@@ -799,7 +800,7 @@ textarea {
 .p-bio {
   font-size: 11.19px;
   color: var(--pop-bio);
-  margin-top: 11px;
+  margin-top: 12px;
   line-height: 1;
 }
 
