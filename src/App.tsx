@@ -14,6 +14,7 @@ import {
   CreateServerModal,
   EditProfileModal,
   StatusMenu,
+  SwitchAccounts,
 } from './components/Modals'
 import { Pins } from './components/Pins'
 import { CustomStatus } from './components/CustomStatus'
@@ -92,6 +93,7 @@ export default function App() {
   >(null)
   const [editingProfile, setEditingProfile] = useState(false)
   const [statusMenu, setStatusMenu] = useState(false)
+  const [switchAccounts, setSwitchAccounts] = useState(false)
   const [popout, setPopout] = useState(false)
   const [themePanel, setThemePanel] = useState(false)
 
@@ -609,10 +611,7 @@ export default function App() {
                 setEditingProfile(true)
               }}
               onStatus={() => setStatusMenu(true)}
-              onCustomStatus={() => {
-                setPopout(false)
-                setCustomStatus(true)
-              }}
+              onSwitch={() => setSwitchAccounts(true)}
               onClose={() => setPopout(false)}
             />
           ) : null}
@@ -670,6 +669,7 @@ export default function App() {
                   <>
                   <ChatFeed
                     channel={channel}
+                    server={server ?? null}
                     messages={thread}
                     all={thread}
                     account={account}
@@ -678,6 +678,10 @@ export default function App() {
                     editingId={editingId}
                     onStartEdit={setEditingId}
                     onEditChannel={() => setChannelModal({ mode: 'edit', id: channel.id })}
+                    onOnboard={(what) => {
+                      if (what === 'apps') setUserSettings(true)
+                      else setServerSettings(true)
+                    }}
                     onEdit={editMessage}
                     onReply={setReplyTo}
                     onReact={react}
@@ -866,9 +870,17 @@ export default function App() {
           }}
         />
       ) : null}
+      {switchAccounts ? (
+        <SwitchAccounts account={account} onClose={() => setSwitchAccounts(false)} />
+      ) : null}
       {statusMenu ? (
         <StatusMenu
           account={account}
+          onCustomStatus={() => {
+            setStatusMenu(false)
+            setPopout(false)
+            setCustomStatus(true)
+          }}
           onClose={() => setStatusMenu(false)}
           onPick={(s: Status) => {
             setAccount((a) => ({ ...a, status: s }))

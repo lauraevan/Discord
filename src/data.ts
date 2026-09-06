@@ -187,8 +187,9 @@ export const makeServer = (name: string, color = '#5865f2'): Server => ({
     { id: 'text', name: 'Text Channels' },
     { id: 'voice', name: 'Voice Channels' },
   ],
+  // Discord gives a new server exactly these two, which is also what keeps the
+  // welcome checklist up until you build the channel list out
   channels: [
-    { id: uid('ch'), name: 'ok-ui-test', kind: 'text', categoryId: null },
     { id: uid('ch'), name: 'general', kind: 'text', categoryId: 'text' },
     { id: uid('ch'), name: 'General', kind: 'voice', categoryId: 'voice' },
   ],

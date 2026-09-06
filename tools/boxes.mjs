@@ -8,20 +8,24 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 
-const SEED = fs.readFileSync('tools/seed.js', 'utf8')
-const sels = process.argv.slice(2)
+const seedArg = process.argv.find((a) => a.endsWith('.js'))
+const SEED = fs.readFileSync(seedArg ?? 'tools/seed.js', 'utf8')
+const idx = seedArg ? 0 : 1
+const dims = process.argv.find((a) => /^\d+x\d+$/.test(a))
+const [VW, VH] = dims ? dims.split('x').map(Number) : [1558, 743]
+const sels = process.argv.slice(2).filter((a) => a !== seedArg && a !== dims)
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
-const p = await b.newPage({ viewport: { width: 1558, height: 743 }, deviceScaleFactor: 1 })
+const p = await b.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 })
 await p.addInitScript(SEED)
 await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(700)
-await p.evaluate(() => {
-  ;[...document.querySelectorAll('.server-tile.srv')][1]?.dispatchEvent(
+await p.evaluate((idx) => {
+  ;[...document.querySelectorAll('.server-tile.srv')][idx]?.dispatchEvent(
     new MouseEvent('click', { bubbles: true }),
   )
-})
+}, idx)
 await p.waitForTimeout(300)
-await p.evaluate(() => document.querySelector(".user-card .id")?.click())
+if (!seedArg) await p.evaluate(() => document.querySelector('.user-card .id')?.click())
 await p.waitForTimeout(400)
 const out = await p.evaluate((sels) => {
   const rows = []

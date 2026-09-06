@@ -11,6 +11,7 @@ import {
 import {
   ForumIcon,
   HashIcon,
+  SmileyIcon,
   MegaphoneIcon,
   SpeakerIcon,
   StageIcon,
@@ -246,10 +247,12 @@ export function EditProfileModal({
 export function StatusMenu({
   account,
   onPick,
+  onCustomStatus,
   onClose,
 }: {
   account: Account
   onPick: (s: Status) => void
+  onCustomStatus: () => void
   onClose: () => void
 }) {
   const list: Status[] = ['online', 'idle', 'dnd', 'invisible']
@@ -267,6 +270,48 @@ export function StatusMenu({
             {statusLabel[s]}
           </button>
         ))}
+        {/* Discord keeps custom status inside this submenu, not as a row of
+            its own on the popout */}
+        <div className="status-sep" />
+        <button className="status-opt" onClick={onCustomStatus}>
+          <SmileyIcon />
+          {account.customStatus ? 'Edit Custom Status' : 'Set Custom Status'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Switch Accounts.
+ *
+ * Discord lists the accounts you are signed in to and offers to add another.
+ * There is one account here and no login to add a second with, so the panel
+ * shows the real one and says plainly why the other row does nothing.
+ */
+export function SwitchAccounts({
+  account,
+  onClose,
+}: {
+  account: Account
+  onClose: () => void
+}) {
+  useEscape(onClose)
+  return (
+    <div className="overlay soft" onMouseDown={onClose}>
+      <div className="status-menu accounts" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="accounts-head">Accounts</div>
+        <button className="status-opt on">
+          <span className="p-dot" style={{ background: statusColor[account.status] }} />
+          <span className="accounts-name">
+            {account.name}
+            <span>{account.handle}</span>
+          </span>
+        </button>
+        <div className="status-sep" />
+        <button className="status-opt" disabled title="Adding an account needs a Discord login">
+          Add an Account
+        </button>
       </div>
     </div>
   )

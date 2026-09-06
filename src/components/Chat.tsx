@@ -7,8 +7,10 @@ import {
   type Message,
   type Poll,
   type Reaction,
+  type Server,
 } from '../data'
 import { byName } from '../emoji'
+import { ServerOnboarding } from './Onboarding'
 import { EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
 import {
   BellIcon,
@@ -153,13 +155,13 @@ const time = (t: number) =>
 
 const dayKey = (t: number) => new Date(t).toDateString()
 
+/** The divider carries the full date even for today, as the reference shows. */
 function dayLabel(t: number) {
-  const d = new Date(t)
-  const today = new Date()
-  const yday = new Date(today.getTime() - 864e5)
-  if (d.toDateString() === today.toDateString()) return 'Today'
-  if (d.toDateString() === yday.toDateString()) return 'Yesterday'
-  return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
+  return new Date(t).toLocaleDateString(undefined, {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 /** Reply previews are plain text in the client — strip the syntax. */
@@ -171,12 +173,13 @@ function preview(text: string) {
     .trim()
 }
 
-/** Discord's own wording: "Today at 4:32 PM". */
+/**
+ * The inline stamp is the time alone — the date lives on the divider above it,
+ * which is how the reference renders a message. The full date stays available
+ * on the element's title.
+ */
 function stamp(t: number) {
-  const label = dayLabel(t)
-  return label === 'Today' || label === 'Yesterday'
-    ? `${label} at ${time(t)}`
-    : `${new Date(t).toLocaleDateString()} ${time(t)}`
+  return time(t)
 }
 
 /* -------------------------------------------------------------- reactions */
@@ -271,6 +274,7 @@ const ArrowJoin = () => (
 
 export function ChatFeed({
   channel,
+  server,
   messages,
   all,
   account,
@@ -286,8 +290,10 @@ export function ChatFeed({
   onOpenPicker,
   onContext,
   onVote,
+  onOnboard,
 }: {
   channel: Channel
+  server: Server | null
   messages: Message[]
   all: Message[]
   account: Account
@@ -303,9 +309,15 @@ export function ChatFeed({
   onOpenPicker: (id: string, at: { x: number; y: number }) => void
   onContext: (m: Message, at: { x: number; y: number }) => void
   onVote: (id: string, answer: number) => void
+  onOnboard: (what: 'invite' | 'icon' | 'boosts' | 'apps') => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
+
+  // Discord keeps the checklist up on a server that is still as it was created
+  // — it stays after the first message, as the reference shows — and drops it
+  // once the channel list has been built out.
+  const showChecklist = !!server && server.channels.length <= 2
 
   useLayoutEffect(() => {
     const el = ref.current
@@ -325,17 +337,30 @@ export function ChatFeed({
   let lastDay = ''
   return (
     <div className="feed" ref={ref}>
-      <div className="intro">
-        <span className="intro-glyph">
-          <Glyph kind={channel.kind} />
-        </span>
-        <h3>Welcome to #{channel.name}!</h3>
-        <p>This is the start of the #{channel.name} channel.</p>
-        <button className="intro-btn" onClick={onEditChannel}>
-          <PencilIcon />
-          <span>Edit Channel</span>
-        </button>
-      </div>
+      {/* a brand new server shows the checklist in place of the channel intro,
+          the way Discord does until the server has been used */}
+      {server && showChecklist ? (
+        <ServerOnboarding
+          server={server}
+          hasMessages={messages.length > 0}
+          onInvite={() => onOnboard('invite')}
+          onIcon={() => onOnboard('icon')}
+          onBoosts={() => onOnboard('boosts')}
+          onApps={() => onOnboard('apps')}
+        />
+      ) : (
+        <div className="intro">
+          <span className="intro-glyph">
+            <Glyph kind={channel.kind} />
+          </span>
+          <h3>Welcome to #{channel.name}!</h3>
+          <p>This is the start of the #{channel.name} channel.</p>
+          <button className="intro-btn" onClick={onEditChannel}>
+            <PencilIcon />
+            <span>Edit Channel</span>
+          </button>
+        </div>
+      )}
 
       {messages.map((m, idx) => {
         const prev = messages[idx - 1]

@@ -36,13 +36,13 @@ export function ProfilePopout({
   account,
   onEdit,
   onStatus,
-  onCustomStatus,
+  onSwitch,
   onClose,
 }: {
   account: Account
   onEdit: () => void
   onStatus: () => void
-  onCustomStatus: () => void
+  onSwitch: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -102,7 +102,7 @@ export function ProfilePopout({
           </button>
         </div>
         <div className="p-group">
-          <button className="p-btn" onClick={onCustomStatus}>
+          <button className="p-btn" onClick={onSwitch}>
             <SwitchAccountsIcon />
             <span>Switch Accounts</span>
             <ChevronRightIcon className="p-caret" />

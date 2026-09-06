@@ -12,6 +12,12 @@ const step = async (label, fn) => {
 }
 const say = async (t) => { await p.click('.composer-input'); await p.fill('.composer-input', t); await p.press('.composer-input','Enter'); await p.waitForTimeout(80) }
 
+// the checklist is up while the server is still as it was created; the tests
+// below add channels, which is what retires it
+await step('server checklist shows on a fresh server', async () => {
+  const n = await p.locator('.onboard-step').count()
+  if (n !== 6) throw new Error('expected 6 steps, got ' + n)
+})
 await step('user settings opens', async () => {
   await p.click('[aria-label="User settings"]')
   await p.waitForSelector('.settings-layer')
@@ -95,13 +101,22 @@ await step('channel context menu has mute submenu', async () => {
   await p.waitForSelector('.ctx-sub')
   if (!(await p.locator('.ctx-sub .ctx-item:has-text("For 15 Minutes")').count())) throw new Error('no durations')
 })
+// custom status lives inside the status submenu, where Discord keeps it
 await step('custom status', async () => {
   await p.click('.user-card .id')
-  await p.click('.p-btn:has-text("Set Custom Status")')
+  await p.click('.p-btn:has-text("Online")')
+  await p.click('.status-opt:has-text("Set Custom Status")')
   await p.waitForSelector('.status-modal')
   await p.fill('[aria-label="Custom status"]', 'building discord')
   await p.click('.modal-foot .btn-primary')
   await p.waitForTimeout(150)
+})
+await step('switch accounts panel', async () => {
+  await p.click('.user-card .id')
+  await p.click('.p-btn:has-text("Switch Accounts")')
+  await p.waitForSelector('.accounts')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(120)
 })
 await step('search filters parse', async () => {
   await say('needle in here')
