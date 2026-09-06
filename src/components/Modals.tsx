@@ -316,3 +316,25 @@ export function SwitchAccounts({
     </div>
   )
 }
+
+/**
+ * Use Apps.
+ *
+ * Discord lists the apps installed on the server and links out to the App
+ * Directory. Nothing is installed here, and nothing could be — an app is a
+ * program on Discord's side — so the panel shows that empty state honestly.
+ */
+export function AppsPanel({ onClose }: { onClose: () => void }) {
+  useEscape(onClose)
+  return (
+    <div className="overlay soft" onMouseDown={onClose}>
+      <div className="status-menu apps-panel" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="accounts-head">Apps</div>
+        <p className="apps-empty">
+          No apps are installed on this server. Apps run on Discord&rsquo;s side, so a page cannot
+          bring its own.
+        </p>
+      </div>
+    </div>
+  )
+}

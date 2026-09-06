@@ -22,6 +22,7 @@ export const K = {
   account: `${PREFIX}account`,
   reads: `${PREFIX}reads`,
   prefs: `${PREFIX}prefs`,
+  scheduled: `${PREFIX}scheduled`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -63,6 +64,19 @@ export function isAccount(v: unknown): v is Account {
 }
 
 export const isRecord = (v: unknown): v is Record<string, unknown> => isObj(v)
+
+/** Queued Schedule Message sends, validated the same way as everything else. */
+export function isScheduled(
+  v: unknown,
+): v is { id: string; key: string; text: string; at: number }[] {
+  return (
+    Array.isArray(v) &&
+    v.every(
+      (s) =>
+        isObj(s) && isStr(s.id) && isStr(s.key) && isStr(s.text) && typeof s.at === 'number',
+    )
+  )
+}
 
 export function isMessages(v: unknown): v is Record<string, Message[]> {
   return (

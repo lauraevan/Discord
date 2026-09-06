@@ -15,6 +15,7 @@ import {
   EditProfileModal,
   StatusMenu,
   SwitchAccounts,
+  AppsPanel,
 } from './components/Modals'
 import { Pins } from './components/Pins'
 import { CustomStatus } from './components/CustomStatus'
@@ -47,6 +48,7 @@ import { matches, parseQuery } from './search'
 import {
   isAccount,
   isMessages,
+  isScheduled,
   isRecord,
   isServers,
   isThemeId,
@@ -92,6 +94,10 @@ export default function App() {
     { mode: 'create'; categoryId: string | null } | { mode: 'edit'; id: string } | null
   >(null)
   const [editingProfile, setEditingProfile] = useState(false)
+  const [scheduled, setScheduled] = useState<
+    { id: string; key: string; text: string; at: number }[]
+  >(() => load(K.scheduled, [], isScheduled))
+  const [appsPanel, setAppsPanel] = useState(false)
   const [statusMenu, setStatusMenu] = useState(false)
   const [switchAccounts, setSwitchAccounts] = useState(false)
   const [popout, setPopout] = useState(false)
@@ -126,6 +132,7 @@ export default function App() {
   useEffect(() => save(K.messages, messages), [messages])
   useEffect(() => save(K.reads, lastRead), [lastRead])
   useEffect(() => save(K.prefs, prefs), [prefs])
+  useEffect(() => save(K.scheduled, scheduled), [scheduled])
 
   // the appearance pane drives real CSS variables, not a mock preview
   useEffect(() => {
@@ -259,6 +266,40 @@ export default function App() {
     patchThread((list) => [...list, m])
     setReplyTo(null)
   }
+
+  /**
+   * Schedule Message.
+   *
+   * Discord queues these on its servers; a page has nowhere to keep them but
+   * the browser, so they are stored locally and delivered on the next tick
+   * the app is open — including straight after a reload, if the time passed
+   * while it was shut.
+   */
+  const scheduleSend = (text: string, at: number) => {
+    if (!key || !text) return
+    setScheduled((q) => [...q, { id: uid('sch'), key, text, at }])
+  }
+
+  useEffect(() => {
+    if (!scheduled.length) return
+    const flush = () => {
+      const now = Date.now()
+      const due = scheduled.filter((s) => s.at <= now)
+      if (!due.length) return
+      setMessages((all) => {
+        const next = { ...all }
+        for (const s of due) {
+          const m: Message = { id: uid('m'), author: account.handle, time: s.at, text: s.text }
+          next[s.key] = [...(next[s.key] ?? []), m]
+        }
+        return next
+      })
+      setScheduled((q) => q.filter((s) => s.at > now))
+    }
+    flush()
+    const t = setInterval(flush, 15_000)
+    return () => clearInterval(t)
+  }, [scheduled, account.handle])
 
   const editMessage = (id: string, text: string) =>
     patchThread((list) =>
@@ -703,6 +744,12 @@ export default function App() {
                     }}
                     onOpenPicker={(at) => setPicker({ target: 'composer', at })}
                     onPoll={() => setPollModal(true)}
+                    onThread={() => {
+                      const last = [...thread].reverse().find((m) => !m.type || m.type === 'DEFAULT')
+                      if (last) createThread(last, 'thread')
+                    }}
+                    onApps={() => setAppsPanel(true)}
+                    onSchedule={scheduleSend}
                     onAttach={(a) =>
                       patchThread((list) => [
                         ...list,
@@ -870,6 +917,7 @@ export default function App() {
           }}
         />
       ) : null}
+      {appsPanel ? <AppsPanel onClose={() => setAppsPanel(false)} /> : null}
       {switchAccounts ? (
         <SwitchAccounts account={account} onClose={() => setSwitchAccounts(false)} />
       ) : null}

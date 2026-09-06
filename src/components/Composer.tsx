@@ -4,12 +4,17 @@ import { EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
 import {
   AppsIcon,
+  ChevronRightIcon,
   CloseIcon,
   GifIcon,
   GiftIcon,
   PlusIcon,
+  PollBarsIcon,
+  SchedulePlusIcon,
   SmileyIcon,
   StickerIcon,
+  ThreadPlusIcon,
+  UploadFileIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
@@ -51,6 +56,30 @@ function useAutocomplete(value: string, caret: number, channels: Channel[], acco
   }, [value, caret, channels, account])
 }
 
+/**
+ * The times Discord's Schedule Message submenu offers. Delivery here happens
+ * while the app is open — there is no server to hold a queued message.
+ */
+const SCHEDULE_OPTIONS: [string, () => number][] = [
+  ['Tomorrow morning', () => atClock(1, 9)],
+  ['Tomorrow afternoon', () => atClock(1, 15)],
+  ['Next Monday', () => nextMonday(9)],
+]
+
+function atClock(daysAhead: number, hour: number) {
+  const d = new Date()
+  d.setDate(d.getDate() + daysAhead)
+  d.setHours(hour, 0, 0, 0)
+  return d.getTime()
+}
+
+function nextMonday(hour: number) {
+  const d = new Date()
+  d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7))
+  d.setHours(hour, 0, 0, 0)
+  return d.getTime()
+}
+
 export function Composer({
   channel,
   channels,
@@ -61,6 +90,9 @@ export function Composer({
   onEditLast,
   onOpenPicker,
   onPoll,
+  onThread,
+  onApps,
+  onSchedule,
   onAttach,
 }: {
   channel: Channel
@@ -72,12 +104,16 @@ export function Composer({
   onEditLast: () => void
   onOpenPicker: (at: { x: number; y: number }) => void
   onPoll: () => void
+  onThread: () => void
+  onApps: () => void
+  onSchedule: (text: string, at: number) => void
   onAttach: (a: Attachment) => void
 }) {
   const [value, setValue] = useState('')
   const [caret, setCaret] = useState(0)
   const [pick, setPick] = useState(0)
   const [plusOpen, setPlusOpen] = useState(false)
+  const [schedOpen, setSchedOpen] = useState(false)
   const input = useRef<HTMLTextAreaElement>(null)
   const file = useRef<HTMLInputElement>(null)
 
@@ -187,13 +223,24 @@ export function Composer({
         <>
           <div className="plus-scrim" onMouseDown={() => setPlusOpen(false)} />
           <div className="plus-menu">
+            {/* the five items Discord's plus menu carries, in its order */}
             <button
               onClick={() => {
                 file.current?.click()
                 setPlusOpen(false)
               }}
             >
+              <UploadFileIcon />
               Upload a File
+            </button>
+            <button
+              onClick={() => {
+                onThread()
+                setPlusOpen(false)
+              }}
+            >
+              <ThreadPlusIcon />
+              Create Thread
             </button>
             <button
               onClick={() => {
@@ -201,14 +248,48 @@ export function Composer({
                 setPlusOpen(false)
               }}
             >
+              <PollBarsIcon />
               Create Poll
             </button>
-            <button disabled title="Voice messages need a microphone and a file host">
-              Send a Voice Message
-            </button>
-            <button disabled title="Apps run on Discord's servers">
+            <button
+              onClick={() => {
+                onApps()
+                setPlusOpen(false)
+              }}
+            >
+              <AppsIcon />
               Use Apps
             </button>
+            <div
+              className="plus-wrap"
+              onMouseEnter={() => setSchedOpen(true)}
+              onMouseLeave={() => setSchedOpen(false)}
+            >
+              <button aria-haspopup="menu">
+                <SchedulePlusIcon />
+                Schedule Message
+                <ChevronRightIcon className="plus-caret" />
+              </button>
+              {schedOpen ? (
+                <div className="plus-menu plus-sub" role="menu">
+                  {SCHEDULE_OPTIONS.map(([label, at]) => (
+                    <button
+                      key={label}
+                      disabled={!value.trim()}
+                      title={value.trim() ? 'Sends while the app is open' : 'Type a message first'}
+                      onClick={() => {
+                        onSchedule(value.trim(), at())
+                        setValue('')
+                        setPlusOpen(false)
+                        setSchedOpen(false)
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
         </>
       ) : null}

@@ -555,3 +555,64 @@ export const JumpIcon = solid(
 export const MarkReadIcon = solid(
   'M2.6 5.4a2.4 2.4 0 0 1 2.4-2.4h14a2.4 2.4 0 0 1 2.4 2.4v6.9a6.6 6.6 0 0 0-9.24 6.5H5a2.4 2.4 0 0 1-2.4-2.4V5.4Zm2.9.9a1 1 0 0 0-.6 1.8l6.5 4.7a1 1 0 0 0 1.2 0l6.5-4.7a1 1 0 0 0-1.2-1.62L12 10.7 6.1 6.48a1 1 0 0 0-.6-.18Zm12.6 6.9a4.6 4.6 0 1 1 0 9.2 4.6 4.6 0 0 1 0-9.2Zm2.2 2.9a.9.9 0 0 0-1.28 0l-1.72 1.72-.62-.62a.9.9 0 0 0-1.28 1.28l1.26 1.26a.9.9 0 0 0 1.28 0l2.36-2.36a.9.9 0 0 0 0-1.28Z',
 )
+
+/* --------------------------------------------------- composer plus menu */
+
+/**
+ * Upload a File: a page with a folded corner, its lower-left bitten away so
+ * the arrow reads as a separate mark the way the reference draws it.
+ */
+export function UploadFileIcon(p: P) {
+  return (
+    <Svg {...p}>
+      <g fill="currentColor">
+        <path d="M6.4 2h6.9l6.7 6.7v11.9a2.4 2.4 0 0 1-2.4 2.4h-6.2c.5-.78.85-1.66 1-2.6h5.2V10.4h-3.9a2.4 2.4 0 0 1-2.4-2.4V4.6H6.4v6.35c-.94.15-1.82.5-2.6 1V4.4A2.4 2.4 0 0 1 6.4 2Zm7.5 3.2V7.8h2.6l-2.6-2.6Z" />
+        <path d="M6 13.4 9.4 16.5H2.6L6 13.4Z" />
+        <path d="M4.9 16.5h2.2v4a1.1 1.1 0 0 1-2.2 0v-4Z" />
+      </g>
+    </Svg>
+  )
+}
+
+/** Create Thread: the threads comb with a plus clear of its corner. */
+export function ThreadPlusIcon(p: P) {
+  return (
+    <Svg {...p}>
+      <g fill="currentColor">
+        <g transform="rotate(-45 10.5 9.5)">
+          <rect x="2.5" y="2" width="16" height="2.8" rx="0.7" />
+          <rect x="4.8" y="6.1" width="11.4" height="2.8" rx="0.7" />
+          <rect x="4.8" y="10.2" width="11.4" height="2.8" rx="0.7" />
+          <rect x="2.5" y="14.3" width="16" height="2.8" rx="0.7" />
+        </g>
+        <path d="M18.2 14.9c.66 0 1.2.54 1.2 1.2v1.7h1.7a1.2 1.2 0 0 1 0 2.4h-1.7v1.7a1.2 1.2 0 0 1-2.4 0v-1.7h-1.7a1.2 1.2 0 0 1 0-2.4h1.7v-1.7c0-.66.54-1.2 1.2-1.2Z" />
+      </g>
+    </Svg>
+  )
+}
+
+/** Create Poll: three bars of different lengths. */
+export function PollBarsIcon(p: P) {
+  return (
+    <Svg {...p}>
+      <g fill="currentColor">
+        <rect x="3.5" y="5" width="10" height="3.4" rx="1.7" />
+        <rect x="3.5" y="10.3" width="17" height="3.4" rx="1.7" />
+        <rect x="3.5" y="15.6" width="7" height="3.4" rx="1.7" />
+      </g>
+    </Svg>
+  )
+}
+
+/** Schedule Message: a calendar with a plus at its corner. */
+export function SchedulePlusIcon(p: P) {
+  return (
+    <Svg {...p}>
+      <g fill="currentColor">
+        <path d="M7.3 1.8c.66 0 1.2.54 1.2 1.2v1h7v-1a1.2 1.2 0 0 1 2.4 0v1h.6a2.9 2.9 0 0 1 2.9 2.9v2.2h-19V6.9A2.9 2.9 0 0 1 5.4 4h.7V3c0-.66.54-1.2 1.2-1.2Z" />
+        <path d="M2.4 11.1h19v2.6h-4.1a1.2 1.2 0 0 0-1.2 1.2v1.6h-1.6a1.2 1.2 0 0 0-1.2 1.2v3.3H5.3a2.9 2.9 0 0 1-2.9-2.9v-7Z" />
+        <path d="M17.5 15.1h2.3v2.1h2.1v2.3h-2.1v2.1h-2.3v-2.1h-2.1v-2.3h2.1v-2.1Z" />
+      </g>
+    </Svg>
+  )
+}

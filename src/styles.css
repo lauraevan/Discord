@@ -1518,6 +1518,17 @@ textarea {
   margin-right: auto;
 }
 
+.apps-panel {
+  width: 230px;
+}
+
+.apps-empty {
+  padding: 2px 10px 8px;
+  font-size: 10.6px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 .accounts-head {
   padding: 6px 10px 4px;
   font-size: 10.5px;
@@ -4236,16 +4247,72 @@ body.streamer .invite-row code {
 }
 
 .plus-menu {
+  /* 156px wide with 29px rows, converted from the reference's 193/36 */
   position: absolute;
   left: 6px;
   bottom: 100%;
   margin-bottom: 8px;
   z-index: 5;
-  min-width: 200px;
-  padding: 6px 8px;
-  border-radius: 6px;
+  min-width: 156px;
+  padding: 6px;
+  border-radius: 7px;
   background: var(--card);
   box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+}
+
+.plus-menu button {
+  width: 100%;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 7px 0 6px;
+  border-radius: 4px;
+  font-size: 10.6px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+}
+
+.plus-menu button svg {
+  /* the glyphs sit inside their 24-grid, so the box runs bigger than the
+     14px of ink the reference shows */
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: var(--muted);
+}
+
+.plus-menu button:hover:not(:disabled) {
+  background: var(--blurple);
+  color: #fff;
+}
+
+.plus-menu button:hover:not(:disabled) svg {
+  color: #fff;
+}
+
+.plus-menu button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.plus-wrap {
+  position: relative;
+}
+
+.plus-caret {
+  margin-left: auto;
+  width: 11px !important;
+  height: 11px !important;
+  flex: 0 0 11px !important;
+}
+
+.plus-sub {
+  left: 100%;
+  bottom: auto;
+  top: -6px;
+  margin: 0 0 0 4px;
 }
 
 .plus-menu button {
