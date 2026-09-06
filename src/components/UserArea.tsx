@@ -10,6 +10,7 @@ import {
   MicIcon,
   MicOffIcon,
   PencilIcon,
+  PlusIcon,
   SwitchAccountsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
@@ -31,18 +32,23 @@ export function Avatar({ account, size }: { account: Account; size: number }) {
   )
 }
 
+/** One of the prompts Discord rotates through on an empty status bubble. */
+const STATUS_PROMPT = 'Best dad joke?'
+
 /** The profile popout that opens from the user area. */
 export function ProfilePopout({
   account,
   onEdit,
   onStatus,
   onSwitch,
+  onCustomStatus,
   onClose,
 }: {
   account: Account
   onEdit: () => void
   onStatus: () => void
   onSwitch: () => void
+  onCustomStatus: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -59,34 +65,82 @@ export function ProfilePopout({
     }
   }, [onClose])
 
+  // the popout paints from these; a themed profile washes the card, the
+  // default one leaves it dark under an accent banner
+  const badges = BADGES.filter((b) => (account.badges ?? []).includes(b.id))
+  const themed = account.profileTheme
+  const skin = themed
+    ? {
+        '--pop-body': `linear-gradient(180deg, ${themed[0]} 0%, ${themed[1]} 100%)`,
+        '--pop-card': themed[0],
+        '--pop-ring': '#dfdee4',
+        '--pop-chip': '#f3eeff',
+        '--pop-chip-text': '#2f3235',
+        '--pop-name': '#0a0a0a',
+        '--pop-sub': '#4e564f',
+        '--pop-bio': '#333d36',
+        '--pop-label': '#4a554f',
+        '--pop-caret': '#66716b',
+        '--pop-row': 'rgba(255, 255, 255, 0.24)',
+        '--pop-row-hover': 'rgba(255, 255, 255, 0.3)',
+        '--pop-divider': 'rgba(0, 0, 0, 0.033)',
+      }
+    : {
+        '--pop-body': '#242426',
+        '--pop-card': '#242426',
+        '--pop-ring': '#242426',
+        '--pop-chip': '#2e2d33',
+        '--pop-chip-text': '#dbdee1',
+        '--pop-name': '#f2f3f5',
+        '--pop-sub': '#b5bac1',
+        '--pop-bio': '#dbdee1',
+        '--pop-label': '#dbdee1',
+        '--pop-caret': '#b5bac1',
+        '--pop-row': '#2e2d33',
+        '--pop-row-hover': '#37363d',
+        '--pop-divider': 'rgba(255, 255, 255, 0.06)',
+      }
+
   return (
-    <div className="popout" ref={ref}>
-      <div className="popout-banner">
-        <ProfileBanner />
+    <div className="popout" ref={ref} style={skin as React.CSSProperties}>
+      <div className="popout-banner" style={themed ? undefined : { background: account.color }}>
+        {themed ? <ProfileBanner /> : null}
       </div>
       <div className="popout-avatar">
         <Avatar account={account} size={64} />
       </div>
       {/* Discord's status bubble: a pill with a two-circle tail pointing back
           at the avatar, not the plain chip this used to draw */}
-      <span className="popout-chip" aria-label="Status">
+      {/* with a status set the bubble shows it; without one Discord shows a
+          plus and an italic prompt inviting you to add one */}
+      <button className="popout-chip" aria-label="Custom status" onClick={onCustomStatus}>
         <i className="chip-tail2" />
         <i className="chip-tail1" />
-        <span className="chip-body">wow</span>
-      </span>
+        <span className={'chip-body' + (account.customStatus ? '' : ' hint')}>
+          {account.customStatus ? (
+            account.customStatus
+          ) : (
+            <>
+              <PlusIcon />
+              <em>{STATUS_PROMPT}</em>
+            </>
+          )}
+        </span>
+      </button>
       <div className="popout-body">
         <div className="p-name">{account.name}</div>
         <div className="p-sub">
-          {account.handle} • {account.pronouns}
+          {account.handle}
+          {account.pronouns ? ` • ${account.pronouns}` : ''}
         </div>
         <div className="p-badges">
-          {BADGES.map((b) => (
+          {badges.map((b) => (
             <Tooltip key={b.id} label={b.label} side="above">
               <img className="p-badge" src={b.src} alt={b.label} />
             </Tooltip>
           ))}
         </div>
-        <div className="p-bio">{account.customStatus || account.bio}</div>
+        {account.bio ? <div className="p-bio">{account.bio}</div> : null}
         {/* Discord groups these: Edit Profile and the status row share a card,
             Switch Accounts sits in its own. Custom status lives inside the
             status submenu, not as a row of its own. */}

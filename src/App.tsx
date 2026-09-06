@@ -653,6 +653,10 @@ export default function App() {
               }}
               onStatus={() => setStatusMenu(true)}
               onSwitch={() => setSwitchAccounts(true)}
+              onCustomStatus={() => {
+                setPopout(false)
+                setCustomStatus(true)
+              }}
               onClose={() => setPopout(false)}
             />
           ) : null}

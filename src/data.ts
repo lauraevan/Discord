@@ -44,6 +44,14 @@ export type Account = {
   /** the custom status line and its emoji shortcode */
   customStatus?: string
   customEmoji?: string
+  /**
+   * Profile theme. Discord's default popout is an accent-coloured banner over
+   * a dark card; a themed profile replaces the card with a two-colour wash and
+   * flips the text dark. Both appear in the reference frames.
+   */
+  profileTheme?: [string, string]
+  /** ids from src/badges.ts, in the order the profile shows them */
+  badges?: string[]
 }
 
 export const defaultAccount: Account = {
@@ -53,6 +61,22 @@ export const defaultAccount: Account = {
   bio: "i'm... nebula.",
   status: 'online',
   color: '#5865f2',
+  profileTheme: ['#e3e1e7', '#bad7b4'],
+  customStatus: 'wow',
+  badges: [
+    'staff',
+    'partner',
+    'hypesquad',
+    'bug_hunter',
+    'bravery',
+    'early_supporter',
+    'bug_hunter_gold',
+    'verified_developer',
+    'mod_alumni',
+    'active_developer',
+    'nitro',
+    'boost',
+  ],
 }
 
 export const statusLabel: Record<Status, string> = {

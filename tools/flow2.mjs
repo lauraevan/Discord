@@ -105,7 +105,7 @@ await step('channel context menu has mute submenu', async () => {
 await step('custom status', async () => {
   await p.click('.user-card .id')
   await p.click('.p-btn:has-text("Online")')
-  await p.click('.status-opt:has-text("Set Custom Status")')
+  await p.click('.status-opt:has-text("Custom Status")')
   await p.waitForSelector('.status-modal')
   await p.fill('[aria-label="Custom status"]', 'building discord')
   await p.click('.modal-foot .btn-primary')

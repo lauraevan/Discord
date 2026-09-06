@@ -672,8 +672,8 @@ textarea {
   width: 247px;
   border-radius: 8px;
   overflow: hidden;
-  background: #e3e1e7;
-  color: #14160f;
+  background: var(--pop-card);
+  color: var(--pop-label);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   z-index: 20;
 }
@@ -689,11 +689,11 @@ textarea {
   top: 44px;
   border-radius: 50%;
   padding: 5px;
-  background: #dfdee4;
+  background: var(--pop-ring);
 }
 
 .popout-avatar .status-dot {
-  box-shadow: 0 0 0 4px #dfdee4;
+  box-shadow: 0 0 0 4px var(--pop-ring);
 }
 
 .popout-chip {
@@ -706,9 +706,28 @@ textarea {
 .popout-chip i,
 .chip-body {
   position: absolute;
-  background: #f3eeff;
+  background: var(--pop-chip);
   border-radius: 999px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.chip-body.hint em {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.chip-body.hint svg {
+  /* the reference sets the plus in a filled disc */
+  width: 15px;
+  height: 15px;
+  padding: 2px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--pop-chip-text) 22%, transparent);
+  opacity: 0.85;
+}
+
+.popout-chip {
+  cursor: pointer;
 }
 
 .chip-tail2 {
@@ -731,7 +750,12 @@ textarea {
   min-width: 41px;
   height: 27px;
   padding: 0 8px;
-  color: #2f3235;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: var(--pop-chip-text);
   font-size: 10.54px;
   font-weight: 500;
   line-height: 27px;
@@ -741,19 +765,19 @@ textarea {
 /* the wash lives on the body so the banner image is not tinted by it */
 .popout-body {
   padding: 37px 16px 20px;
-  background: linear-gradient(180deg, #e3e1e7 0%, #d3ddd3 42%, #bad7b4 100%);
+  background: var(--pop-body);
 }
 
 .p-name {
   font-size: 15.77px;
   font-weight: 700;
-  color: #0a0a0a;
+  color: var(--pop-name);
   line-height: 1;
 }
 
 .p-sub {
   font-size: 11.64px;
-  color: #4e564f;
+  color: var(--pop-sub);
   margin-top: 3px;
   line-height: 1;
 }
@@ -774,7 +798,7 @@ textarea {
 
 .p-bio {
   font-size: 11.19px;
-  color: #333d36;
+  color: var(--pop-bio);
   margin-top: 11px;
   line-height: 1;
 }
@@ -782,7 +806,7 @@ textarea {
 .p-group {
   margin-top: 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--pop-row);
   overflow: hidden;
 }
 
@@ -799,7 +823,7 @@ textarea {
   padding: 0 12px 0 14px;
   font-size: 11.22px;
   font-weight: 400;
-  color: #4a554f;
+  color: var(--pop-label);
   text-align: left;
 }
 
@@ -807,11 +831,11 @@ textarea {
    band 3% darker than the card, which is what the reference measures */
 .p-btn + .p-btn {
   height: 40px;
-  border-top: 2px solid rgba(0, 0, 0, 0.033);
+  border-top: 2px solid var(--pop-divider);
 }
 
 .p-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--pop-row-hover);
 }
 
 .p-btn svg {
@@ -832,7 +856,7 @@ textarea {
 
 .p-caret {
   margin-left: auto;
-  color: #66716b;
+  color: var(--pop-caret);
 }
 
 /* ------------------------------------------------------------------ chat */
