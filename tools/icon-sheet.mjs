@@ -1,36 +1,40 @@
 /**
- * Renders extracted icons to a numbered contact sheet so they can be
- * identified by eye and matched to the ones the app needs.
+ * Renders every icon the app uses, labelled, so the mapping in
+ * tools/gen-icons.py can be checked by eye against the real client.
+ *
+ *   node tools/icon-sheet.mjs out.png
  */
 import { chromium } from 'playwright'
-import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 
-const icons = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
-const from = +(process.argv[4] ?? 0)
-const to = +(process.argv[5] ?? icons.length)
-const slice = icons.slice(from, to)
+const named = JSON.parse(readFileSync('tools/discord-named-icons.json', 'utf8'))
+const src = readFileSync('tools/gen-icons.py', 'utf8')
+const body = src.slice(src.indexOf('MAP = {'), src.indexOf('ALIASES = {'))
+const map = [...body.matchAll(/'(\w+Icon)': '(\w+Icon)',/g)].map((m) => [m[1], m[2]])
 
-const cell = (ic) => {
-  const paths = ic.paths
-    .map(
-      (p) =>
-        `<path fill="currentColor"${p.evenodd ? ' fill-rule="evenodd" clip-rule="evenodd"' : ''} d="${p.d}"/>`,
-    )
-    .join('')
-  return `<i><svg viewBox="0 0 24 24" width="30" height="30">${paths}</svg><b>${ic.i}</b></i>`
-}
+const cells = map
+  .map(([slot, discord]) => {
+    const g = named[discord]
+    const box = g.size[0]
+    const paths = g.paths
+      .map(([d, eo]) => `<path fill="#dbdee1" fill-rule="${eo ? 'evenodd' : 'nonzero'}" d="${d}"/>`)
+      .join('')
+    return `<figure><svg viewBox="0 0 ${box} ${box}" width="40" height="40">${paths}</svg>
+      <b>${slot}</b><i>${discord}</i></figure>`
+  })
+  .join('')
 
 const html = `<style>
-body{margin:0;background:#1a1a1e;color:#dbdee1;font:9px monospace}
-i{display:inline-flex;flex-direction:column;align-items:center;width:52px;padding:5px 0}
-b{opacity:.55;font-weight:400;margin-top:2px}
-</style>${slice.map(cell).join('')}`
+body{background:#1a1a1e;color:#b5bac1;font:12px system-ui;margin:0;padding:16px;
+  display:grid;grid-template-columns:repeat(8,1fr);gap:14px}
+figure{margin:0;text-align:center;background:#232328;border-radius:6px;padding:8px 4px}
+b{display:block;color:#e4e4e8;font-size:11px;margin-top:4px}
+i{display:block;font-size:10px;opacity:.7}
+</style>${cells}`
 
-fs.writeFileSync('/tmp/sheet.html', html)
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
-const p = await b.newPage({ viewport: { width: 1092, height: 800 }, deviceScaleFactor: 1 })
-await p.goto('file:///tmp/sheet.html')
-await p.waitForTimeout(500)
-await p.screenshot({ path: process.argv[3], fullPage: true })
+const p = await b.newPage({ viewport: { width: 1200, height: 900 } })
+await p.setContent(html)
+await p.screenshot({ path: process.argv[2] || 'icons.png', fullPage: true })
 await b.close()
-console.log(`rendered ${slice.length} icons (${from}..${to})`)
+console.log(`${map.length} icons`)

@@ -10,20 +10,25 @@ import {
   ForumIcon,
   GearIcon,
   HashIcon,
+  MediaIcon,
   MegaphoneIcon,
   MembersIcon,
   PlusIcon,
   RulesIcon,
   SpeakerIcon,
+  StageIcon,
   ThreadsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
+/** The client's own channel-type switch, glyph for glyph. */
 function Glyph({ kind, thread }: { kind: Channel['kind']; thread?: boolean }) {
   if (thread) return <ThreadsIcon />
   if (kind === 'announcement') return <MegaphoneIcon />
   if (kind === 'forum') return <ForumIcon />
+  if (kind === 'media') return <MediaIcon />
   if (kind === 'rules') return <RulesIcon />
+  if (kind === 'stage') return <StageIcon />
   if (kind === 'voice') return <SpeakerIcon />
   return <HashIcon />
 }
