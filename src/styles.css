@@ -149,18 +149,18 @@ textarea {
      the reference's ink runs (1474-1486, 1503-1516, 1532-1545) rather than
      spaced evenly */
   position: absolute;
-  right: 5.4px;
+  right: 10.25px;
   margin-top: -2px;
   display: flex;
   align-items: center;
-  gap: 8.85px;
+  gap: 13.75px;
   /* the title bar's glyphs are a shade brighter than --muted; measured at
      #96979e on the reference */
   color: #96979e;
 }
 
 .win-actions button:first-child {
-  margin-right: 2.1px;
+  margin-right: 0.75px;
 }
 
 .win-actions button:last-child {
@@ -352,9 +352,9 @@ textarea {
 }
 
 .server-header .chevron {
-  width: 11px;
-  height: 11px;
-  flex: 0 0 11px;
+  width: 12.2px;
+  height: 12.2px;
+  flex: 0 0 12.2px;
   margin-left: 4px;
   color: var(--text);
 }
@@ -370,8 +370,8 @@ textarea {
 }
 
 .server-header .invite svg {
-  width: 17px;
-  height: 17px;
+  width: 15.9px;
+  height: 15.9px;
 }
 
 .sidebar-scroll {
@@ -417,9 +417,9 @@ textarea {
 }
 
 .row > svg {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 15px;
+  width: 16.6px;
+  height: 16.6px;
+  flex: 0 0 16.6px;
   color: inherit;
 }
 
@@ -428,7 +428,7 @@ textarea {
 }
 
 .row-name {
-  margin-left: 8px;
+  margin-left: 5.4px;
   font-size: 12.4px;
   font-weight: 500;
   white-space: nowrap;
@@ -639,8 +639,8 @@ textarea {
 }
 
 .icon-btn svg {
-  width: 17px;
-  height: 17px;
+  width: 16.1px;
+  height: 16.1px;
 }
 
 .caret {
@@ -652,8 +652,8 @@ textarea {
 }
 
 .caret svg {
-  width: 10px;
-  height: 10px;
+  width: 13.3px;
+  height: 13.3px;
 }
 
 .caret:hover {
@@ -906,15 +906,20 @@ textarea {
   color: var(--strong);
 }
 
+/* the tools group sits 2px right of where the flex line puts it, which is
+   where the reference has its ink runs */
 .chat-tools {
   margin-left: auto;
+  margin-right: -0.5px;
   display: flex;
   align-items: center;
-  gap: 15.3px;
+  gap: 14.7px;
   color: var(--text);
 }
 
 .chat-tools button {
+  width: 18px;
+  height: 18px;
   display: grid;
   place-items: center;
   color: inherit;
@@ -927,8 +932,8 @@ textarea {
 }
 
 .chat-tools svg {
-  width: 17px;
-  height: 17px;
+  width: 15.9px;
+  height: 15.9px;
 }
 
 .searchbox {
@@ -1172,8 +1177,8 @@ textarea {
 }
 
 .intro-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 14.2px;
+  height: 14.2px;
 }
 
 .group {
@@ -1240,10 +1245,12 @@ textarea {
 }
 
 .composer .plus {
-  width: 16px;
-  height: 16px;
-  margin-bottom: 16px;
-  flex: 0 0 16px;
+  position: relative;
+  left: -2px;
+  width: 20.4px;
+  height: 20.4px;
+  margin: 0 0 14px;
+  flex: 0 0 20.4px;
   color: var(--text);
   opacity: 0.79;
   display: flex;
@@ -1252,8 +1259,8 @@ textarea {
 }
 
 .composer .plus svg {
-  width: 16px;
-  height: 16px;
+  width: 20.4px;
+  height: 20.4px;
 }
 
 .composer .plus:hover {
@@ -1263,7 +1270,7 @@ textarea {
 .composer-input {
   flex: 1;
   min-width: 0;
-  margin-left: 21.5px;
+  margin-left: 16.7px;
   font-size: 12.37px;
   color: var(--text);
 }
@@ -1275,12 +1282,16 @@ textarea {
 .composer-acts {
   display: flex;
   align-items: center;
-  gap: 17px;
-  margin-bottom: 16px;
+  gap: 12.5px;
+  margin: 0 -3.5px 14px 0;
   color: var(--text);
 }
 
 .composer-acts button {
+  /* a fixed box so a glyph's own size cannot shift the whole right-anchored
+     group; only the svg inside it changes */
+  width: 20px;
+  height: 20px;
   display: grid;
   place-items: center;
   color: inherit;
@@ -1292,8 +1303,20 @@ textarea {
 }
 
 .composer-acts svg {
-  width: 16px;
-  height: 16px;
+  width: 17.3px;
+  height: 17.3px;
+}
+
+/* two of the five glyphs sit differently inside their 24-grid, so they need
+   their own box to land on the reference's ink */
+.composer-acts .sticker svg {
+  width: 19.8px;
+  height: 19.8px;
+}
+
+.composer-acts .emoji svg {
+  width: 14.3px;
+  height: 14.3px;
 }
 
 /* --------------------------------------------------- theme (appearance) */

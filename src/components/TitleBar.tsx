@@ -23,10 +23,10 @@ export function TitleBar({
           <button aria-label="Inbox" onClick={onInbox}><InboxIcon size={15} /></button>
         </Tooltip>
         <Tooltip label="Help" side="below">
-          <button aria-label="Help" className="help"><HelpIcon size={16.1} /></button>
+          <button aria-label="Help" className="help"><HelpIcon size={15} /></button>
         </Tooltip>
         <Tooltip label="Support Tools" side="below">
-          <button aria-label="Support tools"><ToolsIcon size={20.2} /></button>
+          <button aria-label="Support tools"><ToolsIcon size={15.5} /></button>
         </Tooltip>
       </div>
     </header>

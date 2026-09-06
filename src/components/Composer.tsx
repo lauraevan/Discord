@@ -376,7 +376,7 @@ export function Composer({
         <div className="composer-acts">
           {acts.map(({ label, Icon, on }) => (
             <Tooltip key={label} label={label} side="above">
-              <button aria-label={label} onClick={on}>
+              <button aria-label={label} className={label.toLowerCase().replace(/\W+/g, '-')} onClick={on}>
                 <Icon />
               </button>
             </Tooltip>

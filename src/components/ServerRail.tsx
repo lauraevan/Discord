@@ -62,13 +62,13 @@ export function ServerRail({
           </RailItem>
         ))}
         <RailItem label="Add a Server" className="plain green" onClick={onCreate}>
-          <AddServerIcon size={19} />
+          <AddServerIcon size={16.8} />
         </RailItem>
         <RailItem label="Discover" className="plain green">
-          <CompassIcon size={19} />
+          <CompassIcon size={16.8} />
         </RailItem>
         <RailItem label="Download Apps" className="plain green">
-          <DownloadIcon size={17} />
+          <DownloadIcon size={15.9} />
         </RailItem>
       </div>
     </nav>

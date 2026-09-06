@@ -112,3 +112,43 @@ Real voice/video transport, screen share and Go Live; bots, apps and slash
 commands that hit an API; payments (Nitro, boosts, the shop); the game overlay
 and game detection; anything requiring another human. Those surfaces are drawn
 where they are part of the UI, and say what they are.
+
+
+## The icon set
+
+Every icon was hand-drawn from screenshots until the reference frames made it
+clear how far off that gets you at 15px: the channel hash was nearly twice the
+right stroke weight, Add-a-Server and Discover were rings where Discord fills
+them and knocks the glyph out, Browse Channels was missing its magnifier
+entirely, and the title bar's third action was a full-screen toggle where
+Discord draws crossed tools.
+
+They now come from Discord's own client. The shipped bundle carries 696
+components with a `viewBox="0 0 24 24"`, each followed by its `<path d>`;
+`tools/extract-icons.py` walks those and writes `tools/discord-icons.json`,
+which is the geometry `tools/gen-icons.py` turns into `src/ui/Icons.tsx`.
+
+Establishing which glyph is which took three steps, because the bundle is
+minified and the components have no names left:
+
+1. `tools/icon-atlas.mjs` renders all 661 unique glyphs into a fixed-cell
+   sheet.
+2. `tools/icon-match.py` reduces both an icon's crop from a reference frame and
+   every candidate to a silhouette — threshold to ink, crop to the ink bbox,
+   scale into a 32x32 box — and ranks by mean absolute difference. Throwing
+   away size and position is what makes this work: the frames render these at
+   12-16px, the atlas at 64px.
+3. `tools/icon-verify.py` puts the crop beside its top candidates, upscaled, so
+   the winner can be confirmed rather than trusted. This caught #574, which
+   the eye reads as a pencil on a contact sheet and is actually the italic
+   mark.
+
+Two glyphs are still drawn by hand, because no candidate matched closely
+enough to be sure of: the plain pencil (Discord's edit glyphs all carry
+sparkles, so there may not be one) and Server Home.
+
+Sizes then had to be re-derived: the real paths sit differently inside their
+24-grid than the drawn ones did, so `tools/icon-fit.py` reports the reference's
+ink box against the app's for each icon, and the box that produces it. Where a
+group is right-anchored — the header tools, the composer actions — the buttons
+now have a fixed box so a glyph's own size cannot shift the whole row.
