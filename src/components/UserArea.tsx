@@ -4,16 +4,16 @@ import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
   CloseIcon,
-  SmileyIcon,
   ChevronRightIcon,
   GearIcon,
   HeadphonesIcon,
   MicIcon,
   MicOffIcon,
   PencilIcon,
-  MembersIcon,
+  SwitchAccountsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { BADGES } from '../badges'
 
 export function Avatar({ account, size }: { account: Account; size: number }) {
   return (
@@ -23,8 +23,8 @@ export function Avatar({ account, size }: { account: Account; size: number }) {
         className="status-dot"
         style={{
           background: statusColor[account.status],
-          width: size * 0.36,
-          height: size * 0.36,
+          width: size * 0.42,
+          height: size * 0.42,
         }}
       />
     </span>
@@ -65,17 +65,32 @@ export function ProfilePopout({
         <ProfileBanner />
       </div>
       <div className="popout-avatar">
-        <Avatar account={account} size={52} />
+        <Avatar account={account} size={64} />
       </div>
-      <span className="popout-chip">wow</span>
+      {/* Discord's status bubble: a pill with a two-circle tail pointing back
+          at the avatar, not the plain chip this used to draw */}
+      <span className="popout-chip" aria-label="Status">
+        <i className="chip-tail2" />
+        <i className="chip-tail1" />
+        <span className="chip-body">wow</span>
+      </span>
       <div className="popout-body">
         <div className="p-name">{account.name}</div>
         <div className="p-sub">
           {account.handle} • {account.pronouns}
         </div>
-        <div className="p-accent" style={{ background: account.color }} />
-        <div className="p-bio">{account.bio}</div>
-        <div className="popout-actions">
+        <div className="p-badges">
+          {BADGES.map((b) => (
+            <Tooltip key={b.id} label={b.label} side="above">
+              <img className="p-badge" src={b.src} alt={b.label} />
+            </Tooltip>
+          ))}
+        </div>
+        <div className="p-bio">{account.customStatus || account.bio}</div>
+        {/* Discord groups these: Edit Profile and the status row share a card,
+            Switch Accounts sits in its own. Custom status lives inside the
+            status submenu, not as a row of its own. */}
+        <div className="p-group">
           <button className="p-btn" onClick={onEdit}>
             <PencilIcon />
             <span>Edit Profile</span>
@@ -85,12 +100,10 @@ export function ProfilePopout({
             <span>{statusLabel[account.status]}</span>
             <ChevronRightIcon className="p-caret" />
           </button>
+        </div>
+        <div className="p-group">
           <button className="p-btn" onClick={onCustomStatus}>
-            <SmileyIcon />
-            <span>{account.customStatus ? 'Edit Custom Status' : 'Set Custom Status'}</span>
-          </button>
-          <button className="p-btn">
-            <MembersIcon />
+            <SwitchAccountsIcon />
             <span>Switch Accounts</span>
             <ChevronRightIcon className="p-caret" />
           </button>
@@ -136,7 +149,7 @@ export function UserArea({
         </div>
       ) : null}
       <button className="id" onClick={onOpenProfile}>
-        <Avatar account={account} size={28} />
+        <Avatar account={account} size={26} />
         <span className="user-meta">
           <span className="name">{account.name}</span>
           <span className="state">{account.handle}</span>

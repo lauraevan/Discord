@@ -451,7 +451,6 @@ export default function App() {
       <TitleBar
         title={activeServer === null ? 'Friends' : (server?.name ?? 'Discord')}
         initials={activeServer === null ? '' : (server?.initials ?? 'D')}
-        color={activeServer === null ? '#5865f2' : (server?.color ?? '#5865f2')}
         onInbox={() => setInboxOpen((v) => !v)}
       />
       {inboxOpen ? (

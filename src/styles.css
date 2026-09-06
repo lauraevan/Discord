@@ -13,10 +13,15 @@
   /* filled in by applyTheme(); these are the Dark defaults */
   --rail: #121214;
   --side: #121214;
-  --chat: #1a191e;
+  --chat: #1a1a1e;
   --card: #222327;
   --composer: #222327;
-  --selected: #2c2b30;
+  --selected: #2c2c30;
+  /* the reference uses three different raised greys, not one: the selected
+     channel row is #2c2b30, secondary buttons are a shade under it, and the
+     intro glyph's disc is darker again */
+  --btn2: #29292d;
+  --disc: #242428;
   --hover: #1e1d22;
   --text: #e4e4e8;
   --muted: #85858a;
@@ -115,20 +120,23 @@ textarea {
   gap: 6px;
 }
 
+/* the title bar shows the server mark muted, not in the server's colour —
+   measured off the reference at rgb(29,29,36) on an rgb(18,18,20) bar */
 .win-title .mark {
-  width: 13px;
-  height: 13px;
-  border-radius: 3px;
-  flex: 0 0 13px;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  flex: 0 0 15px;
   display: grid;
   place-items: center;
+  background: rgba(255, 255, 255, 0.06);
   font-size: 6px;
   font-weight: 700;
-  color: #fff;
+  color: var(--muted);
 }
 
 .win-title .wt {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   color: var(--strong);
   white-space: nowrap;
@@ -526,6 +534,11 @@ textarea {
   display: block;
 }
 
+/* the reference sits the account avatar slightly above the card's centre */
+.user-card .avatar-wrap {
+  top: -2px;
+}
+
 .avatar-wrap .art {
   border-radius: 50%;
   overflow: hidden;
@@ -536,11 +549,13 @@ textarea {
   right: -1px;
   bottom: -1px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2.5px var(--card);
+  box-shadow: 0 0 0 3px var(--card);
 }
 
 .user-meta {
-  margin-left: 4px;
+  position: relative;
+  top: 0.5px;
+  margin-left: 5px;
   min-width: 0;
   display: block;
   text-align: left;
@@ -548,7 +563,7 @@ textarea {
 
 .user-meta .name {
   display: block;
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--strong);
   line-height: 1.2;
@@ -556,12 +571,14 @@ textarea {
 
 .user-meta .state {
   display: block;
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--muted);
   line-height: 1.25;
 }
 
 .user-card .acts {
+  position: relative;
+  top: -1px;
   margin-left: auto;
   display: flex;
   align-items: center;
@@ -598,8 +615,8 @@ textarea {
 }
 
 .icon-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 }
 
 .caret {
@@ -622,118 +639,176 @@ textarea {
 /* --------------------------------------------------------- profile popout */
 
 .popout {
+  /* every number here is measured off the reference frame: the card is
+     247x357 at x6, its banner 87px, and the body a top-to-bottom wash from
+     #e3e1e7 to #bad7b4 rather than the flat fill it had before */
   position: absolute;
   left: 6px;
-  bottom: 56px;
+  bottom: 57px;
   width: 247px;
   border-radius: 8px;
   overflow: hidden;
-  background: linear-gradient(180deg, #dfe4de 0%, #cfdcc7 55%, #c0d4b4 100%);
+  background: #e3e1e7;
   color: #14160f;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   z-index: 20;
 }
 
 .popout-banner {
-  height: 112px;
+  height: 87px;
   overflow: hidden;
 }
 
 .popout-avatar {
   position: absolute;
-  left: 12px;
-  top: 62px;
+  left: 10px;
+  top: 44px;
   border-radius: 50%;
-  padding: 4px;
-  background: linear-gradient(180deg, #dfe4de, #dbe2d6);
+  padding: 5px;
+  background: #dfdee4;
 }
 
 .popout-avatar .status-dot {
-  box-shadow: 0 0 0 3px #dfe4de;
+  box-shadow: 0 0 0 4px #dfdee4;
 }
 
 .popout-chip {
   position: absolute;
-  left: 78px;
-  top: 86px;
-  height: 20px;
-  padding: 0 8px;
-  border-radius: 10px;
-  background: #f4f6f2;
-  color: #3c4038;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  left: 6px;
+  top: 70px;
+  pointer-events: none;
 }
 
+.popout-chip i,
+.chip-body {
+  position: absolute;
+  background: #f3eeff;
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.chip-tail2 {
+  left: 80px;
+  top: 0;
+  width: 7px;
+  height: 7px;
+}
+
+.chip-tail1 {
+  left: 91px;
+  top: 5px;
+  width: 14px;
+  height: 14px;
+}
+
+.chip-body {
+  left: 82px;
+  top: 12px;
+  min-width: 41px;
+  height: 27px;
+  padding: 0 8px;
+  color: #2f3235;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 27px;
+  text-align: center;
+}
+
+/* the wash lives on the body so the banner image is not tinted by it */
 .popout-body {
-  padding: 22px 12px 14px;
+  padding: 37px 16px 20px;
+  background: linear-gradient(180deg, #e3e1e7 0%, #d3ddd3 42%, #bad7b4 100%);
 }
 
 .p-name {
-  font-size: 17px;
+  font-size: 16.4px;
   font-weight: 700;
-  color: #12140e;
+  color: #0a0a0a;
+  line-height: 1;
 }
 
 .p-sub {
-  font-size: 11px;
-  color: #4a4f44;
-  margin-top: 2px;
+  font-size: 12.5px;
+  color: #4e564f;
+  margin-top: 3px;
+  line-height: 1;
 }
 
-.p-accent {
-  height: 20px;
-  border-radius: 3px;
-  margin: 8px 0 6px;
+/* twelve 14px badges on an 18px pitch, matching the reference row */
+.p-badges {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+  height: 14px;
+}
+
+.p-badge {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
 
 .p-bio {
-  font-size: 12px;
-  color: #2c3026;
+  font-size: 11px;
+  color: #333d36;
+  margin-top: 11px;
+  line-height: 1;
 }
 
-.popout-actions {
+.p-group {
   margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+}
+
+.p-group + .p-group {
+  margin-top: 12px;
 }
 
 .p-btn {
-  height: 30px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.45);
+  width: 100%;
+  height: 38px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #1d2018;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  gap: 4px;
+  padding: 0 12px 0 14px;
+  font-size: 12.05px;
+  font-weight: 400;
+  color: #4a554f;
+  text-align: left;
+}
+
+/* the divider between stacked rows reads as the wash showing through: a 2px
+   band 3% darker than the card, which is what the reference measures */
+.p-btn + .p-btn {
+  height: 40px;
+  border-top: 2px solid rgba(0, 0, 0, 0.033);
 }
 
 .p-btn:hover {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .p-btn svg {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
 }
 
+/* the dot occupies the same 15px slot as the row icons so every label
+   starts at the same x, as the reference has them */
 .p-dot {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
-  flex: 0 0 9px;
+  flex: 0 0 11px;
+  margin: 0 2px;
 }
 
 .p-caret {
   margin-left: auto;
-  opacity: 0.55;
+  color: #66716b;
 }
 
 /* ------------------------------------------------------------------ chat */
@@ -871,46 +946,51 @@ textarea {
 }
 
 .intro-glyph {
-  width: 48px;
-  height: 48px;
+  /* measured: the disc is 55px across and its hash 28px, not 48/29 */
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
-  background: var(--selected);
-  color: var(--strong);
+  background: var(--disc);
+  color: #fafafc;
   display: grid;
   place-items: center;
-  margin-bottom: 13px;
+  margin-bottom: 9px;
 }
 
 .intro-glyph svg {
-  width: 37px;
-  height: 37px;
+  width: 34.2px;
+  height: 34.2px;
 }
 
 .intro h3 {
-  font-size: 26.5px;
-  font-weight: 800;
+  /* 26.8/700 puts the ink at the reference's 282px; 800 only matched by
+     landing on the same width from the wrong direction */
+  font-size: 26.8px;
+  font-weight: 700;
   color: var(--strong);
   letter-spacing: 0.28px;
 }
 
 .intro p {
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 13.8px;
   color: var(--text);
 }
 
 .intro-btn {
+  /* the reference button is 99x26: 10px padding, an 11px pencil, a 5px gap
+     and 62px of text */
   margin-top: 11px;
   height: 26px;
   border-radius: 4px;
-  background: var(--selected);
+  background: var(--btn2);
   color: var(--strong);
-  font-size: 13px;
+  font-size: 11.7px;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 10px;
+  gap: 3px;
+  padding: 0 10px 0 9px;
 }
 
 .intro-btn:hover {
@@ -918,8 +998,8 @@ textarea {
 }
 
 .intro-btn svg {
-  width: 13px;
-  height: 13px;
+  width: 15px;
+  height: 15px;
 }
 
 .group {

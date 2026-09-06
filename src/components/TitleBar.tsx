@@ -4,18 +4,16 @@ import { Tooltip } from '../ui/Tooltip'
 export function TitleBar({
   title,
   initials,
-  color,
   onInbox,
 }: {
   title: string
   initials: string
-  color: string
   onInbox?: () => void
 }) {
   return (
     <header className="titlebar">
       <div className="win-title">
-        <span className="mark" style={{ background: color }}>
+        <span className="mark">
           {initials}
         </span>
         <span className="wt">{title}</span>

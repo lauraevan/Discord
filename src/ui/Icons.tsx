@@ -34,10 +34,31 @@ const solid = (d: string, rule: 'evenodd' | 'nonzero' = 'evenodd') =>
 
 /* ------------------------------------------------------------ channels */
 
-/** The channel hash: italic, and heavier than the old set drew it. */
-export const HashIcon = solid(
-  'M9.3 2.8h3.1l-2.2 18.4H7.1L9.3 2.8Zm7 0h3.1l-2.2 18.4h-3.1L16.3 2.8ZM2.6 7.4h18.8v3.1H2.6V7.4Zm0 6.1h18.8v3.1H2.6v-3.1Z',
-  'nonzero',
+/**
+ * The channel hash.
+ *
+ * Measured off the reference frame's 28px intro glyph rather than guessed: the
+ * strokes are 2.45px on 28, so 1.66 units on a 19-unit ink height, and the whole
+ * mark leans 9.8 degrees — the bars stay horizontal but shift with the skew,
+ * which is why the top bar sits a pixel right of the bottom one.
+ */
+export function HashIcon(p: P) {
+  return (
+    <Svg {...p}>
+      {/* skewX(-9.8deg) pinned so the glyph's middle row stays put */}
+      <g fill="currentColor" transform="matrix(1,0,-0.1727,1,2.0724,0)">
+        <rect x="2.85" y="8.39" width="18.3" height="1.66" />
+        <rect x="2.85" y="14.29" width="18.3" height="1.66" />
+        <rect x="7.8" y="2.5" width="1.66" height="19" />
+        <rect x="14.54" y="2.5" width="1.66" height="19" />
+      </g>
+    </Svg>
+  )
+}
+
+/** Switch Accounts: a person knocked out of a filled disc. */
+export const SwitchAccountsIcon = solid(
+  'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 4.4a3.1 3.1 0 1 1 0 6.2 3.1 3.1 0 0 1 0-6.2Zm0 14.2a8.5 8.5 0 0 1-5.62-2.12c.5-2.2 3-3.38 5.62-3.38s5.12 1.18 5.62 3.38A8.5 8.5 0 0 1 12 20.6Z',
 )
 
 export const SpeakerIcon = solid(
