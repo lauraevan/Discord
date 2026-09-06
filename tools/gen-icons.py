@@ -18,7 +18,10 @@ MAP = {
     'PinIcon': 528, 'SearchIcon': 489, 'InboxIcon': 467, 'ToolsIcon': 579,
     'AddServerIcon': 368, 'CompassIcon': 383, 'DownloadIcon': 398, 'PlusIcon': 534,
     'GiftIcon': 438, 'GifIcon': 437, 'StickerIcon': 589, 'SmileyIcon': 99,
-    'AppsIcon': 290, 'HeadphonesIcon': 451, 'GearIcon': 563, 'MicOffIcon': 127,
+    'AppsIcon': 290, 'HeadphonesIcon': 451, 'GearIcon': 563,
+    # 127 is mute-with-noise-suppression; its second path is the sparkle that
+    # marks that feature, and the reference's mute button does not carry it
+    'MicOffIcon': (127, [0, 2]),
     'AddMemberIcon': 445, 'UploadFileIcon': 418, 'ThreadPlusIcon': 605,
     'PollBarsIcon': 536, 'SchedulePlusIcon': 335, 'SwitchAccountsIcon': 623,
     'ChevronRightIcon': 362, 'ChevronDownIcon': 360, 'ClydeIcon': 381,
@@ -89,9 +92,12 @@ const glyph = (g: Glyph) =>
 ''')
 
 for name in sorted(MAP):
-    ic = icons[MAP[name]]
+    spec = MAP[name]
+    idx, keep = spec if isinstance(spec, tuple) else (spec, None)
+    ic = icons[idx]
+    paths = ic['paths'] if keep is None else [ic['paths'][k] for k in keep]
     parts = ',\n  '.join(
-        "['" + p['d'] + "'" + (', 1]' if p['evenodd'] else ']') for p in ic['paths']
+        "['" + p['d'] + "'" + (', 1]' if p['evenodd'] else ']') for p in paths
     )
     w(f'export const {name} = glyph([\n  {parts},\n])\n')
 

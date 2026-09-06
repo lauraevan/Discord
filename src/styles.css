@@ -604,9 +604,10 @@ textarea {
   position: relative;
   top: -1px;
   margin-left: auto;
+  margin-right: -1px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .split {
@@ -615,14 +616,20 @@ textarea {
   border-radius: 5px;
 }
 
+/* the reference's muted pill is 40x26 in two segments split by a hairline,
+   filled #352127 over the user card */
 .split.on {
-  background: rgba(216, 58, 65, 0.12);
+  background: rgba(216, 58, 65, 0.105);
   color: var(--red);
 }
 
+.split.on .caret {
+  box-shadow: inset 1px 0 0 rgba(0, 0, 0, 0.22);
+}
+
 .icon-btn {
-  width: 24px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
   color: var(--muted);
@@ -644,8 +651,8 @@ textarea {
 }
 
 .caret {
-  width: 15px;
-  height: 22px;
+  width: 14px;
+  height: 26px;
   display: grid;
   place-items: center;
   color: var(--muted);
@@ -1142,10 +1149,10 @@ textarea {
 .intro h3 {
   /* 26.8/700 puts the ink at the reference's 282px; 800 only matched by
      landing on the same width from the wrong direction */
-  font-size: 24.59px;
+  font-size: 24.35px;
   font-weight: 700;
   color: var(--strong);
-  letter-spacing: 0.28px;
+  letter-spacing: 0.4px;
   /* the block is bottom-anchored, so this gap is what lifts the heading and
      the glyph on to the reference's rows without moving the body or button */
   margin-bottom: 7px;
