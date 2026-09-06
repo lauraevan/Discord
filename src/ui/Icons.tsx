@@ -271,12 +271,14 @@ export const ClydeIcon = (p: P) => (
 
 /** Add a Server: a ring with a plus inside it, not a solid disc. */
 export const AddServerIcon = solid(
-  'M12 2.3a9.7 9.7 0 1 0 0 19.4 9.7 9.7 0 0 0 0-19.4Zm0 2.6a7.1 7.1 0 1 1 0 14.2 7.1 7.1 0 0 1 0-14.2Zm1.15 2.85a1.15 1.15 0 0 0-2.3 0v3.1h-3.1a1.15 1.15 0 0 0 0 2.3h3.1v3.1a1.15 1.15 0 0 0 2.3 0v-3.1h3.1a1.15 1.15 0 0 0 0-2.3h-3.1v-3.1Z',
+  // a filled disc with the plus knocked out, which is what the reference
+  // shows; the old glyph drew a ring with a plus inside it
+  'M12 2.3a9.7 9.7 0 1 0 0 19.4 9.7 9.7 0 0 0 0-19.4Zm1.3 4.55v3.85h3.85a1.3 1.3 0 0 1 0 2.6H13.3v3.85a1.3 1.3 0 0 1-2.6 0V13.3H6.85a1.3 1.3 0 0 1 0-2.6h3.85V6.85a1.3 1.3 0 0 1 2.6 0Z',
 )
 
-/** Discover: a ring around a compass rose. */
+/** Discover: a filled disc with the compass rose knocked out of it. */
 export const CompassIcon = solid(
-  'M12 2.3a9.7 9.7 0 1 0 0 19.4 9.7 9.7 0 0 0 0-19.4Zm0 2.6a7.1 7.1 0 1 1 0 14.2 7.1 7.1 0 0 1 0-14.2Zm4.02 2.44a.55.55 0 0 1 .7.7l-2.05 5.47a1.65 1.65 0 0 1-.97.97l-5.47 2.05a.55.55 0 0 1-.7-.7l2.05-5.47c.18-.47.5-.79.97-.97l5.47-2.05ZM12 10.65a1.35 1.35 0 1 0 0 2.7 1.35 1.35 0 0 0 0-2.7Z',
+  'M12 2.3a9.7 9.7 0 1 0 0 19.4 9.7 9.7 0 0 0 0-19.4Zm4.72 4.28a.62.62 0 0 1 .8.8l-2.34 6.24a1.9 1.9 0 0 1-1.11 1.11l-6.24 2.34a.62.62 0 0 1-.8-.8l2.34-6.24a1.9 1.9 0 0 1 1.11-1.11l6.24-2.34ZM12 10.4a1.6 1.6 0 1 0 0 3.2 1.6 1.6 0 0 0 0-3.2Z',
 )
 
 /** Download: arrow over a separate rule. */
