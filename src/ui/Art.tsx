@@ -85,37 +85,78 @@ export function ProfileBanner() {
  * same spirit — a rounded, legless creature with a pale body — rather than a
  * copy of theirs.
  */
+/**
+ * The empty-state character.
+ *
+ * Discord's friends screens are illustrated with Wumpus, and Discord's own copy
+ * names him — so an empty state here needs a character, but that artwork is
+ * theirs and unreachable from this page. This is drawn instead: an original
+ * creature, shaded rather than flat, with a rim light, a cast shadow and a
+ * face that carries the "nobody is here" the copy is describing.
+ */
 export function WumpusMark({ color = 'currentColor' }: { color?: string }) {
   return (
-    <svg viewBox="0 0 340 200" fill="none" aria-hidden="true">
-      <ellipse cx="170" cy="182" rx="96" ry="10" fill={color} opacity="0.12" />
-      {/* body */}
+    <svg viewBox="0 0 340 220" fill="none" aria-hidden="true">
+      <defs>
+        <radialGradient id="wm-body" cx="0.36" cy="0.24" r="0.92">
+          <stop offset="0" stopColor={color} stopOpacity="0.5" />
+          <stop offset="0.62" stopColor={color} stopOpacity="0.33" />
+          <stop offset="1" stopColor={color} stopOpacity="0.22" />
+        </radialGradient>
+        <linearGradient id="wm-belly" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={color} stopOpacity="0.1" />
+          <stop offset="1" stopColor={color} stopOpacity="0.2" />
+        </linearGradient>
+        <radialGradient id="wm-shadow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor={color} stopOpacity="0.22" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
+      {/* a soft cast shadow rather than a hard ellipse */}
+      <ellipse cx="170" cy="196" rx="104" ry="16" fill="url(#wm-shadow)" />
+
+      {/* arms tucked behind the body, so the silhouette reads first */}
       <path
-        d="M108 178c-14 0-24-11-22-25l6-44c5-38 36-66 74-66h8c38 0 69 28 74 66l6 44c2 14-8 25-22 25H108Z"
+        d="M104 132c-12 2-20 13-18 24 2 11 12 17 23 14l12-3-17-35Zm132 0 17 35 12 3c11 3 21-3 23-14 2-11-6-22-18-24Z"
         fill={color}
-        opacity="0.35"
+        fillOpacity="0.24"
       />
-      {/* belly */}
+
       <path
-        d="M134 178c-9 0-16-8-14-17l4-26c3-21 20-36 41-36s38 15 41 36l4 26c2 9-5 17-14 17h-62Z"
-        fill={color}
-        opacity="0.18"
+        d="M110 190c-16 0-27-13-25-29l7-50c6-42 40-73 82-73s76 31 82 73l7 50c2 16-9 29-25 29H110Z"
+        fill="url(#wm-body)"
       />
-      {/* arms */}
+
+      {/* a rim light along the top-left edge, which is what stops the
+          silhouette reading as a flat blob */}
       <path
-        d="M92 118c-11 3-18 13-16 24 2 10 12 16 22 13l10-3-16-34Zm156 0 16 34 10 3c10 3 20-3 22-13 2-11-5-21-16-24Z"
-        fill={color}
-        opacity="0.35"
+        d="M85 161l7-50c4-27 20-45 44-56"
+        stroke="#fff"
+        strokeOpacity="0.16"
+        strokeWidth="4"
+        strokeLinecap="round"
+        fill="none"
       />
-      {/* eyes */}
-      <ellipse cx="142" cy="92" rx="9" ry="12" fill={color} opacity="0.75" />
-      <ellipse cx="198" cy="92" rx="9" ry="12" fill={color} opacity="0.75" />
-      {/* mouth */}
+
       <path
-        d="M152 122c5 7 12 11 18 11s13-4 18-11"
+        d="M138 190c-10 0-18-9-16-19l5-30c4-24 22-41 47-41s43 17 47 41l5 30c2 10-6 19-16 19h-72Z"
+        fill="url(#wm-belly)"
+      />
+
+      {/* eyes: a highlight in each is the difference between asleep and drawn */}
+      {[146, 202].map((cx) => (
+        <g key={cx}>
+          <ellipse cx={cx} cy="104" rx="10" ry="13.5" fill={color} fillOpacity="0.72" />
+          <circle cx={cx - 3.4} cy="99" r="3.4" fill="#fff" fillOpacity="0.75" />
+        </g>
+      ))}
+
+      <path
+        d="M156 136c5.5 7.5 13 11.5 19 11.5s13.5-4 19-11.5"
         stroke={color}
-        strokeOpacity="0.6"
-        strokeWidth="5"
+        strokeOpacity="0.62"
+        strokeWidth="5.5"
         strokeLinecap="round"
         fill="none"
       />

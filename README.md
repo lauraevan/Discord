@@ -146,10 +146,15 @@ Nothing is cropped out of a screenshot.
   [Debuggingss/discord-badges](https://github.com/Debuggingss/discord-badges),
   eight are redraws from
   [mezotv/discord-badges](https://github.com/mezotv/discord-badges).
-- **Artwork** — the profile banner, the avatars, the onboarding sprites, the
-  Nitro perk art and the Shop's avatar decorations are drawn here, in
-  `src/ui/`. Discord's own illustrations are CDN-served and are not ours to
-  copy.
+- **Artwork** — the Nitro hero and perk scenes, the quest key art, the Shop's
+  avatar decorations, the profile banner, the avatars, the onboarding sprites
+  and the empty-state character are all drawn here, in `src/ui/`. None of it is
+  Discord's own illustration and none of it pretends to be: their art is served
+  from a CDN this page cannot reach, the GitHub mirror that carried their
+  avatar decorations was taken down by Discord, and Decor — the obvious
+  alternative — bans re-uploads of Discord's decorations outright. What *is*
+  theirs and is used exactly: the geometry, the gradient stops from the client's
+  own colour table, the copy, and the icons.
 - **Type** — Figtree (SIL OFL 1.1), self-hosted as base64 so the page makes no
   external requests. It stands in for Discord's proprietary gg sans, and it was
   chosen by measurement: twenty candidate families rendered at the size that
