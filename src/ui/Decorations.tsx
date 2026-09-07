@@ -16,16 +16,16 @@ export type DecorationDef = {
   orbs: number
   /** the two colours the ring is drawn from */
   colors: [string, string]
-  kind: 'ring' | 'sparks' | 'flames' | 'leaves' | 'wings' | 'bolts'
+  kind: 'ring' | 'sparks' | 'flames' | 'leaves' | 'crown' | 'bolts'
 }
 
 export const DECORATIONS: DecorationDef[] = [
-  { id: 'halo', name: 'Halo', collection: 'Everyday', orbs: 900, colors: ['#ffd76a', '#ff9d3d'], kind: 'ring' },
-  { id: 'sparks', name: 'Sparks', collection: 'Everyday', orbs: 1200, colors: ['#b473f5', '#e292aa'], kind: 'sparks' },
-  { id: 'ember', name: 'Ember', collection: 'Heat', orbs: 1500, colors: ['#ff7043', '#ffca28'], kind: 'flames' },
-  { id: 'ivy', name: 'Ivy', collection: 'Garden', orbs: 1200, colors: ['#5cb85c', '#2f8f4e'], kind: 'leaves' },
-  { id: 'wings', name: 'Wings', collection: 'Garden', orbs: 1800, colors: ['#8fd3ff', '#5865f2'], kind: 'wings' },
-  { id: 'circuit', name: 'Circuit', collection: 'Heat', orbs: 1500, colors: ['#00d3a7', '#00a8fc'], kind: 'bolts' },
+  { id: 'halo', name: 'Halo', collection: 'Classics', orbs: 900, colors: ['#ffd76a', '#ff9d3d'], kind: 'ring' },
+  { id: 'sparks', name: 'Sparks', collection: 'Classics', orbs: 1200, colors: ['#b473f5', '#e292aa'], kind: 'sparks' },
+  { id: 'crown', name: 'Crown', collection: 'Classics', orbs: 1800, colors: ['#ffd76a', '#e0a33a'], kind: 'crown' },
+  { id: 'ember', name: 'Ember', collection: 'Elements', orbs: 1500, colors: ['#ff7043', '#ffca28'], kind: 'flames' },
+  { id: 'ivy', name: 'Ivy', collection: 'Elements', orbs: 1200, colors: ['#5cb85c', '#2f8f4e'], kind: 'leaves' },
+  { id: 'circuit', name: 'Circuit', collection: 'Neon', orbs: 1500, colors: ['#00d3a7', '#00a8fc'], kind: 'bolts' },
 ]
 
 const byId = Object.fromEntries(DECORATIONS.map((d) => [d.id, d]))
@@ -99,11 +99,15 @@ export function Decoration({ id, size = 40 }: { id: string; size?: number }) {
             />
           ))}
         </>
-      ) : d.kind === 'wings' ? (
+      ) : d.kind === 'crown' ? (
         <>
-          <path d="M12 46c-8-14 2-24 14-20 6 2 10 8 12 16-10 6-20 8-26 4Z" fill={`url(#${gid})`} />
-          <path d="M88 46c8-14-2-24-14-20-6 2-10 8-12 16 10 6 20 8 26 4Z" fill={`url(#${gid})`} />
           <circle cx="50" cy="50" r="44" fill="none" stroke={`url(#${gid})`} strokeWidth="3" opacity=".7" />
+          {/* a five-point crown sitting on the top of the ring */}
+          <path
+            d="M22 20 L32 6 L41 16 L50 0 L59 16 L68 6 L78 20 L74 28 L26 28 Z"
+            fill={`url(#${gid})`}
+          />
+          <rect x="24" y="29" width="52" height="6" rx="3" fill={`url(#${gid})`} />
         </>
       ) : (
         <>

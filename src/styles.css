@@ -6192,9 +6192,14 @@ body.streamer .invite-row code {
   font-size: 12px;
 }
 
-.nitro-compare td {
+.nitro-compare td,
+.nitro-compare thead th + th {
   text-align: center;
   color: var(--text);
+}
+
+.nitro-compare tbody tr {
+  height: 38px;
 }
 
 .nitro-compare tbody th {
