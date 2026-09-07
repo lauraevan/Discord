@@ -4,12 +4,15 @@ import { WumpusMark } from '../ui/Art'
 import {
   ChevronDownIcon,
   CloseIcon,
+  FriendsIcon,
   InboxIcon,
   MembersIcon,
   MoreIcon,
+  NitroIcon,
   PlusIcon,
+  QuestsIcon,
   SearchIcon,
-  SparkleIcon,
+  ShopIcon,
   VideoIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
@@ -17,31 +20,64 @@ import { Avatar } from './UserArea'
 
 type Tab = 'online' | 'all' | 'pending' | 'blocked' | 'add'
 
+/** The four destinations behind the Discord button, in the client's order. */
+export type HomeView = 'friends' | 'nitro' | 'shop' | 'quests'
+
 /**
  * Home — the view behind the Discord button in the rail.
  *
- * The Friends tabs are the client's own (Online, All, Pending, Blocked, plus
- * the Add Friend button), and the empty states are the client's copy. With no
- * account server there is nobody to be friends with, so every list is genuinely
- * empty rather than populated with invented people.
+ * The nav rows are the client's own — Friends, Nitro, Shop with its New pill,
+ * and Quests — and so are the Friends tabs and the empty-state copy. With no
+ * account server there is nobody to be friends with, so every list is
+ * genuinely empty rather than populated with invented people.
  */
-export function HomeSidebar({ tab, onTab }: { tab: Tab; onTab: (t: Tab) => void }) {
+export function HomeSidebar({
+  view,
+  tab,
+  questsDone,
+  onView,
+  onTab,
+}: {
+  view: HomeView
+  tab: Tab
+  questsDone: number
+  onView: (v: HomeView) => void
+  onTab: (t: Tab) => void
+}) {
   return (
     <div className="dm-sidebar">
       <button className="dm-search">Find or start a conversation</button>
       <div className="dm-nav">
-        <button className={'row nav' + (tab !== 'add' ? ' active' : '')} onClick={() => onTab('online')}>
-          <MembersIcon />
+        <button
+          className={'row nav' + (view === 'friends' && tab !== 'add' ? ' active' : '')}
+          onClick={() => onTab('online')}
+        >
+          <FriendsIcon />
           <span className="row-name">Friends</span>
         </button>
-        <div className="row nav">
-          <SparkleIcon />
+        <button
+          className={'row nav' + (view === 'nitro' ? ' active' : '')}
+          onClick={() => onView('nitro')}
+        >
+          <NitroIcon />
           <span className="row-name">Nitro</span>
-        </div>
-        <div className="row nav">
-          <InboxIcon />
+        </button>
+        <button
+          className={'row nav' + (view === 'shop' ? ' active' : '')}
+          onClick={() => onView('shop')}
+        >
+          <ShopIcon />
           <span className="row-name">Shop</span>
-        </div>
+          <span className="row-pill">NEW</span>
+        </button>
+        <button
+          className={'row nav' + (view === 'quests' ? ' active' : '')}
+          onClick={() => onView('quests')}
+        >
+          <QuestsIcon />
+          <span className="row-name">Quests</span>
+          {questsDone > 0 ? <span className="row-badge">{questsDone}</span> : null}
+        </button>
       </div>
       <div className="dm-head">
         <span>DIRECT MESSAGES</span>

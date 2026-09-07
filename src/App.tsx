@@ -6,12 +6,16 @@ import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
 import { ForumView, makePost } from './components/Forum'
 import { EmojiPicker } from './components/EmojiPicker'
-import { FriendsPage, HomeSidebar, ProfileModal } from './components/Home'
+import { FriendsPage, HomeSidebar, ProfileModal, type HomeView } from './components/Home'
+import { LoginScreen, RegisterScreen } from './components/Auth'
+import { CreateServerFlow, applyTemplate, type NewServer } from './components/CreateServer'
+import { NitroPage } from './components/Nitro'
+import { QuestsPage } from './components/Quests'
+import { ShopPage } from './components/Shop'
 import { Inbox } from './components/Inbox'
 import { MemberList } from './components/MemberList'
 import {
   ChannelModal,
-  CreateServerModal,
   EditProfileModal,
   StatusMenu,
   SwitchAccounts,
@@ -31,7 +35,7 @@ import { UserSettings } from './components/UserSettings'
 import { ProfilePopout, UserArea } from './components/UserArea'
 import {
   MUTE_DURATIONS,
-  defaultAccount,
+  accountFor,
   initialsOf,
   makeServer,
   uid,
@@ -47,29 +51,121 @@ import type { MdContext } from './markdown'
 import { matches, parseQuery } from './search'
 import {
   isAccount,
+  isCredentials,
+  isGifts,
   isMessages,
+  isNumber,
+  isQuestStatus,
   isScheduled,
   isRecord,
   isServers,
+  isSession,
+  isSubscription,
   isThemeId,
   K,
   load,
   purgeOldSchemas,
   save,
+  type Credential,
 } from './storage'
+import {
+  PremiumType,
+  currentType,
+  giftLength,
+  isActive,
+  type Gift,
+  type Subscription,
+} from './nitro'
+import { QUESTS, type QuestUserStatus } from './quests'
 import { allThemes, applyTheme, defaultThemes } from './themes'
 
 purgeOldSchemas()
 const themeIds = allThemes.map((t) => t.id)
 
+/** What the window title says for each of the home views. */
+const HOME_TITLES: Record<HomeView, string> = {
+  friends: 'Friends',
+  nitro: 'Nitro',
+  shop: 'Shop',
+  quests: 'Quests',
+}
+
 type Picker = { target: 'composer' | string; at: { x: number; y: number } }
 type Ctx = { items: MenuItem[]; at: { x: number; y: number } }
 
+/**
+ * The account gate.
+ *
+ * There is no account server behind this page, so registration and login are
+ * local (see src/auth.ts) — but they are a real gate: nothing below renders
+ * until somebody is signed in, and the client is keyed on the username so
+ * switching accounts remounts it.
+ */
 export default function App() {
-  const [servers, setServers] = useState<Server[]>(() =>
-    load(K.servers, [makeServer("Nebula's Server")], isServers),
+  const [credentials, setCredentials] = useState<Credential[]>(() =>
+    load(K.credentials, [], isCredentials),
   )
-  const [account, setAccount] = useState<Account>(() => load(K.account, defaultAccount, isAccount))
+  const [session, setSession] = useState<string | null>(() => load(K.session, null, isSession))
+  const [screen, setScreen] = useState<'login' | 'register'>(
+    credentials.length ? 'login' : 'register',
+  )
+
+  useEffect(() => save(K.credentials, credentials), [credentials])
+  useEffect(() => save(K.session, session), [session])
+
+  const me = session ? (credentials.find((c) => c.username === session) ?? null) : null
+
+  if (!me) {
+    return screen === 'login' ? (
+      <LoginScreen
+        credentials={credentials}
+        onLogin={(c) => setSession(c.username)}
+        onRegister={() => setScreen('register')}
+      />
+    ) : (
+      <RegisterScreen
+        credentials={credentials}
+        onLogin={() => setScreen('login')}
+        onCreated={(c) => {
+          setCredentials((all) => [...all, c])
+          setSession(c.username)
+        }}
+      />
+    )
+  }
+  // logging out lands on the login screen, not back on registration
+  return (
+    <Client
+      key={me.username}
+      me={me}
+      onSignOut={() => {
+        setSession(null)
+        setScreen('login')
+      }}
+    />
+  )
+}
+
+function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
+  const [servers, setServers] = useState<Server[]>(() =>
+    load(K.servers, [makeServer(`${me.displayName}'s server`)], isServers),
+  )
+  const [account, setAccount] = useState<Account>(() => {
+    const saved = load<Account | null>(K.account, null, (v): v is Account | null =>
+      v === null || isAccount(v),
+    )
+    // the stored account belongs to whoever was signed in last; a different
+    // account starts from its own registration details
+    return saved && saved.handle === me.username ? saved : accountFor(me.displayName, me.username)
+  })
+  const [subscription, setSubscription] = useState<Subscription | null>(() =>
+    load<Subscription | null>(K.subscription, null, isSubscription),
+  )
+  const [gifts, setGifts] = useState<Gift[]>(() => load(K.gifts, [], isGifts))
+  const [orbs, setOrbs] = useState<number>(() => load(K.orbs, 0, isNumber))
+  const [questStatus, setQuestStatus] = useState<Record<string, QuestUserStatus>>(() =>
+    load<Record<string, QuestUserStatus>>(K.quests, {}, isQuestStatus),
+  )
   const [messages, setMessages] = useState<Record<string, Message[]>>(() =>
     load<Record<string, Message[]>>(K.messages, {}, isMessages),
   )
@@ -114,6 +210,7 @@ export default function App() {
   const [pinsOpen, setPinsOpen] = useState(false)
   const [userSettings, setUserSettings] = useState(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
+  const [homeView, setHomeView] = useState<HomeView>('friends')
   const [profileModal, setProfileModal] = useState(false)
   const [pollModal, setPollModal] = useState(false)
   const [channelSettings, setChannelSettings] = useState<string | null>(null)
@@ -133,6 +230,10 @@ export default function App() {
   useEffect(() => save(K.reads, lastRead), [lastRead])
   useEffect(() => save(K.prefs, prefs), [prefs])
   useEffect(() => save(K.scheduled, scheduled), [scheduled])
+  useEffect(() => save(K.subscription, subscription), [subscription])
+  useEffect(() => save(K.gifts, gifts), [gifts])
+  useEffect(() => save(K.orbs, orbs), [orbs])
+  useEffect(() => save(K.quests, questStatus), [questStatus])
 
   // the appearance pane drives real CSS variables, not a mock preview
   useEffect(() => {
@@ -225,12 +326,66 @@ export default function App() {
   const patchThread = (fn: (list: Message[]) => Message[]) =>
     setMessages((all) => ({ ...all, [key]: fn(all[key] ?? []) }))
 
-  const createServer = (name: string, color: string) => {
-    const s = { ...makeServer(name, color), color, initials: initialsOf(name) }
+  const createServer = ({ name, color, icon, template }: NewServer) => {
+    const { categories, channels } = applyTemplate(template)
+    const s: Server = {
+      ...makeServer(name, color),
+      color,
+      icon,
+      initials: initialsOf(name),
+      categories,
+      channels,
+    }
     setServers((all) => [...all, s])
     setActiveServer(s.id)
-    setActiveChannel(s.channels[0]?.id ?? '')
+    setActiveChannel(channels.find((c) => c.kind !== 'voice')?.id ?? '')
     setCreatingServer(false)
+  }
+
+  /* ------------------------------------------------------- nitro + quests */
+
+  const premiumType = currentType(subscription)
+
+  /** Quests finished but not yet collected — the number the tab badges. */
+  const questsReady = QUESTS.filter(
+    (q) => questStatus[q.id]?.completedAt != null && questStatus[q.id]?.claimedAt == null,
+  ).length
+
+  /** Subscribing grants the Nitro badge, the way the account's does. */
+  const subscribe = (s: Subscription) => {
+    setSubscription(s)
+    setAccount((a) => ({ ...a, badges: [...new Set([...(a.badges ?? []), 'nitro'])] }))
+  }
+
+  const cancelSubscription = () => {
+    setSubscription(null)
+    setAccount((a) => ({ ...a, badges: (a.badges ?? []).filter((b) => b !== 'nitro') }))
+  }
+
+  const buyGift = (g: Gift) => setGifts((all) => [g, ...all])
+
+  /** Redeem a code, or a discord.gift link with a code on the end of it. */
+  const redeemGift = (raw: string) => {
+    const code = raw.trim().split('/').pop() ?? ''
+    const gift = gifts.find((g) => g.code === code && !g.redeemedAt)
+    if (!gift) return
+    setGifts((all) => all.map((g) => (g.code === code ? { ...g, redeemedAt: Date.now() } : g)))
+    subscribe({
+      premiumType: gift.tier === 'nitro' ? PremiumType.TIER_2 : PremiumType.TIER_0,
+      interval: gift.interval,
+      source: 'gift',
+      until:
+        Math.max(Date.now(), isActive(subscription) ? subscription.until : 0) +
+        giftLength(gift.interval),
+    })
+  }
+
+  const claimQuest = (questId: string, payout: number) => {
+    setOrbs((n) => n + payout)
+    setQuestStatus((all) => ({
+      ...all,
+      [questId]: { ...all[questId], claimedAt: Date.now() },
+    }))
   }
 
   const saveChannel = (name: string, kind: Channel['kind']) => {
@@ -492,7 +647,7 @@ export default function App() {
     <div className="app">
       <span style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: SPRITE }} />
       <TitleBar
-        title={activeServer === null ? 'Friends' : (server?.name ?? 'Discord')}
+        title={activeServer === null ? HOME_TITLES[homeView] : (server?.name ?? 'Discord')}
         initials={activeServer === null ? '' : (server?.initials ?? 'D')}
         onInbox={() => setInboxOpen((v) => !v)}
       />
@@ -525,7 +680,16 @@ export default function App() {
             onCreate={() => setCreatingServer(true)}
           />
           {activeServer === null ? (
-            <HomeSidebar tab={friendsTab} onTab={setFriendsTab} />
+            <HomeSidebar
+              view={homeView}
+              tab={friendsTab}
+              questsDone={questsReady}
+              onView={setHomeView}
+              onTab={(t) => {
+                setHomeView('friends')
+                setFriendsTab(t)
+              }}
+            />
           ) : server ? (
             <ChannelSidebar
               server={server}
@@ -663,7 +827,39 @@ export default function App() {
         </div>
 
         {activeServer === null ? (
-          <FriendsPage tab={friendsTab} onTab={setFriendsTab} />
+          homeView === 'nitro' ? (
+            <NitroPage
+              subscription={subscription}
+              gifts={gifts}
+              orbs={orbs}
+              onSubscribe={subscribe}
+              onCancel={cancelSubscription}
+              onGift={buyGift}
+              onRedeem={redeemGift}
+            />
+          ) : homeView === 'quests' ? (
+            <QuestsPage
+              status={questStatus}
+              orbs={orbs}
+              multiplier={premiumType === PremiumType.TIER_2}
+              onStatus={(st) => setQuestStatus((all) => ({ ...all, [st.questId]: st }))}
+              onClaim={(q, payout) => claimQuest(q.id, payout)}
+            />
+          ) : homeView === 'shop' ? (
+            <ShopPage
+              orbs={orbs}
+              premiumType={premiumType}
+              owned={account.collectibles ?? []}
+              equipped={account.decoration}
+              onBuy={(id, price) => {
+                setOrbs((n) => n - price)
+                setAccount((a) => ({ ...a, collectibles: [...(a.collectibles ?? []), id] }))
+              }}
+              onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
+            />
+          ) : (
+            <FriendsPage tab={friendsTab} onTab={setFriendsTab} />
+          )
         ) : (
         <main className="chat">
           {server && channel ? (
@@ -753,6 +949,11 @@ export default function App() {
                       if (last) createThread(last, 'thread')
                     }}
                     onApps={() => setAppsPanel(true)}
+                    premiumType={premiumType}
+                    onGiftNitro={() => {
+                      setActiveServer(null)
+                      setHomeView('nitro')
+                    }}
                     onSchedule={scheduleSend}
                     onAttach={(a) =>
                       patchThread((list) => [
@@ -852,6 +1053,7 @@ export default function App() {
           onAccount={setAccount}
           onPrefs={(p) => setPrefs((old) => ({ ...old, ...p }))}
           onTheme={(t) => setThemeId(t.id)}
+          onSignOut={onSignOut}
           onClose={() => setUserSettings(false)}
         />
       ) : null}
@@ -898,7 +1100,12 @@ export default function App() {
       {ctx ? <ContextMenu at={ctx.at} items={ctx.items} onClose={() => setCtx(null)} /> : null}
 
       {creatingServer ? (
-        <CreateServerModal onClose={() => setCreatingServer(false)} onCreate={createServer} />
+        <CreateServerFlow
+          suggestedName={`${account.name}'s server`}
+          onClose={() => setCreatingServer(false)}
+          onCreate={createServer}
+          onJoin={() => setCreatingServer(false)}
+        />
       ) : null}
       {channelModal ? (
         <ChannelModal
@@ -923,7 +1130,11 @@ export default function App() {
       ) : null}
       {appsPanel ? <AppsPanel onClose={() => setAppsPanel(false)} /> : null}
       {switchAccounts ? (
-        <SwitchAccounts account={account} onClose={() => setSwitchAccounts(false)} />
+        <SwitchAccounts
+          account={account}
+          onSignOut={onSignOut}
+          onClose={() => setSwitchAccounts(false)}
+        />
       ) : null}
       {statusMenu ? (
         <StatusMenu

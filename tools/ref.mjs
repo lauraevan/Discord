@@ -4,10 +4,12 @@
  * 1558x743. Pass "popout" to open the profile popout as the reference has it.
  */
 import { chromium } from 'playwright'
+import { readFileSync as __readSession } from 'node:fs'
 const out = process.argv[2] || 'ref.png'
 const popout = process.argv[3] === 'popout'
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: 1558, height: 743 }, deviceScaleFactor: 1 })
+await p.addInitScript(__readSession('tools/session.js', 'utf8'))
 const errs = []
 p.on('pageerror', (e) => errs.push(String(e).split('\n')[0]))
 await p.addInitScript(() => {

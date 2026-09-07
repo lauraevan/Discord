@@ -4,11 +4,13 @@
  */
 import { chromium } from 'playwright'
 import fs from 'node:fs'
+import { readFileSync as __readSession } from 'node:fs'
 
 const [out, seedFile, w = '1366', h = '884'] = process.argv.slice(2)
 const seed = fs.readFileSync(seedFile, 'utf8')
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: 1 })
+await p.addInitScript(__readSession('tools/session.js', 'utf8'))
 const errs = []
 p.on('pageerror', (e) => errs.push(String(e).split('\n')[0]))
 await p.addInitScript(seed)

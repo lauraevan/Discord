@@ -292,9 +292,11 @@ export function StatusMenu({
 export function SwitchAccounts({
   account,
   onClose,
+  onSignOut,
 }: {
   account: Account
   onClose: () => void
+  onSignOut: () => void
 }) {
   useEscape(onClose)
   return (
@@ -309,8 +311,11 @@ export function SwitchAccounts({
           </span>
         </button>
         <div className="status-sep" />
-        <button className="status-opt" disabled title="Adding an account needs a Discord login">
+        <button className="status-opt" onClick={onSignOut}>
           Add an Account
+        </button>
+        <button className="status-opt danger" onClick={onSignOut}>
+          Log Out
         </button>
       </div>
     </div>

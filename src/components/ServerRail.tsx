@@ -56,9 +56,13 @@ export function ServerRail({
             className="srv"
             onClick={() => onSelect(s.id)}
           >
-            <span className="server-initials" style={{ background: s.color }}>
-              {s.initials}
-            </span>
+            {s.icon ? (
+              <img className="server-icon" src={s.icon} alt="" />
+            ) : (
+              <span className="server-initials" style={{ background: s.color }}>
+                {s.initials}
+              </span>
+            )}
           </RailItem>
         ))}
         <RailItem label="Add a Server" className="plain green" onClick={onCreate}>

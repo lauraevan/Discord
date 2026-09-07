@@ -7,6 +7,7 @@
  */
 import { chromium } from 'playwright'
 import fs from 'node:fs'
+import { readFileSync as __readSession } from 'node:fs'
 
 const seedArg = process.argv.find((a) => a.endsWith('.js'))
 const SEED = fs.readFileSync(seedArg ?? 'tools/seed.js', 'utf8')
@@ -16,6 +17,7 @@ const [VW, VH] = dims ? dims.split('x').map(Number) : [1558, 743]
 const sels = process.argv.slice(2).filter((a) => a !== seedArg && a !== dims)
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 })
+await p.addInitScript(__readSession('tools/session.js', 'utf8'))
 await p.addInitScript(SEED)
 await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(700)

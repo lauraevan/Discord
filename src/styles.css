@@ -298,6 +298,13 @@ textarea {
   color: #fff;
 }
 
+.server-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* --------------------------------------------------------------- sidebar */
 
 .left-col {
@@ -5059,4 +5066,1915 @@ body.streamer .invite-row code {
 .inbox-empty span {
   font-size: 12.12px;
   color: var(--muted);
+}
+
+/* --- login / register ---------------------------------------------------- */
+/* Discord's auth pages sit on their own artwork rather than the app chrome:
+   a blurple field with soft drifting shapes, and one raised card on top. */
+
+.auth-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: auto;
+  background:
+    radial-gradient(52% 44% at 12% 18%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 60%),
+    radial-gradient(38% 38% at 88% 8%, rgba(120, 220, 255, 0.22) 0%, rgba(120, 220, 255, 0) 62%),
+    radial-gradient(46% 46% at 82% 92%, rgba(160, 100, 255, 0.28) 0%, rgba(160, 100, 255, 0) 60%),
+    radial-gradient(40% 40% at 22% 96%, rgba(88, 101, 242, 0.55) 0%, rgba(88, 101, 242, 0) 62%),
+    linear-gradient(160deg, #5b6ef5 0%, #4b57d8 42%, #404eb8 100%);
+}
+
+.auth-card {
+  background: #313338;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+  padding: 32px;
+  color: #dbdee1;
+}
+
+.auth-card-login {
+  display: flex;
+  gap: 40px;
+  width: 784px;
+  max-width: 100%;
+}
+
+.auth-card-login .auth-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.auth-card-register {
+  width: 480px;
+  max-width: 100%;
+}
+
+.auth-card h1 {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  color: #f2f3f5;
+}
+
+.auth-card-register h1 {
+  text-align: center;
+}
+
+.auth-sub {
+  margin-top: 8px;
+  font-size: 16px;
+  line-height: 20px;
+  color: #b5bac1;
+}
+
+.auth-field {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.auth-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #b5bac1;
+}
+
+.auth-label i {
+  color: #f23f43;
+  font-style: normal;
+}
+
+.auth-label.bad,
+.auth-label.bad span {
+  color: #fa777c;
+}
+
+.auth-label span {
+  text-transform: none;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.auth-input,
+.auth-select {
+  width: 100%;
+  height: 40px;
+  padding: 10px;
+  border: 1px solid #1e1f22;
+  border-radius: 3px;
+  background: #1e1f22;
+  color: #dbdee1;
+  font-family: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.auth-input:focus,
+.auth-select:focus {
+  border-color: #00a8fc;
+}
+
+.auth-select {
+  appearance: none;
+  padding-right: 26px;
+  background-image: linear-gradient(45deg, transparent 50%, #b5bac1 50%),
+    linear-gradient(135deg, #b5bac1 50%, transparent 50%);
+  background-position: calc(100% - 15px) 18px, calc(100% - 10px) 18px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.auth-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #b5bac1;
+}
+
+.auth-dob {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-dob .auth-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.auth-forgot {
+  display: block;
+  margin-top: 4px;
+  text-align: left;
+}
+
+.auth-link {
+  padding: 0;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #00a8fc;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  width: 100%;
+  height: 44px;
+  margin-top: 20px;
+  border-radius: 3px;
+  background: #5865f2;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.auth-submit:hover {
+  background: #4752c4;
+}
+
+.auth-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-foot {
+  margin-top: 8px;
+  text-align: left;
+  font-size: 14px;
+  line-height: 16px;
+  color: #949ba4;
+}
+
+.auth-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 18px;
+  color: #b5bac1;
+  cursor: pointer;
+}
+
+.auth-check input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.auth-box {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  background: #1e1f22;
+  box-shadow: inset 0 0 0 1px #4e5058;
+}
+
+.auth-check input:checked + .auth-box {
+  background: #5865f2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M8.99 16.4 4.6 12l1.4-1.41 2.99 2.99 8-8L18.4 7z'/%3E%3C/svg%3E")
+    center / 20px no-repeat;
+  box-shadow: none;
+}
+
+.auth-terms {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #949ba4;
+}
+
+.auth-terms a {
+  color: #00a8fc;
+  text-decoration: none;
+}
+
+.auth-terms a:hover {
+  text-decoration: underline;
+}
+
+.auth-qr-col {
+  flex: 0 0 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.auth-qr-col h2 {
+  margin-top: 20px;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  color: #f2f3f5;
+}
+
+.auth-qr-col p {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 18px;
+  color: #b5bac1;
+}
+
+.auth-qr {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  padding: 8px;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.auth-qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: crispEdges;
+}
+
+/* the app mark Discord prints over the middle of the code; the code's error
+   correction is what makes covering the centre safe */
+.auth-qr-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #5865f2;
+  color: #fff;
+  box-shadow: 0 0 0 4px #fff;
+}
+
+.auth-qr-mark svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* --- home nav rows: pills and counts -------------------------------------- */
+
+.row-pill {
+  margin-left: auto;
+  padding: 1px 5px;
+  border-radius: 8px;
+  background: var(--blurple);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.row-badge {
+  margin-left: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: var(--red);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Discord draws a collectible over the avatar, larger than it and centred,
+   and it never takes a click */
+.avatar-decoration {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  line-height: 0;
+}
+
+/* --- create a server ------------------------------------------------------ */
+
+.cs {
+  position: relative;
+  width: 440px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.cs-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  color: var(--muted);
+  z-index: 2;
+}
+
+.cs-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cs-head {
+  padding: 24px 16px 8px;
+  text-align: center;
+}
+
+.cs-head h2 {
+  font-size: 24px;
+  line-height: 30px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.cs-head p {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--muted);
+}
+
+.cs-body {
+  padding: 8px 16px 16px;
+  overflow: auto;
+}
+
+.cs-own,
+.cs-template,
+.cs-intent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 56px;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--hover);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.cs-own:hover,
+.cs-template:hover,
+.cs-intent:hover {
+  background: var(--selected);
+}
+
+.cs-own {
+  border: 1px solid var(--border);
+  background: transparent;
+}
+
+.cs-own-name,
+.cs-template-name,
+.cs-intent span:first-of-type {
+  flex: 1 1 auto;
+}
+
+.cs-own-art,
+.cs-template-art {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  font-size: 20px;
+}
+
+.cs-own svg,
+.cs-template svg,
+.cs-intent svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+
+.cs-intent svg:first-child {
+  width: 22px;
+  height: 22px;
+  color: var(--text);
+}
+
+.cs-section {
+  margin: 18px 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.cs-templates,
+.cs-body .cs-intent + .cs-intent {
+  margin-top: 8px;
+}
+
+.cs-templates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cs-skip {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.cs-inline-link {
+  padding: 0;
+  color: #00a8fc;
+  font-size: 13px;
+}
+
+.cs-inline-link:hover {
+  text-decoration: underline;
+}
+
+.cs-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px;
+  background: var(--hover);
+}
+
+.cs-foot-center {
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cs-foot-center .btn-secondary {
+  width: 100%;
+  height: 38px;
+}
+
+.cs-icon-row {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 16px;
+}
+
+.cs-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.cs-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cs-icon.has-icon {
+  background: none;
+}
+
+.cs-icon-badge {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--blurple);
+  color: #fff;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 0 0 0 3px var(--card);
+}
+
+.cs-swatches {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.cs-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.cs-swatch.on {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text);
+}
+
+.cs-terms {
+  margin-top: 10px;
+  font-size: 11px;
+  line-height: 15px;
+  color: var(--muted);
+}
+
+.cs-terms a {
+  color: #00a8fc;
+  text-decoration: none;
+}
+
+.cs-invite-hint {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--hover);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cs-invite-hint b {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.cs-invite-hint span {
+  display: block;
+  line-height: 18px;
+}
+
+/* --- Nitro ---------------------------------------------------------------- */
+
+.nitro,
+.quests,
+.shop {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nitro-header,
+.quests-header,
+.shop-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  flex: 0 0 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.nitro-tabs {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow: auto hidden;
+}
+
+.nitro-tab {
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nitro-tab:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+
+.nitro-tab.on {
+  color: var(--strong);
+  background: var(--selected);
+}
+
+.nitro-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nitro-heart {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.nitro-heart:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.nitro-heart.on {
+  color: #e292aa;
+}
+
+.nitro-gift-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 4px;
+  background: var(--blurple);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.nitro-gift-btn:hover {
+  filter: brightness(1.1);
+}
+
+.nitro-body,
+.quests-body,
+.shop-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 20px 24px 40px;
+}
+
+.nitro-hero {
+  position: relative;
+  border-radius: 10px;
+  padding: 36px 28px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.nitro-wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nitro-wordmark-small {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.nitro-wordmark-big {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.nitro-hero p {
+  max-width: 460px;
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 20px;
+  opacity: 0.92;
+}
+
+.nitro-cta {
+  margin-top: 20px;
+  height: 40px;
+  padding: 0 22px;
+  border-radius: 20px;
+  background: #fff;
+  color: #4b57d8;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nitro-hero-active {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.nitro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.nitro-cancel {
+  color: #fff;
+  font-size: 13px;
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.nitro-status {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.nitro-status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--muted);
+}
+
+.nitro-status-card svg {
+  color: var(--text);
+}
+
+.nitro-status-card b {
+  font-size: 20px;
+  color: var(--strong);
+}
+
+.nitro-status-card span {
+  font-size: 12px;
+}
+
+.nitro-h2 {
+  margin: 28px 0 4px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.nitro-lede {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.nitro-perks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.nitro-perk {
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.nitro-perk-art {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.nitro-perk h3 {
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.nitro-perk p {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.nitro-news {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.nitro-news-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.nitro-news-tag {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--selected);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.nitro-news-tag.new {
+  background: #b473f5;
+  color: #fff;
+}
+
+.nitro-news-item h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.nitro-news-item p {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+.nitro-best {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.nitro-best-card {
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.nitro-best-card.wide {
+  grid-column: span 2;
+}
+
+.nitro-best-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.nitro-best-card p {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--muted);
+}
+
+.nitro-interval {
+  display: inline-flex;
+  gap: 2px;
+  margin: 12px 0 16px;
+  padding: 3px;
+  border-radius: 6px;
+  background: var(--card);
+}
+
+.nitro-interval button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.nitro-interval button.on {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.nitro-save {
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--green);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.nitro-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 380px));
+  gap: 16px;
+}
+
+.nitro-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.nitro-plan.nitro {
+  border-color: #b473f5;
+  background: linear-gradient(180deg, rgba(180, 115, 245, 0.12), transparent 220px), var(--card);
+}
+
+.nitro-popular {
+  position: absolute;
+  right: 16px;
+  top: -10px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: #b473f5;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.nitro-plan h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--strong);
+}
+
+.nitro-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.nitro-price b {
+  font-size: 30px;
+  color: var(--strong);
+}
+
+.nitro-perklist {
+  list-style: none;
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nitro-perklist li,
+.gift-perks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.nitro-perklist svg,
+.gift-perks svg {
+  flex: 0 0 auto;
+  color: var(--green);
+}
+
+.nitro-plan-btn {
+  margin-top: auto;
+  width: 100%;
+  height: 40px;
+  border-radius: 4px;
+  background: var(--blurple);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nitro-plan.nitro .nitro-plan-btn {
+  background: #b473f5;
+}
+
+.nitro-plan-btn.current {
+  background: var(--selected);
+  color: var(--text);
+}
+
+.nitro-skus {
+  margin-top: 28px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.nitro-skus summary {
+  cursor: pointer;
+}
+
+.nitro-sku-table,
+.nitro-compare {
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.nitro-sku-table th,
+.nitro-sku-table td,
+.nitro-compare th,
+.nitro-compare td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.nitro-sku-table th,
+.nitro-compare thead th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.nitro-compare td {
+  text-align: center;
+  color: var(--text);
+}
+
+.nitro-compare tbody th {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.nitro-compare .hi {
+  background: rgba(180, 115, 245, 0.08);
+}
+
+.nitro-compare thead .hi {
+  color: #b473f5;
+}
+
+.nitro-yes {
+  color: var(--green);
+}
+
+.nitro-no {
+  color: var(--muted);
+}
+
+.nitro-redeem {
+  margin-top: 32px;
+}
+
+.nitro-redeem-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  max-width: 520px;
+}
+
+.nitro-redeem-row .field {
+  flex: 1 1 auto;
+  margin: 0;
+  background: var(--rail);
+  border: 1px solid var(--border);
+}
+
+.nitro-gifts {
+  list-style: none;
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nitro-gifts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.nitro-gifts li.used {
+  opacity: 0.6;
+}
+
+.nitro-gifts li div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.nitro-gifts b {
+  display: block;
+  font-size: 14px;
+  color: var(--strong);
+}
+
+.nitro-gifts span.mono {
+  color: var(--muted);
+}
+
+.nitro-used {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.nitro-gifts .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --- Send a Gift ---------------------------------------------------------- */
+
+.gift {
+  width: 720px;
+  max-width: 94vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.gift-head {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px 10px;
+}
+
+.gift-head h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--strong);
+}
+
+.gift-close {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.gift-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.gift-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 6px 20px 16px;
+  overflow: auto;
+}
+
+.gift-col {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--hover);
+  border: 1px solid var(--border);
+}
+
+.gift-col.nitro {
+  border-color: #b473f5;
+  background: linear-gradient(180deg, rgba(180, 115, 245, 0.14), transparent 200px), var(--hover);
+}
+
+.gift-col header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gift-col header svg {
+  color: #b473f5;
+}
+
+.gift-col.basic header svg {
+  color: #007cc2;
+}
+
+.gift-col h3 {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--strong);
+}
+
+.gift-popular {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 9px;
+  background: #b473f5;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.gift-prices {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.gift-price {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gift-price:hover {
+  border-color: var(--blurple);
+}
+
+.gift-price b {
+  font-size: 18px;
+  color: var(--strong);
+}
+
+.gift-perks {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.gift-promo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: linear-gradient(120deg, #3736bb, #8377eb);
+  color: #fff;
+}
+
+.gift-promo b {
+  font-size: 16px;
+}
+
+.gift-promo span:last-of-type {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.gift-promo svg {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  opacity: 0.9;
+}
+
+.gift-promo-pill {
+  align-self: flex-start;
+  padding: 2px 7px;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.28);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.gift-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--hover);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.gift-foot svg {
+  color: #b473f5;
+}
+
+/* --- Quests --------------------------------------------------------------- */
+
+.quests-title,
+.shop-title {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+.quests-title h2,
+.shop-title h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.quests-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quests-multiplier {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 12px;
+  background: rgba(180, 115, 245, 0.18);
+  color: #ca9ef9;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.quests-orbs,
+.shop-orbs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.quests-orbs svg,
+.shop-orbs svg {
+  color: #ca9ef9;
+}
+
+.quests-hero,
+.shop-hero {
+  border-radius: 10px;
+  padding: 28px;
+  color: #fff;
+}
+
+.quests-hero h1,
+.shop-hero h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.quests-hero p,
+.shop-hero p {
+  max-width: 520px;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 19px;
+  opacity: 0.9;
+}
+
+.quests-hero-count {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.quests-sort {
+  display: flex;
+  gap: 6px;
+  margin: 20px 0 12px;
+  flex-wrap: wrap;
+}
+
+.quests-sort-btn,
+.shop-collection {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.quests-sort-btn.on,
+.shop-collection.on {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.quests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.quest-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid transparent;
+  text-align: left;
+}
+
+.quest-card:hover {
+  border-color: var(--border);
+  background: var(--selected);
+}
+
+.quest-card.claimed {
+  opacity: 0.62;
+}
+
+.quest-card.completed {
+  border-color: #ca9ef9;
+}
+
+.quest-tile {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.quest-tile i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  padding: 0 4px;
+  font-size: 7.5px;
+  line-height: 8.5px;
+  font-style: normal;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.01em;
+  opacity: 0.9;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.quest-card-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.quest-card-text b {
+  font-size: 14px;
+  color: var(--strong);
+}
+
+.quest-card-game {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.quest-card-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #ca9ef9;
+  font-weight: 600;
+}
+
+.quest-bar {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--selected);
+  overflow: hidden;
+}
+
+.quest-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7d42f2, #ca9ef9);
+}
+
+.quest-bar.big {
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 4px;
+  margin: 0;
+}
+
+.quest-card-right {
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.quest-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.quest-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.quest-state.ready {
+  background: #7d42f2;
+  color: #fff;
+}
+
+.quest-state.done {
+  background: var(--hover);
+  color: var(--muted);
+}
+
+.quest-sheet {
+  width: 480px;
+  max-width: 94vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  background: var(--card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.quest-sheet-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  color: #fff;
+}
+
+.quest-sheet-hero h2 {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.quest-sheet-hero p {
+  margin-top: 3px;
+  font-size: 13px;
+  opacity: 0.88;
+}
+
+.quest-sheet-body {
+  padding: 18px 22px;
+  overflow: auto;
+}
+
+.quest-sheet-body h3 {
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.quest-sheet-body h3:first-child {
+  margin-top: 0;
+}
+
+.quest-task {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.quest-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.quest-count {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.quest-rewards {
+  list-style: none;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quest-rewards li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--hover);
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.quest-rewards svg {
+  color: #ca9ef9;
+}
+
+.quest-rewards em {
+  margin-left: auto;
+  font-style: normal;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.quest-expiry {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.quest-sheet-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  background: var(--hover);
+}
+
+.quest-sheet-foot .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+}
+
+.quest-claimed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--green);
+}
+
+.quest-running {
+  padding: 0 22px 14px;
+  background: var(--hover);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* --- Shop ----------------------------------------------------------------- */
+
+.shop-hero {
+  background: linear-gradient(135deg, #8547c6, #3736bb);
+}
+
+.shop-collections {
+  display: flex;
+  gap: 6px;
+  margin: 20px 0 12px;
+  flex-wrap: wrap;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.shop-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 12px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid transparent;
+}
+
+.shop-item.on {
+  border-color: #ca9ef9;
+}
+
+/* the decoration is drawn over a sample avatar, the way the Shop previews it */
+.shop-item-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+}
+
+.shop-item-art::before {
+  content: '';
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--selected);
+}
+
+.shop-item-art svg {
+  position: relative;
+}
+
+.shop-item b {
+  font-size: 14px;
+  color: var(--strong);
+}
+
+.shop-item-collection {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.shop-buy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  margin-top: 8px;
+  padding: 0 14px;
+  border-radius: 15px;
+  background: var(--selected);
+  color: var(--strong);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.shop-buy:hover:not(:disabled) {
+  background: var(--blurple);
+  color: #fff;
+}
+
+.shop-buy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shop-buy.equipped {
+  background: #7d42f2;
+  color: #fff;
+}
+
+.shop-buy s {
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.shop-empty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.status-opt.danger {
+  color: var(--red);
+}
+
+/* the character counter Discord shows as a message nears its limit */
+.composer-count {
+  align-self: flex-end;
+  padding: 0 6px 12px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.composer-count.over {
+  color: var(--red);
+}
+
+.composer-toobig {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(216, 58, 65, 0.12);
+  color: var(--red);
+  font-size: 13px;
+}
+
+.composer-toobig button {
+  margin-left: auto;
+  color: inherit;
+}
+
+.composer-toobig svg {
+  width: 14px;
+  height: 14px;
 }

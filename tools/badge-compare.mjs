@@ -5,6 +5,7 @@
 import { chromium } from 'playwright'
 import fs from 'node:fs'
 import path from 'node:path'
+import { readFileSync as __readSession } from 'node:fs'
 
 const rows = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
 const CELL = 18
@@ -23,6 +24,7 @@ div{clear:both;height:${CELL}px}
 fs.writeFileSync('/tmp/badgecmp.html', html)
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: CELL * 6, height: 800 }, deviceScaleFactor: 1 })
+await p.addInitScript(__readSession('tools/session.js', 'utf8'))
 await p.goto('file:///tmp/badgecmp.html')
 await p.waitForTimeout(900)
 await p.screenshot({ path: process.argv[3], fullPage: true })

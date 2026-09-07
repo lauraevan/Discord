@@ -7,6 +7,7 @@
  */
 import { chromium } from 'playwright'
 import fs from 'node:fs'
+import { readFileSync as __readSession } from 'node:fs'
 
 const SEED = () => {
   localStorage.setItem(
@@ -31,6 +32,7 @@ const trials = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'))
 const prelude = process.argv[3] ? fs.readFileSync(process.argv[3], 'utf8') : null
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: 1558, height: 743 }, deviceScaleFactor: 1 })
+await p.addInitScript(__readSession('tools/session.js', 'utf8'))
 await p.addInitScript(SEED)
 await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(700)

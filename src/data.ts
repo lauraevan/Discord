@@ -52,7 +52,26 @@ export type Account = {
   profileTheme?: [string, string]
   /** ids from src/badges.ts, in the order the profile shows them */
   badges?: string[]
+  /** collectible ids bought in the Shop */
+  collectibles?: string[]
+  /** the avatar decoration currently worn, if any */
+  decoration?: string
 }
+
+/**
+ * The account a freshly registered user gets: their own display name and
+ * username, Discord's default blurple, and nothing else. Badges, Nitro and
+ * collectibles are all earned from here rather than handed out.
+ */
+export const accountFor = (displayName: string, username: string): Account => ({
+  name: displayName,
+  handle: username,
+  pronouns: '',
+  bio: '',
+  status: 'online',
+  color: '#5865f2',
+  badges: [],
+})
 
 export const defaultAccount: Account = {
   name: 'Nebula',
@@ -176,6 +195,8 @@ export type Server = {
   name: string
   initials: string
   color: string
+  /** an uploaded icon, as a data URL; the initials show when there is none */
+  icon?: string
   description?: string
   categories: Category[]
   channels: Channel[]

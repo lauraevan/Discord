@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { uid, SLASH, type Account, type Attachment, type Channel, type Message } from '../data'
+import { messageLimit, uploadLimitMb, type PremiumTypeValue } from '../nitro'
 import { EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
 import {
@@ -94,6 +95,8 @@ export function Composer({
   onApps,
   onSchedule,
   onAttach,
+  premiumType,
+  onGiftNitro,
 }: {
   channel: Channel
   channels: Channel[]
@@ -108,8 +111,12 @@ export function Composer({
   onApps: () => void
   onSchedule: (text: string, at: number) => void
   onAttach: (a: Attachment) => void
+  /** the account's premium type, which is what sets the two caps below */
+  premiumType: PremiumTypeValue
+  onGiftNitro: () => void
 }) {
   const [value, setValue] = useState('')
+  const [tooBig, setTooBig] = useState<string | null>(null)
   const [caret, setCaret] = useState(0)
   const [pick, setPick] = useState(0)
   const [plusOpen, setPlusOpen] = useState(false)
@@ -117,9 +124,20 @@ export function Composer({
   const input = useRef<HTMLTextAreaElement>(null)
   const file = useRef<HTMLInputElement>(null)
 
+  // Nitro raises both of the composer's caps, so they are read off the
+  // account's premium type rather than hard-coded
+  const limit = messageLimit(premiumType)
+  const uploadCap = uploadLimitMb(premiumType)
+
   /** Images pasted or picked become data URLs; nothing leaves the browser. */
   const take = (f: File) => {
     if (!f.type.startsWith('image/')) return
+    if (f.size > uploadCap * 1024 * 1024) {
+      // Discord's own wording when a file is over the account's limit
+      setTooBig(`Your files are too powerful. Max upload size is ${uploadCap}MB.`)
+      return
+    }
+    setTooBig(null)
     const r = new FileReader()
     r.onload = () => onAttach({ id: uid('att'), name: f.name, url: String(r.result) })
     r.readAsDataURL(f)
@@ -154,7 +172,7 @@ export function Composer({
 
   const submit = () => {
     const raw = value.trim()
-    if (!raw) return
+    if (!raw || raw.length > limit) return
     const slash = /^\/(\w+)\s*([\s\S]*)$/.exec(raw)
     const run = slash && SLASH[slash[1]]
     onSend(run ? run(slash[2]) : raw)
@@ -163,7 +181,7 @@ export function Composer({
   }
 
   const acts = [
-    { label: 'Gift a Nitro subscription', Icon: GiftIcon, on: () => {} },
+    { label: 'Gift a Nitro subscription', Icon: GiftIcon, on: onGiftNitro },
     { label: 'GIF', Icon: GifIcon, on: () => {} },
     { label: 'Sticker', Icon: StickerIcon, on: () => {} },
     {
@@ -373,6 +391,13 @@ export function Composer({
             if (e.key === 'Escape' && replyTo) onCancelReply()
           }}
         />
+        {/* Discord shows the remaining characters once you are within 200 of
+            the limit, and turns it red past it */}
+        {value.length > limit - 200 ? (
+          <span className={'composer-count' + (value.length > limit ? ' over' : '')}>
+            {(limit - value.length).toLocaleString()}
+          </span>
+        ) : null}
         <div className="composer-acts">
           {acts.map(({ label, Icon, on }) => (
             <Tooltip key={label} label={label} side="above">
@@ -383,6 +408,14 @@ export function Composer({
           ))}
         </div>
       </div>
+      {tooBig ? (
+        <div className="composer-toobig" role="alert">
+          {tooBig}
+          <button onClick={() => setTooBig(null)} aria-label="Dismiss">
+            <CloseIcon />
+          </button>
+        </div>
+      ) : null}
     </div>
   )
 }

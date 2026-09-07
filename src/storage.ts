@@ -9,6 +9,9 @@
  * that fails either check is discarded and the default is used.
  */
 import type { Account, Message, Server, Status } from './data'
+import type { Gift, Subscription } from './nitro'
+import type { QuestUserStatus } from './quests'
+import { isCredentials, type Credential } from './auth'
 
 /** Bump when the shape of anything below changes. */
 const SCHEMA = 4
@@ -23,6 +26,12 @@ export const K = {
   reads: `${PREFIX}reads`,
   prefs: `${PREFIX}prefs`,
   scheduled: `${PREFIX}scheduled`,
+  credentials: `${PREFIX}credentials`,
+  session: `${PREFIX}session`,
+  subscription: `${PREFIX}subscription`,
+  gifts: `${PREFIX}gifts`,
+  orbs: `${PREFIX}orbs`,
+  quests: `${PREFIX}quests`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -94,6 +103,48 @@ export function isMessages(v: unknown): v is Record<string, Message[]> {
 
 export const isThemeId = (ids: string[]) => (v: unknown): v is string =>
   isStr(v) && ids.includes(v)
+
+export { isCredentials }
+export type { Credential }
+
+/** The signed-in account's username, or null when nobody is signed in. */
+export const isSession = (v: unknown): v is string | null => v === null || isStr(v)
+
+export const isNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v)
+
+export function isSubscription(v: unknown): v is Subscription | null {
+  return (
+    v === null ||
+    (isObj(v) &&
+      isNumber(v.premiumType) &&
+      isNumber(v.until) &&
+      (v.source === 'purchase' || v.source === 'gift') &&
+      (v.interval === 1 || v.interval === 2))
+  )
+}
+
+export function isGifts(v: unknown): v is Gift[] {
+  return (
+    Array.isArray(v) &&
+    v.every(
+      (g) =>
+        isObj(g) &&
+        isStr(g.code) &&
+        (g.tier === 'nitro' || g.tier === 'basic') &&
+        (g.interval === 1 || g.interval === 2) &&
+        isNumber(g.createdAt),
+    )
+  )
+}
+
+export function isQuestStatus(v: unknown): v is Record<string, QuestUserStatus> {
+  return (
+    isObj(v) &&
+    Object.values(v).every(
+      (s) => isObj(s) && isStr(s.questId) && isObj(s.progress),
+    )
+  )
+}
 
 /** Read `key`, or return `fallback` if it is missing, unparseable or the wrong shape. */
 export function load<T>(key: string, fallback: T, valid: (v: unknown) => v is T): T {

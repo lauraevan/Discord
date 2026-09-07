@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { Decoration } from '../ui/Decorations'
 import { statusColor, statusLabel, type Account } from '../data'
 import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
@@ -20,6 +21,12 @@ export function Avatar({ account, size }: { account: Account; size: number }) {
   return (
     <span className="avatar-wrap" style={{ width: size, height: size, flex: `0 0 ${size}px` }}>
       <DefaultAvatar color={account.color} />
+      {/* Discord draws a decoration at 1.2x the avatar box, centred over it */}
+      {account.decoration ? (
+        <span className="avatar-decoration">
+          <Decoration id={account.decoration} size={size * 1.2} />
+        </span>
+      ) : null}
       <span
         className="status-dot"
         style={{

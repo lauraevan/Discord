@@ -33,6 +33,7 @@ export function UserSettings({
   onPrefs,
   onTheme,
   onClose,
+  onSignOut,
 }: {
   account: Account
   prefs: Prefs
@@ -41,6 +42,7 @@ export function UserSettings({
   onPrefs: (p: Partial<Prefs>) => void
   onTheme: (t: Theme) => void
   onClose: () => void
+  onSignOut: () => void
 }) {
   const [section, setSection] = useState('account')
   const set = <K extends keyof Prefs>(k: K, v: Prefs[K]) => onPrefs({ [k]: v } as Partial<Prefs>)
@@ -696,7 +698,13 @@ export function UserSettings({
       {section === 'logout' ? (
         <>
           <Title>Log Out</Title>
-          <Note>There is no account to log out of — everything lives in this browser.</Note>
+          <Note>
+            You will be returned to the login screen. Your servers, messages and Nitro stay in
+            this browser and come back when you sign in again.
+          </Note>
+          <button className="btn-danger" onClick={onSignOut}>
+            Log Out
+          </button>
         </>
       ) : null}
     </SettingsLayer>
