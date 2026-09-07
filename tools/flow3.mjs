@@ -244,9 +244,9 @@ await step('a quest enrols, runs, completes and pays out', async () => {
 await step('the Orbs can be spent in the Shop, and the decoration is worn', async () => {
   await p.click('.dm-nav .row:has-text("Shop")')
   await p.waitForTimeout(300)
-  await p.click('.shop-item:has-text("Halo") .shop-buy')
+  await p.click('.shop-item:has-text("Cozy Cat") .shop-buy')
   await p.waitForTimeout(300)
-  await p.click('.shop-item:has-text("Halo") .shop-buy')
+  await p.click('.shop-item:has-text("Cozy Cat") .shop-buy')
   await p.waitForTimeout(300)
   expect((await p.locator('.shop-buy.equipped').count()) === 1, 'decoration not worn')
   expect((await p.locator('.user-card .avatar-decoration').count()) === 1, 'not shown on the avatar')

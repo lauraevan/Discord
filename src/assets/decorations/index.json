@@ -1,0 +1,146 @@
+[
+  {
+    "id": "air",
+    "name": "Air",
+    "collection": "Elements",
+    "file": "air.png"
+  },
+  {
+    "id": "balance",
+    "name": "Balance",
+    "collection": "Elements",
+    "file": "balance.png"
+  },
+  {
+    "id": "earth",
+    "name": "Earth",
+    "collection": "Elements",
+    "file": "earth.png"
+  },
+  {
+    "id": "fire",
+    "name": "Fire",
+    "collection": "Elements",
+    "file": "fire.png"
+  },
+  {
+    "id": "lightning",
+    "name": "Lightning",
+    "collection": "Elements",
+    "file": "lightning.png"
+  },
+  {
+    "id": "water",
+    "name": "Water",
+    "collection": "Elements",
+    "file": "water.png"
+  },
+  {
+    "id": "astronaut-helmet",
+    "name": "Astronaut Helmet",
+    "collection": "Space",
+    "file": "astronaut-helmet.png"
+  },
+  {
+    "id": "black-hole",
+    "name": "Black Hole",
+    "collection": "Space",
+    "file": "black-hole.png"
+  },
+  {
+    "id": "constellations",
+    "name": "Constellations",
+    "collection": "Space",
+    "file": "constellations.png"
+  },
+  {
+    "id": "solar-orbit",
+    "name": "Solar Orbit",
+    "collection": "Space",
+    "file": "solar-orbit.png"
+  },
+  {
+    "id": "stardust",
+    "name": "Stardust",
+    "collection": "Space",
+    "file": "stardust.png"
+  },
+  {
+    "id": "ufo",
+    "name": "UFO",
+    "collection": "Space",
+    "file": "ufo.png"
+  },
+  {
+    "id": "chromawave",
+    "name": "Chromawave",
+    "collection": "Lo-Fi Vibes",
+    "file": "chromawave.png"
+  },
+  {
+    "id": "cozy-cat",
+    "name": "Cozy Cat",
+    "collection": "Lo-Fi Vibes",
+    "file": "cozy-cat.png"
+  },
+  {
+    "id": "cozy-headphones",
+    "name": "Cozy Headphones",
+    "collection": "Lo-Fi Vibes",
+    "file": "cozy-headphones.png"
+  },
+  {
+    "id": "doodling",
+    "name": "Doodling",
+    "collection": "Lo-Fi Vibes",
+    "file": "doodling.png"
+  },
+  {
+    "id": "oasis",
+    "name": "Oasis",
+    "collection": "Lo-Fi Vibes",
+    "file": "oasis.png"
+  },
+  {
+    "id": "rainy-mood",
+    "name": "Rainy Mood",
+    "collection": "Lo-Fi Vibes",
+    "file": "rainy-mood.png"
+  },
+  {
+    "id": "dragons-smile",
+    "name": "Dragon's Smile",
+    "collection": "Lunar New Year",
+    "file": "dragons-smile.png"
+  },
+  {
+    "id": "fan-flourish",
+    "name": "Fan Flourish",
+    "collection": "Lunar New Year",
+    "file": "fan-flourish.png"
+  },
+  {
+    "id": "firecrackers",
+    "name": "Firecrackers",
+    "collection": "Lunar New Year",
+    "file": "firecrackers.png"
+  },
+  {
+    "id": "koi-pond",
+    "name": "Koi Pond",
+    "collection": "Lunar New Year",
+    "file": "koi-pond.png"
+  },
+  {
+    "id": "lucky-envelopes",
+    "name": "Lucky Envelopes",
+    "collection": "Lunar New Year",
+    "file": "lucky-envelopes.png"
+  },
+  {
+    "id": "lunar-lanterns",
+    "name": "Lunar Lanterns",
+    "collection": "Lunar New Year",
+    "file": "lunar-lanterns.png"
+  }
+]

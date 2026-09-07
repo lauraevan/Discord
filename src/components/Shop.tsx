@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { PremiumType, type PremiumTypeValue } from '../nitro'
 import { CheckSmallIcon, LockIcon, OrbsIcon, ShopSparkleIcon, SparkleIcon } from '../ui/Icons'
-import { Decoration, DECORATIONS } from '../ui/Decorations'
+import { DECORATIONS, Decoration } from '../ui/Decorations'
 
 /**
  * The Shop tab.
@@ -12,10 +12,8 @@ import { Decoration, DECORATIONS } from '../ui/Decorations'
  * client's SHOP_DISCOUNTS perk, and a bought decoration is worn on the real
  * avatar everywhere in the app.
  *
- * The decorations themselves are drawn in src/ui/Decorations.tsx. Discord's
- * own artwork is served from its CDN, which this page cannot reach and should
- * not pass off as its own, so these are named for what they are rather than
- * for a Discord SKU.
+ * The decorations are Discord's own — four complete Shop collections, vendored
+ * by tools/fetch-decorations.py; see src/ui/Decorations.tsx.
  */
 
 /** Nitro's SHOP_DISCOUNTS perk. */
@@ -61,7 +59,7 @@ export function ShopPage({
         <section className="shop-hero">
           <h1>Avatar Decorations</h1>
           <p>
-            Spend the Orbs you earn from Quests. {discounted ? 'Nitro takes ' : 'Nitro takes '}
+            Spend the Orbs you earn from Quests. Nitro takes{' '}
             {Math.round(NITRO_DISCOUNT * 100)}% off every collectible
             {discounted ? ' — already applied.' : '.'}
           </p>
@@ -87,7 +85,7 @@ export function ShopPage({
             return (
               <article key={d.id} className={'shop-item' + (on ? ' on' : '')}>
                 <span className="shop-item-art">
-                  <Decoration id={d.id} size={88} />
+                  <Decoration id={d.id} size={120} />
                 </span>
                 <b>{d.name}</b>
                 <span className="shop-item-collection">{d.collection}</span>
