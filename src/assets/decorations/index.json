@@ -1,5 +1,124 @@
 [
   {
+    "id": "in-love",
+    "name": "In Love",
+    "collection": "Anime",
+    "file": "in-love.webp",
+    "still": "in-love.png"
+  },
+  {
+    "id": "radiating-energy",
+    "name": "Radiating Energy",
+    "collection": "Anime",
+    "file": "radiating-energy.webp",
+    "still": "radiating-energy.png"
+  },
+  {
+    "id": "shocked",
+    "name": "Shocked",
+    "collection": "Anime",
+    "file": "shocked.webp",
+    "still": "shocked.png"
+  },
+  {
+    "id": "soul-leaving-body",
+    "name": "Soul Leaving Body",
+    "collection": "Anime",
+    "file": "soul-leaving-body.webp",
+    "still": "soul-leaving-body.png"
+  },
+  {
+    "id": "starry-eyed",
+    "name": "Starry Eyed",
+    "collection": "Anime",
+    "file": "starry-eyed.webp",
+    "still": "starry-eyed.png"
+  },
+  {
+    "id": "sweat-drops",
+    "name": "Sweat Drops",
+    "collection": "Anime",
+    "file": "sweat-drops.webp",
+    "still": "sweat-drops.png"
+  },
+  {
+    "id": "angry",
+    "name": "Angry",
+    "collection": "Anime",
+    "file": "angry.webp",
+    "still": "angry.png"
+  },
+  {
+    "id": "cat-ears",
+    "name": "Cat Ears",
+    "collection": "Anime",
+    "file": "cat-ears.webp",
+    "still": "cat-ears.png"
+  },
+  {
+    "id": "dismay",
+    "name": "Dismay",
+    "collection": "Anime",
+    "file": "dismay.webp",
+    "still": "dismay.png"
+  },
+  {
+    "id": "heartbloom",
+    "name": "Heartbloom",
+    "collection": "Anime",
+    "file": "heartbloom.webp",
+    "still": "heartbloom.png"
+  },
+  {
+    "id": "in-tears",
+    "name": "In Tears",
+    "collection": "Anime",
+    "file": "in-tears.webp",
+    "still": "in-tears.png"
+  },
+  {
+    "id": "ki-energy",
+    "name": "Ki Energy",
+    "collection": "Anime",
+    "file": "ki-energy.webp",
+    "still": "ki-energy.png"
+  },
+  {
+    "id": "rage",
+    "name": "Rage",
+    "collection": "Anime",
+    "file": "rage.webp",
+    "still": "rage.png"
+  },
+  {
+    "id": "cybernetic",
+    "name": "Cybernetic",
+    "collection": "Cyberpunk",
+    "file": "cybernetic.webp",
+    "still": "cybernetic.png"
+  },
+  {
+    "id": "digital-sunrise",
+    "name": "Digital Sunrise",
+    "collection": "Cyberpunk",
+    "file": "digital-sunrise.webp",
+    "still": "digital-sunrise.png"
+  },
+  {
+    "id": "glitch",
+    "name": "Glitch",
+    "collection": "Cyberpunk",
+    "file": "glitch.webp",
+    "still": "glitch.png"
+  },
+  {
+    "id": "implant",
+    "name": "Implant",
+    "collection": "Cyberpunk",
+    "file": "implant.webp",
+    "still": "implant.png"
+  },
+  {
     "id": "air",
     "name": "Air",
     "collection": "Elements",
@@ -40,6 +159,118 @@
     "collection": "Elements",
     "file": "water.webp",
     "still": "water.png"
+  },
+  {
+    "id": "defensive-shield",
+    "name": "Defensive Shield",
+    "collection": "Fantasy",
+    "file": "defensive-shield.webp",
+    "still": "defensive-shield.png"
+  },
+  {
+    "id": "fairy-sprites",
+    "name": "Fairy Sprites",
+    "collection": "Fantasy",
+    "file": "fairy-sprites.webp",
+    "still": "fairy-sprites.png"
+  },
+  {
+    "id": "flaming-sword",
+    "name": "Flaming Sword",
+    "collection": "Fantasy",
+    "file": "flaming-sword.webp",
+    "still": "flaming-sword.png"
+  },
+  {
+    "id": "glowing-runes",
+    "name": "Glowing Runes",
+    "collection": "Fantasy",
+    "file": "glowing-runes.webp",
+    "still": "glowing-runes.png"
+  },
+  {
+    "id": "magical-potion",
+    "name": "Magical Potion",
+    "collection": "Fantasy",
+    "file": "magical-potion.webp",
+    "still": "magical-potion.png"
+  },
+  {
+    "id": "skull-medallion",
+    "name": "Skull Medallion",
+    "collection": "Fantasy",
+    "file": "skull-medallion.webp",
+    "still": "skull-medallion.png"
+  },
+  {
+    "id": "treasure-and-key",
+    "name": "Treasure and Key",
+    "collection": "Fantasy",
+    "file": "treasure-and-key.webp",
+    "still": "treasure-and-key.png"
+  },
+  {
+    "id": "wizards-staff",
+    "name": "Wizard's Staff",
+    "collection": "Fantasy",
+    "file": "wizards-staff.webp",
+    "still": "wizards-staff.png"
+  },
+  {
+    "id": "beamchop",
+    "name": "Beamchop",
+    "collection": "Monsters",
+    "file": "beamchop.webp",
+    "still": "beamchop.png"
+  },
+  {
+    "id": "chewbert",
+    "name": "Chewbert",
+    "collection": "Monsters",
+    "file": "chewbert.webp",
+    "still": "chewbert.png"
+  },
+  {
+    "id": "chuck",
+    "name": "Chuck",
+    "collection": "Monsters",
+    "file": "chuck.webp",
+    "still": "chuck.png"
+  },
+  {
+    "id": "doodlezard",
+    "name": "Doodlezard",
+    "collection": "Monsters",
+    "file": "doodlezard.webp",
+    "still": "doodlezard.png"
+  },
+  {
+    "id": "gawblehop",
+    "name": "Gawblehop",
+    "collection": "Monsters",
+    "file": "gawblehop.webp",
+    "still": "gawblehop.png"
+  },
+  {
+    "id": "glop",
+    "name": "Glop",
+    "collection": "Monsters",
+    "file": "glop.webp",
+    "still": "glop.png"
+  },
+  {
+    "id": "stinkums",
+    "name": "Stinkums",
+    "collection": "Monsters",
+    "file": "stinkums.webp",
+    "still": "stinkums.png"
+  },
+  {
+    "id": "winkle",
+    "name": "Winkle",
+    "collection": "Monsters",
+    "file": "winkle.webp",
+    "still": "winkle.png"
   },
   {
     "id": "astronaut-helmet",

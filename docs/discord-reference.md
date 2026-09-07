@@ -325,3 +325,50 @@ the task adds elapsed seconds to `progress[eventName].value` on the client's
 own 30-second heartbeat, so a fifteen-minute quest takes fifteen minutes and
 stops the moment it is paused. `tools/flow3.mjs` verifies the whole loop with a
 faked clock rather than a shortcut in the app.
+
+## Client themes (background gradients)
+
+Nitro's background gradients, out of the bundle's own preset table. The ids are
+Discord's (`{TWILIGHT:1, PLUM:2, FIRE:3, GOLD_DUST:4, MOSS:5, JADE:6,
+OBSIDIAN:7, OCEAN:8, DENIM:9, BLURPLE:10}`), each preset built by a helper that
+takes the two stops and the base mix:
+
+```js
+_(from, to, baseMix) = { color: from, angle: 0, baseMix,
+                         colors: [{ hex: from, stop: 0 }, { hex: to, stop: 100 }] }
+```
+
+| Preset | id | dark | light | baseMix |
+| --- | --- | --- | --- | --- |
+| Twilight | 1 | `#69426A` → `#111731` | `#FA9EFF` → `#5A7EFE` | 100 |
+| Denim | 9 | `#5359AD` → `#121238` | `#DBDBFF` → `#6060FF` | 100 |
+| Ocean | 8 | `#245B92` → `#141D40` | `#9ADBF7` → `#2D3CCA` | 100 |
+| Blurple | 10 | `#533D9E` → `#1A1035` | `#C3BFFF` → `#816BDC` | 100 |
+| Obsidian | 7 | `#5E4C85` → `#1E1740` | `#B59DF2` → `#8F89D2` | 100 |
+| Plum | 2 | `#8A3F7F` → `#2C0D25` | `#E893FF` → `#FFADDC` | 100 |
+| Fire | 3 | `#9B2C2C` → `#2A0C0C` | `#FFEBCA` → `#FF8989` | 50 |
+| Gold Dust | 4 | `#6C523D` → `#241912` | `#FFE7DA` → `#FFD89B` | 50 |
+| Moss | 5 | `#58694E` → `#222A1C` | `#B7D19F` → `#B1DCA4` | 50 |
+| Jade | 6 | `#297071` → `#18203F` | `#C5F0D2` → `#60ADB2` | 50 |
+
+The picker's order is `[TWILIGHT, DENIM, OCEAN, BLURPLE, OBSIDIAN, PLUM, FIRE,
+GOLD_DUST, MOSS, JADE]`; the default base mix elsewhere in the client is 74 and
+the default accent is `#5865F2`, with the theme's tones clamped to 15–75.
+`ClientThemesBackgroundStore` persists only `gradientPresetId`, so the gradient
+is a setting alongside the light/dark appearance rather than a theme of its own
+— which is why the app applies a preset over whichever base theme is on.
+
+## Collectibles
+
+Discord's collections are products with `styles.background_colors`,
+`styles.button_colors` and `styles.confetti_colors` (integers, `'#%06x'`), and
+items typed `0` (avatar decoration), `1` (profile effect) and `1000` (bundle).
+Prices are keyed by payment tier: `'0'` is the list price, `'4'` the price a
+Nitro subscriber pays, both in `prices[key].country_prices.prices[0].amount` as
+minor units.
+
+A profile effect carries `staticFrameSrc`, `thumbnailPreviewSrc`,
+`reducedMotionSrc` and an `effects[]` list of layers, each with `src`, `loop`,
+`width`, `height`, `duration`, `start`, `loopDelay`, `position` and `zIndex` —
+an intro layer that plays once, then an idle layer that loops. All of those
+`src` values are on `cdn.discordapp.com`.

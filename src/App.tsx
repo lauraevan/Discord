@@ -877,6 +877,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             />
           ) : homeView === 'shop' ? (
             <ShopPage
+              account={account}
               orbs={orbs}
               premiumType={premiumType}
               owned={account.collectibles ?? []}
@@ -1074,6 +1075,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           account={account}
           prefs={prefs}
           themeId={themeId}
+          premium={premiumType === PremiumType.TIER_2}
           onAccount={setAccount}
           onPrefs={(p) => setPrefs((old) => ({ ...old, ...p }))}
           onTheme={(t) => setThemeId(t.id)}

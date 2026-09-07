@@ -2,6 +2,7 @@ import type { Account, Channel, Message } from '../data'
 import { renderMarkdown, type MdContext } from '../markdown'
 import { CloseIcon, HashIcon } from '../ui/Icons'
 import { Avatar } from './UserArea'
+import { WumpusMark } from '../ui/Art'
 
 /**
  * Discord puts search results in the right-hand panel, in place of the member
@@ -53,6 +54,7 @@ export function SearchResults({
         ))}
         {!results.length ? (
           <div className="results-empty">
+            <WumpusMark pose="thinking" />
             <p>No results</p>
             <span>Nothing in this server matched “{query}”.</span>
           </div>

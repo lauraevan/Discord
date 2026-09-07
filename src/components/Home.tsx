@@ -209,6 +209,7 @@ export function FriendsPage({
         <aside className="active-now">
           <h3>Active Now</h3>
           <div className="active-empty">
+            <WumpusMark pose="sleep" />
             <b>It’s quiet for now...</b>
             <span>
               When a friend starts an activity—like playing a game or hanging out on voice—we’ll

@@ -1423,6 +1423,26 @@ textarea {
   box-shadow: 0 0 0 2px var(--blurple);
 }
 
+.theme-swatch.locked {
+  cursor: not-allowed;
+}
+
+/* the lock the client puts on a gradient you have not got Nitro for */
+.theme-swatch.locked svg {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  color: rgba(255, 255, 255, 0.86);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.theme-note {
+  margin-top: 8px;
+  font-size: 12.5px;
+  line-height: 17px;
+  color: var(--muted);
+}
+
 .theme-swatch .tick {
   position: absolute;
   right: -5px;
@@ -7087,32 +7107,472 @@ body.streamer .invite-row code {
 
 /* --- Shop ----------------------------------------------------------------- */
 
+.shop-mark {
+  flex: 0 0 auto;
+  color: var(--strong);
+}
+
+.shop-tabs {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow: auto hidden;
+}
+
+.shop-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.shop-tab:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+
+.shop-tab.on {
+  color: var(--strong);
+  background: var(--selected);
+}
+
+.shop-header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.shop-search input {
+  width: 168px;
+  height: 26px;
+  padding: 0 26px 0 8px;
+  border-radius: 4px;
+  background: var(--titlebar);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.shop-search input::placeholder {
+  color: var(--muted);
+}
+
+.shop-search svg {
+  position: absolute;
+  right: 6px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.shop-heart {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.shop-heart:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.shop-heart.on {
+  color: #e292aa;
+}
+
+.shop-heading {
+  margin: 28px 0 14px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--strong);
+}
+
+.shop-body > .shop-heading:first-child {
+  margin-top: 4px;
+}
+
+.shop-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-bar .shop-heading {
+  margin-bottom: 14px;
+}
+
+.shop-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-sort-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.shop-shuffle {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shop-shuffle:hover {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.shop-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  margin-bottom: 12px;
+  padding: 0 10px 0 6px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.shop-back:hover {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+/* --- the featured collection ----------------------------------------------- */
+
 .shop-hero {
-  border-radius: 12px;
-  padding: 28px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  min-height: 216px;
+  padding: 28px 32px;
+  border-radius: 16px;
   color: #fff;
-  background: linear-gradient(135deg, #8547c6, #3736bb);
+  overflow: hidden;
+}
+
+.shop-hero.tall {
+  min-height: 248px;
+}
+
+.shop-hero-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shop-hero-tag {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 3px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .shop-hero h1 {
-  font-size: 26px;
-  font-weight: 700;
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .shop-hero p {
-  max-width: 560px;
+  max-width: 460px;
   margin-top: 8px;
-  font-size: 14px;
-  line-height: 19px;
-  opacity: 0.9;
+  font-size: 15px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.82);
 }
 
-.shop-collections {
-  display: flex;
-  gap: 6px;
-  margin: 20px 0 12px;
-  flex-wrap: wrap;
+.shop-hero-cta {
+  height: 38px;
+  margin-top: 18px;
+  padding: 0 18px;
+  border-radius: 19px;
+  color: #10111a;
+  font-size: 14px;
+  font-weight: 600;
 }
+
+.shop-hero-cta:hover {
+  filter: brightness(1.08);
+}
+
+/* the collection's own confetti colours, blurred behind its banner */
+.shop-hero-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.shop-hero-glow i {
+  position: absolute;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(46px);
+  opacity: 0.5;
+}
+
+.shop-hero-glow i:nth-child(1) { left: -6%; top: -32% }
+.shop-hero-glow i:nth-child(2) { left: 26%; top: 44%; opacity: 0.34 }
+.shop-hero-glow i:nth-child(3) { left: 54%; top: -26% }
+.shop-hero-glow i:nth-child(4) { left: 72%; top: 38%; opacity: 0.4 }
+.shop-hero-glow i:nth-child(5) { left: 8%; top: 30%; opacity: 0.28 }
+.shop-hero-glow i:nth-child(6) { left: 88%; top: -10%; opacity: 0.36 }
+
+.shop-hero-body,
+.shop-strip-body,
+.shop-worn,
+.shop-tile-art .shop-worn {
+  position: relative;
+  z-index: 1;
+}
+
+.shop-tile-art {
+  position: relative;
+  overflow: hidden;
+}
+
+/* an avatar wearing a decoration, as every preview in the Shop shows one */
+.shop-avatar {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+}
+
+.shop-avatar > .art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.shop-worn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  /* the decorations are 1.2x their avatars, so they need the room */
+  gap: 30px;
+}
+
+/* --- bundles ---------------------------------------------------------------- */
+
+.shop-bundles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.shop-bundle {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  color: #fff;
+}
+
+.shop-bundle-art {
+  position: relative;
+  display: block;
+  height: 168px;
+}
+
+/* the two collectibles inside, on profile cards tilted against each other */
+.shop-bundle-card {
+  position: absolute;
+  top: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 104px;
+  padding: 12px 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+.shop-bundle-card.c0 {
+  left: 22px;
+  transform: rotate(-7deg);
+}
+
+.shop-bundle-card.c1 {
+  right: 22px;
+  transform: rotate(7deg);
+}
+
+.shop-bundle-card b {
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.shop-bundle-card em {
+  font-size: 9.5px;
+  font-style: normal;
+  opacity: 0.7;
+}
+
+.shop-bundle-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.shop-bundle-foot b {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shop-bundle-price {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.shop-bundle-price s {
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+/* --- collections ------------------------------------------------------------ */
+
+.shop-collections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.shop-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 0 0 14px;
+  border-radius: 12px;
+  background: var(--card);
+  overflow: hidden;
+  text-align: left;
+}
+
+.shop-tile:hover {
+  background: var(--selected);
+}
+
+.shop-tile-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 128px;
+  margin-bottom: 12px;
+}
+
+.shop-tile b {
+  padding: 0 14px;
+  font-size: 15px;
+  color: var(--strong);
+}
+
+.shop-tile-summary {
+  padding: 0 14px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.shop-tile-count {
+  padding: 0 14px;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.shop-strips {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shop-strip {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 132px;
+  padding: 18px 24px;
+  border-radius: 12px;
+  color: #fff;
+  overflow: hidden;
+}
+
+.shop-strip-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shop-strip h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.shop-strip p {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.shop-strip-cta {
+  height: 32px;
+  margin-top: 12px;
+  padding: 0 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shop-strip-cta:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+/* --- the items -------------------------------------------------------------- */
 
 .shop-grid {
   display: grid;
@@ -7125,10 +7585,11 @@ body.streamer .invite-row code {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 16px 12px;
+  padding: 0 12px 16px;
   border-radius: 10px;
   background: var(--card);
   border: 1px solid transparent;
+  overflow: hidden;
 }
 
 .shop-item.on {
@@ -7140,25 +7601,49 @@ body.streamer .invite-row code {
   position: relative;
   display: grid;
   place-items: center;
-  width: 120px;
-  height: 120px;
+  width: calc(100% + 24px);
+  height: 156px;
+  margin: 0 -12px 10px;
+  background: var(--selected);
 }
 
-/* the sample avatar the decoration is previewed on, sized the way Discord's
-   preview does it: the decoration is 1.2x the avatar */
+/* the collection's colour sits under the item, dimmed so the art leads */
 .shop-item-art::before {
   content: '';
   position: absolute;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--selected);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .shop-item-art img,
 .shop-item-art svg {
   position: relative;
   z-index: 1;
+}
+
+.shop-wish {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+.shop-item:hover .shop-wish,
+.shop-wish.on {
+  opacity: 1;
+}
+
+.shop-wish.on {
+  color: #e292aa;
 }
 
 .shop-item b {
@@ -7169,6 +7654,44 @@ body.streamer .invite-row code {
 .shop-item-collection {
   font-size: 11.5px;
   color: var(--muted);
+  text-align: center;
+}
+
+/* a profile effect, shown as its own confetti colours drifting */
+.shop-effect {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shop-effect i {
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.9;
+  animation: shop-effect-drift 2.6s ease-in-out infinite;
+}
+
+.shop-effect i:nth-child(2) { left: 26% }
+.shop-effect i:nth-child(3) { left: 70% }
+.shop-effect i:nth-child(4) { left: 38% }
+.shop-effect i:nth-child(5) { left: 60% }
+.shop-effect i:nth-child(6) { left: 46% }
+
+@keyframes shop-effect-drift {
+  0% { transform: translateY(14px) scale(0.6); opacity: 0 }
+  30% { opacity: 0.95 }
+  100% { transform: translateY(-58px) scale(1); opacity: 0 }
+}
+
+.reduced-motion .shop-effect i {
+  animation: none;
+  opacity: 0.9;
 }
 
 .shop-buy {
@@ -7203,6 +7726,50 @@ body.streamer .invite-row code {
 .shop-buy s {
   opacity: 0.55;
   font-weight: 400;
+}
+
+.shop-orbs-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #3b1e63, #1a1030);
+  color: #fff;
+}
+
+.shop-orbs-hero svg {
+  color: #ca9ef9;
+}
+
+.shop-orbs-hero h1 {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.shop-orbs-hero p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.shop-emptystate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.shop-emptystate img {
+  width: 168px;
+  opacity: 0.9;
+}
+
+.shop-emptystate p {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 .shop-empty {
@@ -7400,4 +7967,44 @@ body.reduced-motion img.decoration.anim {
 
 body.reduced-motion img.decoration.still {
   display: block;
+}
+
+/* Wumpus, wherever the client leaves an empty state illustrated */
+.active-empty img.wumpus,
+.inbox-empty img.wumpus,
+.results-empty img.wumpus {
+  width: 132px;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.crash-card img.wumpus {
+  width: 128px;
+  margin-bottom: 10px;
+}
+
+/* the "no profile theme" swatch, and the lock on the ones Nitro gates */
+.swatch.none {
+  background:
+    linear-gradient(135deg, transparent 46%, var(--red) 46%, var(--red) 54%, transparent 54%),
+    var(--card);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.swatch.locked {
+  cursor: not-allowed;
+}
+
+.swatch.locked svg {
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+}
+
+.preview-card.themed .preview-body b {
+  color: #0a0a0a;
+}
+
+.preview-card.themed .preview-body span,
+.preview-card.themed .preview-body p {
+  color: #333d36;
 }

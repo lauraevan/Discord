@@ -100,7 +100,16 @@ const wumpus = import.meta.glob('../assets/wumpus/*.png', {
   import: 'default',
 }) as Record<string, string>
 
-export type WumpusPose = 'shrug' | 'waiting' | 'idle' | 'lurking'
+export type WumpusPose =
+  | 'shrug'
+  | 'waiting'
+  | 'idle'
+  | 'lurking'
+  | 'sleep'
+  | 'thinking'
+  | 'waving'
+  | 'despair'
+  | 'thumbsup'
 
 export function WumpusMark({ pose = 'shrug' }: { pose?: WumpusPose }) {
   const src = wumpus[`../assets/wumpus/${pose}.png`]

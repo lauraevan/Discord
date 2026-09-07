@@ -2,9 +2,12 @@
 Vendors Discord's avatar decorations into src/assets/decorations/.
 
 Discord serves these as 288x288 APNGs from a CDN this environment cannot
-reach. Hayanaga/SillyTavern-AvatarDecorations-CSS carries the same files
-committed to a public repo, which raw.githubusercontent.com does serve, so
-that is where they come from.
+reach. Two public repos carry the same files committed to git, which
+raw.githubusercontent.com does serve, so that is where they come from:
+
+  * uhidontkno/DiscordAvatarDecorations - the shop collections, unmodified
+  * Hayanaga/SillyTavern-AvatarDecorations-CSS - the collections that repo
+    does not carry (Galaxy, Lofi Vibes, Lunar New Year)
 
 They arrive as 60-132 frame animations at 288px, ~18MB for the set, which is
 far too heavy to inline into a single-file build. But a decoration that does
@@ -28,39 +31,75 @@ import urllib.request
 
 from PIL import Image, ImageDraw
 
-BASE = 'https://raw.githubusercontent.com/Hayanaga/SillyTavern-AvatarDecorations-CSS/main/dc-decorations'
+SILLY = 'https://raw.githubusercontent.com/Hayanaga/SillyTavern-AvatarDecorations-CSS/main/dc-decorations/{}.png'
+MONO = 'https://raw.githubusercontent.com/uhidontkno/DiscordAvatarDecorations/main/shop/{}/{{}}.png'
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src/assets/decorations')
 SIZE = 80
 # each animation is walked down this ladder until it fits BUDGET
-LADDER = [(4, 70), (5, 62), (6, 55), (8, 50)]
-BUDGET = 46 * 1024
+LADDER = [(4, 70), (5, 62), (6, 55), (8, 50), (10, 44)]
+BUDGET = 30 * 1024
 
-# Four complete Discord Shop collections. The collection names are Discord's
-# own, from the catalogue tools/fetch-shop.py reads.
-COLLECTIONS = {
-    'Elements': ['6_Air', '6_Balance', '6_Earth', '6_Fire', '6_Lightning', '6_Water'],
-    'Galaxy': [
+# Complete Discord Shop collections. The collection names are Discord's own,
+# from the catalogue tools/fetch-shop.py reads.
+COLLECTIONS = [
+    ('Anime', MONO.format('anime'), [
+        'in_love', 'radiating_energy', 'shocked',
+        'soul_leaving_body', 'starry_eyed', 'sweat_drops',
+    ]),
+    # Discord shipped the collection in two drops; the repo files them apart
+    ('Anime', MONO.format('anime_2'), [
+        'angry', 'cat_ears', 'dismay', 'heartbloom', 'in_tears', 'ki_energy', 'rage',
+    ]),
+    ('Cyberpunk', MONO.format('cyberpunk'), [
+        'cybernetic', 'digital_sunrise', 'glitch', 'implant',
+    ]),
+    ('Elements', MONO.format('elements'), [
+        'air', 'balance', 'earth', 'fire', 'lightning', 'water',
+    ]),
+    ('Fantasy', MONO.format('fantasy'), [
+        'defensive_shield', 'fairy_sprites', 'flaming_sword', 'glowing_runes',
+        'magical_potion', 'skull_medallion', 'treasure_and_key', 'wizards_staff',
+    ]),
+    ('Monsters', MONO.format('monsters'), [
+        'beamchop', 'chewbert', 'chuck', 'doodlezard',
+        'gawblehop', 'glop', 'stinkums', 'winkle',
+    ]),
+    ('Galaxy', SILLY, [
         '10_Astronaut-Helmet', '10_Black-Hole', '10_Constellations',
         '10_Solar-Orbit', '10_Stardust', '10_UFO',
-    ],
-    'Lofi Vibes': [
+    ]),
+    ('Lofi Vibes', SILLY, [
         '7_Chromawave', '7_Cozy-Cat', '7_Cozy-Headphones',
         '7_Doodling', '7_Oasis', '7_Rainy-Mood',
-    ],
-    'Lunar New Year': [
+    ]),
+    ('Lunar New Year', SILLY, [
         "5_Dragon's Smile", '5_Fan Fluorish', '5_Firecrackers',
         '5_Koi Pond', '5_Lucky Envelopes', '5_Lunar Lanterns',
-    ],
-}
+    ]),
+]
 
-# the repo's file stem -> the name Discord sells it under
-RENAME = {'5_Fan Fluorish': 'Fan Flourish'}
+# the repo's file stem -> the name Discord sells it under, where stripping the
+# numbering and swapping the separators does not get there
+RENAME = {
+    '5_Fan Fluorish': 'Fan Flourish',
+    'wizards_staff': "Wizard's Staff",
+    'treasure_and_key': 'Treasure and Key',
+}
 
 
 def title(stem: str) -> str:
+    """
+    The decoration's name.
+
+    The two repos name their files differently: one prefixes a collection
+    number and hyphenates ("10_Black-Hole"), the other is plain snake case
+    ("digital_sunrise").
+    """
     if stem in RENAME:
         return RENAME[stem]
-    return stem.split('_', 1)[1].replace('-', ' ')
+    if stem[:1].isdigit():
+        return stem.split('_', 1)[1].replace('-', ' ')
+    return stem.replace('_', ' ').title()
 
 
 def slug(stem: str) -> str:
@@ -132,9 +171,9 @@ def main() -> None:
     os.makedirs(OUT, exist_ok=True)
     index = []
     total = 0
-    for collection, stems in COLLECTIONS.items():
+    for collection, source, stems in COLLECTIONS:
         for stem in stems:
-            url = f'{BASE}/{urllib.parse.quote(stem + ".png")}'
+            url = source.format(urllib.parse.quote(stem))
             with urllib.request.urlopen(url, timeout=90) as r:
                 raw = r.read()
 

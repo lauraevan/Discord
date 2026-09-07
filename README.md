@@ -146,23 +146,43 @@ Nothing is cropped out of a screenshot.
   [Debuggingss/discord-badges](https://github.com/Debuggingss/discord-badges),
   eight are redraws from
   [mezotv/discord-badges](https://github.com/mezotv/discord-badges).
-- **Avatar decorations** — Discord's own, four complete Shop collections
-  (Elements, Space, Lo-Fi Vibes, Lunar New Year). They ship as 288x288 APNGs of
-  60-132 frames from a CDN this environment cannot reach;
+- **Avatar decorations** — Discord's own, eight complete Shop collections
+  (Anime, Cyberpunk, Elements, Fantasy, Monsters, Galaxy, Lofi Vibes, Lunar New
+  Year), animated. They ship as 288x288 APNGs of 60-132 frames from a CDN this
+  environment cannot reach;
+  [uhidontkno/DiscordAvatarDecorations](https://github.com/uhidontkno/DiscordAvatarDecorations)
+  and
   [Hayanaga/SillyTavern-AvatarDecorations-CSS](https://github.com/Hayanaga/SillyTavern-AvatarDecorations-CSS)
-  carries the same files in a public repo, and `tools/fetch-decorations.py`
-  reduces each to the frame that best represents it at rest — scored on the
-  ring outside the avatar, since scoring the whole frame picks the moment the
-  effect blankets it. 24 decorations, 84KB.
-- **Wumpus** — Discord's own, from
+  carry the same files in public repos, and `tools/fetch-decorations.py`
+  re-encodes each as an animated WebP at 80px, walked down a frame-rate and
+  quality ladder until it fits a 30KB budget — a decoration that does not move
+  is not the decoration. A still is written beside each one for the Reduced
+  Motion preference, picked on the ring outside the avatar since scoring the
+  whole frame picks the moment the effect blankets it.
+- **The Shop's catalogue** — Discord's own, generated into `src/shop.ts` by
+  `tools/fetch-shop.py` from
+  [Infinitay/discord-collectibles-archive](https://github.com/Infinitay/discord-collectibles-archive),
+  which keeps Discord's collectibles data committed as JSON: collection names
+  and summaries, gradient and confetti colours, every decoration, profile effect
+  and bundle, and both prices — what Discord charges, and the lower price a
+  Nitro subscriber pays.
+- **Client themes** — the ten background gradients Nitro unlocks, hex for hex
+  out of Discord's shipped bundle (`{TWILIGHT:1, PLUM:2, ...}`, each preset a
+  two-stop gradient with its own base mix), in `src/themes.ts`. They light the
+  whole window the way the client's do, and they are the palette the profile
+  themes offer too.
+- **Wumpus** — Discord's own, nine poses from
   [taiten312/wumpus](https://github.com/taiten312/wumpus) via
-  `tools/fetch-wumpus.py`: one pose per friends empty state, matched to the
-  line Discord prints under it.
-- **Still drawn here** — the Nitro hero and its perk scenes, and the quest key
-  art. Discord's versions of those are only on `cdn.discordapp.com`, which this
-  environment's egress policy denies outright, and no GitHub mirror of them
-  turned up. They are composed from the gradient stops in the client's own
-  colour table and are not passed off as Discord's illustration.
+  `tools/fetch-wumpus.py`, one per empty state and matched to the line Discord
+  prints under it: the friends screens, an empty inbox, a search that found
+  nothing, the quiet Active Now panel, the Shop with no game shops, and the
+  crash panel. Animated sources are reduced to the frame that reads as a
+  portrait rather than to frame one, which on a zooming animation is an ear.
+- **Still drawn here** — the Nitro perk scenes and the quest key art, and the
+  profile effects in the Shop (which show their collection's own confetti
+  colours rather than a drawing pretending to be the effect). Discord's versions
+  of those are only on `cdn.discordapp.com`, which this environment's egress
+  policy denies outright, and no GitHub mirror of them turned up.
 - **Also drawn** — the profile banner, the default avatars and the onboarding
   sprites, in `src/ui/`.
 - **Type** — Figtree (SIL OFL 1.1), self-hosted as base64 so the page makes no

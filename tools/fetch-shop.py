@@ -22,7 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'src/shop.ts')
 
 # the collections whose decorations we hold art for
-SLUGS = ['elements', 'galaxy', 'lofi-vibes', 'lunar-new-year']
+SLUGS = ['anime', 'cyberpunk', 'elements', 'fantasy', 'galaxy', 'lofi-vibes', 'lunar-new-year', 'monsters']
 
 # Discord's product and item type numbers
 DECORATION, EFFECT, BUNDLE = 0, 1, 1000
@@ -78,7 +78,11 @@ def main() -> None:
             'name': d['name'],
             'summary': d['summary'],
             'colors': [hexc(c) for c in d['styles']['background_colors']],
-            'button': hexc(d['styles']['button_colors'][0]),
+            # a few collections ship no button colour; the client falls back
+            'button': hexc(d['styles']['button_colors'][0])
+            if d['styles'].get('button_colors')
+            else '#5865f2',
+            'confetti': [hexc(c) for c in d['styles'].get('confetti_colors', [])],
             'bundles': bundles,
             'decorations': decorations,
             'effects': effects,
@@ -127,6 +131,8 @@ export type ShopCollection = {
   /** the collection's own gradient, from Discord's style block */
   colors: string[]
   button: string
+  /** the colours Discord throws as confetti when you buy from the collection */
+  confetti: string[]
   bundles: ShopProduct[]
   decorations: ShopProduct[]
   effects: ShopProduct[]

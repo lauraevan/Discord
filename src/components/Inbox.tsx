@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Account, Channel, Message, Server } from '../data'
 import { CloseIcon, HashIcon, MarkReadIcon } from '../ui/Icons'
 import { Avatar } from './UserArea'
+import { WumpusMark } from '../ui/Art'
 
 type Tab = 'unreads' | 'for_you' | 'mentions'
 
@@ -91,6 +92,7 @@ export function Inbox({
         })}
         {!groups.length ? (
           <div className="inbox-empty">
+            <WumpusMark pose={tab === 'unreads' ? 'thumbsup' : 'sleep'} />
             {tab === 'unreads' ? (
               <>
                 <b>You're all caught up!</b>

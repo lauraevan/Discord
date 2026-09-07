@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { statusColor, statusLabel, type Account, type Status } from '../data'
 import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
-import { colorThemes, defaultThemes, type Theme } from '../themes'
-import { CheckIcon } from '../ui/Icons'
+import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
+import { CheckIcon, LockIcon } from '../ui/Icons'
 import {
   Divider,
   Field,
@@ -29,6 +29,7 @@ export function UserSettings({
   account,
   prefs,
   themeId,
+  premium,
   onAccount,
   onPrefs,
   onTheme,
@@ -38,6 +39,8 @@ export function UserSettings({
   account: Account
   prefs: Prefs
   themeId: string
+  /** Nitro subscribers get the background gradients, as they do in the client */
+  premium: boolean
   onAccount: (a: Account) => void
   onPrefs: (p: Partial<Prefs>) => void
   onTheme: (t: Theme) => void
@@ -45,6 +48,9 @@ export function UserSettings({
   onSignOut: () => void
 }) {
   const [section, setSection] = useState('account')
+  // the gradients follow the base appearance, the way the client's do
+  const scheme = allThemes.find((t) => t.id === themeId)?.tokens.scheme ?? 'dark'
+  const gradients = colorThemes.filter((t) => t.tokens.scheme === scheme)
   const set = <K extends keyof Prefs>(k: K, v: Prefs[K]) => onPrefs({ [k]: v } as Partial<Prefs>)
 
   const nav: NavItem[] = [
@@ -194,6 +200,44 @@ export function UserSettings({
                 </div>
               </div>
               <div className="set-field">
+                <label>PROFILE THEME</label>
+                {/* Discord's profile theme is two colours, and it is a Nitro
+                    feature. The pairs offered are its own gradient presets. */}
+                <div className="swatch-row">
+                  <button
+                    className={'swatch none' + (account.profileTheme ? '' : ' on')}
+                    aria-label="No profile theme"
+                    onClick={() => onAccount({ ...account, profileTheme: undefined })}
+                  >
+                    {account.profileTheme ? null : <CheckIcon />}
+                  </button>
+                  {GRADIENTS.map((g) => {
+                    const on =
+                      account.profileTheme?.[0] === g.light[0] &&
+                      account.profileTheme?.[1] === g.light[1]
+                    return (
+                      <button
+                        key={g.key}
+                        className={'swatch' + (on ? ' on' : '') + (premium ? '' : ' locked')}
+                        style={{ background: `linear-gradient(160deg, ${g.light[0]}, ${g.light[1]})` }}
+                        aria-label={g.name}
+                        title={g.name}
+                        disabled={!premium}
+                        onClick={() =>
+                          onAccount({ ...account, profileTheme: [g.light[0], g.light[1]] })
+                        }
+                      >
+                        {on ? <CheckIcon /> : null}
+                        {premium ? null : <LockIcon size={12} />}
+                      </button>
+                    )
+                  })}
+                </div>
+                {premium ? null : (
+                  <p className="theme-note">Nitro unlocks profile themes.</p>
+                )}
+              </div>
+              <div className="set-field">
                 <label>STATUS</label>
                 <div className="status-row">
                   {(['online', 'idle', 'dnd', 'invisible'] as Status[]).map((s) => (
@@ -211,8 +255,20 @@ export function UserSettings({
             </div>
             <div className="profile-preview">
               <div className="set-row-label">PREVIEW</div>
-              <div className="preview-card">
-                <div className="preview-banner" style={{ background: account.color }} />
+              <div
+                className={'preview-card' + (account.profileTheme ? ' themed' : '')}
+                style={
+                  account.profileTheme
+                    ? {
+                        background: `linear-gradient(180deg, ${account.profileTheme[0]}, ${account.profileTheme[1]})`,
+                      }
+                    : undefined
+                }
+              >
+                <div
+                  className="preview-banner"
+                  style={{ background: account.profileTheme?.[0] ?? account.color }}
+                />
                 <span className="preview-avatar">
                   <Avatar account={account} size={72} />
                 </span>
@@ -254,19 +310,29 @@ export function UserSettings({
           </div>
           <Sub>Colours</Sub>
           <div className="theme-grid">
-            {colorThemes.map((t) => (
+            {gradients.map((t) => (
               <button
                 key={t.id}
-                className={'theme-swatch' + (t.id === themeId ? ' on' : '')}
+                className={
+                  'theme-swatch' + (t.id === themeId ? ' on' : '') + (premium ? '' : ' locked')
+                }
                 style={{ background: t.swatch }}
                 title={t.name}
                 aria-label={t.name}
+                disabled={!premium}
                 onClick={() => onTheme(t)}
               >
                 {t.id === themeId ? <CheckIcon /> : null}
+                {premium ? null : <LockIcon size={14} />}
               </button>
             ))}
           </div>
+          {premium ? null : (
+            <p className="theme-note">
+              Nitro unlocks these background gradients, and they follow whichever of Light
+              or Dark you are on.
+            </p>
+          )}
           <Divider />
           <Sub>Message Display</Sub>
           <Radio

@@ -34,12 +34,265 @@ export type ShopCollection = {
   /** the collection's own gradient, from Discord's style block */
   colors: string[]
   button: string
+  /** the colours Discord throws as confetti when you buy from the collection */
+  confetti: string[]
   bundles: ShopProduct[]
   decorations: ShopProduct[]
   effects: ShopProduct[]
 }
 
 export const COLLECTIONS: ShopCollection[] = [
+  {
+    "id": "anime",
+    "name": "Anime",
+    "summary": "Senpai will definitely notice you.",
+    "colors": [
+      "#aefffd",
+      "#023d73"
+    ],
+    "button": "#40b7ff",
+    "confetti": [
+      "#2c9bd9",
+      "#e46a80",
+      "#ffe500",
+      "#bba8d5",
+      "#3eddd3",
+      "#e2b761"
+    ],
+    "bundles": [
+      {
+        "id": "heartthrob-bundle",
+        "name": "Heartthrob Bundle",
+        "summary": "A bundle of collectibles.",
+        "price": 10.99,
+        "nitro": 8.99,
+        "items": [
+          "Heartbloom",
+          "Dreamy"
+        ]
+      }
+    ],
+    "decorations": [
+      {
+        "id": "cat-ears",
+        "name": "Cat Ears",
+        "summary": "\u227d ^ \u2022 \u2a4a \u2022 ^ \u227c",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "ki-energy",
+        "name": "Ki Energy",
+        "summary": "Focus from within.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "heartbloom",
+        "name": "Heartbloom",
+        "summary": "Let your love blossom.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "dismay",
+        "name": "Dismay",
+        "summary": "Not like this...",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "rage",
+        "name": "Rage",
+        "summary": "THAT'S IT.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "in-tears",
+        "name": "In Tears",
+        "summary": "*sobbing*",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "radiating-energy",
+        "name": "Radiating Energy",
+        "summary": "Over EIGHT-THOUSAND-NINE-HUNDRED-NINETY-NINE!",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "soul-leaving-body",
+        "name": "Soul Leaving Body",
+        "summary": "Can I just disappear right now?",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "sweat-drops",
+        "name": "Sweat Drops",
+        "summary": "*laughs nervously*",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "starry-eyed",
+        "name": "Starry Eyed",
+        "summary": "Feelin' sparkly.",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "in-love",
+        "name": "In Love",
+        "summary": "uwu",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "shocked",
+        "name": "Shocked",
+        "summary": "Nani?!!",
+        "price": 7.99,
+        "nitro": 5.49
+      },
+      {
+        "id": "angry",
+        "name": "Angry",
+        "summary": "How dare you.",
+        "price": 7.99,
+        "nitro": 5.49
+      }
+    ],
+    "effects": [
+      {
+        "id": "dreamy",
+        "name": "Dreamy",
+        "summary": "When senpai notices you.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "ki-detonate",
+        "name": "Ki Detonate",
+        "summary": "Obliteration in 3... 2... 1...",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "sushi-mania",
+        "name": "Sushi Mania",
+        "summary": "Always keep the sushi rolling.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "magic-hearts",
+        "name": "Magic Hearts",
+        "summary": "Moon Prism Power, Make Up!",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "shatter",
+        "name": "Shatter",
+        "summary": "Ouch, my windows!",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "shuriken-strike",
+        "name": "Shuriken Strike",
+        "summary": "Every side is the pointy end.",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "power-surge",
+        "name": "Power Surge",
+        "summary": "You're about to witness true power.",
+        "price": 11.99,
+        "nitro": 8.49
+      }
+    ]
+  },
+  {
+    "id": "cyberpunk",
+    "name": "Cyberpunk",
+    "summary": "Welcome to the neon embrace of the future.",
+    "colors": [
+      "#20156d",
+      "#070200"
+    ],
+    "button": "#4942da",
+    "confetti": [
+      "#00aafc",
+      "#f0b232",
+      "#fa777b",
+      "#2dc771",
+      "#949cf7"
+    ],
+    "bundles": [
+      {
+        "id": "am-i-getting-hacked?-bundle",
+        "name": "Am I Getting Hacked? Bundle",
+        "summary": "A bundle of collectibles.",
+        "price": 10.99,
+        "nitro": 8.99,
+        "items": [
+          "Glitch",
+          "Uplink Error"
+        ]
+      }
+    ],
+    "decorations": [
+      {
+        "id": "glitch",
+        "name": "Glitch",
+        "summary": "Neurovisor disruption detected, please standby.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "cybernetic",
+        "name": "Cybernetic",
+        "summary": "Cybernetic visuals now online. Welcome aboard, runner.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "digital-sunrise",
+        "name": "Digital Sunrise",
+        "summary": "It's a new day in cyberspace.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "implant",
+        "name": "Implant",
+        "summary": "Get ready to jack in.",
+        "price": 5.99,
+        "nitro": 4.99
+      }
+    ],
+    "effects": [
+      {
+        "id": "nightrunner",
+        "name": "Nightrunner",
+        "summary": "Cruisin' the cyber highway.",
+        "price": 5.99,
+        "nitro": 4.99
+      },
+      {
+        "id": "uplink-error",
+        "name": "Uplink Error",
+        "summary": "Anomaly detected, attempting system reset.",
+        "price": 5.99,
+        "nitro": 4.99
+      }
+    ]
+  },
   {
     "id": "elements",
     "name": "Elements",
@@ -49,6 +302,13 @@ export const COLLECTIONS: ShopCollection[] = [
       "#001629"
     ],
     "button": "#ebbd1a",
+    "confetti": [
+      "#00aafc",
+      "#f0b232",
+      "#fa777b",
+      "#2dc771",
+      "#949cf7"
+    ],
     "bundles": [
       {
         "id": "elemental-bundle",
@@ -131,6 +391,125 @@ export const COLLECTIONS: ShopCollection[] = [
     ]
   },
   {
+    "id": "fantasy",
+    "name": "Fantasy",
+    "summary": "You're walking in the forest and notice something magical and shiny.",
+    "colors": [
+      "#146144",
+      "#021a0e"
+    ],
+    "button": "#028737",
+    "confetti": [
+      "#efa7f7",
+      "#b646c1",
+      "#56b3b3",
+      "#1a8199",
+      "#7160af",
+      "#aec7ff"
+    ],
+    "bundles": [
+      {
+        "id": "fairy-&-pixie-bundle",
+        "name": "Fairy & Pixie Bundle",
+        "summary": "A bundle of collectibles.",
+        "price": 19.99,
+        "nitro": 13.99,
+        "items": [
+          "Fairy Sprites",
+          "Pixie Dust"
+        ]
+      }
+    ],
+    "decorations": [
+      {
+        "id": "flaming-sword",
+        "name": "Flaming Sword",
+        "summary": "Slaying the look and the monsters.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "magical-potion",
+        "name": "Magical Potion",
+        "summary": "Drink at your own risk.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "fairy-sprites",
+        "name": "Fairy Sprites",
+        "summary": "Here to guide you on your path.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "wizards-staff",
+        "name": "Wizard's Staff",
+        "summary": "How much power does it hold?",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "glowing-runes",
+        "name": "Glowing Runes",
+        "summary": "I wonder what these symbols mean.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "defensive-shield",
+        "name": "Defensive Shield",
+        "summary": "Use against pointy things.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "skull-medallion",
+        "name": "Skull Medallion",
+        "summary": "Earned through unknown means.",
+        "price": 9.99,
+        "nitro": 6.99
+      },
+      {
+        "id": "treasure-and-key",
+        "name": "Treasure and Key",
+        "summary": "What glorious treasures lie within?",
+        "price": 9.99,
+        "nitro": 6.99
+      }
+    ],
+    "effects": [
+      {
+        "id": "hydro-blast",
+        "name": "Hydro Blast",
+        "summary": "Time to make a splash.",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "sakura-dreams",
+        "name": "Sakura Dreams",
+        "summary": "Close your eyes, and breathe.",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "mystic-vines",
+        "name": "Mystic Vines",
+        "summary": "Why touch grass when you can touch magical vines?",
+        "price": 11.99,
+        "nitro": 8.49
+      },
+      {
+        "id": "pixie-dust",
+        "name": "Pixie Dust",
+        "summary": "Did a pixie sneeze nearby?",
+        "price": 11.99,
+        "nitro": 8.49
+      }
+    ]
+  },
+  {
     "id": "galaxy",
     "name": "Galaxy",
     "summary": "Reach for the stars.",
@@ -139,6 +518,13 @@ export const COLLECTIONS: ShopCollection[] = [
       "#111214"
     ],
     "button": "#5865f2",
+    "confetti": [
+      "#00aafc",
+      "#f0b232",
+      "#fa777b",
+      "#2dc771",
+      "#949cf7"
+    ],
     "bundles": [
       {
         "id": "stargazing-bundle",
@@ -229,6 +615,14 @@ export const COLLECTIONS: ShopCollection[] = [
       "#df82b9"
     ],
     "button": "#5865f2",
+    "confetti": [
+      "#2c9bd9",
+      "#e46a80",
+      "#ffe500",
+      "#bba8d5",
+      "#3eddd3",
+      "#e2b761"
+    ],
     "bundles": [
       {
         "id": "cozy-plant-vibes-bundle",
@@ -319,6 +713,13 @@ export const COLLECTIONS: ShopCollection[] = [
       "#5b0000"
     ],
     "button": "#ffb106",
+    "confetti": [
+      "#00aafc",
+      "#f0b232",
+      "#fa777b",
+      "#2dc771",
+      "#949cf7"
+    ],
     "bundles": [],
     "decorations": [
       {
@@ -385,6 +786,96 @@ export const COLLECTIONS: ShopCollection[] = [
         "summary": "Protection and prosperity guaranteed.",
         "price": 5.99,
         "nitro": 4.99
+      }
+    ]
+  },
+  {
+    "id": "monsters",
+    "name": "Monsters",
+    "summary": "We're not a menace, just misunderstood.",
+    "colors": [],
+    "button": "#5865f2",
+    "confetti": [],
+    "bundles": [],
+    "decorations": [
+      {
+        "id": "beamchop",
+        "name": "Beamchop",
+        "summary": "Awh it's so cu- AHHH",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "stinkums",
+        "name": "Stinkums",
+        "summary": "Questionably dealt. Definitely smelt.",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "chuck",
+        "name": "Chuck",
+        "summary": "Wanna see what I had for lunch earlier?",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "winkle",
+        "name": "Winkle",
+        "summary": "Eye love you.",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "chewbert",
+        "name": "Chewbert",
+        "summary": "Me chew gum, make bubbles, big fun.",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "doodlezard",
+        "name": "Doodlezard",
+        "summary": "You might want to wash up after.",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "glop",
+        "name": "Glop",
+        "summary": "Is there something in my teeth?",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "gawblehop",
+        "name": "Gawblehop",
+        "summary": "Talk about being tongue-tied.",
+        "price": 4.99,
+        "nitro": 3.99
+      }
+    ],
+    "effects": [
+      {
+        "id": "goozilla",
+        "name": "Goozilla",
+        "summary": "Wait a second, what's my profile even made of?!",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "heartzilla",
+        "name": "Heartzilla",
+        "summary": "Is this what they mean when they say love hurts?",
+        "price": 4.99,
+        "nitro": 3.99
+      },
+      {
+        "id": "monster-pop",
+        "name": "Monster Pop",
+        "summary": "POP goes the monster.",
+        "price": 4.99,
+        "nitro": 3.99
       }
     ]
   }

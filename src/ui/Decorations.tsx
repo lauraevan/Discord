@@ -3,16 +3,17 @@
  *
  * These are the real Shop collectibles, not drawings of them. Discord serves
  * them as 288x288 APNGs from a CDN this page cannot reach, so they come from
- * Hayanaga/SillyTavern-AvatarDecorations-CSS, which carries the same files in
- * a public repo. tools/fetch-decorations.py vendors four complete collections
- * into src/assets/decorations, reducing each animation to the single frame
- * that best represents it at rest — see that file for why the frame is chosen
- * on the ring rather than the whole disc.
+ * uhidontkno/DiscordAvatarDecorations and Hayanaga/SillyTavern-AvatarDecorations-CSS,
+ * which carry the same files in public repos. tools/fetch-decorations.py vendors eight complete collections
+ * into src/assets/decorations as animated WebP, with the still that best
+ * represents each one alongside it — see that file for why the still is
+ * chosen on the ring outside the avatar rather than on the whole frame.
  *
  * They are worn the way Discord wears them: the decoration is 1.2x the
  * avatar's box, centred on it, and never intercepts a click.
  */
 import index from '../assets/decorations/index.json'
+import { COLLECTIONS } from '../shop'
 
 const files = import.meta.glob('../assets/decorations/*.{webp,png}', {
   eager: true,
@@ -35,23 +36,25 @@ export type DecorationDef = {
 }
 
 /**
- * Orb prices. Discord prices collectibles per collection rather than per item,
- * with the odd standout costing more; these follow that shape.
+ * Orb prices, from the dollar price Discord charges.
+ *
+ * Discord does not sell these for Orbs, so the rate is the app's: 200 Orbs to
+ * the dollar, which puts a Quest's 1,500-Orb payout a little over one $5.99
+ * decoration — the shape the two systems have. The prices themselves are
+ * Discord's, out of the catalogue in src/shop.ts.
  */
-const PRICE: Record<string, number> = {
-  Elements: 1200,
-  Galaxy: 1500,
-  'Lofi Vibes': 1200,
-  'Lunar New Year': 1800,
-}
+export const orbsOf = (usd: number) => Math.round((usd * 200) / 25) * 25
 
-const PREMIUM = new Set(['astronaut-helmet', 'dragons-smile', 'stardust', 'rainy-mood'])
+const PRICES: Record<string, number> = {}
+for (const c of COLLECTIONS)
+  for (const p of [...c.decorations, ...c.effects, ...c.bundles])
+    if (p.price) PRICES[p.id] = p.price
 
 export const DECORATIONS: DecorationDef[] = index.map((d) => ({
   id: d.id,
   name: d.name,
   collection: d.collection,
-  orbs: PRICE[d.collection] + (PREMIUM.has(d.id) ? 600 : 0),
+  orbs: PRICES[d.id] ? orbsOf(PRICES[d.id]) : 1200,
   src: urlFor(d.file),
   still: urlFor(d.still),
 }))

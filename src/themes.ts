@@ -1,9 +1,10 @@
 /**
  * Theme tokens.
  *
- * The four default themes and the Nitro colour themes shown in the reference
- * Appearance / Preview Theme panels. Every surface in the app reads from these
- * custom properties, so switching a theme repaints the whole window.
+ * The four default themes, and the ten background gradients Nitro unlocks —
+ * Discord's own presets, hex for hex, out of its shipped bundle. Every surface
+ * in the app reads from these custom properties, so switching a theme repaints
+ * the whole window.
  */
 
 export type Tokens = {
@@ -97,59 +98,92 @@ export const defaultThemes: Theme[] = [
   { id: 'onyx', name: 'Onyx', swatch: '#000000', tokens: onyx },
 ]
 
-/** Nitro colour themes: a tinted wash over a light or dark base. */
-type ColorSpec = {
-  id: string
+/**
+ * Discord's own background gradient presets.
+ *
+ * These are the client themes Nitro unlocks, taken out of Discord's shipped
+ * bundle rather than eyeballed: the ids, the picker's order, both appearances
+ * and the base mix are exactly the table the client carries
+ * (`{TWILIGHT:1, PLUM:2, ...}`, each preset built as
+ * `{color, angle:0, baseMix, colors:[{hex, stop:0},{hex, stop:100}]}`).
+ */
+export type Gradient = {
+  /** Discord's own preset id */
+  id: number
+  key: string
   name: string
-  from: string
-  to: string
-  scheme: 'light' | 'dark'
+  /** [start, end], the two stops of the dark appearance */
+  dark: [string, string]
+  light: [string, string]
+  /**
+   * How far Discord mixes the chassis toward the gradient. 100 leaves the
+   * surfaces barely tinted glass; 50 keeps them half solid.
+   */
+  baseMix: number
 }
 
-const colorSpecs: ColorSpec[] = [
-  { id: 'mint', name: 'Mint Apple', from: '#c6e7c0', to: '#e9f6e3', scheme: 'light' },
-  { id: 'citrus', name: 'Citrus Sherbert', from: '#f8c99a', to: '#fbe3c9', scheme: 'light' },
-  { id: 'retro', name: 'Retro Raincloud', from: '#c9d3f2', to: '#e4e9fb', scheme: 'light' },
-  { id: 'neon', name: 'Neon Nights', from: '#d9f3c9', to: '#f0fae4', scheme: 'light' },
-  { id: 'strawberry', name: 'Strawberry', from: '#f2c9cf', to: '#fbe4e7', scheme: 'light' },
-  { id: 'cotton', name: 'Cotton Candy', from: '#f7d4ea', to: '#fdeaf6', scheme: 'light' },
-  { id: 'sky', name: 'Sky', from: '#cfe6f7', to: '#e8f3fc', scheme: 'light' },
-  { id: 'desert', name: 'Desert Khaki', from: '#f0e6c8', to: '#f9f3e2', scheme: 'light' },
-  { id: 'sunrise', name: 'Sunrise', from: '#5b4bb8', to: '#2b2456', scheme: 'dark' },
-  { id: 'chroma', name: 'Chroma Glow', from: '#7b2fbe', to: '#2a1140', scheme: 'dark' },
-  { id: 'forest', name: 'Forest', from: '#2f5544', to: '#12211b', scheme: 'dark' },
-  { id: 'crimson', name: 'Crimson Moon', from: '#6d1f24', to: '#25090c', scheme: 'dark' },
-  { id: 'midnight', name: 'Midnight Blurple', from: '#3b3b8f', to: '#141438', scheme: 'dark' },
-  { id: 'mars', name: 'Mars', from: '#7a3b2e', to: '#2a120d', scheme: 'dark' },
-  { id: 'dusk', name: 'Dusk', from: '#4c5573', to: '#1b1f2c', scheme: 'dark' },
-  { id: 'sepia', name: 'Sepia', from: '#6a5433', to: '#241c10', scheme: 'dark' },
-  { id: 'hanami', name: 'Hanami', from: '#8f2f63', to: '#2c0c1f', scheme: 'dark' },
-  { id: 'lofi', name: 'Lofi Vibes', from: '#2a6a63', to: '#0d2523', scheme: 'dark' },
+export const GRADIENTS: Gradient[] = [
+  { id: 1, key: 'twilight', name: 'Twilight', dark: ['#69426A', '#111731'], light: ['#FA9EFF', '#5A7EFE'], baseMix: 100 },
+  { id: 9, key: 'denim', name: 'Denim', dark: ['#5359AD', '#121238'], light: ['#DBDBFF', '#6060FF'], baseMix: 100 },
+  { id: 8, key: 'ocean', name: 'Ocean', dark: ['#245B92', '#141D40'], light: ['#9ADBF7', '#2D3CCA'], baseMix: 100 },
+  { id: 10, key: 'blurple', name: 'Blurple', dark: ['#533D9E', '#1A1035'], light: ['#C3BFFF', '#816BDC'], baseMix: 100 },
+  { id: 7, key: 'obsidian', name: 'Obsidian', dark: ['#5E4C85', '#1E1740'], light: ['#B59DF2', '#8F89D2'], baseMix: 100 },
+  { id: 2, key: 'plum', name: 'Plum', dark: ['#8A3F7F', '#2C0D25'], light: ['#E893FF', '#FFADDC'], baseMix: 100 },
+  { id: 3, key: 'fire', name: 'Fire', dark: ['#9B2C2C', '#2A0C0C'], light: ['#FFEBCA', '#FF8989'], baseMix: 50 },
+  { id: 4, key: 'gold-dust', name: 'Gold Dust', dark: ['#6C523D', '#241912'], light: ['#FFE7DA', '#FFD89B'], baseMix: 50 },
+  { id: 5, key: 'moss', name: 'Moss', dark: ['#58694E', '#222A1C'], light: ['#B7D19F', '#B1DCA4'], baseMix: 50 },
+  { id: 6, key: 'jade', name: 'Jade', dark: ['#297071', '#18203F'], light: ['#C5F0D2', '#60ADB2'], baseMix: 50 },
 ]
 
-function colorTheme(s: ColorSpec): Theme {
-  const base = s.scheme === 'light' ? light : dark
+/** The gradient itself, at the angle Discord stores (0deg, bottom to top). */
+export const gradientCss = (g: Gradient, scheme: 'light' | 'dark') => {
+  const [from, to] = scheme === 'light' ? g.light : g.dark
+  return `linear-gradient(0deg, ${from} 0%, ${to} 100%)`
+}
+
+/**
+ * A gradient preset as a theme.
+ *
+ * Discord does not swap the palette for a client theme — it paints the
+ * gradient behind the whole window and turns every surface into glass over it,
+ * mixed toward the gradient by the preset's own baseMix. A preset that mixes
+ * only halfway keeps more of the base theme showing, so the veils over it are
+ * correspondingly more opaque.
+ */
+function colorTheme(g: Gradient, scheme: 'light' | 'dark'): Theme {
+  const base = scheme === 'light' ? light : dark
+  const wash = gradientCss(g, scheme)
+  // 1 at a full mix, 1.5 at a half one
+  const m = 1 + (100 - g.baseMix) / 100
+  const veil = (a: number) =>
+    scheme === 'light'
+      ? `rgba(255,255,255,${Math.min(0.9, +(a * m).toFixed(3))})`
+      : `rgba(0,0,0,${Math.min(0.85, +(a * m).toFixed(3))})`
+  const lift = (a: number) => `rgba(255,255,255,${+(a / m).toFixed(3)})`
   return {
-    id: s.id,
-    name: s.name,
-    swatch: `linear-gradient(150deg, ${s.from}, ${s.to})`,
+    id: `${g.key}-${scheme}`,
+    name: g.name,
+    swatch: wash,
     tokens: {
       ...base,
-      wash: `linear-gradient(150deg, ${s.from}, ${s.to})`,
+      wash,
       rail: 'transparent',
-      side: s.scheme === 'light' ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.34)',
-      chat: s.scheme === 'light' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.22)',
-      card: s.scheme === 'light' ? 'rgba(255,255,255,0.75)' : 'rgba(0,0,0,0.32)',
-      composer: s.scheme === 'light' ? 'rgba(255,255,255,0.62)' : 'rgba(0,0,0,0.32)',
-      selected: s.scheme === 'light' ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.13)',
-      hover: s.scheme === 'light' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.07)',
-      border: s.scheme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
+      side: veil(scheme === 'light' ? 0.28 : 0.34),
+      chat: veil(scheme === 'light' ? 0.55 : 0.22),
+      card: veil(scheme === 'light' ? 0.75 : 0.32),
+      composer: veil(scheme === 'light' ? 0.62 : 0.32),
+      selected: scheme === 'light' ? veil(0.85) : lift(0.13),
+      hover: scheme === 'light' ? veil(0.5) : lift(0.07),
+      border: scheme === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
       titlebar: 'transparent',
     },
   }
 }
 
-export const colorThemes: Theme[] = colorSpecs.map(colorTheme)
+export const colorThemes: Theme[] = GRADIENTS.flatMap((g) => [
+  colorTheme(g, 'dark'),
+  colorTheme(g, 'light'),
+])
 
 export const allThemes = [...defaultThemes, ...colorThemes]
 
