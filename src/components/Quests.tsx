@@ -3,7 +3,6 @@ import {
   HEARTBEAT_INTERVAL_S,
   ORB_MULTIPLIER,
   QUESTS,
-  QUEST_COLORS,
   RewardType,
   SORT_LABELS,
   SortOrder,
@@ -24,6 +23,7 @@ import {
   type QuestUserStatus,
   type SortOrderValue,
 } from '../quests'
+import { QuestKeyArt } from '../ui/QuestArt'
 import {
   CheckSmallIcon,
   ClockIcon,
@@ -84,6 +84,9 @@ export function QuestsPage({
 
   const quests: Quest[] = QUESTS.map((q) => ({ ...q, userStatus: status[q.id] ?? null }))
   const ordered = sortQuests(quests, sort)
+  // Discord leads the tab with one quest and lists the rest below it
+  const featured = ordered[0] ?? null
+  const rest = ordered.slice(1)
   const open = quests.find((q) => q.id === openId) ?? null
   const done = quests.filter(isComplete).length
 
@@ -109,39 +112,34 @@ export function QuestsPage({
       </header>
 
       <div className="quests-body">
-        <section
-          className="quests-hero"
-          style={{
-            background: `linear-gradient(135deg, ${QUEST_COLORS.gradientStart}, ${QUEST_COLORS.gradientEnd})`,
-          }}
-        >
-          <h1>Play, watch, earn Orbs.</h1>
-          <p>
-            Finish a quest to collect its reward. Progress is tracked while the task is running and
-            picks up where it left off.
-          </p>
-          <span className="quests-hero-count">
-            {done} of {quests.length} completed
-          </span>
-        </section>
+        {featured ? <FeaturedQuest quest={featured} onOpen={() => setOpenId(featured.id)} /> : null}
 
-        <div className="quests-sort">
-          {(Object.values(SortOrder) as SortOrderValue[]).map((s) => (
-            <button
-              key={s}
-              className={'quests-sort-btn' + (s === sort ? ' on' : '')}
-              onClick={() => setSort(s)}
-            >
-              {SORT_LABELS[s]}
-            </button>
-          ))}
+        <div className="quests-bar">
+          <h2>
+            Available Quests <span>{rest.length}</span>
+          </h2>
+          <div className="quests-sort">
+            {(Object.values(SortOrder) as SortOrderValue[]).map((s) => (
+              <button
+                key={s}
+                className={'quests-sort-btn' + (s === sort ? ' on' : '')}
+                onClick={() => setSort(s)}
+              >
+                {SORT_LABELS[s]}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="quests-grid">
-          {ordered.map((q) => (
+          {rest.map((q) => (
             <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
           ))}
         </div>
+
+        <p className="quests-count">
+          {done} of {quests.length} quests completed.
+        </p>
       </div>
 
       {open ? (
@@ -158,22 +156,25 @@ export function QuestsPage({
   )
 }
 
-function QuestTile({ quest, size }: { quest: Quest; size: number }) {
-  const { colors, messages } = quest.config
-  const Icon = TASK_ICON[taskOf(quest).type]
+/** The card's poster: the quest's key art with its own colours. */
+function QuestPoster({
+  quest,
+  className,
+  wide,
+}: {
+  quest: Quest
+  className?: string
+  wide?: boolean
+}) {
   return (
-    <span
-      className="quest-tile"
-      style={{
-        width: size,
-        height: size,
-        background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-      }}
-      aria-hidden
-    >
-      <Icon size={Math.round(size * 0.42)} />
-      <i>{messages.gameTitle}</i>
-    </span>
+    <QuestKeyArt
+      id={quest.id}
+      colors={quest.config.colors}
+      title={quest.config.messages.gameTitle}
+      publisher={quest.config.messages.gamePublisher}
+      className={className}
+      wide={wide}
+    />
   )
 }
 
@@ -182,43 +183,88 @@ function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
   const value = progressOf(quest)
   const state = questState(quest)
   const pct = Math.round((value / task.target) * 100)
+  const collectible = quest.config.rewardsConfig.rewards.some(
+    (r) => r.type === RewardType.COLLECTIBLE,
+  )
+  const Icon = TASK_ICON[task.type]
   return (
     <button className={'quest-card ' + state} onClick={onOpen}>
-      <QuestTile quest={quest} size={56} />
-      <div className="quest-card-text">
+      <span className="quest-card-art">
+        <QuestPoster quest={quest} />
+        <span className="quest-card-badge">
+          {state === 'claimed' ? (
+            <>
+              <CheckSmallIcon size={13} />
+              Claimed
+            </>
+          ) : state === 'completed' ? (
+            'Ready to claim'
+          ) : (
+            <>
+              <ClockIcon size={12} />
+              {timeLeft(quest.config.expiresAt)}
+            </>
+          )}
+        </span>
+      </span>
+      <span className="quest-card-body">
         <b>{quest.config.messages.questName}</b>
-        <span className="quest-card-game">
+        <span className="quest-card-task">
+          <Icon size={13} />
+          {taskLabel(task)}
+        </span>
+        <span className="quest-card-foot">
+          <span className="quest-card-reward">
+            <OrbsIcon size={15} />
+            {orbValue(quest).toLocaleString()}
+            {collectible ? <span className="quest-plus">+1</span> : null}
+          </span>
+          {isEnrolled(quest) && !isComplete(quest) ? (
+            <span className="quest-bar">
+              <i style={{ width: `${pct}%` }} />
+            </span>
+          ) : null}
+        </span>
+      </span>
+    </button>
+  )
+}
+
+/** The featured quest across the top of the tab, the way Discord leads with one. */
+function FeaturedQuest({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
+  const task = taskOf(quest)
+  const state = questState(quest)
+  return (
+    <section className="quest-featured">
+      <QuestPoster quest={quest} className="quest-featured-art" wide />
+      <div className="quest-featured-body">
+        <span className="quest-featured-tag">Featured Quest</span>
+        <span className="quest-featured-game">
           {quest.config.messages.gameTitle} · {quest.config.messages.gamePublisher}
         </span>
-        <span className="quest-card-reward">
-          <OrbsIcon size={14} />
-          {orbValue(quest).toLocaleString()} Orbs
-          {quest.config.rewardsConfig.rewards.some((r) => r.type === RewardType.COLLECTIBLE)
-            ? ' + a collectible'
-            : ''}
-        </span>
-        {isEnrolled(quest) && !isComplete(quest) ? (
-          <span className="quest-bar">
-            <i style={{ width: `${pct}%` }} />
+        <h1>{quest.config.messages.questName}</h1>
+        <p>{taskLabel(task)}</p>
+        <div className="quest-featured-meta">
+          <span className="quest-card-reward big">
+            <OrbsIcon size={18} />
+            {orbValue(quest).toLocaleString()} Orbs
           </span>
-        ) : null}
-      </div>
-      <div className="quest-card-right">
-        {state === 'claimed' ? (
-          <span className="quest-state done">
-            <CheckSmallIcon size={16} />
-            Claimed
-          </span>
-        ) : state === 'completed' ? (
-          <span className="quest-state ready">Claim</span>
-        ) : (
           <span className="quest-left">
             <ClockIcon size={14} />
             {timeLeft(quest.config.expiresAt)}
           </span>
-        )}
+        </div>
+        <button className="quest-featured-cta" onClick={onOpen}>
+          {state === 'claimed'
+            ? 'View Quest'
+            : state === 'completed'
+              ? 'Claim reward'
+              : isEnrolled(quest)
+                ? 'Continue Quest'
+                : 'Accept Quest'}
+        </button>
       </div>
-    </button>
+    </section>
   )
 }
 
@@ -277,11 +323,8 @@ function QuestSheet({
       <div className="quest-sheet" onMouseDown={(e) => e.stopPropagation()}>
         <div
           className="quest-sheet-hero"
-          style={{
-            background: `linear-gradient(135deg, ${quest.config.colors.primary}, ${quest.config.colors.secondary})`,
-          }}
         >
-          <QuestTile quest={quest} size={72} />
+          <QuestPoster quest={quest} className="quest-sheet-art" />
           <div>
             <h2>{quest.config.messages.questName}</h2>
             <p>

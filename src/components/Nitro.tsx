@@ -6,7 +6,6 @@ import {
   GIFT_HOST,
   GIFT_LENGTHS,
   GIFT_PROMO,
-  NITRO_COLORS,
   PERKS,
   PLANS,
   PremiumType,
@@ -34,7 +33,7 @@ import {
   OrbsIcon,
   SparkleIcon,
 } from '../ui/Icons'
-import { NitroWordmark, PerkArt } from '../ui/NitroArt'
+import { NitroHeroArt, NitroWordmark, PerkArt } from '../ui/NitroArt'
 
 /**
  * The Nitro tab.
@@ -153,12 +152,9 @@ function NitroHome({
   const active = isActive(subscription)
   return (
     <>
-      <section
-        className="nitro-hero"
-        style={{
-          background: `linear-gradient(120deg, ${NITRO_COLORS.header.join(', ')})`,
-        }}
-      >
+      <section className="nitro-hero">
+        <NitroHeroArt />
+        <div className="nitro-hero-body">
         <NitroWordmark />
         <p>
           Show off a new look, upload bigger files, and get more out of every server you are in.
@@ -180,9 +176,10 @@ function NitroHome({
           </div>
         ) : (
           <button className="nitro-cta" onClick={onSubscribe}>
-            Subscribe
+            Subscribe — {money(TIERS[0].monthly)}/month
           </button>
         )}
+        </div>
       </section>
 
       {active ? (

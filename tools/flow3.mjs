@@ -217,7 +217,9 @@ await step('a gift can be bought and redeemed', async () => {
 await step('a quest enrols, runs, completes and pays out', async () => {
   await p.click('.dm-nav .row:has-text("Quests")')
   await p.waitForTimeout(300)
-  expect((await p.locator('.quest-card').count()) === 6, 'expected six quests')
+  // one quest is featured across the top; the rest are cards under it
+  expect((await p.locator('.quest-featured').count()) === 1, 'no featured quest')
+  expect((await p.locator('.quest-card').count()) === 5, 'expected five quest cards')
   await p.click('.quest-card:has-text("Play a game of chess")')
   await p.waitForTimeout(300)
   await p.clock.install()
