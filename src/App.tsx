@@ -76,7 +76,14 @@ import {
   type Gift,
   type Subscription,
 } from './nitro'
-import { QUESTS, type QuestUserStatus } from './quests'
+import {
+  HEARTBEAT_INTERVAL_S,
+  QUESTS,
+  beat,
+  enroll,
+  type Quest,
+  type QuestUserStatus,
+} from './quests'
 import { allThemes, applyTheme, defaultThemes } from './themes'
 
 purgeOldSchemas()
@@ -379,6 +386,25 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
         giftLength(gift.interval),
     })
   }
+
+  /**
+   * One heartbeat of quest progress, applied to the status the app already
+   * holds. The sheet only says which quest is running: several beats can land
+   * before React re-renders, so a tick that carried its own copy of the quest
+   * would overwrite the progress the previous tick just wrote.
+   */
+  const beatQuest = useCallback((questId: string) => {
+    setQuestStatus((all) => {
+      const q = QUESTS.find((x) => x.id === questId)
+      if (!q) return all
+      return { ...all, [questId]: beat({ ...q, userStatus: all[questId] ?? null }, HEARTBEAT_INTERVAL_S) }
+    })
+  }, [])
+
+  const enrollQuest = useCallback(
+    (q: Quest) => setQuestStatus((all) => ({ ...all, [q.id]: enroll(q) })),
+    [],
+  )
 
   const claimQuest = (questId: string, payout: number) => {
     setOrbs((n) => n + payout)
@@ -842,7 +868,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               status={questStatus}
               orbs={orbs}
               multiplier={premiumType === PremiumType.TIER_2}
-              onStatus={(st) => setQuestStatus((all) => ({ ...all, [st.questId]: st }))}
+              onEnroll={enrollQuest}
+              onBeat={beatQuest}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
             />
           ) : homeView === 'shop' ? (

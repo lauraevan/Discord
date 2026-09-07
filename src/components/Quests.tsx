@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   HEARTBEAT_INTERVAL_S,
   ORB_MULTIPLIER,
@@ -9,8 +9,6 @@ import {
   SortOrder,
   TASK_VERB,
   TaskType,
-  beat,
-  enroll,
   isClaimed,
   isComplete,
   isEnrolled,
@@ -70,13 +68,15 @@ export function QuestsPage({
   status,
   orbs,
   multiplier,
-  onStatus,
+  onEnroll,
+  onBeat,
   onClaim,
 }: {
   status: Record<string, QuestUserStatus>
   orbs: number
   multiplier: boolean
-  onStatus: (s: QuestUserStatus) => void
+  onEnroll: (q: Quest) => void
+  onBeat: (questId: string) => void
   onClaim: (q: Quest, orbs: number) => void
 }) {
   const [sort, setSort] = useState<SortOrderValue>(SortOrder.SUGGESTED)
@@ -149,7 +149,8 @@ export function QuestsPage({
           quest={open}
           multiplier={multiplier}
           onClose={() => setOpenId(null)}
-          onStatus={onStatus}
+          onEnroll={onEnroll}
+          onBeat={onBeat}
           onClaim={onClaim}
         />
       ) : null}
@@ -226,43 +227,40 @@ function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
  *
  * The client keeps a quest's progress alive with a heartbeat every 30 seconds
  * and the server adds the elapsed time, so the timer here beats on the same
- * interval and writes the same `progress` record. Leaving the sheet stops the
- * task, exactly as closing the game does.
+ * interval. The beat itself is applied by the owner of the quest state, from
+ * the state it already holds — a tick that read the quest through a prop or a
+ * ref would drop progress whenever several beats land before React has
+ * re-rendered. Leaving the sheet stops the task, exactly as closing the game
+ * does.
  */
 function QuestSheet({
   quest,
   multiplier,
   onClose,
-  onStatus,
+  onEnroll,
+  onBeat,
   onClaim,
 }: {
   quest: Quest
   multiplier: boolean
   onClose: () => void
-  onStatus: (s: QuestUserStatus) => void
+  onEnroll: (q: Quest) => void
+  onBeat: (questId: string) => void
   onClaim: (q: Quest, orbs: number) => void
 }) {
   const task = taskOf(quest)
-  const [running, setRunning] = useState(false)
-  // the heartbeat below reads the quest from a ref rather than closing over it,
-  // so the interval does not have to be torn down and rebuilt on every tick
-  const latest = useRef(quest)
-  useEffect(() => {
-    latest.current = quest
-  }, [quest])
+  const questId = quest.id
+  const done = isComplete(quest)
+  // "started" is what the button toggles; the task stops on its own once the
+  // quest completes, so whether it is running is derived rather than stored
+  const [started, setStarted] = useState(false)
+  const running = started && !done
 
   useEffect(() => {
     if (!running) return
-    const tick = setInterval(() => {
-      const q = latest.current
-      if (isComplete(q)) {
-        setRunning(false)
-        return
-      }
-      onStatus(beat(q, HEARTBEAT_INTERVAL_S))
-    }, HEARTBEAT_INTERVAL_S * 1000)
+    const tick = setInterval(() => onBeat(questId), HEARTBEAT_INTERVAL_S * 1000)
     return () => clearInterval(tick)
-  }, [running, onStatus])
+  }, [running, questId, onBeat])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -342,14 +340,14 @@ function QuestSheet({
             <button
               className="btn-primary"
               onClick={() => {
-                onStatus(enroll(quest))
-                setRunning(true)
+                onEnroll(quest)
+                setStarted(true)
               }}
             >
               Accept Quest
             </button>
           ) : (
-            <button className="btn-primary" onClick={() => setRunning((v) => !v)}>
+            <button className="btn-primary" onClick={() => setStarted((v) => !v)}>
               {running ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
               {running ? 'Pause' : TASK_VERB[task.type]}
             </button>
