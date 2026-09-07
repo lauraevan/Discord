@@ -7,14 +7,17 @@ import {
   AppsIcon,
   ChevronRightIcon,
   CloseIcon,
+  EyeIcon,
   GifIcon,
   GiftIcon,
+  PencilIcon,
   PlusIcon,
   PollBarsIcon,
   SchedulePlusIcon,
   SmileyIcon,
   StickerIcon,
   ThreadPlusIcon,
+  TrashIcon,
   UploadFileIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
@@ -94,7 +97,6 @@ export function Composer({
   onThread,
   onApps,
   onSchedule,
-  onAttach,
   premiumType,
   onGiftNitro,
 }: {
@@ -103,19 +105,21 @@ export function Composer({
   account: Account
   replyTo: Message | null
   onCancelReply: () => void
-  onSend: (text: string) => void
+  onSend: (text: string, attachments: Attachment[]) => void
   onEditLast: () => void
   onOpenPicker: (at: { x: number; y: number }) => void
   onPoll: () => void
   onThread: () => void
   onApps: () => void
   onSchedule: (text: string, at: number) => void
-  onAttach: (a: Attachment) => void
   /** the account's premium type, which is what sets the two caps below */
   premiumType: PremiumTypeValue
   onGiftNitro: () => void
 }) {
   const [value, setValue] = useState('')
+  // Discord holds a picked file in the composer until you send, with its own
+  // preview card and a spoiler / rename / remove toolbar
+  const [pending, setPending] = useState<Attachment[]>([])
   const [tooBig, setTooBig] = useState<string | null>(null)
   const [caret, setCaret] = useState(0)
   const [pick, setPick] = useState(0)
@@ -139,7 +143,8 @@ export function Composer({
     }
     setTooBig(null)
     const r = new FileReader()
-    r.onload = () => onAttach({ id: uid('att'), name: f.name, url: String(r.result) })
+    r.onload = () =>
+      setPending((all) => [...all, { id: uid('att'), name: f.name, url: String(r.result) }])
     r.readAsDataURL(f)
   }
   const ac = useAutocomplete(value, caret, channels, account)
@@ -172,11 +177,13 @@ export function Composer({
 
   const submit = () => {
     const raw = value.trim()
-    if (!raw || raw.length > limit) return
+    if (raw.length > limit) return
+    if (!raw && pending.length === 0) return
     const slash = /^\/(\w+)\s*([\s\S]*)$/.exec(raw)
     const run = slash && SLASH[slash[1]]
-    onSend(run ? run(slash[2]) : raw)
+    onSend(run ? run(slash[2]) : raw, pending)
     setValue('')
+    setPending([])
     setCaret(0)
   }
 
@@ -408,6 +415,55 @@ export function Composer({
           ))}
         </div>
       </div>
+      {pending.length ? (
+        <div className="upload-tray">
+          {pending.map((a) => (
+            <figure key={a.id} className={'upload-card' + (a.spoiler ? ' spoiler' : '')}>
+              <div className="upload-thumb">
+                <img src={a.url} alt={a.name} />
+                {a.spoiler ? <span className="upload-spoiler-tag">SPOILER</span> : null}
+              </div>
+              <figcaption>{a.name}</figcaption>
+              <div className="upload-acts">
+                <Tooltip label={a.spoiler ? 'Remove Spoiler' : 'Mark as Spoiler'} side="above">
+                  <button
+                    aria-label="Mark as spoiler"
+                    onClick={() =>
+                      setPending((all) =>
+                        all.map((x) => (x.id === a.id ? { ...x, spoiler: !x.spoiler } : x)),
+                      )
+                    }
+                  >
+                    <EyeIcon />
+                  </button>
+                </Tooltip>
+                <Tooltip label="Edit File Name" side="above">
+                  <button
+                    aria-label="Edit file name"
+                    onClick={() => {
+                      const name = prompt('File name', a.name)
+                      if (name)
+                        setPending((all) => all.map((x) => (x.id === a.id ? { ...x, name } : x)))
+                    }}
+                  >
+                    <PencilIcon />
+                  </button>
+                </Tooltip>
+                <Tooltip label="Remove Attachment" side="above">
+                  <button
+                    className="danger"
+                    aria-label="Remove attachment"
+                    onClick={() => setPending((all) => all.filter((x) => x.id !== a.id))}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
+              </div>
+            </figure>
+          ))}
+        </div>
+      ) : null}
+
       {tooBig ? (
         <div className="composer-toobig" role="alert">
           {tooBig}

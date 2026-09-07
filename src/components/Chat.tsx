@@ -319,6 +319,11 @@ export function ChatFeed({
   // once the channel list has been built out.
   const showChecklist = !!server && server.channels.length <= 2
 
+  // Discord paints an author's name in their top coloured role. @everyone
+  // carries no colour, so on a server with no roles set up the name is just
+  // the header colour — which is what the reference frames show.
+  const nameColor = server?.roles.find((r) => r.color)?.color ?? null
+
   useLayoutEffect(() => {
     const el = ref.current
     if (el) el.scrollTop = el.scrollHeight
@@ -421,7 +426,7 @@ export function ChatFeed({
                     <Avatar account={account} size={40} />
                   </span>
                   <div className="msg-head">
-                    <span className="author" style={{ color: account.color }}>
+                    <span className="author" style={nameColor ? { color: nameColor } : undefined}>
                       {account.name}
                     </span>
                     <span className="timestamp">{stamp(m.time)}</span>

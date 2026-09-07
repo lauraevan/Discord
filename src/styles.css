@@ -6993,3 +6993,132 @@ body.streamer .invite-row code {
   width: 14px;
   height: 14px;
 }
+
+/* the user card's second line: status normally, username on hover or with the
+   popout open — both lines occupy the same row so nothing shifts */
+.user-card .state {
+  display: grid;
+}
+
+.user-card .state i {
+  grid-area: 1 / 1;
+  font-style: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-card .state-handle {
+  visibility: hidden;
+}
+
+.user-card .id:hover .state-status,
+.user-card .id.open .state-status {
+  visibility: hidden;
+}
+
+.user-card .id:hover .state-handle,
+.user-card .id.open .state-handle {
+  visibility: visible;
+}
+
+/* --- pending uploads ------------------------------------------------------ */
+/* Discord holds a picked file in the composer until you send it: a card with
+   the preview, the file name under it, and a toolbar that appears on hover. */
+
+.upload-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--hover);
+}
+
+.upload-card {
+  position: relative;
+  width: 216px;
+  padding: 8px;
+  border-radius: 4px;
+  background: var(--chat);
+}
+
+.upload-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 128px;
+  border-radius: 3px;
+  background: var(--rail);
+  overflow: hidden;
+}
+
+.upload-thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.upload-card.spoiler .upload-thumb img {
+  filter: blur(24px);
+}
+
+.upload-spoiler-tag {
+  position: absolute;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.upload-card figcaption {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-acts {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: none;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 4px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border);
+}
+
+.upload-card:hover .upload-acts,
+.upload-acts:focus-within {
+  display: flex;
+}
+
+.upload-acts button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  color: var(--text);
+}
+
+.upload-acts button:hover {
+  background: var(--hover);
+}
+
+.upload-acts button.danger {
+  color: var(--red);
+}
+
+.upload-acts svg {
+  width: 16px;
+  height: 16px;
+}

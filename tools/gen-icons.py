@@ -56,6 +56,8 @@ MAP = {
     'JumpIcon': 'UploadIcon',
     'PencilIcon': 'PencilIcon',
     'TrashIcon': 'TrashIcon',
+    'EyeIcon': 'EyeIcon',
+    'EyeSlashIcon': 'EyeSlashIcon',
     'CopyIcon': 'CopyIcon',
     'MoreIcon': 'MoreHorizontalIcon',
     # composer

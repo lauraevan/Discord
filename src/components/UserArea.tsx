@@ -184,6 +184,7 @@ export function UserArea({
   onDeafen,
   onSettings,
   onOpenProfile,
+  profileOpen,
 }: {
   account: Account
   muted: boolean
@@ -194,6 +195,8 @@ export function UserArea({
   onDeafen: () => void
   onSettings: () => void
   onOpenProfile: () => void
+  /** the popout is open, which is when Discord swaps the line for the username */
+  profileOpen: boolean
 }) {
   return (
     <div className={'user-card' + (voice ? ' with-voice' : '')}>
@@ -209,11 +212,17 @@ export function UserArea({
           </button>
         </div>
       ) : null}
-      <button className="id" onClick={onOpenProfile}>
+      {/* the second line is the custom status, or the plain status when there
+          is none; hovering the card — or opening the popout — swaps it for the
+          username, which is what all four reference frames show */}
+      <button className={'id' + (profileOpen ? ' open' : '')} onClick={onOpenProfile}>
         <Avatar account={account} size={26} />
         <span className="user-meta">
           <span className="name">{account.name}</span>
-          <span className="state">{account.handle}</span>
+          <span className="state">
+            <i className="state-status">{account.customStatus || statusLabel[account.status]}</i>
+            <i className="state-handle">{account.handle}</i>
+          </span>
         </span>
       </button>
       <div className="acts">

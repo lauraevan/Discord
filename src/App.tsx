@@ -40,6 +40,7 @@ import {
   makeServer,
   uid,
   type Account,
+  type Attachment,
   type Channel,
   type Message,
   type Server,
@@ -435,13 +436,14 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     setChannelModal(null)
   }
 
-  const send = (text: string) => {
+  const send = (text: string, attachments: Attachment[] = []) => {
     if (!key) return
     const m: Message = {
       id: uid('m'),
       author: account.handle,
       time: Date.now(),
       text,
+      ...(attachments.length ? { attachments } : {}),
       ...(replyTo ? { replyTo: replyTo.id } : {}),
     }
     patchThread((list) => [...list, m])
@@ -832,6 +834,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             onMute={() => setMuted((m) => !m)}
             onDeafen={() => setDeafened((d) => !d)}
             onSettings={() => setUserSettings(true)}
+            profileOpen={popout}
             onOpenProfile={() => setPopout((v) => !v)}
           />
           {popout ? (
@@ -982,12 +985,6 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                       setHomeView('nitro')
                     }}
                     onSchedule={scheduleSend}
-                    onAttach={(a) =>
-                      patchThread((list) => [
-                        ...list,
-                        { id: uid('m'), author: account.handle, time: Date.now(), text: '', attachments: [a] },
-                      ])
-                    }
                   />
                   </>
                   )}

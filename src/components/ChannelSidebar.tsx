@@ -117,6 +117,7 @@ export function ChannelSidebar({
   onHeader: (at: { x: number; y: number }) => void
 }) {
   // threads hang off their parent channel rather than sitting in the list
+  const grown = server.channels.length > 2
   const top = server.channels.filter((c) => !c.parentId)
   const loose = top.filter((c) => c.categoryId === null)
   const inCat = (cat: Category) => top.filter((c) => c.categoryId === cat.id)
@@ -168,19 +169,28 @@ export function ChannelSidebar({
       </button>
 
       <div className="sidebar-scroll">
+        {/* A brand new server gets Events and Server Boosts only; Browse
+            Channels and Members appear once it has grown past the two channels
+            it was created with. Both reference frames agree on this — the
+            server still showing the welcome checklist shows two rows, the one
+            with a third channel shows four. */}
         <div className="nav-block">
           <div className="row nav">
             <CalendarIcon />
             <span className="row-name">Events</span>
           </div>
-          <div className="row nav">
-            <BrowseChannelsIcon />
-            <span className="row-name">Browse Channels</span>
-          </div>
-          <div className="row nav">
-            <MembersIcon />
-            <span className="row-name">Members</span>
-          </div>
+          {grown ? (
+            <>
+              <div className="row nav">
+                <BrowseChannelsIcon />
+                <span className="row-name">Browse Channels</span>
+              </div>
+              <div className="row nav">
+                <MembersIcon />
+                <span className="row-name">Members</span>
+              </div>
+            </>
+          ) : null}
           <div className="row nav">
             <BoostIcon />
             <span className="row-name">Server Boosts</span>

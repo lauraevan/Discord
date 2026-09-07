@@ -250,6 +250,40 @@ await step('the Orbs can be spent in the Shop, and the decoration is worn', asyn
   expect((await p.locator('.user-card .avatar-decoration').count()) === 1, 'not shown on the avatar')
 })
 
+/* -------------------------------------------------------------- uploads */
+
+await step('a picked file waits in the composer, then sends with the message', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  // a 2x2 red PNG is enough to exercise the whole path
+  const png = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGP8z4AATAxQxhBjAgIAAP//DEwBH1p9U7QAAAAASUVORK5CYII=',
+    'base64',
+  )
+  await p.setInputFiles('.composer-wrap input[type=file]', {
+    name: 'image.png',
+    mimeType: 'image/png',
+    buffer: png,
+  })
+  await p.waitForTimeout(300)
+  expect((await p.locator('.upload-card').count()) === 1, 'no pending upload card')
+  expect(
+    (await p.locator('.upload-card figcaption').innerText()) === 'image.png',
+    'wrong file name',
+  )
+  await p.hover('.upload-card')
+  await p.click('.upload-acts button[aria-label="Mark as spoiler"]')
+  await p.waitForTimeout(150)
+  expect((await p.locator('.upload-card.spoiler').count()) === 1, 'spoiler not applied')
+  const before = await p.locator('.group').count()
+  await p.fill('.composer-input', 'with a file')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(400)
+  expect((await p.locator('.upload-card').count()) === 0, 'tray did not clear')
+  expect((await p.locator('.group').count()) === before + 1, 'message not sent')
+  expect((await p.locator('.attachment').count()) === 1, 'attachment not carried')
+})
+
 console.log('\nerrors:', errs.length ? errs.join('\n  ') : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()
