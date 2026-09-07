@@ -76,7 +76,10 @@ MAP = {
     'HeadphonesOffIcon': 'HeadphonesDenyIcon',
     'GearIcon': 'SettingsIcon',
     'SwitchAccountsIcon': 'UserCircleIcon',
+    # the sidebar header's invite button is two people and a plus; the one on a
+    # channel row is a single person and a plus — different glyphs in the client
     'AddMemberIcon': 'GroupPlusIcon',
+    'InvitePersonIcon': 'UserPlusIcon',
     'VideoIcon': 'VideoIcon',
     'ScreenIcon': 'ScreenIcon',
     'PhoneHangUpIcon': 'PhoneHangUpIcon',

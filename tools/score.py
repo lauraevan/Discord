@@ -18,7 +18,7 @@ REF = Image.open('docs/reference.png').convert('L')
 # regions with no matchable content: the reference's own avatars and banner,
 # and the other server's icon in the rail
 UNMATCHABLE = [
-    (84, 690, 224, 743),      # the user card's avatar
+    (12, 698, 46, 732),       # the user card's avatar
     (0, 100, 84, 160),        # the other server's rail tile
     (8, 326, 254, 452),       # the popout's banner and avatar, when it is open
 ]

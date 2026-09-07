@@ -10,6 +10,7 @@ import {
   ForumIcon,
   GearIcon,
   HashIcon,
+  InvitePersonIcon,
   MediaIcon,
   MegaphoneIcon,
   MembersIcon,
@@ -71,7 +72,7 @@ function ChannelRow({
       <span className="row-actions">
         <Tooltip label="Create Invite" side="below">
           <button aria-label="Create invite" onClick={(e) => e.stopPropagation()}>
-            <AddMemberIcon />
+            <InvitePersonIcon />
           </button>
         </Tooltip>
         <Tooltip label="Edit Channel" side="below">
