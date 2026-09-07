@@ -7298,3 +7298,17 @@ img.decoration {
   object-fit: contain;
   image-rendering: auto;
 }
+
+/* a decoration that does not move is not the decoration, so it animates by
+   default and only falls back to its still under Reduced Motion */
+img.decoration.still {
+  display: none;
+}
+
+body.reduced-motion img.decoration.anim {
+  display: none;
+}
+
+body.reduced-motion img.decoration.still {
+  display: block;
+}

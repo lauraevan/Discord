@@ -20,10 +20,10 @@ import { BADGES } from '../badges'
 /**
  * The status indicator's diameter for a given avatar size.
  *
- * Discord does not scale it proportionally — it steps, and the step flattens
- * as the avatar grows, so the dot on a 80px profile avatar is only a fifth of
- * it where the dot on a 24px one is a third. Measured off the reference
- * frames: 16 on the popout's 80px avatar, 10 on the user card's 32px one.
+ * Discord does not scale it proportionally at small sizes — it steps, and a
+ * 16px avatar needs a dot that is a third of it to be visible at all. From
+ * 40px up it settles at a fifth of the avatar, which is where the profile
+ * sizes live: 16 on an 80px avatar, 13 on the popout's 64px one.
  */
 export function statusSize(avatar: number) {
   const steps: [number, number][] = [
@@ -32,13 +32,9 @@ export function statusSize(avatar: number) {
     [24, 8],
     [32, 10],
     [40, 12],
-    [48, 16],
-    [80, 16],
-    [100, 24],
-    [152, 32],
   ]
   for (const [at, dot] of steps) if (avatar <= at) return dot
-  return Math.round(avatar * 0.21)
+  return Math.round(avatar * 0.2)
 }
 
 export function Avatar({ account, size }: { account: Account; size: number }) {

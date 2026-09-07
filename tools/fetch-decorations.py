@@ -6,12 +6,17 @@ reach. Hayanaga/SillyTavern-AvatarDecorations-CSS carries the same files
 committed to a public repo, which raw.githubusercontent.com does serve, so
 that is where they come from.
 
-They arrive as 60-132 frame animations, far too heavy to inline into a
-single-file build: the twenty-four here total ~18MB as shipped. So each one is
-reduced to the single frame that carries the most of its artwork — an
-animation's first frame is often nearly empty — scaled to 128px and
-palette-quantised with a binary alpha, which is what the source art mostly
-uses anyway.
+They arrive as 60-132 frame animations at 288px, ~18MB for the set, which is
+far too heavy to inline into a single-file build. But a decoration that does
+not move is not the decoration, so they stay animated: re-encoded as animated
+WebP at 80px on a frame budget, with each file walked down through quality and
+frame-rate steps until it fits. That holds the set to well under a megabyte
+while every one still plays.
+
+A still is written alongside each animation — the frame that best represents
+the decoration at rest, scored on the ring outside the avatar since scoring the
+whole frame picks the moment the effect blankets it. Nothing uses the stills
+today; they are what a reduced-motion setting would switch to.
 
     python3 tools/fetch-decorations.py
 """
@@ -25,16 +30,20 @@ from PIL import Image, ImageDraw
 
 BASE = 'https://raw.githubusercontent.com/Hayanaga/SillyTavern-AvatarDecorations-CSS/main/dc-decorations'
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'src/assets/decorations')
-SIZE = 128
+SIZE = 80
+# each animation is walked down this ladder until it fits BUDGET
+LADDER = [(4, 70), (5, 62), (6, 55), (8, 50)]
+BUDGET = 46 * 1024
 
-# Four complete Discord Shop collections, keyed by the repo's own grouping.
+# Four complete Discord Shop collections. The collection names are Discord's
+# own, from the catalogue tools/fetch-shop.py reads.
 COLLECTIONS = {
     'Elements': ['6_Air', '6_Balance', '6_Earth', '6_Fire', '6_Lightning', '6_Water'],
-    'Space': [
+    'Galaxy': [
         '10_Astronaut-Helmet', '10_Black-Hole', '10_Constellations',
         '10_Solar-Orbit', '10_Stardust', '10_UFO',
     ],
-    'Lo-Fi Vibes': [
+    'Lofi Vibes': [
         '7_Chromawave', '7_Cozy-Cat', '7_Cozy-Headphones',
         '7_Doodling', '7_Oasis', '7_Rainy-Mood',
     ],
@@ -88,6 +97,37 @@ def best_frame(im: Image.Image) -> Image.Image:
     return best
 
 
+def animate(raw: bytes) -> tuple[bytes, int, int]:
+    """
+    The decoration as animated WebP, walked down the ladder until it fits.
+
+    Returns the encoded bytes, the frame count and the step it settled on.
+    """
+    for step, quality in LADDER:
+        im = Image.open(io.BytesIO(raw))
+        frames = []
+        for i in range(0, getattr(im, 'n_frames', 1), step):
+            im.seek(i)
+            frames.append(im.convert('RGBA').resize((SIZE, SIZE), Image.LANCZOS))
+        buf = io.BytesIO()
+        frames[0].save(
+            buf,
+            format='WEBP',
+            save_all=True,
+            append_images=frames[1:],
+            # the source art runs at 30fps, so a step of n plays at 30/n
+            duration=int(1000 / 30 * step),
+            loop=0,
+            quality=quality,
+            method=6,
+            allow_mixed=True,
+        )
+        data = buf.getvalue()
+        if len(data) <= BUDGET or (step, quality) == LADDER[-1]:
+            return data, len(frames), step
+    raise AssertionError('unreachable')
+
+
 def main() -> None:
     os.makedirs(OUT, exist_ok=True)
     index = []
@@ -95,25 +135,35 @@ def main() -> None:
     for collection, stems in COLLECTIONS.items():
         for stem in stems:
             url = f'{BASE}/{urllib.parse.quote(stem + ".png")}'
-            with urllib.request.urlopen(url, timeout=60) as r:
+            with urllib.request.urlopen(url, timeout=90) as r:
                 raw = r.read()
-            frame = best_frame(Image.open(io.BytesIO(raw)))
-            frame = frame.resize((SIZE, SIZE), Image.LANCZOS)
-            # a binary alpha keeps the palette small; the source art is already
-            # hard-edged, so this costs almost nothing visually
-            alpha = frame.getchannel('A').point(lambda a: 255 if a > 96 else 0)
-            frame.putalpha(alpha)
+
+            data, count, step = animate(raw)
+            name = f'{slug(stem)}.webp'
+            with open(os.path.join(OUT, name), 'wb') as f:
+                f.write(data)
+
+            still = best_frame(Image.open(io.BytesIO(raw))).resize((SIZE, SIZE), Image.LANCZOS)
+            still.putalpha(still.getchannel('A').point(lambda a: 255 if a > 96 else 0))
             # RGBA input only accepts the octree quantiser
-            frame = frame.quantize(colors=192, method=Image.FASTOCTREE)
-            name = f'{slug(stem)}.png'
-            path = os.path.join(OUT, name)
-            frame.save(path, optimize=True)
-            size = os.path.getsize(path)
+            still = still.quantize(colors=192, method=Image.FASTOCTREE)
+            still_name = f'{slug(stem)}.png'
+            still.save(os.path.join(OUT, still_name), optimize=True)
+
+            size = len(data) + os.path.getsize(os.path.join(OUT, still_name))
             total += size
-            index.append({'id': slug(stem), 'name': title(stem), 'collection': collection, 'file': name})
-            print(f'{title(stem):22} {collection:16} {len(raw) // 1024:5}KB -> {size // 1024:3}KB')
+            index.append({
+                'id': slug(stem),
+                'name': title(stem),
+                'collection': collection,
+                'file': name,
+                'still': still_name,
+            })
+            print(
+                f'{title(stem):22} {collection:16} {len(raw) // 1024:5}KB -> '
+                f'{len(data) // 1024:3}KB  {count:2} frames @ 1/{step}'
+            )
     print(f'\n{len(index)} decorations, {total // 1024}KB total')
-    print(json.dumps(index, indent=2)[:200] + ' …')
     with open(os.path.join(OUT, 'index.json'), 'w') as f:
         json.dump(index, f, indent=2)
 

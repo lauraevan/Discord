@@ -3,144 +3,168 @@
     "id": "air",
     "name": "Air",
     "collection": "Elements",
-    "file": "air.png"
+    "file": "air.webp",
+    "still": "air.png"
   },
   {
     "id": "balance",
     "name": "Balance",
     "collection": "Elements",
-    "file": "balance.png"
+    "file": "balance.webp",
+    "still": "balance.png"
   },
   {
     "id": "earth",
     "name": "Earth",
     "collection": "Elements",
-    "file": "earth.png"
+    "file": "earth.webp",
+    "still": "earth.png"
   },
   {
     "id": "fire",
     "name": "Fire",
     "collection": "Elements",
-    "file": "fire.png"
+    "file": "fire.webp",
+    "still": "fire.png"
   },
   {
     "id": "lightning",
     "name": "Lightning",
     "collection": "Elements",
-    "file": "lightning.png"
+    "file": "lightning.webp",
+    "still": "lightning.png"
   },
   {
     "id": "water",
     "name": "Water",
     "collection": "Elements",
-    "file": "water.png"
+    "file": "water.webp",
+    "still": "water.png"
   },
   {
     "id": "astronaut-helmet",
     "name": "Astronaut Helmet",
-    "collection": "Space",
-    "file": "astronaut-helmet.png"
+    "collection": "Galaxy",
+    "file": "astronaut-helmet.webp",
+    "still": "astronaut-helmet.png"
   },
   {
     "id": "black-hole",
     "name": "Black Hole",
-    "collection": "Space",
-    "file": "black-hole.png"
+    "collection": "Galaxy",
+    "file": "black-hole.webp",
+    "still": "black-hole.png"
   },
   {
     "id": "constellations",
     "name": "Constellations",
-    "collection": "Space",
-    "file": "constellations.png"
+    "collection": "Galaxy",
+    "file": "constellations.webp",
+    "still": "constellations.png"
   },
   {
     "id": "solar-orbit",
     "name": "Solar Orbit",
-    "collection": "Space",
-    "file": "solar-orbit.png"
+    "collection": "Galaxy",
+    "file": "solar-orbit.webp",
+    "still": "solar-orbit.png"
   },
   {
     "id": "stardust",
     "name": "Stardust",
-    "collection": "Space",
-    "file": "stardust.png"
+    "collection": "Galaxy",
+    "file": "stardust.webp",
+    "still": "stardust.png"
   },
   {
     "id": "ufo",
     "name": "UFO",
-    "collection": "Space",
-    "file": "ufo.png"
+    "collection": "Galaxy",
+    "file": "ufo.webp",
+    "still": "ufo.png"
   },
   {
     "id": "chromawave",
     "name": "Chromawave",
-    "collection": "Lo-Fi Vibes",
-    "file": "chromawave.png"
+    "collection": "Lofi Vibes",
+    "file": "chromawave.webp",
+    "still": "chromawave.png"
   },
   {
     "id": "cozy-cat",
     "name": "Cozy Cat",
-    "collection": "Lo-Fi Vibes",
-    "file": "cozy-cat.png"
+    "collection": "Lofi Vibes",
+    "file": "cozy-cat.webp",
+    "still": "cozy-cat.png"
   },
   {
     "id": "cozy-headphones",
     "name": "Cozy Headphones",
-    "collection": "Lo-Fi Vibes",
-    "file": "cozy-headphones.png"
+    "collection": "Lofi Vibes",
+    "file": "cozy-headphones.webp",
+    "still": "cozy-headphones.png"
   },
   {
     "id": "doodling",
     "name": "Doodling",
-    "collection": "Lo-Fi Vibes",
-    "file": "doodling.png"
+    "collection": "Lofi Vibes",
+    "file": "doodling.webp",
+    "still": "doodling.png"
   },
   {
     "id": "oasis",
     "name": "Oasis",
-    "collection": "Lo-Fi Vibes",
-    "file": "oasis.png"
+    "collection": "Lofi Vibes",
+    "file": "oasis.webp",
+    "still": "oasis.png"
   },
   {
     "id": "rainy-mood",
     "name": "Rainy Mood",
-    "collection": "Lo-Fi Vibes",
-    "file": "rainy-mood.png"
+    "collection": "Lofi Vibes",
+    "file": "rainy-mood.webp",
+    "still": "rainy-mood.png"
   },
   {
     "id": "dragons-smile",
     "name": "Dragon's Smile",
     "collection": "Lunar New Year",
-    "file": "dragons-smile.png"
+    "file": "dragons-smile.webp",
+    "still": "dragons-smile.png"
   },
   {
     "id": "fan-flourish",
     "name": "Fan Flourish",
     "collection": "Lunar New Year",
-    "file": "fan-flourish.png"
+    "file": "fan-flourish.webp",
+    "still": "fan-flourish.png"
   },
   {
     "id": "firecrackers",
     "name": "Firecrackers",
     "collection": "Lunar New Year",
-    "file": "firecrackers.png"
+    "file": "firecrackers.webp",
+    "still": "firecrackers.png"
   },
   {
     "id": "koi-pond",
     "name": "Koi Pond",
     "collection": "Lunar New Year",
-    "file": "koi-pond.png"
+    "file": "koi-pond.webp",
+    "still": "koi-pond.png"
   },
   {
     "id": "lucky-envelopes",
     "name": "Lucky Envelopes",
     "collection": "Lunar New Year",
-    "file": "lucky-envelopes.png"
+    "file": "lucky-envelopes.webp",
+    "still": "lucky-envelopes.png"
   },
   {
     "id": "lunar-lanterns",
     "name": "Lunar Lanterns",
     "collection": "Lunar New Year",
-    "file": "lunar-lanterns.png"
+    "file": "lunar-lanterns.webp",
+    "still": "lunar-lanterns.png"
   }
 ]
