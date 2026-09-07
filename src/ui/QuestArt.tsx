@@ -154,14 +154,12 @@ export function QuestKeyArt({
   id,
   colors,
   title,
-  publisher,
   className,
   wide = false,
 }: {
   id: string
   colors: { primary: string; secondary: string }
   title: string
-  publisher?: string
   className?: string
   /**
    * The featured card is much wider than a poster, so the motif moves to the
@@ -203,7 +201,7 @@ export function QuestKeyArt({
       </svg>
     )
   return (
-    <svg className={className} viewBox="0 0 200 132" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <svg className={className} viewBox="0 0 240 135" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
         <linearGradient id={`${uid}-bg`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor={colors.primary} />
@@ -219,21 +217,26 @@ export function QuestKeyArt({
         </linearGradient>
         <linearGradient id={`${uid}-scrim`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0.35" stopColor="#000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity="0.62" />
+          <stop offset="1" stopColor="#000" stopOpacity="0.58" />
         </linearGradient>
       </defs>
-      <rect width="200" height="132" fill={`url(#${uid}-bg)`} />
-      <rect width="200" height="132" fill={`url(#${uid}-glow)`} />
-      <Motifs motif={motif} id={uid} />
-      <rect width="200" height="132" fill={`url(#${uid}-scrim)`} />
-      <text x="12" y="116" fill="#fff" fontSize="15" fontWeight="800" letterSpacing="-0.2">
+      <rect width="240" height="135" fill={`url(#${uid}-bg)`} />
+      <rect width="240" height="135" fill={`url(#${uid}-glow)`} />
+      <g transform="translate(49 4) scale(0.85)">
+        <Motifs motif={motif} id={uid} />
+      </g>
+      <rect width="240" height="135" fill={`url(#${uid}-scrim)`} />
+      <text
+        x="120"
+        y="122"
+        fill="#fff"
+        fontSize="15"
+        fontWeight="800"
+        letterSpacing="-0.2"
+        textAnchor="middle"
+      >
         {title}
       </text>
-      {publisher ? (
-        <text x="12" y="127" fill="#fff" fontSize="8" fontWeight="600" opacity=".72">
-          {publisher.toUpperCase()}
-        </text>
-      ) : null}
     </svg>
   )
 }

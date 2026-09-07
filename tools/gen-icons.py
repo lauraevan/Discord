@@ -125,6 +125,8 @@ MAP = {
     'UserIcon': 'UserIcon',
     'MedalIcon': 'MedalIcon',
     'CircleCheckIcon': 'CircleCheckIcon',
+    'FiltersIcon': 'FiltersHorizontalIcon',
+    'MoreVerticalIcon': 'MoreVerticalIcon',
     'CircleInformationIcon': 'CircleInformationIcon',
     'ArrowRightIcon': 'ArrowSmallRightIcon',
 }

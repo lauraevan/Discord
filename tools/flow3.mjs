@@ -217,10 +217,10 @@ await step('a gift can be bought and redeemed', async () => {
 await step('a quest enrols, runs, completes and pays out', async () => {
   await p.click('.dm-nav .row:has-text("Quests")')
   await p.waitForTimeout(300)
-  // one quest is featured across the top; the rest are cards under it
-  expect((await p.locator('.quest-featured').count()) === 1, 'no featured quest')
-  expect((await p.locator('.quest-card').count()) === 5, 'expected five quest cards')
-  await p.click('.quest-card:has-text("Play a game of chess")')
+  // the Orbs banner leads the tab, and every quest is a card in the grid
+  expect((await p.locator('.orbs-hero').count()) === 1, 'no Orbs banner')
+  expect((await p.locator('.quest-card').count()) === 6, 'expected six quest cards')
+  await p.click('.quest-card:has-text("Chess In The Park")')
   await p.waitForTimeout(300)
   await p.clock.install()
   await p.click('.quest-sheet-foot .btn-primary')     // Accept Quest, starts the task

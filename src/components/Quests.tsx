@@ -7,7 +7,6 @@ import {
   SORT_LABELS,
   SortOrder,
   TASK_VERB,
-  TaskType,
   isClaimed,
   isComplete,
   isEnrolled,
@@ -24,15 +23,18 @@ import {
   type SortOrderValue,
 } from '../quests'
 import { QuestKeyArt } from '../ui/QuestArt'
+import orbsHero from '../assets/quests/orbs-hero.jpg'
 import {
   CheckSmallIcon,
+  ChevronDownIcon,
+  CircleCheckIcon,
+  FiltersIcon,
+  MoreIcon,
   ClockIcon,
-  GameControllerIcon,
   OrbsIcon,
   PauseIcon,
   PlayIcon,
   QuestsIcon,
-  ScreenIcon,
   SparkleIcon,
   TrophyIcon,
 } from '../ui/Icons'
@@ -52,17 +54,6 @@ import {
  * actually running, and stops the moment it is paused.
  */
 
-const TASK_ICON = {
-  [TaskType.PLAY_ACTIVITY]: GameControllerIcon,
-  [TaskType.PLAY_ON_DESKTOP]: GameControllerIcon,
-  [TaskType.PLAY_ON_XBOX]: GameControllerIcon,
-  [TaskType.PLAY_ON_PLAYSTATION]: GameControllerIcon,
-  [TaskType.STREAM_ON_DESKTOP]: ScreenIcon,
-  [TaskType.WATCH_VIDEO]: PlayIcon,
-  [TaskType.WATCH_VIDEO_ON_MOBILE]: PlayIcon,
-  [TaskType.ACHIEVEMENT_IN_GAME]: TrophyIcon,
-  [TaskType.ACHIEVEMENT_IN_ACTIVITY]: TrophyIcon,
-}
 
 export function QuestsPage({
   status,
@@ -80,23 +71,34 @@ export function QuestsPage({
   onClaim: (q: Quest, orbs: number) => void
 }) {
   const [sort, setSort] = useState<SortOrderValue>(SortOrder.SUGGESTED)
+  const [sortOpen, setSortOpen] = useState(false)
+  const [tab, setTab] = useState<'all' | 'claimed'>('all')
   const [openId, setOpenId] = useState<string | null>(null)
 
   const quests: Quest[] = QUESTS.map((q) => ({ ...q, userStatus: status[q.id] ?? null }))
   const ordered = sortQuests(quests, sort)
-  // Discord leads the tab with one quest and lists the rest below it
-  const featured = ordered[0] ?? null
-  const rest = ordered.slice(1)
+  const shown = tab === 'claimed' ? ordered.filter(isClaimed) : ordered
   const open = quests.find((q) => q.id === openId) ?? null
-  const done = quests.filter(isComplete).length
+  const claimed = quests.filter(isClaimed).length
 
   return (
     <main className="chat quests">
       <header className="quests-header">
-        <div className="quests-title">
-          <QuestsIcon size={22} />
-          <h2>Quests</h2>
-        </div>
+        <QuestsIcon size={24} className="quests-mark" />
+        <nav className="quests-tabs">
+          <button
+            className={'quests-tab' + (tab === 'all' ? ' on' : '')}
+            onClick={() => setTab('all')}
+          >
+            All Quests
+          </button>
+          <button
+            className={'quests-tab' + (tab === 'claimed' ? ' on' : '')}
+            onClick={() => setTab('claimed')}
+          >
+            Claimed Quests
+          </button>
+        </nav>
         <div className="quests-header-right">
           {multiplier ? (
             <span className="quests-multiplier">
@@ -112,34 +114,62 @@ export function QuestsPage({
       </header>
 
       <div className="quests-body">
-        {featured ? <FeaturedQuest quest={featured} onOpen={() => setOpenId(featured.id)} /> : null}
+        <OrbsHero />
 
         <div className="quests-bar">
-          <h2>
-            Available Quests <span>{rest.length}</span>
-          </h2>
-          <div className="quests-sort">
-            {(Object.values(SortOrder) as SortOrderValue[]).map((s) => (
-              <button
-                key={s}
-                className={'quests-sort-btn' + (s === sort ? ' on' : '')}
-                onClick={() => setSort(s)}
-              >
-                {SORT_LABELS[s]}
+          <h2>{tab === 'claimed' ? 'Claimed Quests' : 'Available Quests'}</h2>
+          <div className="quests-controls">
+            <div className="quests-select">
+              <button className="quests-select-btn" onClick={() => setSortOpen((v) => !v)}>
+                {SORT_LABELS[sort]}
+                <ChevronDownIcon size={16} />
               </button>
-            ))}
+              {sortOpen ? (
+                <>
+                  <div className="quests-select-away" onClick={() => setSortOpen(false)} />
+                  <ul className="quests-select-menu">
+                    {(Object.values(SortOrder) as SortOrderValue[]).map((s) => (
+                      <li key={s}>
+                        <button
+                          className={s === sort ? 'on' : ''}
+                          onClick={() => {
+                            setSort(s)
+                            setSortOpen(false)
+                          }}
+                        >
+                          {SORT_LABELS[s]}
+                          {s === sort ? <CheckSmallIcon size={16} /> : null}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+            </div>
+            <button className="quests-filters">
+              Filters
+              <FiltersIcon size={16} />
+            </button>
           </div>
         </div>
 
-        <div className="quests-grid">
-          {rest.map((q) => (
-            <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
-          ))}
-        </div>
+        {shown.length ? (
+          <div className="quests-grid">
+            {shown.map((q) => (
+              <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+            ))}
+          </div>
+        ) : (
+          <p className="quests-count">
+            No claimed Quests yet — finish one and its reward lands here.
+          </p>
+        )}
 
-        <p className="quests-count">
-          {done} of {quests.length} quests completed.
-        </p>
+        {tab === 'all' ? (
+          <p className="quests-count">
+            {claimed} of {quests.length} Quests claimed.
+          </p>
+        ) : null}
       </div>
 
       {open ? (
@@ -171,11 +201,16 @@ function QuestPoster({
       id={quest.id}
       colors={quest.config.colors}
       title={quest.config.messages.gameTitle}
-      publisher={quest.config.messages.gamePublisher}
       className={className}
       wide={wide}
     />
   )
+}
+
+/** "Ends 9/7" — the date Discord prints on a quest card. */
+const endsOn = (at: number) => {
+  const d = new Date(at)
+  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
 function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
@@ -183,86 +218,61 @@ function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
   const value = progressOf(quest)
   const state = questState(quest)
   const pct = Math.round((value / task.target) * 100)
-  const collectible = quest.config.rewardsConfig.rewards.some(
-    (r) => r.type === RewardType.COLLECTIBLE,
-  )
-  const Icon = TASK_ICON[task.type]
   return (
     <button className={'quest-card ' + state} onClick={onOpen}>
       <span className="quest-card-art">
         <QuestPoster quest={quest} />
-        <span className="quest-card-badge">
-          {state === 'claimed' ? (
-            <>
-              <CheckSmallIcon size={13} />
-              Claimed
-            </>
-          ) : state === 'completed' ? (
-            'Ready to claim'
-          ) : (
-            <>
-              <ClockIcon size={12} />
-              {timeLeft(quest.config.expiresAt)}
-            </>
-          )}
+        <span className="quest-card-more" aria-hidden>
+          <MoreIcon size={18} />
         </span>
-      </span>
-      <span className="quest-card-body">
-        <b>{quest.config.messages.questName}</b>
-        <span className="quest-card-task">
-          <Icon size={13} />
-          {taskLabel(task)}
-        </span>
-        <span className="quest-card-foot">
-          <span className="quest-card-reward">
-            <OrbsIcon size={15} />
-            {orbValue(quest).toLocaleString()}
-            {collectible ? <span className="quest-plus">+1</span> : null}
+        {state === 'claimed' ? (
+          <span className="quest-card-badge done">
+            <CheckSmallIcon size={13} />
+            Claimed
           </span>
-          {isEnrolled(quest) && !isComplete(quest) ? (
-            <span className="quest-bar">
-              <i style={{ width: `${pct}%` }} />
-            </span>
-          ) : null}
+        ) : state === 'completed' ? (
+          <span className="quest-card-badge ready">Ready to claim</span>
+        ) : isEnrolled(quest) ? (
+          <span className="quest-card-progress">
+            <i style={{ width: `${pct}%` }} />
+          </span>
+        ) : null}
+      </span>
+      <span className="quest-card-foot">
+        <span className="quest-card-promo">
+          Promoted by
+          <CircleCheckIcon size={15} className="quest-verified" />
+          <b>{quest.config.messages.gamePublisher}</b>
         </span>
+        <span className="quest-card-ends">Ends {endsOn(quest.config.expiresAt)}</span>
       </span>
     </button>
   )
 }
 
-/** The featured quest across the top of the tab, the way Discord leads with one. */
-function FeaturedQuest({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
-  const task = taskOf(quest)
-  const state = questState(quest)
+/**
+ * The Discord Orbs banner across the top of the tab.
+ *
+ * Discord leads the Quests tab with this rather than with a quest: the Orbs
+ * key art, the headline, the line about earning and spending, and two buttons
+ * — a white primary to the Orbs Exclusives shelf and a dark secondary to the
+ * terms.
+ */
+function OrbsHero() {
   return (
-    <section className="quest-featured">
-      <QuestPoster quest={quest} className="quest-featured-art" wide />
-      <div className="quest-featured-body">
-        <span className="quest-featured-tag">Featured Quest</span>
-        <span className="quest-featured-game">
-          {quest.config.messages.gameTitle} · {quest.config.messages.gamePublisher}
-        </span>
-        <h1>{quest.config.messages.questName}</h1>
-        <p>{taskLabel(task)}</p>
-        <div className="quest-featured-meta">
-          <span className="quest-card-reward big">
-            <OrbsIcon size={18} />
-            {orbValue(quest).toLocaleString()} Orbs
-          </span>
-          <span className="quest-left">
-            <ClockIcon size={14} />
-            {timeLeft(quest.config.expiresAt)}
-          </span>
+    <section className="orbs-hero">
+      <img className="orbs-hero-art" src={orbsHero} alt="" aria-hidden="true" />
+      <div className="orbs-hero-body">
+        <h1>
+          Introducing
+          <br />
+          Discord Orbs
+        </h1>
+        <p>Reward Your Play. Earn through Quests. Spend in the Shop.</p>
+        <div className="orbs-hero-actions">
+          <button className="orbs-cta">Explore Orbs Exclusives</button>
+          <button className="orbs-cta secondary">Discord Orbs Terms</button>
         </div>
-        <button className="quest-featured-cta" onClick={onOpen}>
-          {state === 'claimed'
-            ? 'View Quest'
-            : state === 'completed'
-              ? 'Claim reward'
-              : isEnrolled(quest)
-                ? 'Continue Quest'
-                : 'Accept Quest'}
-        </button>
       </div>
     </section>
   )

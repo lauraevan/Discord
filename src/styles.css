@@ -6552,14 +6552,37 @@ body.streamer .invite-row code {
   color: #ca9ef9;
 }
 
-.quests-sort {
-  display: flex;
-  gap: 6px;
-  margin: 20px 0 12px;
-  flex-wrap: wrap;
+.quests-mark {
+  flex: 0 0 auto;
+  color: var(--strong);
 }
 
-.quests-sort-btn,
+.quests-tabs {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  overflow: auto hidden;
+}
+
+.quests-tab {
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.quests-tab:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+
+.quests-tab.on {
+  color: var(--strong);
+  background: var(--selected);
+}
+
 .shop-collection {
   height: 28px;
   padding: 0 12px;
@@ -6570,7 +6593,6 @@ body.streamer .invite-row code {
   font-weight: 500;
 }
 
-.quests-sort-btn.on,
 .shop-collection.on {
   background: var(--selected);
   color: var(--strong);
@@ -6578,119 +6600,180 @@ body.streamer .invite-row code {
 
 .quests-bar {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  margin: 28px 0 12px;
+  margin: 28px 0 16px;
 }
 
 .quests-bar h2 {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--strong);
 }
 
-.quests-bar h2 span {
-  margin-left: 6px;
+.quests-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quests-select {
+  position: relative;
+}
+
+.quests-select-btn,
+.quests-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.quests-select-btn:hover,
+.quests-filters:hover {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.quests-select-btn svg,
+.quests-filters svg {
   color: var(--muted);
 }
 
-.quests-bar .quests-sort {
-  margin: 0 0 0 auto;
+.quests-select-away {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.quests-select-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 61;
+  min-width: 180px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--pop-card, var(--card));
+  box-shadow: var(--elevation-high, 0 8px 16px rgba(0, 0, 0, 0.24));
+}
+
+.quests-select-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: left;
+}
+
+.quests-select-menu button:hover {
+  background: var(--blurple);
+  color: #fff;
+}
+
+.quests-select-menu button.on {
+  color: var(--strong);
+  font-weight: 500;
+}
+
+.quests-select-menu button svg {
+  margin-left: auto;
 }
 
 .quests-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 20px 16px;
 }
 
-/* --- the featured quest ---------------------------------------------------- */
+/* --- the Discord Orbs hero ------------------------------------------------- */
 
-.quest-featured {
+.orbs-hero {
   position: relative;
   display: flex;
-  align-items: flex-end;
-  min-height: 260px;
-  border-radius: 12px;
+  align-items: center;
+  min-height: 232px;
+  border-radius: 16px;
   overflow: hidden;
   isolation: isolate;
+  background: #1c0f2e;
 }
 
-.quest-featured-art {
+.orbs-hero-art {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0 0 0 auto;
   z-index: -1;
+  width: 78%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 34%);
+  mask-image: linear-gradient(90deg, transparent, #000 34%);
 }
 
-.quest-featured-body {
-  padding: 26px 28px;
-  max-width: 560px;
+.orbs-hero-body {
+  padding: 28px 32px;
+  max-width: 460px;
   color: #fff;
 }
 
-.quest-featured-tag {
-  display: inline-block;
-  padding: 3px 9px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.quest-featured-game {
-  display: block;
-  margin-top: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-
-.quest-featured-body h1 {
-  margin-top: 4px;
-  font-size: 27px;
-  line-height: 32px;
+.orbs-hero-body h1 {
+  font-size: 32px;
+  line-height: 36px;
   font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
-.quest-featured-body p {
-  margin-top: 6px;
+.orbs-hero-body p {
+  margin-top: 10px;
+  max-width: 330px;
   font-size: 14px;
   line-height: 19px;
-  opacity: 0.92;
+  color: rgba(255, 255, 255, 0.78);
 }
 
-.quest-featured-meta {
+.orbs-hero-actions {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-top: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
 }
 
-.quest-featured-meta .quest-left {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.quest-featured-cta {
-  height: 40px;
-  margin-top: 16px;
-  padding: 0 22px;
-  border-radius: 20px;
+.orbs-cta {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 19px;
   background: #fff;
-  color: #1d0b24;
-  font-size: 14.5px;
+  color: #14042b;
+  font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
-.quest-featured-cta:hover {
-  background: #eae6f2;
+.orbs-cta:hover {
+  background: #e6e0f0;
+}
+
+.orbs-cta.secondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.orbs-cta.secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* --- quest cards ----------------------------------------------------------- */
@@ -6698,27 +6781,28 @@ body.streamer .invite-row code {
 .quest-card {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   padding: 0;
-  border-radius: 10px;
-  background: var(--card);
-  overflow: hidden;
+  background: none;
   text-align: left;
-  transition: transform 0.12s ease-out;
-}
-
-.quest-card:hover {
-  transform: translateY(-2px);
-  background: var(--selected);
-}
-
-.quest-card.claimed {
-  opacity: 0.62;
 }
 
 .quest-card-art {
   position: relative;
   display: block;
-  aspect-ratio: 200 / 132;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+  transition: transform 0.12s ease-out;
+}
+
+.quest-card:hover .quest-card-art {
+  transform: translateY(-2px);
+}
+
+.quest-card.claimed .quest-card-art {
+  opacity: 0.62;
 }
 
 .quest-card-art svg {
@@ -6727,10 +6811,29 @@ body.streamer .invite-row code {
   height: 100%;
 }
 
+.quest-card-more {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.1s ease-out;
+}
+
+.quest-card:hover .quest-card-more {
+  opacity: 1;
+}
+
 .quest-card-badge {
   position: absolute;
-  right: 8px;
-  top: 8px;
+  left: 8px;
+  bottom: 8px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -6749,62 +6852,56 @@ body.streamer .invite-row code {
   background: #7d42f2;
 }
 
-.quest-card-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 12px 14px 14px;
+.quest-card-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: block;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.quest-card-progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #7d42f2, #ca9ef9);
 }
 
 .quest-card-foot {
-  margin-top: auto;
-  padding-top: 8px;
-}
-
-.quest-card-body b {
-  font-size: 14.5px;
-  line-height: 19px;
-  color: var(--strong);
-}
-
-.quest-card-task {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.quest-card-promo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
   font-size: 12px;
   color: var(--muted);
 }
 
-.quest-card-task svg {
+.quest-card-promo b {
+  overflow: hidden;
+  color: var(--text);
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quest-verified {
   flex: 0 0 auto;
+  color: var(--muted);
 }
 
-.quest-card-foot {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.quest-card-reward {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #ca9ef9;
-}
-
-.quest-card-reward.big {
-  font-size: 15px;
-  color: #fff;
-}
-
-.quest-plus {
-  padding: 1px 5px;
-  border-radius: 8px;
-  background: rgba(202, 158, 249, 0.18);
-  font-size: 10.5px;
+.quest-card-ends {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .quest-bar {
@@ -6827,14 +6924,6 @@ body.streamer .invite-row code {
   height: 8px;
   border-radius: 4px;
   margin: 0;
-}
-
-.quest-left {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11.5px;
-  color: var(--muted);
 }
 
 .quests-count {
