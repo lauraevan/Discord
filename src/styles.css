@@ -1171,9 +1171,9 @@ textarea {
 }
 
 .intro-glyph {
-  /* measured: the disc is 55px across and its hash 28px, not 48/29 */
-  width: 55px;
-  height: 55px;
+  /* swept against the frame: a 56.5px disc under a 34.2px hash */
+  width: 56.5px;
+  height: 56.5px;
   border-radius: 50%;
   background: var(--disc);
   color: #fafafc;
@@ -1218,7 +1218,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 0 10px 0 9px;
+  padding: 0 12px 0 11px;
 }
 
 .intro-btn:hover {
@@ -1226,8 +1226,8 @@ textarea {
 }
 
 .intro-btn svg {
-  width: 14.2px;
-  height: 14.2px;
+  width: 12px;
+  height: 12px;
 }
 
 .group {
@@ -1344,7 +1344,7 @@ textarea {
   display: grid;
   place-items: center;
   color: inherit;
-  opacity: 0.72;
+  opacity: 0.68;
 }
 
 .composer-acts button:hover {
@@ -1352,8 +1352,8 @@ textarea {
 }
 
 .composer-acts svg {
-  width: 17.3px;
-  height: 17.3px;
+  width: 16.3px;
+  height: 16.3px;
 }
 
 /* two of the five glyphs sit differently inside their 24-grid, so they need
