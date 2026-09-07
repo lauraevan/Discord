@@ -591,12 +591,24 @@ textarea {
   overflow: hidden;
 }
 
+/* the ring around a status dot is a hole through the avatar, so it takes the
+   colour of the surface behind it — the popout's own card when it is themed */
 .status-dot {
   position: absolute;
   right: -1px;
   bottom: -1px;
   border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--card);
+}
+
+.popout {
+  --avatar-ring: var(--pop-card);
+}
+
+.feed,
+.member-list,
+.pins,
+.search-results {
+  --avatar-ring: var(--chat);
 }
 
 .user-meta {
@@ -727,10 +739,6 @@ textarea {
   border-radius: 50%;
   padding: 5px;
   background: var(--pop-ring);
-}
-
-.popout-avatar .status-dot {
-  box-shadow: 0 0 0 4px var(--pop-ring);
 }
 
 .popout-chip {

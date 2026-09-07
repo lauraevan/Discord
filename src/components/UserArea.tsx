@@ -17,7 +17,32 @@ import {
 import { Tooltip } from '../ui/Tooltip'
 import { BADGES } from '../badges'
 
+/**
+ * The status indicator's diameter for a given avatar size.
+ *
+ * Discord does not scale it proportionally — it steps, and the step flattens
+ * as the avatar grows, so the dot on a 80px profile avatar is only a fifth of
+ * it where the dot on a 24px one is a third. Measured off the reference
+ * frames: 16 on the popout's 80px avatar, 10 on the user card's 32px one.
+ */
+export function statusSize(avatar: number) {
+  const steps: [number, number][] = [
+    [16, 6],
+    [20, 6],
+    [24, 8],
+    [32, 10],
+    [40, 12],
+    [48, 16],
+    [80, 16],
+    [100, 24],
+    [152, 32],
+  ]
+  for (const [at, dot] of steps) if (avatar <= at) return dot
+  return Math.round(avatar * 0.21)
+}
+
 export function Avatar({ account, size }: { account: Account; size: number }) {
+  const dot = statusSize(size)
   return (
     <span className="avatar-wrap" style={{ width: size, height: size, flex: `0 0 ${size}px` }}>
       <DefaultAvatar color={account.color} />
@@ -31,8 +56,11 @@ export function Avatar({ account, size }: { account: Account; size: number }) {
         className="status-dot"
         style={{
           background: statusColor[account.status],
-          width: size * 0.42,
-          height: size * 0.42,
+          width: dot,
+          height: dot,
+          // the gap around the dot is a hole punched through the avatar, so it
+          // takes the colour of whatever the avatar is sitting on
+          boxShadow: `0 0 0 ${Math.max(2, Math.round(dot * 0.2))}px var(--avatar-ring, var(--card))`,
         }}
       />
     </span>
