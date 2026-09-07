@@ -88,78 +88,22 @@ export function ProfileBanner() {
 /**
  * The empty-state character.
  *
- * Discord's friends screens are illustrated with Wumpus, and Discord's own copy
- * names him — so an empty state here needs a character, but that artwork is
- * theirs and unreachable from this page. This is drawn instead: an original
- * creature, shaded rather than flat, with a rim light, a cast shadow and a
- * face that carries the "nobody is here" the copy is describing.
+ * Discord's friends screens are illustrated with Wumpus and Discord's own copy
+ * on those screens names him, so this is the real thing rather than a drawing
+ * of one: tools/fetch-wumpus.py vendors his art from taiten312/wumpus, which
+ * carries it committed to a public repo — Discord's own CDN is unreachable
+ * from this page. One pose per empty state, matched to the line under it.
  */
-export function WumpusMark({ color = 'currentColor' }: { color?: string }) {
-  return (
-    <svg viewBox="0 0 340 220" fill="none" aria-hidden="true">
-      <defs>
-        <radialGradient id="wm-body" cx="0.36" cy="0.24" r="0.92">
-          <stop offset="0" stopColor={color} stopOpacity="0.5" />
-          <stop offset="0.62" stopColor={color} stopOpacity="0.33" />
-          <stop offset="1" stopColor={color} stopOpacity="0.22" />
-        </radialGradient>
-        <linearGradient id="wm-belly" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={color} stopOpacity="0.1" />
-          <stop offset="1" stopColor={color} stopOpacity="0.2" />
-        </linearGradient>
-        <radialGradient id="wm-shadow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor={color} stopOpacity="0.22" />
-          <stop offset="1" stopColor={color} stopOpacity="0" />
-        </radialGradient>
-      </defs>
+const wumpus = import.meta.glob('../assets/wumpus/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
 
-      {/* a soft cast shadow rather than a hard ellipse */}
-      <ellipse cx="170" cy="196" rx="104" ry="16" fill="url(#wm-shadow)" />
+export type WumpusPose = 'shrug' | 'waiting' | 'idle' | 'lurking'
 
-      {/* arms tucked behind the body, so the silhouette reads first */}
-      <path
-        d="M104 132c-12 2-20 13-18 24 2 11 12 17 23 14l12-3-17-35Zm132 0 17 35 12 3c11 3 21-3 23-14 2-11-6-22-18-24Z"
-        fill={color}
-        fillOpacity="0.24"
-      />
-
-      <path
-        d="M110 190c-16 0-27-13-25-29l7-50c6-42 40-73 82-73s76 31 82 73l7 50c2 16-9 29-25 29H110Z"
-        fill="url(#wm-body)"
-      />
-
-      {/* a rim light along the top-left edge, which is what stops the
-          silhouette reading as a flat blob */}
-      <path
-        d="M85 161l7-50c4-27 20-45 44-56"
-        stroke="#fff"
-        strokeOpacity="0.16"
-        strokeWidth="4"
-        strokeLinecap="round"
-        fill="none"
-      />
-
-      <path
-        d="M138 190c-10 0-18-9-16-19l5-30c4-24 22-41 47-41s43 17 47 41l5 30c2 10-6 19-16 19h-72Z"
-        fill="url(#wm-belly)"
-      />
-
-      {/* eyes: a highlight in each is the difference between asleep and drawn */}
-      {[146, 202].map((cx) => (
-        <g key={cx}>
-          <ellipse cx={cx} cy="104" rx="10" ry="13.5" fill={color} fillOpacity="0.72" />
-          <circle cx={cx - 3.4} cy="99" r="3.4" fill="#fff" fillOpacity="0.75" />
-        </g>
-      ))}
-
-      <path
-        d="M156 136c5.5 7.5 13 11.5 19 11.5s13.5-4 19-11.5"
-        stroke={color}
-        strokeOpacity="0.62"
-        strokeWidth="5.5"
-        strokeLinecap="round"
-        fill="none"
-      />
-    </svg>
-  )
+export function WumpusMark({ pose = 'shrug' }: { pose?: WumpusPose }) {
+  const src = wumpus[`../assets/wumpus/${pose}.png`]
+  if (!src) return null
+  return <img className="wumpus" src={src} alt="" draggable={false} aria-hidden="true" />
 }

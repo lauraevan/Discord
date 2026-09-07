@@ -3889,10 +3889,10 @@ body.streamer .invite-row code {
   color: var(--muted);
 }
 
-.friends-empty svg {
-  width: 340px;
+.friends-empty img.wumpus {
+  width: 200px;
   height: 200px;
-  opacity: 0.9;
+  image-rendering: auto;
 }
 
 .friends-empty p {
@@ -3945,6 +3945,11 @@ body.streamer .invite-row code {
   margin-top: 60px;
   display: flex;
   justify-content: center;
+}
+
+.add-friend-art img.wumpus {
+  width: 190px;
+  height: 190px;
 }
 
 .add-friend-art svg {

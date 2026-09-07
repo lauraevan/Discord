@@ -146,15 +146,25 @@ Nothing is cropped out of a screenshot.
   [Debuggingss/discord-badges](https://github.com/Debuggingss/discord-badges),
   eight are redraws from
   [mezotv/discord-badges](https://github.com/mezotv/discord-badges).
-- **Artwork** — the Nitro hero and perk scenes, the quest key art, the Shop's
-  avatar decorations, the profile banner, the avatars, the onboarding sprites
-  and the empty-state character are all drawn here, in `src/ui/`. None of it is
-  Discord's own illustration and none of it pretends to be: their art is served
-  from a CDN this page cannot reach, the GitHub mirror that carried their
-  avatar decorations was taken down by Discord, and Decor — the obvious
-  alternative — bans re-uploads of Discord's decorations outright. What *is*
-  theirs and is used exactly: the geometry, the gradient stops from the client's
-  own colour table, the copy, and the icons.
+- **Avatar decorations** — Discord's own, four complete Shop collections
+  (Elements, Space, Lo-Fi Vibes, Lunar New Year). They ship as 288x288 APNGs of
+  60-132 frames from a CDN this environment cannot reach;
+  [Hayanaga/SillyTavern-AvatarDecorations-CSS](https://github.com/Hayanaga/SillyTavern-AvatarDecorations-CSS)
+  carries the same files in a public repo, and `tools/fetch-decorations.py`
+  reduces each to the frame that best represents it at rest — scored on the
+  ring outside the avatar, since scoring the whole frame picks the moment the
+  effect blankets it. 24 decorations, 84KB.
+- **Wumpus** — Discord's own, from
+  [taiten312/wumpus](https://github.com/taiten312/wumpus) via
+  `tools/fetch-wumpus.py`: one pose per friends empty state, matched to the
+  line Discord prints under it.
+- **Still drawn here** — the Nitro hero and its perk scenes, and the quest key
+  art. Discord's versions of those are only on `cdn.discordapp.com`, which this
+  environment's egress policy denies outright, and no GitHub mirror of them
+  turned up. They are composed from the gradient stops in the client's own
+  colour table and are not passed off as Discord's illustration.
+- **Also drawn** — the profile banner, the default avatars and the onboarding
+  sprites, in `src/ui/`.
 - **Type** — Figtree (SIL OFL 1.1), self-hosted as base64 so the page makes no
   external requests. It stands in for Discord's proprietary gg sans, and it was
   chosen by measurement: twenty candidate families rendered at the size that

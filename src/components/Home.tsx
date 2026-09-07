@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Account } from '../data'
-import { WumpusMark } from '../ui/Art'
+import { WumpusMark, type WumpusPose } from '../ui/Art'
 import {
   ChevronDownIcon,
   CloseIcon,
@@ -98,12 +98,13 @@ export function HomeSidebar({
   )
 }
 
-const EMPTY: Record<Tab, [string, string]> = {
-  online: ["No one's around to play with Wumpus.", ''],
-  all: ['Wumpus is waiting on friends. You don’t have to though!', ''],
-  pending: ['There are no pending friend requests. Here’s Wumpus for now.', ''],
-  blocked: ['You can’t unblock the Wumpus.', ''],
-  add: ['', ''],
+/** Discord's own empty-state copy, and the Wumpus pose it prints under. */
+const EMPTY: Record<Tab, [string, WumpusPose]> = {
+  online: ["No one's around to play with Wumpus.", 'shrug'],
+  all: ['Wumpus is waiting on friends. You don’t have to though!', 'waiting'],
+  pending: ['There are no pending friend requests. Here’s Wumpus for now.', 'idle'],
+  blocked: ['You can’t unblock the Wumpus.', 'lurking'],
+  add: ['', 'shrug'],
 }
 
 export function FriendsPage({
@@ -186,7 +187,7 @@ export function FriendsPage({
                 </p>
               ) : null}
               <div className="add-friend-art">
-                <WumpusMark />
+                <WumpusMark pose="waiting" />
               </div>
             </div>
           ) : (
@@ -199,7 +200,7 @@ export function FriendsPage({
                 {tab.toUpperCase()} — 0
               </div>
               <div className="friends-empty">
-                <WumpusMark />
+                <WumpusMark pose={EMPTY[tab][1]} />
                 <p>{EMPTY[tab][0]}</p>
               </div>
             </>
