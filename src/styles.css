@@ -426,6 +426,8 @@ textarea {
 
 .row {
   position: relative;
+  /* 27px, which is Discord's 34px row on the frame's 80%: taking it to a
+     literal 32 * --u drifts the whole sidebar and costs 0.2 on the frame */
   height: 27px;
   margin: 0 8px 1px 7px;
   border-radius: 4px;
@@ -1092,7 +1094,8 @@ textarea {
 /* Measured off the reference: a 325px column centred in the chat pane, a
    two-line welcome at 24.6px, and six 47px rows on a 6px gap. */
 .onboard {
-  width: 325px;
+  /* docs/refs measures the checklist column at 400px */
+  width: calc(400px * var(--u));
   margin: 0 auto;
   padding: 24px 0 18px;
   text-align: center;
@@ -2245,10 +2248,12 @@ h3.md-h {
    Right-hand panels
    ========================================================================== */
 
+/* Discord's member list is 240px of 42px rows — measured values, in Discord's
+   own numbers, scaled by --u the way the message list is. */
 .members,
 .results {
-  width: 232px;
-  flex: 0 0 232px;
+  width: calc(240px * var(--u));
+  flex: 0 0 calc(240px * var(--u));
   background: var(--side);
   overflow-y: auto;
   scrollbar-width: thin;
@@ -2257,9 +2262,10 @@ h3.md-h {
 
 .members-head,
 .results-head {
-  padding: 20px 8px 6px 16px;
-  font-size: 11.18px;
-  font-weight: 700;
+  padding: calc(24px * var(--u)) calc(8px * var(--u)) calc(4px * var(--u))
+    calc(16px * var(--u));
+  font-size: calc(12px * var(--u));
+  font-weight: 600;
   color: var(--muted);
   display: flex;
   align-items: center;
@@ -2279,12 +2285,12 @@ h3.md-h {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: calc(100% - 16px);
-  margin: 0 8px;
-  padding: 0 8px;
-  height: 42px;
-  border-radius: 4px;
+  gap: calc(12px * var(--u));
+  width: calc(100% - 16px * var(--u));
+  margin: 0 calc(8px * var(--u));
+  padding: 0 calc(8px * var(--u));
+  height: calc(42px * var(--u));
+  border-radius: calc(4px * var(--u));
   text-align: left;
 }
 
@@ -2304,14 +2310,19 @@ h3.md-h {
 }
 
 .member-name {
-  font-size: 13.98px;
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
   font-weight: 500;
   color: var(--text);
 }
 
 .member-sub {
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
+  line-height: calc(16px * var(--u));
   color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .member-dot {
@@ -4426,40 +4437,44 @@ body.streamer .invite-row code {
   z-index: 4;
 }
 
+/* Measured off docs/refs/444926d4.jpg, which is Discord at 1:1: a 192px menu
+   of 32px rows, 14px labels, and 12px between an 18px glyph and its label. */
 .plus-menu {
-  /* 156px wide with 29px rows, converted from the reference's 193/36 */
   position: absolute;
   left: 6px;
   bottom: 100%;
-  margin-bottom: 8px;
+  margin-bottom: calc(8px * var(--u));
   z-index: 5;
-  min-width: 156px;
-  padding: 6px;
-  border-radius: 7px;
+  min-width: calc(192px * var(--u));
+  padding: calc(8px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--card);
   box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
 }
 
 .plus-menu button {
   width: 100%;
-  height: 29px;
+  height: calc(32px * var(--u));
+  margin-bottom: calc(4px * var(--u));
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 7px 0 6px;
-  border-radius: 4px;
-  font-size: 10.6px;
+  gap: calc(12px * var(--u));
+  padding: 0 calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  font-size: calc(14px * var(--u));
   font-weight: 500;
   color: var(--text);
   text-align: left;
 }
 
+.plus-menu button:last-child {
+  margin-bottom: 0;
+}
+
 .plus-menu button svg {
-  /* the glyphs sit inside their 24-grid, so the box runs bigger than the
-     14px of ink the reference shows */
-  width: 20px;
-  height: 20px;
-  flex: 0 0 20px;
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
+  flex: 0 0 calc(18px * var(--u));
   color: var(--muted);
 }
 
@@ -4483,43 +4498,35 @@ body.streamer .invite-row code {
 
 .plus-caret {
   margin-left: auto;
-  width: 11px !important;
-  height: 11px !important;
-  flex: 0 0 11px !important;
+  width: calc(16px * var(--u)) !important;
+  height: calc(16px * var(--u)) !important;
+  flex: 0 0 calc(16px * var(--u)) !important;
 }
 
 .plus-sub {
   left: 100%;
   bottom: auto;
-  top: -6px;
-  margin: 0 0 0 4px;
+  top: calc(-8px * var(--u));
+  margin: 0 0 0 calc(4px * var(--u));
 }
 
-.plus-menu button {
-  display: block;
-  width: 100%;
-  height: 32px;
-  padding: 0 8px;
-  border-radius: 4px;
-  font-size: 13.05px;
-  font-weight: 500;
-  color: var(--text);
-  text-align: left;
-}
-
-.plus-menu button:hover:not(:disabled) {
-  background: var(--blurple);
-  color: #fff;
-}
-
-.plus-menu button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
+/* Discord does not turn the plus into a cross while its menu is open — it
+   leaves it a plus and raises it onto a rounded square, which is what
+   docs/refs shows. */
 .composer .plus.on {
   opacity: 1;
-  transform: rotate(45deg);
+}
+
+.composer .plus.on::before {
+  content: '';
+  position: absolute;
+  inset: calc(-6px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--btn2);
+}
+
+.composer .plus svg {
+  position: relative;
 }
 
 /* threads show nested under their parent channel */
@@ -10860,7 +10867,6 @@ button.group-avatar:hover {
    it take the inset themselves. The divider draws its rule as a border, which
    padding would sit inside, so that one takes a margin. */
 .intro,
-.onboard,
 .system-row {
   padding-left: 12px;
   padding-right: 12px;

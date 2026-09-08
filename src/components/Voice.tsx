@@ -41,8 +41,10 @@ export function VoiceView({
     <div className="voice-view">
       <div className="voice-stage">
         <div className="voice-tile">
+          {/* no status indicator on a voice tile — Discord shows the ring
+              when you are speaking and nothing else */}
           <span className={'voice-avatar' + (muted ? '' : ' speaking')}>
-            <Avatar account={account} size={80} />
+            <Avatar account={account} size={80} status={false} />
           </span>
           <span className="voice-name">
             {muted ? <MicOffIcon /> : null}
@@ -105,7 +107,7 @@ export function VoiceView({
 export function VoiceMember({ account }: { account: Account }) {
   return (
     <div className="voice-member">
-      <Avatar account={account} size={24} />
+      <Avatar account={account} size={24} status={false} />
       <span>{account.name}</span>
     </div>
   )

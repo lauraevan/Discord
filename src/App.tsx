@@ -309,12 +309,14 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     return out
   }, [server, messages, lastRead, keyOf])
 
+  // Discord's unread bar counts what other people said, never what you said:
+  // sending is itself a read, so your own message never sits under a NEW line
   const unreadFrom = useMemo(() => {
     const mark = lastRead[key]
     if (!mark) return null
-    const first = thread.find((m) => m.time > mark)
+    const first = thread.find((m) => m.time > mark && m.author !== account.handle)
     return first ? first.time : null
-  }, [lastRead, key, thread])
+  }, [lastRead, key, thread, account.handle])
 
   const markRead = useCallback(() => {
     if (key) setLastRead((r) => ({ ...r, [key]: Date.now() }))

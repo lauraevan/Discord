@@ -1,4 +1,4 @@
-import { statusLabel, type Account } from '../data'
+import { type Account } from '../data'
 import { Avatar } from './UserArea'
 import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
@@ -29,7 +29,12 @@ export function MemberList({
         </span>
         <span className="member-body">
           <DisplayName account={account} color={account.color} className="member-name" />
-          <span className="member-sub">{statusLabel[account.status]}</span>
+          {/* Discord's second line is what someone is doing — their custom
+              status — not the word "Online"; with nothing to say the name
+              sits centred on its own */}
+          {account.customStatus ? (
+            <span className="member-sub">{account.customStatus}</span>
+          ) : null}
         </span>
       </button>
     </aside>
