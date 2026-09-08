@@ -415,8 +415,20 @@ an intro layer that plays once, then an idle layer that loops. All of those
 ## Where Discord's own artwork is reachable from
 
 `cdn.discordapp.com` and `discord.com` are both denied by this environment's
-egress policy, so none of the web client's images can be fetched. The Android
-client is a way in: Wumpus-Central's `Discord-Datamining-Android` unpacks the
+egress policy, so none of the web client's images can be fetched directly.
+There are two ways in.
+
+The first is other people's copies of the marketing pages.
+`aashish-dhiman/discord-clone` rebuilt discord.com's Nitro and home pages and
+committed Discord's own SVGs with them, under `src/assets/nitro` and
+`src/assets/home` — the Nitro cover (`card4.svg`), the cloud band
+(`home/clouds.svg`), the NITRO and NITRO BASIC wordmarks (`nitro2.svg`,
+`nitro1.svg`), the sparkles (`star.svg`, `star2.svg`), the MOST POPULAR pill
+(`tag.svg`) and twelve perk illustrations (`card1`-`card12`). They are Figma
+exports, so they are much heavier than they look — `card7.svg` is 2.8MB — and
+worth rendering to WebP at the size they are shown.
+
+The second is the Android client: Wumpus-Central's `Discord-Datamining-Android` unpacks the
 APK with apktool and commits the result, and `res/values/public.xml` is a
 complete index of every resource name in it — 1,919 drawables — which is how a
 name like `images_native_premium_plan_selection_img_wumpus_nitro` is found

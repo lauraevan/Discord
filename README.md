@@ -176,6 +176,16 @@ Nothing is cropped out of a screenshot.
   two-stop gradient with its own base mix), in `src/themes.ts`. They light the
   whole window the way the client's do, and they are the palette the profile
   themes offer too.
+- **The Nitro cover** — Discord's own, off its Nitro page. discord.com is
+  denied here, but
+  [aashish-dhiman/discord-clone](https://github.com/aashish-dhiman/discord-clone)
+  rebuilt that page and committed the artwork it uses, so the cover behind the
+  hero, the cloud band, the NITRO and NITRO BASIC wordmarks, the sparkles, the
+  MOST POPULAR pill and the bento illustrations are Discord's own SVGs.
+  `tools/fetch-nitro-web-art.mjs` vendors them: the flat ones stay SVG, the
+  illustrations are rendered in the browser at the size the page shows them and
+  written as WebP, since they arrive as Figma exports — one perk card is 2.8MB
+  of paths and lands at 17KB.
 - **Nitro art** — Discord's own, out of its Android client. The web client's
   images are on `discord.com`, which this environment's egress policy denies,
   and no repo mirrors them — but
@@ -196,7 +206,7 @@ Nothing is cropped out of a screenshot.
   nothing, the quiet Active Now panel, the Shop with no game shops, and the
   crash panel. Animated sources are reduced to the frame that reads as a
   portrait rather than to frame one, which on a zooming animation is an ear.
-- **Still drawn here** — the Nitro hero's starfield and ringed planet, the quest key art, and the
+- **Still drawn here** — the quest key art, and the
   profile effects in the Shop (which show their collection's own confetti
   colours rather than a drawing pretending to be the effect). Discord's versions
   of those are only on `cdn.discordapp.com`, which this environment's egress

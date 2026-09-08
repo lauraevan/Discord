@@ -36,7 +36,7 @@ import {
   OrbsIcon,
   SparkleIcon,
 } from '../ui/Icons'
-import { NitroHeroArt, NitroWordmark } from '../ui/NitroArt'
+import { NitroWordmark } from '../ui/NitroArt'
 
 /**
  * The Nitro tab.
@@ -141,6 +141,8 @@ export function NitroPage({
 
         <OrbsSection type={type} orbs={orbs} active={active} />
 
+        <Bento />
+
         <Perks />
 
         <Tenure subscription={subscription} />
@@ -203,7 +205,11 @@ function NitroHero({
   const active = isActive(subscription)
   return (
     <section className="nitro-hero">
-      <NitroHeroArt />
+      {/* the cover is Discord's own artwork, not a drawing of it */}
+      <NitroArt name="cover" className="nitro-hero-cover" />
+      <NitroArt name="clouds" className="nitro-hero-clouds" />
+      <NitroArt name="sparkles-pink" className="nitro-hero-sparkle one" />
+      <NitroArt name="sparkles-green" className="nitro-hero-sparkle two" />
       <NitroArt name="plan-nitro" className="nitro-hero-wumpus" />
       <div className="nitro-hero-body">
         <NitroWordmark />
@@ -264,6 +270,55 @@ function OrbsSection({ type, orbs, active }: { type: number; orbs: number; activ
         <NitroIcon size={22} />
         <b>{active ? 'Active' : 'None'}</b>
         <span>Subscription</span>
+      </div>
+    </section>
+  )
+}
+
+/**
+ * The bento box.
+ *
+ * The client instruments a `premium marketing bento box` above the perk cards,
+ * and these are the illustrations Discord runs in it — its own, off the Nitro
+ * page, vendored by tools/fetch-nitro-web-art.mjs.
+ */
+const BENTO: { art: string; title: string; body: string; wide?: boolean }[] = [
+  {
+    art: 'bento-uploads',
+    title: 'Send it whole',
+    body: 'Files up to 500MB, so a clip goes up as a clip and not as a link.',
+    wide: true,
+  },
+  {
+    art: 'bento-emoji',
+    title: 'Every emoji, everywhere',
+    body: 'Custom emoji and stickers from every server you are in, in any server and in DMs.',
+  },
+  {
+    art: 'bento-profile',
+    title: 'A profile that looks like you',
+    body: 'Animated avatar, banner, decorations, and a different look per server.',
+  },
+  {
+    art: 'bento-collectibles',
+    title: 'Collectibles, kept',
+    body: 'Decorations and effects stay yours, at 15% off in the Shop.',
+  },
+]
+
+function Bento() {
+  return (
+    <section className="nitro-section">
+      <div className="nitro-bento">
+        {BENTO.map((b) => (
+          <article key={b.art} className={'nitro-bento-tile' + (b.wide ? ' wide' : '')}>
+            <NitroArt name={b.art} className="nitro-bento-art" />
+            <div className="nitro-bento-copy">
+              <b>{b.title}</b>
+              <span>{b.body}</span>
+            </div>
+          </article>
+        ))}
       </div>
     </section>
   )
@@ -402,7 +457,9 @@ function Plans({
           const mine = active && subscription!.premiumType === t.premiumType
           return (
             <article key={t.key} className={'nitro-plan ' + t.key}>
-              {t.key === 'nitro' ? <span className="nitro-popular">Popular</span> : null}
+              {t.key === 'nitro' ? (
+                <NitroArt name="tag-popular" className="nitro-popular" />
+              ) : null}
               <NitroArt
                 name={t.key === 'nitro' ? 'plan-nitro' : 'plan-basic'}
                 className="nitro-plan-art"

@@ -5866,7 +5866,10 @@ body.streamer .invite-row code {
 
 .nitro-hero {
   position: relative;
-  min-height: 340px;
+  min-height: 360px;
+  background:
+    radial-gradient(80% 120% at 8% 0%, #2a2472 0%, transparent 62%),
+    linear-gradient(120deg, #1b1a4d 0%, #0e0d2a 58%, #0b1a22 100%);
   display: flex;
   align-items: flex-end;
   border-radius: 16px;
@@ -5883,12 +5886,75 @@ body.streamer .invite-row code {
   z-index: -1;
 }
 
+/* Discord's own Nitro cover. It is a wide illustration with the gem at its
+   centre, so it rides the right of the hero and fades into the ground rather
+   than being cropped to a slab of wing behind the copy. */
+.nitro-hero-cover {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: -2;
+  width: 66%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 46%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 38%);
+  mask-image: linear-gradient(90deg, transparent, #000 38%);
+}
+
+/* the cloud band Discord runs under its heroes, along the bottom edge */
+.nitro-hero-clouds {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  z-index: -1;
+  width: 100%;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* and its sparkles */
+.nitro-hero-sparkle {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.nitro-hero-sparkle.one {
+  right: 20%;
+  top: 16%;
+  width: 34px;
+}
+
+.nitro-hero-sparkle.two {
+  right: 8%;
+  bottom: 26%;
+  width: 26px;
+  opacity: 0.9;
+}
+
+/* the copy sits over all of it, so it needs a scrim of its own */
+.nitro-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    100deg,
+    rgba(10, 8, 30, 0.8) 0%,
+    rgba(10, 8, 30, 0.4) 34%,
+    rgba(10, 8, 30, 0.08) 62%,
+    rgba(10, 8, 30, 0) 100%
+  );
+}
+
 /* the plan-selection Wumpus, in the space helmet the redesign put him in */
 .nitro-hero-wumpus {
   position: absolute;
-  right: 318px;
-  bottom: 92px;
-  width: 116px;
+  right: 42%;
+  bottom: 40px;
+  width: 92px;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
 }
 
@@ -5925,6 +5991,13 @@ body.streamer .invite-row code {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   opacity: 0.85;
+}
+
+.nitro-wordmark-art {
+  display: block;
+  width: 208px;
+  max-width: 60%;
+  margin-top: 2px;
 }
 
 .nitro-wordmark-big {
@@ -6066,6 +6139,88 @@ body.streamer .invite-row code {
   transform: rotate(180deg);
 }
 
+/* the bento box: Discord's own illustrations, one wide tile and three beside */
+.nitro-bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.nitro-bento-tile {
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.nitro-bento-tile.wide {
+  grid-column: span 3;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* the illustrations are whole compositions, so they are fitted rather than
+   cropped — a cropped one loses the joke */
+.nitro-bento-art {
+  display: block;
+  width: 100%;
+  height: 176px;
+  padding: 16px;
+  object-fit: contain;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.nitro-bento-tile.wide .nitro-bento-art {
+  width: 46%;
+  height: 216px;
+  padding: 20px;
+}
+
+.nitro-bento-copy {
+  padding: 14px 16px 16px;
+}
+
+.nitro-bento-tile.wide .nitro-bento-copy {
+  padding: 20px 28px;
+}
+
+.nitro-bento-copy b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.nitro-bento-tile.wide .nitro-bento-copy b {
+  font-size: 22px;
+}
+
+.nitro-bento-copy span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 17px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.nitro-bento-tile.wide .nitro-bento-copy span {
+  font-size: 14px;
+  line-height: 19px;
+  max-width: 420px;
+}
+
+@media (max-width: 980px) {
+  .nitro-bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nitro-bento-tile.wide {
+    grid-column: span 2;
+  }
+}
+
 /* the perk cards: a tinted icon, a line of copy, and a back face the card
    flips to — the client tracks the flip as its own event */
 .nitro-perks {
@@ -6202,17 +6357,17 @@ body.streamer .invite-row code {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: #15142c;
+  background: rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.35);
 }
 
-/* the real badge, greyed until the level is reached */
+/* the real badge, dimmed until the level is reached */
 .nitro-tenure-node img {
-  width: 22px;
-  height: 22px;
-  filter: grayscale(1);
-  opacity: 0.45;
+  width: 24px;
+  height: 24px;
+  filter: grayscale(0.9) brightness(1.7);
+  opacity: 0.55;
 }
 
 .nitro-tenure li.on .nitro-tenure-node img {
@@ -6425,18 +6580,13 @@ body.streamer .invite-row code {
   background: linear-gradient(180deg, rgba(180, 115, 245, 0.12), transparent 220px), var(--card);
 }
 
+/* Discord's own MOST POPULAR pill, off the Nitro page */
 .nitro-popular {
   position: absolute;
   right: 16px;
-  top: -10px;
-  padding: 3px 10px;
-  border-radius: 10px;
-  background: #b473f5;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  top: -11px;
+  width: 118px;
+  height: auto;
 }
 
 /* the tier's own art, from the client's plan-selection screen */
