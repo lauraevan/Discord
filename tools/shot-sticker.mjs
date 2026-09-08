@@ -1,0 +1,37 @@
+import { chromium } from 'playwright'
+import { readFileSync } from 'node:fs'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 900 } })
+await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+p.on('pageerror', (e) => console.log('ERR', String(e).split('\n')[0]))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(700)
+await p.click('.server-tile.srv')
+await p.waitForTimeout(300)
+await p.click('.server-header')
+await p.waitForSelector('.ctx-item', { timeout: 3000 })
+await p.click('.ctx-item:has-text("Server Settings")')
+await p.click('.settings-item:has-text("Stickers")')
+await p.waitForTimeout(300)
+// a 64x64 magenta square stands in for a sticker image
+const png = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABnElEQVR4nO2b3VHEMAyEA0MJUBL0AYVBH1AS1wM8+cXnH8laW1ay32OSkXfXip2ZOx8HIeTKPKwc7Pf180/67MvPxxJtUwfRGO4xK5ApRZHGc9BBQIvNNJ6DCgJSZKXxHGsQj1YBnuYR45sC8DafsOgYap9djJfQvhLqDtjZ/HHo9akC2N18QqPTvAhGRxxAlNlPSPWKAohmPiHR3Q0gqvlETz/XgNbN6LOfaPl4mjHg8/f73bXb25dbnRbVDhid/ZLo1vXZdRI1P9A1oCdOKh5VR0IxgJHZX21uJISSL+4C3gK8YQD5hbPs/TVyf7AOkO7PvedQdaRAX4FV5pAfQ/A1oCZOKxpVp8eUT2GUSLTZEtwFvAV4wwC8BXjDALwFeHMXwKp/ZniR+2MHeAvwhgGULp51HSj5YgfUbpytC2p+2AGtm2fpgpYPdkDvgehd0NMv6oCoIUh0i1+BaCFI9XIN0DwcpQs0OtUdsHsIWn0mMzv9jDY6MaY1YJdusOgwL4LeIVjH54kRRJGcy54ZyrnsqbEaO54bJOTi/APcR7IOysst6gAAAABJRU5ErkJggg==',
+  'base64',
+)
+await p.setInputFiles('.set-row-add input[type=file]', { name: 's.png', mimeType: 'image/png', buffer: png })
+await p.waitForTimeout(300)
+await p.fill('.set-row-add input.field', 'Blobwave')
+await p.click('.set-row-add .btn-primary')
+await p.waitForTimeout(300)
+await p.screenshot({ path: process.argv[2] })
+await p.keyboard.press('Escape')
+await p.waitForTimeout(400)
+await p.click('[aria-label="Sticker"]')
+await p.waitForSelector('.picker-sticker', { timeout: 3000 })
+await p.waitForTimeout(300)
+await p.screenshot({ path: process.argv[3] })
+await p.click('.picker-sticker')
+await p.waitForTimeout(400)
+console.log('stickers in feed:', await p.locator('.msg-sticker').count())
+await p.screenshot({ path: process.argv[4] })
+await b.close()

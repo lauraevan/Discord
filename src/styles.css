@@ -2040,8 +2040,6 @@ h3.md-h {
   white-space: nowrap;
 }
 
-
-
 .reactions {
   display: flex;
   flex-wrap: wrap;
@@ -3732,6 +3730,17 @@ body.compact .msg-head {
   display: none;
 }
 
+/* compact prints the bare time in the gutter, so the long stamp is hidden and
+   the short one takes its place */
+body.compact .timestamp {
+  font-size: 0;
+}
+
+body.compact .timestamp::after {
+  content: attr(data-short);
+  font-size: 11.18px;
+}
+
 body.compact .msg-line::before {
   content: attr(data-author);
   font-weight: 600;
@@ -4745,15 +4754,6 @@ body.streamer .invite-row code {
   width: 13px;
   height: 13px;
   color: #f23f43;
-}
-
-.voice-dot-lg {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
 }
 
 .voice-note {
@@ -10378,4 +10378,175 @@ button.group-avatar:hover {
 .shop-seeall:hover,
 .shop-more:hover {
   background: var(--hover);
+}
+
+/* --------------------------------------------------- the expression picker
+   Discord's picker is one popover with four views — GIF, Stickers, Emoji,
+   Soundboard — switched from inside it rather than by opening another. */
+
+.picker-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border);
+}
+
+.picker-tabs button {
+  width: 34px;
+  height: 30px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.picker-tabs button:hover {
+  color: var(--strong);
+  background: var(--hover);
+}
+
+.picker-tabs button.on {
+  color: var(--strong);
+  background: var(--selected);
+}
+
+.picker-plain {
+  display: block;
+  overflow-y: auto;
+}
+
+.picker-empty.tall {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  height: 100%;
+  min-height: 260px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.picker-empty.tall svg {
+  color: var(--selected);
+  margin-bottom: 4px;
+}
+
+.picker-empty.tall b {
+  font-size: 15px;
+  color: var(--strong);
+}
+
+.picker-empty.tall span {
+  font-size: 13px;
+  line-height: 1.35;
+  max-width: 32ch;
+}
+
+.picker-row.stickers {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.picker-sticker {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  padding: 6px;
+}
+
+.picker-sticker:hover {
+  background: var(--hover);
+}
+
+.picker-sticker img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.picker-sticker .emoji {
+  width: 48px;
+  height: 48px;
+}
+
+.picker-row.sounds {
+  display: grid;
+  gap: 4px;
+  padding: 0 8px 8px;
+}
+
+.picker-sound {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--rail);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.picker-sound .emoji {
+  width: 18px;
+  height: 18px;
+}
+
+.picker-note {
+  padding: 4px 12px 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* a sticker in the feed: Discord draws it at 160px with nothing around it */
+.msg-stickers {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.msg-sticker {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  display: grid;
+  place-items: center;
+}
+
+.msg-sticker.glyph .emoji {
+  width: 120px;
+  height: 120px;
+}
+
+/* the sticker image picker in Server Settings */
+.sticker-drop {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 6px;
+  border: 1px dashed var(--border);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  overflow: hidden;
+}
+
+.sticker-drop.on {
+  border-style: solid;
+}
+
+.sticker-drop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.srv-sticker-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

@@ -638,6 +638,33 @@ Mana design system ships its `i18n` defaults in the clear, which is where the
 quick switcher's empty state comes from: `AUTOCOMPLETE_NO_RESULTS_HEADER:
 "Nope!"`, `AUTOCOMPLETE_NO_RESULTS_BODY: "Did you make a typo?"`.
 
+## The expression picker
+
+Every button on the right of the composer opens **one** popover, not a picker
+each. The client's own enum names its views:
+
+```
+emoji  gif  sticker  soundboard
+```
+
+and the button that opened it only chooses which view to start on
+(`expression-picker-chat-input-button`); the switching happens inside the
+picker. Two of those views have nothing behind them here and say so rather than
+pretending: GIFs are a Tenor search, which is a request to somebody else's
+server, and a soundboard sound needs the voice server it would go out over.
+
+A **sticker is its own message.** Discord sends it with no text at all — the
+message carries `sticker_items` — and draws it at 160px with no bubble. The
+sticker itself is a 320x320 PNG or APNG uploaded in Server Settings, filed
+under an emoji, which is what people search it by.
+
+## Timestamps
+
+The stamp on a group's first message is not the bare time: today is
+"Today at 5:42 PM", yesterday is "Yesterday at 5:42 PM", and anything older is
+the short date and then the time. Compact mode is the exception — it prints the
+time alone in the gutter, which is the point of it.
+
 ## Presence, and the avatar it is cut into
 
 A status indicator is not a coloured dot. The client draws one coloured square

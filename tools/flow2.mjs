@@ -147,6 +147,50 @@ await step('friends page', async () => {
   await p.click('.add-friend-box .btn-primary')
   await p.waitForSelector('.add-friend-note')
 })
+/* ------------------------------------------------- the expression picker */
+
+await step('the picker has all four of Discord\'s views', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  await p.click('[aria-label="GIF"]')
+  await p.waitForSelector('.picker', { timeout: 3000 })
+  if ((await p.locator('.picker-tabs button').count()) !== 4) throw new Error('not four tabs')
+  if (!(await p.locator('.picker-empty.tall:has-text("Tenor")').count()))
+    throw new Error('the GIF view says nothing')
+  await p.click('.picker-tabs button[aria-label="Emoji"]')
+  await p.waitForTimeout(200)
+  if (!(await p.locator('.picker-cell').count())) throw new Error('the emoji view is empty')
+  await p.keyboard.press('Escape')
+})
+
+await step('a sticker uploads, shows in the picker, and sends', async () => {
+  await p.click('.server-header')
+  await p.waitForSelector('.ctx-item', { timeout: 3000 })
+  await p.click('.ctx-item:has-text("Server Settings")')
+  await p.click('.settings-item:has-text("Stickers")')
+  await p.waitForTimeout(250)
+  await p.setInputFiles('.set-row-add input[type=file]', {
+    name: 's.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABnElEQVR4nO2b3VHEMAyEA0MJUBL0AYVBH1AS1wM8+cXnH8laW1ay32OSkXfXip2ZOx8HIeTKPKwc7Pf180/67MvPxxJtUwfRGO4xK5ApRZHGc9BBQIvNNJ6DCgJSZKXxHGsQj1YBnuYR45sC8DafsOgYap9djJfQvhLqDtjZ/HHo9akC2N18QqPTvAhGRxxAlNlPSPWKAohmPiHR3Q0gqvlETz/XgNbN6LOfaPl4mjHg8/f73bXb25dbnRbVDhid/ZLo1vXZdRI1P9A1oCdOKh5VR0IxgJHZX21uJISSL+4C3gK8YQD5hbPs/TVyf7AOkO7PvedQdaRAX4FV5pAfQ/A1oCZOKxpVp8eUT2GUSLTZEtwFvAV4wwC8BXjDALwFeHMXwKp/ZniR+2MHeAvwhgGULp51HSj5YgfUbpytC2p+2AGtm2fpgpYPdkDvgehd0NMv6oCoIUh0i1+BaCFI9XIN0DwcpQs0OtUdsHsIWn0mMzv9jDY6MaY1YJdusOgwL4LeIVjH54kRRJGcy54ZyrnsqbEaO54bJOTi/APcR7IOysst6gAAAABJRU5ErkJggg==',
+      'base64',
+    ),
+  })
+  await p.waitForTimeout(200)
+  await p.fill('.set-row-add input.field', 'Blobwave')
+  await p.click('.set-row-add .btn-primary')
+  await p.waitForTimeout(200)
+  if (!(await p.locator('.srv-stickers li').count())) throw new Error('sticker not added')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+  await p.click('[aria-label="Sticker"]')
+  await p.waitForSelector('.picker-sticker', { timeout: 3000 })
+  await p.click('.picker-sticker')
+  await p.waitForTimeout(300)
+  if ((await p.locator('.msg-sticker').count()) !== 1) throw new Error('sticker not sent')
+})
+
 console.log('\nerrors:', errs.length ? errs : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()

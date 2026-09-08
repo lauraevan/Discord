@@ -177,12 +177,26 @@ function preview(text: string) {
 }
 
 /**
- * The inline stamp is the time alone — the date lives on the divider above it,
- * which is how the reference renders a message. The full date stays available
- * on the element's title.
+ * The stamp on a group's first message.
+ *
+ * Discord does not print the bare time there: today is "Today at 5:42 PM",
+ * yesterday is "Yesterday at 5:42 PM", and anything older is the short date
+ * followed by the time. Compact mode is the exception — it prints the time
+ * alone in the gutter, which is the point of it — and the full date stays on
+ * the element's title either way.
  */
 function stamp(t: number) {
-  return time(t)
+  const d = new Date(t)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(today.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return `Today at ${time(t)}`
+  if (d.toDateString() === yesterday.toDateString()) return `Yesterday at ${time(t)}`
+  return `${d.toLocaleDateString(undefined, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })} ${time(t)}`
 }
 
 /* -------------------------------------------------------------- reactions */
@@ -530,7 +544,13 @@ export function ChatFeed({
                     >
                       {account.name}
                     </button>
-                    <span className="timestamp">{stamp(m.time)}</span>
+                    <span
+                      className="timestamp"
+                      data-short={time(m.time)}
+                      title={new Date(m.time).toLocaleString()}
+                    >
+                      {stamp(m.time)}
+                    </span>
                   </div>
                 </>
               )}
@@ -571,6 +591,24 @@ export function ChatFeed({
                   account={account}
                   onVote={(a) => onVote(m.id, a)}
                 />
+              ) : null}
+
+              {/* Discord sends a sticker as the whole message and draws it
+                  at 160px, with no bubble around it */}
+              {m.stickers?.length ? (
+                <div className="msg-stickers">
+                  {m.stickers.map((id) => {
+                    const st = server?.stickers?.find((x) => x.id === id)
+                    if (!st) return null
+                    return st.url ? (
+                      <img key={id} className="msg-sticker" src={st.url} alt={st.name} title={st.name} />
+                    ) : (
+                      <span key={id} className="msg-sticker glyph" title={st.name}>
+                        <EmojiByName name={st.related} alt={st.name} />
+                      </span>
+                    )
+                  })}
+                </div>
               ) : null}
 
               {m.attachments?.length ? (

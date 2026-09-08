@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   AutoModAction,
   AutoModTrigger,
@@ -721,6 +721,10 @@ function Channels({ server, onPatch }: { server: Server; onPatch: Patch }) {
 function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const [name, setName] = useState('')
   const [related, setRelated] = useState('joy')
+  // Discord takes a 320x320 PNG or APNG; the picture stays in the browser as a
+  // data URL the same way an avatar does
+  const [url, setUrl] = useState<string | undefined>(undefined)
+  const file = useRef<HTMLInputElement>(null)
   const stickers = server.stickers ?? []
   const slots = 5 + server.boostTier * 10
   return (
@@ -731,6 +735,28 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
         adds ten. Every sticker is filed under an emoji, which is what people search it by.
       </Note>
       <div className="set-row-add">
+        <input
+          ref={file}
+          type="file"
+          accept="image/*"
+          hidden
+          aria-hidden="true"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            e.target.value = ''
+            if (!f) return
+            const r = new FileReader()
+            r.onload = () => setUrl(String(r.result))
+            r.readAsDataURL(f)
+          }}
+        />
+        <button
+          className={'sticker-drop' + (url ? ' on' : '')}
+          aria-label="Choose a sticker image"
+          onClick={() => file.current?.click()}
+        >
+          {url ? <img src={url} alt="" /> : <PlusIcon />}
+        </button>
         <input
           className="field"
           value={name}
@@ -759,12 +785,14 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
                     name: name.trim(),
                     description: '',
                     related: related || 'joy',
+                    ...(url ? { url } : {}),
                   },
                 ],
               }),
               { action: 'Sticker uploaded', target: name.trim() },
             )
             setName('')
+            setUrl(undefined)
           }}
         >
           Upload
@@ -777,7 +805,7 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
           {stickers.map((st) => (
             <li key={st.id}>
               <span className="srv-sticker-art">
-                <EmojiByName name={st.related} />
+                {st.url ? <img src={st.url} alt="" /> : <EmojiByName name={st.related} />}
               </span>
               <b>{st.name}</b>
               <span className="srv-sticker-related">:{st.related}:</span>

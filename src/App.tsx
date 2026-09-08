@@ -5,7 +5,7 @@ import { ChatFeed, ChatHeader } from './components/Chat'
 import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
 import { ForumView, makePost } from './components/Forum'
-import { EmojiPicker } from './components/EmojiPicker'
+import { EmojiPicker, type PickerView } from './components/EmojiPicker'
 import { FriendsPage, HomeSidebar, ProfileModal, type HomeView } from './components/Home'
 import { LoginScreen, RegisterScreen } from './components/Auth'
 import { CreateServerFlow, applyTemplate, type NewServer } from './components/CreateServer'
@@ -99,7 +99,12 @@ const HOME_TITLES: Record<HomeView, string> = {
   quests: 'Quests',
 }
 
-type Picker = { target: 'composer' | string; at: { x: number; y: number } }
+type Picker = {
+  target: 'composer' | string
+  at: { x: number; y: number }
+  /** which of the picker's four views to open on */
+  view?: PickerView
+}
 type Ctx = { items: MenuItem[]; at: { x: number; y: number } }
 
 /**
@@ -457,6 +462,23 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     if (!server) return
     patchServer(server.id, (s) => ({ ...s, channels: s.channels.filter((c) => c.id !== id) }))
     setChannelModal(null)
+  }
+
+  /** A sticker is its own message: Discord sends it with no text at all. */
+  const sendSticker = (id: string) => {
+    if (!key) return
+    patchThread((list) => [
+      ...list,
+      {
+        id: uid('m'),
+        author: account.handle,
+        time: Date.now(),
+        text: '',
+        stickers: [id],
+        ...(replyTo ? { replyTo: replyTo.id } : {}),
+      },
+    ])
+    setReplyTo(null)
   }
 
   const send = (text: string, attachments: Attachment[] = []) => {
@@ -1017,7 +1039,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                       const mine = [...thread].reverse().find((m) => m.author === account.handle)
                       if (mine) setEditingId(mine.id)
                     }}
-                    onOpenPicker={(at) => setPicker({ target: 'composer', at })}
+                    onOpenPicker={(at, view) => setPicker({ target: 'composer', at, view })}
                     onPoll={() => setPollModal(true)}
                     onThread={() => {
                       const last = [...thread].reverse().find((m) => !m.type || m.type === 'DEFAULT')
@@ -1197,10 +1219,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
       {picker ? (
         <EmojiPicker
           at={picker.at}
+          view={picker.view}
+          server={server}
           onPick={(name) => {
             if (picker.target === 'composer') send(`:${name}:`)
             else react(picker.target, name)
           }}
+          onSticker={(id) => sendSticker(id)}
           onClose={() => setPicker(null)}
         />
       ) : null}

@@ -10,6 +10,7 @@ import {
   type Message,
 } from '../data'
 import { autoModHit } from './ServerSettings'
+import type { PickerView } from './EmojiPicker'
 import { fileIcon, fileSize, isImage } from '../files'
 import { messageLimit, uploadLimitMb, type PremiumTypeValue } from '../nitro'
 import { EMOJI } from '../emoji'
@@ -121,7 +122,7 @@ export function Composer({
   onCancelReply: () => void
   onSend: (text: string, attachments: Attachment[]) => void
   onEditLast: () => void
-  onOpenPicker: (at: { x: number; y: number }) => void
+  onOpenPicker: (at: { x: number; y: number }, view?: PickerView) => void
   onPoll: () => void
   onThread: () => void
   onApps: () => void
@@ -214,19 +215,22 @@ export function Composer({
     setCaret(0)
   }
 
+  /**
+   * Every one of these opens the same expression picker on a different view,
+   * which is how the client does it — the picker owns the switching, the
+   * button only says where to start.
+   */
+  const openPicker = (e: React.MouseEvent, view: PickerView) => {
+    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    onOpenPicker({ x: r.right - 360, y: r.top - 440 }, view)
+  }
+
   const acts = [
     { label: 'Gift a Nitro subscription', Icon: GiftIcon, on: onGiftNitro },
-    { label: 'GIF', Icon: GifIcon, on: () => {} },
-    { label: 'Sticker', Icon: StickerIcon, on: () => {} },
-    {
-      label: 'Emoji',
-      Icon: SmileyIcon,
-      on: (e: React.MouseEvent) => {
-        const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-        onOpenPicker({ x: r.right - 360, y: r.top - 440 })
-      },
-    },
-    { label: 'Apps', Icon: AppsIcon, on: () => {} },
+    { label: 'GIF', Icon: GifIcon, on: (e: React.MouseEvent) => openPicker(e, 'gif') },
+    { label: 'Sticker', Icon: StickerIcon, on: (e: React.MouseEvent) => openPicker(e, 'sticker') },
+    { label: 'Emoji', Icon: SmileyIcon, on: (e: React.MouseEvent) => openPicker(e, 'emoji') },
+    { label: 'Apps', Icon: AppsIcon, on: onApps },
   ]
 
   return (

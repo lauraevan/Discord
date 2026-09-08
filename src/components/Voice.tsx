@@ -11,7 +11,6 @@ import {
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 import { Avatar } from './UserArea'
-import { StatusGlyph } from '../ui/Status'
 
 /**
  * The voice channel view.
@@ -49,7 +48,6 @@ export function VoiceView({
             {muted ? <MicOffIcon /> : null}
             {account.name}
           </span>
-          <StatusGlyph status={account.status} size={16} />
         </div>
       </div>
 

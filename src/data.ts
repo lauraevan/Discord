@@ -238,6 +238,8 @@ export type GuildSticker = {
   description: string
   /** the emoji the sticker is filed under, as a shortcode */
   related: string
+  /** the picture, as a data URL — Discord takes a 320x320 PNG or APNG */
+  url?: string
 }
 
 /** A soundboard sound. 8 slots before boosts, 0-1 volume. */
@@ -484,6 +486,8 @@ export type Message = {
   type?: MessageType
   poll?: Poll
   attachments?: Attachment[]
+  /** sticker ids, the way Discord's message carries sticker_items */
+  stickers?: string[]
   /** id of the thread started from this message */
   threadId?: string
   /** set when the message has been edited, so the client can tag it */
