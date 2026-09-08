@@ -29,6 +29,7 @@ import { SearchResults } from './components/SearchResults'
 import { ServerSettings } from './components/ServerSettings'
 import { ServerRail } from './components/ServerRail'
 import { ThemePanel } from './components/ThemePanel'
+import { EmptyArt } from './ui/Art'
 import { VoiceView } from './components/Voice'
 import { TitleBar } from './components/TitleBar'
 import { UserSettings } from './components/UserSettings'
@@ -1017,6 +1018,17 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 ) : null}
               </div>
             </>
+          ) : null}
+          {server && !channel ? (
+            /* Discord's own No Text Channels screen, with its own copy */
+            <div className="no-channels">
+              <EmptyArt kind="no-text-channels" />
+              <h3>NO TEXT CHANNELS</h3>
+              <p>
+                You find yourself in a strange place. You don't have access to any text channels,
+                or there are none in this server.
+              </p>
+            </div>
           ) : null}
         </main>
         )}

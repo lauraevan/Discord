@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Decoration } from '../ui/Decorations'
-import { statusColor, statusLabel, type Account } from '../data'
+import { bannerColorOf, statusColor, statusLabel, type Account } from '../data'
 import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
@@ -134,7 +134,7 @@ export function ProfilePopout({
 
   return (
     <div className="popout" ref={ref} style={skin as React.CSSProperties}>
-      <div className="popout-banner" style={themed ? undefined : { background: account.color }}>
+      <div className="popout-banner" style={themed ? undefined : { background: bannerColorOf(account) }}>
         {themed ? <ProfileBanner /> : null}
       </div>
       <div className="popout-avatar">

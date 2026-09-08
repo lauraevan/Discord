@@ -10,6 +10,7 @@ import {
   type Message,
 } from '../data'
 import { autoModHit } from './ServerSettings'
+import { fileIcon, fileSize, isImage } from '../files'
 import { messageLimit, uploadLimitMb, type PremiumTypeValue } from '../nitro'
 import { EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
@@ -149,9 +150,8 @@ export function Composer({
   const limit = messageLimit(premiumType)
   const uploadCap = uploadLimitMb(premiumType)
 
-  /** Images pasted or picked become data URLs; nothing leaves the browser. */
+  /** Anything pasted or picked becomes a data URL; nothing leaves the browser. */
   const take = (f: File) => {
-    if (!f.type.startsWith('image/')) return
     if (f.size > uploadCap * 1024 * 1024) {
       // Discord's own wording when a file is over the account's limit
       setTooBig(`Your files are too powerful. Max upload size is ${uploadCap}MB.`)
@@ -160,7 +160,10 @@ export function Composer({
     setTooBig(null)
     const r = new FileReader()
     r.onload = () =>
-      setPending((all) => [...all, { id: uid('att'), name: f.name, url: String(r.result) }])
+      setPending((all) => [
+        ...all,
+        { id: uid('att'), name: f.name, url: String(r.result), size: f.size, contentType: f.type },
+      ])
     r.readAsDataURL(f)
   }
   const ac = useAutocomplete(value, caret, channels, account)
@@ -355,7 +358,6 @@ export function Composer({
       <input
         ref={file}
         type="file"
-        accept="image/*"
         hidden
         aria-hidden="true"
         onChange={(e) => {
@@ -453,7 +455,16 @@ export function Composer({
           {pending.map((a) => (
             <figure key={a.id} className={'upload-card' + (a.spoiler ? ' spoiler' : '')}>
               <div className="upload-thumb">
-                <img src={a.url} alt={a.name} />
+                {/* only an image previews; anything else gets Discord's own
+                    badge for its file class */}
+                {isImage(a.name, a.contentType) ? (
+                  <img src={a.url} alt={a.name} />
+                ) : (
+                  <span className="upload-file">
+                    <img src={fileIcon(a.name, a.contentType)} alt="" draggable={false} />
+                    {a.size ? <em>{fileSize(a.size)}</em> : null}
+                  </span>
+                )}
                 {a.spoiler ? <span className="upload-spoiler-tag">SPOILER</span> : null}
               </div>
               <figcaption>{a.name}</figcaption>

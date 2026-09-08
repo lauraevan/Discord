@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import type { Channel, Server } from '../data'
 import { HashIcon, SpeakerIcon } from '../ui/Icons'
+import { EmptyArt } from '../ui/Art'
 
 type Hit =
   | { kind: 'server'; server: Server }
@@ -99,7 +100,12 @@ export function QuickSwitcher({
               ) : null}
             </button>
           ))}
-          {!hits.length ? <div className="switcher-empty">Nothing matched.</div> : null}
+          {!hits.length ? (
+            <div className="switcher-empty">
+              <EmptyArt kind="search" />
+              Nothing matched.
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

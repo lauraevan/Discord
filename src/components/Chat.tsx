@@ -14,6 +14,7 @@ import { ServerOnboarding } from './Onboarding'
 import { EmojiByName, EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
 import {
   BellIcon,
+  DownloadIcon,
   ForumIcon,
   HashIcon,
   MegaphoneIcon,
@@ -31,6 +32,7 @@ import {
   ThreadsIcon,
 } from '../ui/Icons'
 import { FILTERS } from '../search'
+import { fileIcon, fileSize, isImage } from '../files'
 import { Tooltip } from '../ui/Tooltip'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
@@ -535,17 +537,48 @@ export function ChatFeed({
 
               {m.attachments?.length ? (
                 <div className="attachments">
-                  {m.attachments.map((a) => (
-                    <a
-                      key={a.id}
-                      className={'attachment' + (a.spoiler ? ' spoiler-file' : '')}
-                      href={a.url}
-                      target="_blank"
-                      rel="noreferrer noopener"
-                    >
-                      <img src={a.url} alt={a.name} />
-                    </a>
-                  ))}
+                  {m.attachments.map((a) =>
+                    isImage(a.name, a.contentType) ? (
+                      <a
+                        key={a.id}
+                        className={'attachment' + (a.spoiler ? ' spoiler-file' : '')}
+                        href={a.url}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <img src={a.url} alt={a.name} />
+                      </a>
+                    ) : (
+                      /* Discord cards anything it cannot show: the badge for
+                         the file's class, its name as a link, its size, and a
+                         download button on the right */
+                      <div
+                        key={a.id}
+                        className={'file-card' + (a.spoiler ? ' spoiler-file' : '')}
+                      >
+                        <img
+                          className="file-badge"
+                          src={fileIcon(a.name, a.contentType)}
+                          alt=""
+                          draggable={false}
+                        />
+                        <div className="file-meta">
+                          <a href={a.url} download={a.name} className="file-name">
+                            {a.name}
+                          </a>
+                          {a.size ? <span className="file-size">{fileSize(a.size)}</span> : null}
+                        </div>
+                        <a
+                          className="file-dl"
+                          href={a.url}
+                          download={a.name}
+                          aria-label={`Download ${a.name}`}
+                        >
+                          <DownloadIcon />
+                        </a>
+                      </div>
+                    ),
+                  )}
                 </div>
               ) : null}
 

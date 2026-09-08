@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  bannerColorOf,
   statusColor,
   statusLabel,
   type Account,
@@ -27,6 +28,8 @@ import {
   type NavItem,
 } from './SettingsLayer'
 import { Avatar } from './UserArea'
+import { DEFAULT_AVATAR_COLORS, DefaultAvatar, defaultAvatarIndex } from '../ui/Art'
+import { SERVICES, connect, logoOf, serviceOf, type Connection } from '../connections'
 
 /**
  * User Settings.
@@ -112,7 +115,7 @@ export function UserSettings({
         <>
           <Title>My Account</Title>
           <div className="acct-card">
-            <div className="acct-banner" style={{ background: account.color }} />
+            <div className="acct-banner" style={{ background: bannerColorOf(account) }} />
             <div className="acct-body">
               <span className="acct-avatar">
                 <Avatar account={account} size={80} />
@@ -610,7 +613,6 @@ export function UserSettings({
         'family_center',
         'authorized_apps',
         'sessions',
-        'connections',
         'clips',
         'friend_requests',
         'premium',
@@ -636,6 +638,11 @@ export function UserSettings({
         </>
       ) : null}
 
+
+      {section === 'connections' ? (
+        <Connections account={account} onAccount={onAccount} />
+      ) : null}
+
       {section === 'changelog' ? (
         <>
           <Title>What's New</Title>
@@ -658,6 +665,155 @@ export function UserSettings({
         </>
       ) : null}
     </SettingsLayer>
+  )
+}
+
+/* --------------------------------------------------------------- connections
+ *
+ * Discord's Connections pane: a grid of platform tiles across the top, and
+ * under it the accounts you have linked, each with the toggles that platform
+ * supports. Linking really needs the platform's OAuth, which is not something
+ * a page can do on its own, so the tile asks for the username instead of
+ * bouncing through a login — everything after that is the real pane.
+ */
+
+function Connections({
+  account,
+  onAccount,
+}: {
+  account: Account
+  onAccount: (a: Account) => void
+}) {
+  const linked = account.connections ?? []
+  const [adding, setAdding] = useState<string | null>(null)
+  const [handle, setHandle] = useState('')
+
+  const set = (next: Connection[]) => onAccount({ ...account, connections: next })
+  const patch = (service: string, part: Partial<Connection>) =>
+    set(linked.map((c) => (c.service === service ? { ...c, ...part } : c)))
+
+  const add = () => {
+    const name = handle.trim()
+    if (!adding || !name) return
+    set([...linked.filter((c) => c.service !== adding), connect(adding, name)])
+    setAdding(null)
+    setHandle('')
+  }
+
+  return (
+    <>
+      <Title>Connections</Title>
+      <div className="conn-grid">
+        {SERVICES.map((s) => {
+          const on = linked.some((c) => c.service === s.id)
+          return (
+            <button
+              key={s.id}
+              className={'conn-tile' + (on ? ' on' : '')}
+              style={{ '--brand': s.color } as React.CSSProperties}
+              aria-label={s.name}
+              title={s.name}
+              disabled={on}
+              onClick={() => {
+                setAdding(s.id)
+                setHandle('')
+              }}
+            >
+              <img src={logoOf(s.id)} alt="" draggable={false} />
+            </button>
+          )
+        })}
+      </div>
+
+      {adding ? (
+        <div className="conn-add">
+          <label htmlFor="conn-handle">
+            Your {serviceOf(adding)?.name} username
+          </label>
+          <div className="conn-add-row">
+            <input
+              id="conn-handle"
+              value={handle}
+              autoFocus
+              placeholder={serviceOf(adding)?.name}
+              onChange={(e) => setHandle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') add()
+                if (e.key === 'Escape') setAdding(null)
+              }}
+            />
+            <button className="btn-primary" disabled={!handle.trim()} onClick={add}>
+              Connect
+            </button>
+            <button className="btn-quiet" onClick={() => setAdding(null)}>
+              Cancel
+            </button>
+          </div>
+          <p className="theme-note">
+            Discord sends you to {serviceOf(adding)?.name} to sign in; a page with no
+            server of its own has nowhere to send the token back to, so it takes the
+            name directly.
+          </p>
+        </div>
+      ) : null}
+
+      <Divider />
+
+      {linked.length === 0 ? (
+        <Note>
+          Nothing connected yet. A connected account shows on your profile, and some
+          of them can find your friends or set your status for you.
+        </Note>
+      ) : (
+        <div className="conn-list">
+          {linked.map((c) => {
+            const s = serviceOf(c.service)
+            if (!s) return null
+            return (
+              <div className="conn-card" key={c.service}>
+                <div className="conn-head">
+                  <img className="conn-logo" src={logoOf(c.service)} alt="" draggable={false} />
+                  <span className="conn-name">{c.name}</span>
+                  {c.verified ? (
+                    <span className="conn-verified" title="Verified">
+                      <CheckIcon />
+                    </span>
+                  ) : null}
+                  <button
+                    className="conn-remove"
+                    aria-label={`Disconnect ${s.name}`}
+                    onClick={() => set(linked.filter((x) => x.service !== c.service))}
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="conn-opts">
+                  {s.status ? (
+                    <Toggle
+                      label={`Display ${s.name} as your status`}
+                      value={c.showActivity}
+                      onChange={(v) => patch(c.service, { showActivity: v })}
+                    />
+                  ) : null}
+                  {s.friendSync ? (
+                    <Toggle
+                      label="Sync friends"
+                      value={c.syncFriends}
+                      onChange={(v) => patch(c.service, { syncFriends: v })}
+                    />
+                  ) : null}
+                  <Toggle
+                    label="Display on profile"
+                    value={c.onProfile}
+                    onChange={(v) => patch(c.service, { onProfile: v })}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
   )
 }
 
@@ -791,32 +947,56 @@ function Profiles({
             }
           />
 
+          {/* Discord ships exactly six default avatars and hands you one; this
+              picks between the same six files rather than tinting a drawing */}
           <div className="set-field">
-            <label>AVATAR &amp; BANNER COLOUR</label>
-            <div className="swatch-row">
-              {[
-                '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
-                '#9b59b6', '#1abc9c', '#e67e22', '#607d8b', '#f47fff',
-              ].map((c) => {
-                const on = (tab === 'server' ? (profile.color ?? account.color) : account.color) === c
+            <label>DEFAULT AVATAR</label>
+            <div className="avatar-row">
+              {DEFAULT_AVATAR_COLORS.map((c) => {
+                const chosen = tab === 'server' ? (profile.color ?? account.color) : account.color
+                const on = defaultAvatarIndex(chosen) === defaultAvatarIndex(c)
                 return (
                   <button
                     key={c}
-                    className={'swatch' + (on ? ' on' : '')}
-                    style={{ background: c }}
-                    aria-label={c}
+                    className={'avatar-pick' + (on ? ' on' : '')}
+                    aria-label={`Default avatar ${c}`}
                     onClick={() =>
                       tab === 'server'
                         ? patchProfile({ color: c })
                         : onAccount({ ...account, color: c })
                     }
                   >
-                    {on ? <CheckIcon /> : null}
+                    <DefaultAvatar color={c} />
                   </button>
                 )
               })}
             </div>
           </div>
+
+          {tab === 'user' ? (
+            <div className="set-field">
+              <label>BANNER COLOUR</label>
+              <div className="swatch-row">
+                {[
+                  '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
+                  '#9b59b6', '#1abc9c', '#e67e22', '#607d8b', '#f47fff',
+                ].map((c) => {
+                  const on = bannerColorOf(account) === c
+                  return (
+                    <button
+                      key={c}
+                      className={'swatch' + (on ? ' on' : '')}
+                      style={{ background: c }}
+                      aria-label={c}
+                      onClick={() => onAccount({ ...account, bannerColor: c })}
+                    >
+                      {on ? <CheckIcon /> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : null}
 
           {tab === 'user' ? (
             <>

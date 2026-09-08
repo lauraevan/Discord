@@ -29,6 +29,8 @@ export const emojiByChar: Record<string, string> = {
   '✨': byCode['2728'],
 }
 
+import type { Connection } from './connections'
+
 /* --------------------------------------------------------------- account */
 
 export type Status = 'online' | 'idle' | 'dnd' | 'invisible'
@@ -64,12 +66,22 @@ export type Account = {
   banner?: string
   /** the banner colour, when there is no banner image */
   bannerColor?: string
+  /** linked platform accounts, from src/connections.ts */
+  connections?: Connection[]
   /**
    * Per-server profiles. Discord lets a member look different in each server:
    * a nickname, its own avatar colour, pronouns and bio.
    */
   serverProfiles?: Record<string, ServerProfile>
 }
+
+/**
+ * The colour behind a profile banner.
+ *
+ * Discord lets you pick a banner colour independently of the avatar, and falls
+ * back to the avatar's own colour until you do.
+ */
+export const bannerColorOf = (a: Account) => a.bannerColor ?? a.color
 
 /** What a member can override about themselves in one server. */
 export type ServerProfile = {
@@ -426,6 +438,10 @@ export type Attachment = {
   name: string
   /** data URL — everything stays in the browser */
   url: string
+  /** bytes, which Discord prints under the file name on a non-image card */
+  size?: number
+  /** the browser's MIME type, which Discord's file-class rules check first */
+  contentType?: string
   width?: number
   height?: number
   spoiler?: boolean

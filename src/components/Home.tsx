@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import type { Account } from '../data'
+import { bannerColorOf, type Account } from '../data'
+import { logoOf, serviceOf } from '../connections'
 import { WumpusMark, type WumpusPose } from '../ui/Art'
 import {
+  CheckIcon,
   ChevronDownIcon,
   CloseIcon,
   FriendsIcon,
@@ -241,7 +243,7 @@ export function ProfileModal({
         <button className="profile-close" onClick={onClose} aria-label="Close">
           <CloseIcon />
         </button>
-        <div className="profile-banner-lg" style={{ background: account.color }} />
+        <div className="profile-banner-lg" style={{ background: bannerColorOf(account) }} />
         <span className="profile-avatar-lg">
           <Avatar account={account} size={92} />
         </span>
@@ -264,6 +266,22 @@ export function ProfileModal({
             <h4>Member Since</h4>
             <p>{new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
           </div>
+          {(account.connections ?? []).some((c) => c.onProfile) ? (
+            <div className="profile-section">
+              <h4>Connections</h4>
+              <div className="profile-conns">
+                {(account.connections ?? [])
+                  .filter((c) => c.onProfile)
+                  .map((c) => (
+                    <span className="profile-conn" key={c.service} title={`${serviceOf(c.service)?.name} — ${c.name}`}>
+                      <img src={logoOf(c.service)} alt="" draggable={false} />
+                      <b>{c.name}</b>
+                      {c.verified ? <CheckIcon /> : null}
+                    </span>
+                  ))}
+              </div>
+            </div>
+          ) : null}
           <div className="profile-section">
             <h4>Roles</h4>
             <div className="profile-roles">
