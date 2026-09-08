@@ -40,7 +40,7 @@ import { Avatar } from './UserArea'
 /** Nitro's SHOP_DISCOUNTS perk. */
 const NITRO_DISCOUNT = 0.15
 
-type Tab = 'featured' | 'browse' | 'orbs' | 'games'
+type Tab = 'featured' | 'nameplates' | 'browse' | 'orbs' | 'games'
 type Sort = 'popular' | 'newest' | 'price'
 
 const SORTS: Record<Sort, string> = {
@@ -97,6 +97,10 @@ export function ShopPage({
   const [sortOpen, setSortOpen] = useState(false)
   const [shuffled, setShuffled] = useState(0)
   const [wishlist, setWishlist] = useState<string[]>([])
+  const [plateQuery, setPlateQuery] = useState('')
+  const [platePage, setPlatePage] = useState(1)
+  // which three the tab's header wears, rotated so it is not always the same
+  const plateHero = useMemo(() => Math.floor(Date.now() / 60_000) % 40, [])
 
   const discounted = premiumType === PremiumType.TIER_2
   const open = COLLECTIONS.find((c) => c.id === openId) ?? null
@@ -163,10 +167,24 @@ export function ShopPage({
     />
   )
 
+  // the Shop's own search covers everything; the tab has its own filter
   const plates = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = (tab === 'nameplates' ? plateQuery : query).trim().toLowerCase()
     return NAMEPLATES.filter((n) => !q || n.name.toLowerCase().includes(q))
-  }, [query])
+  }, [query, plateQuery, tab])
+
+  const PLATE_PAGE = 24
+  const shownPlates = plates.slice(0, platePage * PLATE_PAGE)
+
+  // Featured shows a spread rather than the head of the alphabet, and Shuffle!
+  // reaches these too
+  const featuredPlates = useMemo(
+    () =>
+      [...NAMEPLATES]
+        .sort((a, b) => hash(a.id + shuffled) - hash(b.id + shuffled))
+        .slice(0, 8),
+    [shuffled],
+  )
 
   return (
     <main className="chat shop">
@@ -176,6 +194,7 @@ export function ShopPage({
           {(
             [
               ['featured', 'Featured', false],
+              ['nameplates', 'Nameplates', false],
               ['browse', 'Browse', true],
               ['orbs', 'Orbs Exclusives', false],
               ['games', 'Game Shops', true],
@@ -187,6 +206,7 @@ export function ShopPage({
               onClick={() => {
                 setTab(id)
                 setOpenId(null)
+                setPlatePage(1)
               }}
             >
               {label}
@@ -232,13 +252,58 @@ export function ShopPage({
             </h2>
             <div className="shop-grid">
               {items.map(card)}
-              {plates.map(plateCard)}
+              {plates.slice(0, 24).map(plateCard)}
             </div>
             {items.length === 0 && plates.length === 0 ? (
               <Empty
                 pose="shrug"
                 line="Wumpus looked everywhere and found nothing."
               />
+            ) : null}
+          </>
+        ) : tab === 'nameplates' ? (
+          <>
+            <section className="plate-hero">
+              <div className="plate-hero-strip">
+                {NAMEPLATES.slice(plateHero, plateHero + 3).map((n) => (
+                  <span className="plate-hero-row" key={n.id}>
+                    <NameplateArt id={n.id} />
+                    <Avatar account={account} size={24} status={false} />
+                    <b>{account.name}</b>
+                  </span>
+                ))}
+              </div>
+              <div>
+                <h1>Nameplates</h1>
+                <p>
+                  A nameplate sits behind your name wherever people see it — the member
+                  list, your DMs, your profile.
+                </p>
+              </div>
+            </section>
+
+            <div className="shop-bar">
+              <h2 className="shop-heading">
+                All nameplates <span className="shop-count">{plates.length}</span>
+              </h2>
+              <div className="shop-controls">
+                <input
+                  className="plate-filter"
+                  value={plateQuery}
+                  placeholder="Filter nameplates"
+                  aria-label="Filter nameplates"
+                  onChange={(e) => setPlateQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="shop-grid">{shownPlates.map(plateCard)}</div>
+            {shownPlates.length < plates.length ? (
+              <button className="shop-more" onClick={() => setPlatePage((n) => n + 1)}>
+                Show more ({plates.length - shownPlates.length} left)
+              </button>
+            ) : null}
+            {plates.length === 0 ? (
+              <Empty pose="shrug" line="Wumpus looked everywhere and found nothing." />
             ) : null}
           </>
         ) : tab === 'games' ? (
@@ -317,8 +382,13 @@ export function ShopPage({
             </div>
             <div className="shop-grid">{items.map(card)}</div>
 
-            <h2 className="shop-heading">Nameplates</h2>
-            <div className="shop-grid">{plates.map(plateCard)}</div>
+            <div className="shop-bar">
+              <h2 className="shop-heading">Nameplates</h2>
+              <button className="shop-seeall" onClick={() => setTab('nameplates')}>
+                See all {NAMEPLATES.length}
+              </button>
+            </div>
+            <div className="shop-grid">{featuredPlates.map(plateCard)}</div>
 
             <h2 className="shop-heading">More collections</h2>
             <div className="shop-strips">
@@ -678,14 +748,23 @@ function PlateCard({
 }) {
   return (
     <article className={'shop-item' + (worn ? ' on' : '')}>
-      <span
-        className="shop-item-art"
-        style={{ background: `linear-gradient(140deg, ${plate.palette[0]}, ${plate.palette[1]})` }}
-      >
-        <span className="plate-preview">
-          <NameplateArt id={plate.id} />
-          <Avatar account={account} size={24} status={false} />
-          <b>{account.name}</b>
+      <span className="shop-item-art plate-art">
+        {/* Discord previews a nameplate as three member rows with the plate on
+            the middle one, so you see it as the thing it becomes */}
+        <span className="plate-stack">
+          <span className="plate-row ghost">
+            <i className="plate-ghost-avatar" />
+            <i className="plate-ghost-name" />
+          </span>
+          <span className="plate-row">
+            <NameplateArt id={plate.id} />
+            <Avatar account={account} size={20} status={false} />
+            <b>{account.name}</b>
+          </span>
+          <span className="plate-row ghost">
+            <i className="plate-ghost-avatar" />
+            <i className="plate-ghost-name short" />
+          </span>
         </span>
         <button
           className={'shop-wish' + (wished ? ' on' : '')}

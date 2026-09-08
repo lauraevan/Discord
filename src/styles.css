@@ -10170,14 +10170,12 @@ button.group-avatar:hover {
 
 .nameplate img {
   position: absolute;
-  right: 0;
-  top: 0;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: 62%;
-  object-fit: cover;
-  opacity: 0.85;
-  -webkit-mask: linear-gradient(to right, transparent, #000 78%) 0 0 / 100% 100% no-repeat;
-  mask: linear-gradient(to right, transparent, #000 78%) 0 0 / 100% 100% no-repeat;
+  /* the asset is authored at the row's own 5.33:1, so it fills rather than
+     crops — and it carries its own fade, so nothing is laid over it */
+  object-fit: fill;
 }
 
 /* whatever sits on a nameplate has to sit above it — the plate itself
@@ -10199,29 +10197,61 @@ button.group-avatar:hover {
   inset: -2px -8px;
 }
 
-/* the Shop previews a nameplate as the row it becomes */
-.plate-preview {
-  position: relative;
+/* the Shop previews a nameplate as three member rows with the plate on the
+   middle one, which is how Discord shows you what you are buying */
+.plate-art {
+  background: var(--rail);
+  padding: 10px;
+}
+
+.plate-stack {
+  display: grid;
+  gap: 4px;
   width: 100%;
-  height: 44px;
+}
+
+.plate-row {
+  position: relative;
+  height: 32px;
   border-radius: 4px;
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 8px;
-  background: var(--rail);
+  padding: 0 6px;
 }
 
-.plate-preview .avatar-wrap {
-  z-index: 1;
-}
-
-.plate-preview b {
+.plate-row > *:not(.nameplate) {
   position: relative;
   z-index: 1;
-  font-size: 13.5px;
+}
+
+.plate-row b {
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plate-ghost-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--selected);
+  flex: 0 0 20px;
+}
+
+.plate-ghost-name {
+  height: 8px;
+  width: 64px;
+  border-radius: 4px;
+  background: var(--selected);
+}
+
+.plate-ghost-name.short {
+  width: 44px;
 }
 
 /* the nameplate picker in Profiles: each option is the plate it becomes */
@@ -10253,4 +10283,99 @@ button.group-avatar:hover {
 
 .plate-pick.on {
   border-color: var(--blurple);
+}
+
+/* ------------------------------------------------------- the Nameplates tab
+   Discord gives nameplates their own tab; 236 of them is not a page. */
+
+.plate-hero {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.plate-hero h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--strong);
+  margin-bottom: 4px;
+}
+
+.plate-hero p {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 46ch;
+}
+
+.plate-hero-strip {
+  display: grid;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.plate-hero-row {
+  position: relative;
+  width: 224px;
+  height: 42px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  background: var(--rail);
+}
+
+.plate-hero-row > *:not(.nameplate) {
+  position: relative;
+  z-index: 1;
+}
+
+.plate-hero-row b {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--strong);
+}
+
+.shop-count {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.plate-filter {
+  height: 32px;
+  width: 200px;
+  padding: 0 10px;
+  border-radius: 4px;
+  background: var(--rail);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.shop-seeall,
+.shop-more {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 4px;
+  background: var(--selected);
+  color: var(--strong);
+  font-size: 13.05px;
+  font-weight: 500;
+}
+
+.shop-more {
+  display: block;
+  margin: 20px auto 0;
+}
+
+.shop-seeall:hover,
+.shop-more:hover {
+  background: var(--hover);
 }

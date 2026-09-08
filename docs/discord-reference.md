@@ -688,12 +688,27 @@ Google Drive, and both collectibles archives (Infinitay's and
 happyendermangit/discarchives) predate the feature — every item in them is type
 0 (decoration) or 1 (effect), never a nameplate.
 
-The country nameplates are the exception, because their artwork is a flag.
-lipis/flag-icons (MIT) commits every flag as SVG, so `tools/fetch-nameplates.py`
-builds those for real and samples each palette out of the rendered flag the way
-the client samples it. Only the four the Shop screenshot actually shows are
-emitted — Canada, France, Norway, Scotland, all at $5.99 — because guessing at
-the rest of the catalogue would be inventing a product line.
+So the artwork came in as an archive instead, and
+`tools/import-nameplates.mjs` turns it into something a single-file build can
+carry. Discord ships each plate as a looping VP9 video **with alpha**, 672x126
+or 448x84 — 5.33:1, which is the member row at 3x or 2x. There is no ffmpeg
+here, so the frame is pulled the way the page itself would: a `<video>` seeked
+to the middle of its loop and drawn onto a canvas, which does the WebP encoding
+too. Two things to know if that ever needs re-running:
+
+- a `file://` page gets an **opaque origin**, so `getImageData` on a canvas the
+  video was drawn into throws `SecurityError` unless Chromium is launched with
+  `--allow-file-access-from-files`;
+- 236 animated files is 25MB inlined. 236 stills at 288x54 is about a megabyte,
+  which is what ships.
+
+**The asset carries its own fade.** Each plate is authored transparent at the
+left and solid at the right, so it is drawn edge to edge with nothing over it —
+a CSS mask or a colour wash on top fades it twice.
+
+Discord previews one in the Shop as **three member rows with the plate on the
+middle one**, not as a swatch, which is what makes it read as the thing you are
+buying.
 
 ## Attachments: Discord's file-class table
 
