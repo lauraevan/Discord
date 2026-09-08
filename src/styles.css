@@ -7924,7 +7924,15 @@ body.streamer .invite-row code {
   filter: brightness(1.08);
 }
 
-/* the collection's own confetti colours, blurred behind its banner */
+/* The collection's own confetti colours, blurred behind its banner. The glow
+   is absolute, so anything it sits inside has to be its containing block —
+   .shop-strip was not, and four strips' worth of 46px-blurred blobs escaped
+   onto the whole page and washed the Shop out. */
+:has(> .shop-hero-glow) {
+  position: relative;
+  overflow: hidden;
+}
+
 .shop-hero-glow {
   position: absolute;
   inset: 0;
@@ -8132,6 +8140,7 @@ body.streamer .invite-row code {
 }
 
 .shop-strip {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 20px;
