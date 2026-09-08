@@ -28,6 +28,20 @@ the shape Discord's uses — `src/qr.ts` is a byte-mode encoder with version
 selection, Reed-Solomon and all eight data masks scored by the standard's
 penalty rules, verified against an independent decoder.
 
+### Messages
+
+A message carries the toolbar Discord floats over a hovered one — two quick
+reactions, add reaction, reply, edit on your own, and more — and following a
+reply's reference scrolls to the message it answers and flashes it, which the
+client's own message list calls a `JUMP_TARGET`. Grouping is Discord's rule:
+same author, inside seven minutes, and a reply always starts a new group. The
+list's other rows are its own too: the date divider, the red NEW divider, and
+the system messages.
+
+Motion follows the client's durations — 70ms for a hover or a press, 150ms for
+something opening in place, 200ms for a layer over the window — and every one
+of them collapses under `prefers-reduced-motion`.
+
 ### Profiles
 
 The Profiles pane is Discord's: User Profile and Server Profiles tabs, the
@@ -192,7 +206,11 @@ Nothing is cropped out of a screenshot.
   re-exports the set under readable names, so `tools/extract-named-icons.py`
   joins name to geometry through the module graph and writes 684 of them;
   `tools/gen-icons.py` maps this app's slots onto Discord's names and generates
-  `src/ui/Icons.tsx`. The channel-type glyphs come from the client's own
+  `src/ui/Icons.tsx`. 281 of the 684 resolve to a placeholder path the bundle
+  uses for icons defined inline in the barrel rather than re-exported; one of
+  them was in use here and rendered as nothing, so the generator now refuses
+  any glyph with no curve in it and takes the real geometry from
+  `tools/icon-overrides.json`. The channel-type glyphs come from the client's own
   channel-type switch rather than a judgement call.
 - **Emoji** — 178 Twemoji from
   [jdecked/twemoji](https://github.com/jdecked/twemoji), bundled by

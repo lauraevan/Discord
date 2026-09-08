@@ -9181,3 +9181,155 @@ body.reduced-motion img.decoration.still {
   font-size: 11px;
   color: var(--muted);
 }
+
+/* --- the message hover toolbar, and jumping to a reply's parent ----------- */
+
+.msg-acts {
+  position: absolute;
+  right: 16px;
+  top: -16px;
+  z-index: 2;
+  display: none;
+  align-items: center;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: 0 0 0 1px var(--border), 0 2px 8px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.group:hover .msg-acts,
+.msg-acts:focus-within {
+  display: flex;
+}
+
+.msg-acts button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--muted);
+  transition: background 70ms ease, color 70ms ease;
+}
+
+.msg-acts button:hover {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+.msg-acts .emoji {
+  width: 20px;
+  height: 20px;
+}
+
+/* Discord shows no presence dot on a message avatar — it is on the member
+   list, the user area and the profile, and nowhere in the message list */
+.group-avatar .status-dot {
+  display: none;
+}
+
+/* the flash Discord gives a message you jumped to */
+.jump-target .group {
+  animation: jump-flash 1.4s ease-out;
+}
+
+@keyframes jump-flash {
+  0%,
+  40% {
+    background: color-mix(in srgb, var(--blurple) 22%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+.reply-ref {
+  cursor: pointer;
+}
+
+.reply-ref:hover .reply-text,
+.reply-ref:hover .reply-author {
+  color: var(--strong);
+}
+
+/* --- motion --------------------------------------------------------------
+ *
+ * The client's own durations: 70ms for a hover or a press, 100-150ms for
+ * something opening in place, 200-250ms for a layer over the window. Nothing
+ * here animates a property that forces layout.
+ */
+:root {
+  --dur-hover: 70ms;
+  --dur-open: 150ms;
+  --dur-layer: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.row,
+.server-tile,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.shop-buy,
+.quests-tab,
+.shop-tab,
+.nitro-perk,
+.profile-pick,
+.icon-btn {
+  transition:
+    background var(--dur-hover) ease,
+    color var(--dur-hover) ease,
+    border-radius var(--dur-open) var(--ease-out),
+    transform var(--dur-hover) ease;
+}
+
+.overlay {
+  animation: layer-in var(--dur-layer) ease-out;
+}
+
+.overlay > * {
+  animation: layer-pop var(--dur-layer) var(--ease-out);
+}
+
+@keyframes layer-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes layer-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+.popout,
+.menu,
+.picker,
+.quests-select-menu,
+.tooltip {
+  animation: pop-in var(--dur-open) var(--ease-out);
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* a switch and a slider move with the same 70ms the rest of the UI uses */
+.set-toggle .track,
+.set-toggle .knob {
+  transition: background var(--dur-hover) ease, transform var(--dur-hover) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

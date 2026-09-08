@@ -165,5 +165,30 @@ await step('voice channel join', async () => {
 await step('unread pip + Escape marks read', async () => {
   await p.keyboard.press('Escape')
 })
+await step('the hover toolbar reacts, replies and jumps back', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(250)
+  await p.fill('.composer-input', 'the first one')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(200)
+  await p.hover('.group >> nth=0')
+  await p.waitForTimeout(150)
+  // the quick reaction on the toolbar puts a real reaction on the message
+  await p.click('.group >> nth=0 >> .msg-acts button[aria-label="React with :thumbsup:"]')
+  await p.waitForTimeout(250)
+  if (!((await p.locator('.reaction').count()) >= 1)) throw new Error('the quick reaction did not land')
+  // replying from the toolbar, then following the reference back to the parent
+  await p.hover('.group >> nth=0')
+  await p.click('.group >> nth=0 >> .msg-acts button[aria-label="Reply"]')
+  await p.waitForTimeout(200)
+  await p.fill('.composer-input', 'answering it')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(300)
+  if (!((await p.locator('.reply-ref').count()) === 1)) throw new Error('no reply reference')
+  await p.click('.reply-ref')
+  await p.waitForTimeout(200)
+  if (!((await p.locator('.jump-target').count()) === 1)) throw new Error('jumping did not flash the parent')
+})
+
 console.log('\nerrors:', errs.length ? errs : 'none')
 await b.close()

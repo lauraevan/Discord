@@ -11,7 +11,7 @@ import {
 } from '../data'
 import { byName } from '../emoji'
 import { ServerOnboarding } from './Onboarding'
-import { EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
+import { EmojiByName, EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
 import {
   BellIcon,
   ForumIcon,
@@ -314,6 +314,21 @@ export function ChatFeed({
   const ref = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
 
+  /**
+   * Following a reply back to what it answers: Discord scrolls the message
+   * into view and flashes it, which its own list calls a JUMP_TARGET.
+   */
+  const jumpTo = (id: string) => {
+    const el = ref.current?.querySelector(`[data-msg="${id}"]`)
+    if (el == null) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    el.classList.remove('jump-target')
+    // restart the flash even when the same message is jumped to twice
+    void (el as HTMLElement).offsetWidth
+    el.classList.add('jump-target')
+    window.setTimeout(() => el.classList.remove('jump-target'), 1400)
+  }
+
   // Discord keeps the checklist up on a server that is still as it was created
   // — it stays after the first message, as the reference shows — and drops it
   // once the channel list has been built out.
@@ -409,8 +424,54 @@ export function ChatFeed({
                 onContext(m, { x: e.clientX, y: e.clientY })
               }}
             >
+              {/* the toolbar Discord floats over a hovered message: two quick
+                  reactions, add reaction, reply, edit on your own, and more */}
+              <div className="msg-acts" role="group" aria-label="Message actions">
+                {['thumbsup', 'joy'].map((code) => (
+                  <button
+                    key={code}
+                    aria-label={`React with :${code}:`}
+                    onClick={() => onReact(m.id, code)}
+                  >
+                    <EmojiByName name={code} alt={`:${code}:`} />
+                  </button>
+                ))}
+                <button
+                  aria-label="Add Reaction"
+                  onClick={(e) => {
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    onOpenPicker(m.id, { x: r.left, y: r.bottom + 4 })
+                  }}
+                >
+                  <ReactIcon size={20} />
+                </button>
+                <button aria-label="Reply" onClick={() => onReply(m)}>
+                  <ReplyIcon size={20} />
+                </button>
+                {m.author === account.handle ? (
+                  <button aria-label="Edit" onClick={() => onStartEdit(m.id)}>
+                    <PencilIcon size={20} />
+                  </button>
+                ) : null}
+                <button
+                  aria-label="More"
+                  onClick={(e) => {
+                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                    onContext(m, { x: r.right - 4, y: r.bottom + 4 })
+                  }}
+                >
+                  <MoreIcon size={20} />
+                </button>
+              </div>
+
               {parent ? (
-                <div className="reply-ref">
+                <div
+                  className="reply-ref"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => jumpTo(parent.id)}
+                  onKeyDown={(e) => e.key === 'Enter' && jumpTo(parent.id)}
+                >
                   <span className="reply-spine" />
                   <Avatar account={account} size={16} />
                   <span className="reply-author">{account.name}</span>

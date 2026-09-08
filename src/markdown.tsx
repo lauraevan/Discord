@@ -23,6 +23,18 @@ export type MdContext = {
 
 /* ----------------------------------------------------------------- emoji */
 
+/**
+ * The sprite is keyed by codepoint, so anywhere the app holds a shortcode —
+ * a sticker's related emoji, a soundboard sound, a quick reaction — it has to
+ * be resolved through the emoji table first. Rendering the name straight into
+ * the sprite reference is a blank.
+ */
+export function EmojiByName({ name, alt }: { name: string; alt?: string }) {
+  const e = byName[name]
+  if (e == null) return null
+  return <EmojiGlyph code={e.code} alt={alt ?? name} />
+}
+
 export function EmojiGlyph({ code, alt, big }: { code: string; alt: string; big?: boolean }) {
   return (
     <svg className={'emoji' + (big ? ' jumbo' : '')} role="img" aria-label={alt}>

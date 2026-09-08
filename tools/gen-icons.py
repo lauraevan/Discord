@@ -142,6 +142,10 @@ MAP = {
     'StarShootingIcon': 'StarShootingIcon',
 }
 
+# Icons the extractor cannot resolve, with the geometry read out of the bundle
+# by hand. See the note in the file itself.
+OVERRIDES = json.load(open(os.path.join(ROOT, 'tools/icon-overrides.json')))
+
 ALIASES = {
     'MemberListIcon': 'MembersIcon',
     'ThreadsChannelIcon': 'ThreadsIcon',
@@ -149,9 +153,31 @@ ALIASES = {
     'EditServerProfileIcon': 'PencilIcon',
 }
 
+# an icon the barrel defines inline resolves to the wrong local, so the ones
+# read out by hand replace what the extractor found
+for name, glyph in OVERRIDES.items():
+    if not name.startswith('_'):
+        icons[name] = glyph
+
 missing = [n for n in MAP.values() if n not in icons]
 if missing:
     raise SystemExit(f'not in the bundle: {missing}')
+
+
+def degenerate(glyph):
+    """
+    A path with no curve in it and barely any length is not an icon — it is
+    what a mis-resolved local leaves behind, and it renders as nothing. One
+    icon shipped like that for a while; this stops the next one.
+    """
+    ds = [p[0] for p in glyph['paths']]
+    curves = sum(sum(d.count(c) for c in 'CcAaQqSs') for d in ds)
+    return curves == 0 and sum(len(d) for d in ds) < 240
+
+
+broken = [n for n in MAP.values() if degenerate(icons[n])]
+if broken:
+    raise SystemExit(f'degenerate geometry, resolve by hand: {broken}')
 
 lines = []
 w = lines.append

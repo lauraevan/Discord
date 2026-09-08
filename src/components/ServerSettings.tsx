@@ -17,7 +17,7 @@ import {
   type Server,
 } from '../data'
 import { EMOJI } from '../emoji'
-import { EmojiGlyph } from '../markdown'
+import { EmojiByName, EmojiGlyph } from '../markdown'
 import { CheckIcon, CloseIcon, PlusIcon, TrashIcon } from '../ui/Icons'
 import {
   Divider,
@@ -777,7 +777,7 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
           {stickers.map((st) => (
             <li key={st.id}>
               <span className="srv-sticker-art">
-                <EmojiGlyph code={st.related} alt="" />
+                <EmojiByName name={st.related} />
               </span>
               <b>{st.name}</b>
               <span className="srv-sticker-related">:{st.related}:</span>
@@ -847,7 +847,7 @@ function Soundboard({ server, onPatch }: { server: Server; onPatch: Patch }) {
         <ul className="srv-sounds">
           {sounds.map((sd) => (
             <li key={sd.id}>
-              <EmojiGlyph code={sd.emoji} alt="" />
+              <EmojiByName name={sd.emoji} />
               <b>{sd.name}</b>
               <Slider
                 label="Volume"
@@ -930,11 +930,13 @@ function ServerTagSection({ server, onPatch }: { server: Server; onPatch: Patch 
         <div className="srv-tag-preview">
           <span className="set-row-label">PREVIEW</span>
           <span className="srv-tag-chip">
-            <EmojiGlyph code={
-                BADGE_PACKS.flatMap((p) => p.emoji)[
+            <EmojiByName
+                name={
+                  BADGE_PACKS.flatMap((p) => p.emoji)[
                   BADGE_PACKS.flatMap((p) => p.ids).indexOf(tag?.badge ?? 21)
                 ] ?? 'dog'
-              } alt="" />
+                }
+                />
             {tag?.text || 'TAG'}
           </span>
         </div>
@@ -952,7 +954,7 @@ function ServerTagSection({ server, onPatch }: { server: Server; onPatch: Patch 
                   onPatch((s) => ({ ...s, tag: { text: s.tag?.text ?? '', badge: id } }))
                 }
               >
-                <EmojiGlyph code={pack.emoji[i]} alt="" />
+                <EmojiByName name={pack.emoji[i]} />
               </button>
             ))}
           </div>
