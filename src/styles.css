@@ -8,6 +8,7 @@
    ========================================================================= */
 
 @import './fonts.css';
+@import './springs.css';
 
 :root {
   /* filled in by applyTheme(); these are the Dark defaults */
@@ -1716,11 +1717,15 @@ textarea {
   pointer-events: none;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  transform: translateY(-50%);
+  /* positioning lives on `translate` so the spring below can own `scale`
+     without the two fighting over one transform */
+  translate: 0 -50%;
+  transform-origin: left center;
 }
 
 .tip.below {
-  transform: translate(-50%, 0);
+  translate: -50% 0;
+  transform-origin: center top;
 }
 
 [data-scheme='light'] .tip {
@@ -2748,7 +2753,8 @@ h3.md-h {
 }
 
 .tip.above {
-  transform: translate(-50%, -100%);
+  translate: -50% -100%;
+  transform-origin: center bottom;
 }
 
 /* ==========================================================================
@@ -9284,14 +9290,21 @@ body.reduced-motion img.decoration.still {
 
 /* --- motion --------------------------------------------------------------
  *
- * The client's own durations: 70ms for a hover or a press, 100-150ms for
- * something opening in place, 200-250ms for a layer over the window. Nothing
- * here animates a property that forces layout.
+ * Discord does not animate with durations and beziers: it animates with
+ * react-spring, and every surface carries its own tension and friction. Those
+ * configs are in the shipped bundle, and src/springs.css is them — solved the
+ * way react-spring solves them and sampled into `linear()` easings by
+ * tools/gen-springs.py. Each `--dur-*` is how long that spring really takes to
+ * come to rest, and each `--ease-*` is the shape it takes getting there, the
+ * overshoot included.
+ *
+ * 70ms with a plain ease stays for a hover or a press, which the client does
+ * animate with a CSS transition. Nothing here animates a property that forces
+ * layout.
  */
 :root {
   --dur-hover: 70ms;
   --dur-open: 150ms;
-  --dur-layer: 200ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -9313,39 +9326,150 @@ body.reduced-motion img.decoration.still {
     transform var(--dur-hover) ease;
 }
 
+/* A modal: the scrim fades on its own spring, and the card follows 64ms later
+   on the enter spring, coming up from scale(0.9) — Mana's own numbers. */
 .overlay {
-  animation: layer-in var(--dur-layer) ease-out;
+  animation: scrim-in var(--dur-scrim) var(--ease-scrim);
 }
 
 .overlay > * {
-  animation: layer-pop var(--dur-layer) var(--ease-out);
+  animation: modal-in var(--dur-modal-in) var(--ease-modal-in) 64ms backwards;
 }
 
-@keyframes layer-in {
+@keyframes scrim-in {
   from {
     opacity: 0;
   }
 }
 
-@keyframes layer-pop {
+@keyframes modal-in {
   from {
     opacity: 0;
-    transform: scale(0.94);
+    transform: scale(0.9);
   }
 }
 
+/* Settings is a layer rather than a card, and takes the same spring. */
+.settings-layer {
+  animation: modal-in var(--dur-modal-in) var(--ease-modal-in) 64ms backwards;
+}
+
+/* Tooltips and popouts share one spring, and come up from scale(0.95). It
+   overshoots by 13%, which is what makes Discord's tooltips feel like they
+   snap rather than fade. */
 .popout,
 .menu,
-.picker,
-.quests-select-menu,
-.tooltip {
-  animation: pop-in var(--dur-open) var(--ease-out);
+.picker {
+  animation: popout-in var(--dur-popout) var(--ease-popout);
 }
 
-@keyframes pop-in {
+/* A select's menu is the one popover Discord does not spring: it opens on a
+   flat 100ms ease from scaleY(0.96) and half opacity, hinged on its top edge.
+   (Floating UI's useTransitionStyles, with the client's own numbers.) */
+.quests-select-menu {
+  transform-origin: top center;
+  animation: select-in 100ms ease;
+}
+
+@keyframes select-in {
+  from {
+    opacity: 0.5;
+    transform: scaleY(0.96);
+  }
+}
+
+/* A button whose contents change: Discord springs the new glyph up from
+   scale(0.6), on a 700/26 config that overshoots by 17%. */
+.icon-swap {
+  display: contents;
+}
+
+.icon-swap > * {
+  animation: icon-swap-in var(--dur-icon-swap) var(--ease-icon-swap);
+}
+
+@keyframes icon-swap-in {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    scale: 0.6;
+  }
+}
+
+/* The notice Discord slides up over the composer — AutoMod's refusal here —
+   rides its default spring from 80px down. */
+.composer-blocked {
+  animation: notice-in var(--dur-default) var(--ease-default);
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    translate: 0 80px;
+  }
+}
+
+/* A count that changes rolls up into place. This is the one transition Discord
+   gives a duration rather than a spring: 220ms, clamped. */
+.roll {
+  display: inline-block;
+  font-weight: inherit;
+  animation: roll-up 220ms linear;
+}
+
+/* the roll comes up from under the line, so the line has to clip it */
+.quest-count {
+  overflow: hidden;
+}
+
+@keyframes roll-up {
+  from {
+    opacity: 0;
+    translate: 0 107%;
+  }
+}
+
+@keyframes popout-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* the tooltip takes the same spring, on `scale` rather than `transform`, since
+   its position is a translate it must keep */
+.tip {
+  animation: tip-in var(--dur-popout) var(--ease-popout);
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    scale: 0.95;
+  }
+}
+
+/* A reaction landing. Discord runs three springs back to back on the emoji —
+   squash to 0.8, overshoot to 1.1, settle at 1 — each on the same clamped
+   450/20 config, so the keyframe hands the easing to every leg. */
+.reaction.popped .emoji {
+  animation: reaction-pop calc(var(--dur-reaction) * 3) both;
+}
+
+@keyframes reaction-pop {
+  0% {
+    transform: scale(1);
+    animation-timing-function: var(--ease-reaction);
+  }
+  33.34% {
+    transform: scale(0.8);
+    animation-timing-function: var(--ease-reaction);
+  }
+  66.67% {
+    transform: scale(1.1);
+    animation-timing-function: var(--ease-reaction);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -9355,13 +9479,73 @@ body.reduced-motion img.decoration.still {
   transition: background var(--dur-hover) ease, transform var(--dur-hover) ease;
 }
 
+/* Reduced motion, the way the client does it rather than the way a reset does.
+   Discord does not cut the animation: it drops the movement and keeps the
+   fade. `scale(0.9)` becomes `scale(1)` on a modal, `scale(0.95)` becomes
+   `scale(1)` on a popout, and the notice's `y: 80` becomes `y: 0` — all three
+   are literally `reducedMotion.enabled ? ... : ...` in the bundle. Anything
+   that loops or drifts stops outright. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes popout-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes tip-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes select-in {
+    from {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes icon-swap-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes notice-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes roll-up {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* the reaction pop is movement and nothing else, so it goes entirely */
+  .reaction.popped .emoji {
+    animation: none;
+  }
+
+  /* and anything that loops stops: the profile effect's drift, and an animated
+     decoration, which already has a still frame for the app's own Reduced
+     Motion switch and takes it here too */
+  .shop-effect i {
+    animation: none;
+  }
+
+  img.decoration.anim {
+    display: none;
+  }
+
+  img.decoration.still {
+    display: block;
   }
 }
 

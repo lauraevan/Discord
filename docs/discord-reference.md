@@ -584,6 +584,49 @@ recording so they are not chased again:
   layers stay on `cdn.discordapp.com`, which is denied here, so the Shop shows
   a collection's real `confetti_colors` for an effect instead.
 
+## Motion
+
+Discord does not animate with durations and beziers. It animates with
+react-spring, and every surface carries its own `tension` and `friction`, which
+means a duration is an *output* of the spring rather than something chosen.
+Those configs are in the shipped bundle. `tools/gen-springs.py` solves each one
+the way react-spring's frame loop does — 1ms Euler substeps,
+`springForce = -tension * 1e-6 * x`, `dampingForce = -friction * 1e-3 * v`, both
+over `mass`, stopping when react-spring itself would call it at rest — and
+writes them into `src/springs.css` as `linear()` easings with the duration each
+one really takes.
+
+| what | config | from → to | settles | overshoot |
+| --- | --- | --- | --- | --- |
+| modal / layer opening | t1000 f48, **delayed 64ms** | `scale(0.9)`, opacity 0 | 256ms | 2.3% |
+| modal / layer closing | t1200 f80 | → `scale(0.9)`, opacity 0 | 371ms | none (overdamped) |
+| the scrim behind it | t1000 f48 | opacity 0 | 256ms | — |
+| tooltip and popout | t2400 f52 | `scale(0.95)`, opacity 0 | 197ms | 13.5% |
+| a select's menu | **220ms is a duration, not a spring** — Floating UI, `ease` | `scaleY(0.96)`, opacity 0.5, origin top centre | 100ms | — |
+| a reaction landing | t450 f20 clamped, ×3 | `1 → 0.8 → 1.1 → 1` | 3 × 110ms | to 1.1 by design |
+| a button's contents changing | t700 f26 | `scale(0.6)`, opacity 0 | 357ms | 16.7% |
+| a notice sliding up | react-spring's default, t170 f26 | `y: 80`, opacity 0 | 711ms | none |
+| a count rolling | duration 220ms, clamped, linear | `translate3d(0, 107%, 0)`, opacity 0 | 220ms | — |
+| a toast | t120 f14 | `translateY(120%)`, opacity 0 | 633ms | 7.2% |
+| the success toast | t500 f18 clamped, delayed 200ms | `translateY(16px)`, opacity 0 | 97ms | — |
+| a settings section sliding | t300 f28 clamped | — | 247ms | — |
+| the animated scroller | t200 f35 **mass 2** clamped | — | 540ms | — |
+
+The scroller is the one that cannot be CSS: a scroll position has to be driven
+frame by frame, so `src/motion.ts` runs the same integrator in JS and
+Jump to Message rides it instead of `behavior: 'smooth'`.
+
+**Reduced motion** is not "turn the animations off". The client keeps the fade
+and drops the movement, and it does it per surface:
+`scale(0.9)` → `scale(1)` on a modal, `scale(0.95)` → `scale(1)` on a
+popout or tooltip, `y: 80` → `y: 0` on a notice. Each of those is literally a
+`reducedMotion.enabled ? … : …` in the bundle.
+
+**Strings.** Almost all of Discord's copy is behind hashed intl keys, but the
+Mana design system ships its `i18n` defaults in the clear, which is where the
+quick switcher's empty state comes from: `AUTOCOMPLETE_NO_RESULTS_HEADER:
+"Nope!"`, `AUTOCOMPLETE_NO_RESULTS_BODY: "Did you make a typo?"`.
+
 ## Attachments: Discord's file-class table
 
 The client picks an attachment's badge with an ordered list of rules, the first

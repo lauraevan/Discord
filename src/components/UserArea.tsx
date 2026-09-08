@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
   GearIcon,
   HeadphonesIcon,
+  HeadphonesOffIcon,
   MicIcon,
   MicOffIcon,
   PencilIcon,
@@ -253,7 +254,12 @@ export function UserArea({
         <span className={'split' + (muted ? ' on' : '')}>
           <Tooltip label={muted ? 'Unmute' : 'Mute'} side="below">
             <button className="icon-btn" onClick={onMute} aria-label="Toggle mute">
-              {muted ? <MicOffIcon /> : <MicIcon />}
+              {/* Discord springs a button's contents when they change: the new
+                  glyph comes up from scale(0.6). The key is what makes React
+                  mount a new one rather than repaint the old. */}
+              <span className="icon-swap" key={muted ? 'muted' : 'live'}>
+                {muted ? <MicOffIcon /> : <MicIcon />}
+              </span>
             </button>
           </Tooltip>
           <button className="caret" aria-label="Audio settings">
@@ -263,7 +269,9 @@ export function UserArea({
         <span className={'split' + (deafened ? ' on' : '')}>
           <Tooltip label={deafened ? 'Undeafen' : 'Deafen'} side="below">
             <button className="icon-btn" onClick={onDeafen} aria-label="Toggle deafen">
-              <HeadphonesIcon />
+              <span className="icon-swap" key={deafened ? 'deaf' : 'hearing'}>
+                {deafened ? <HeadphonesOffIcon /> : <HeadphonesIcon />}
+              </span>
             </button>
           </Tooltip>
           <button className="caret" aria-label="Output settings">

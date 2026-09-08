@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   groupsWith,
   joinLine,
@@ -33,6 +33,7 @@ import {
 } from '../ui/Icons'
 import { FILTERS } from '../search'
 import { fileIcon, fileSize, isImage } from '../files'
+import { springScrollIntoView } from '../motion'
 import { Tooltip } from '../ui/Tooltip'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
@@ -197,6 +198,19 @@ function Reactions({
   onToggle: (name: string) => void
   onAdd: () => void
 }) {
+  /**
+   * Discord pops the emoji when the reaction becomes yours — a three-leg
+   * spring, 1 -> 0.8 -> 1.1 -> 1, and only on the one you just added. So the
+   * pop is armed by the transition into `mine`, not by the render.
+   */
+  const wasMine = useRef<Set<string>>(new Set())
+  const [popped, setPopped] = useState<string | null>(null)
+  useEffect(() => {
+    const now = new Set(reactions.filter((r) => r.by.includes(self)).map((r) => r.name))
+    for (const name of now) if (!wasMine.current.has(name)) setPopped(name)
+    wasMine.current = now
+  }, [reactions, self])
+
   if (!reactions.length) return null
   return (
     <div className="reactions">
@@ -206,7 +220,10 @@ function Reactions({
         return (
           <Tooltip key={r.name} label={`:${r.name}:`} side="above">
             <button
-              className={'reaction' + (mine ? ' mine' : '')}
+              className={
+                'reaction' + (mine ? ' mine' : '') + (popped === r.name ? ' popped' : '')
+              }
+              onAnimationEnd={() => popped === r.name && setPopped(null)}
               onClick={() => onToggle(r.name)}
               aria-label={`${r.name}, ${r.by.length}`}
               aria-pressed={mine}
@@ -320,8 +337,10 @@ export function ChatFeed({
    */
   const jumpTo = (id: string) => {
     const el = ref.current?.querySelector(`[data-msg="${id}"]`)
-    if (el == null) return
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (el == null || ref.current == null) return
+    // Discord's own scroller, not the browser's: a heavy clamped spring that
+    // eases into the target rather than decelerating on a bezier
+    springScrollIntoView(ref.current, el)
     el.classList.remove('jump-target')
     // restart the flash even when the same message is jumped to twice
     void (el as HTMLElement).offsetWidth

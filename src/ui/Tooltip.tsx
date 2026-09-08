@@ -4,8 +4,10 @@ import { createPortal } from 'react-dom'
 type Side = 'right' | 'below' | 'above'
 
 /**
- * Discord's tooltips: instant, tiny, no spring. Rendered in a portal so the
- * rail's overflow clipping never cuts them off.
+ * Discord's tooltips: small, dark, and sprung — the client animates them from
+ * scale(0.95) on a tension 2400 / friction 52 spring, which is where the snap
+ * comes from. src/springs.css carries that curve; the CSS applies it.
+ * Rendered in a portal so the rail's overflow clipping never cuts them off.
  */
 export function Tooltip({
   label,

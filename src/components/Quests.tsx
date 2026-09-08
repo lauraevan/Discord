@@ -599,8 +599,14 @@ function QuestSheet({
             <span className="quest-bar big">
               <i style={{ width: `${pct}%` }} />
             </span>
+            {/* Discord rolls a changing count up from below rather than
+                swapping it: 220ms, clamped, translate3d(0, 107%, 0) -> 0 */}
             <span className="quest-count">
-              {mmss(value)} / {mmss(task.target)}
+              <b className="roll" key={mmss(value)}>
+                {mmss(value)}
+              </b>
+              {' / '}
+              {mmss(task.target)}
             </span>
           </div>
 
