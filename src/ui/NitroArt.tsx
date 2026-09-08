@@ -109,3 +109,27 @@ export function NitroWordmark() {
     </div>
   )
 }
+
+/**
+ * Discord's own Nitro artwork.
+ *
+ * The plan-selection Wumpus, the boost gem, the yearly-upsell scene, the
+ * gifting art and the tenure badges are the real illustrations, vendored by
+ * tools/fetch-nitro-art.py out of the Android client's own resources and out
+ * of the badge set — see that file for where each comes from. Nothing here is
+ * drawn.
+ */
+const art = import.meta.glob('../assets/nitro/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
+export function NitroArt({ name, className }: { name: string; className?: string }) {
+  const src = art[`../assets/nitro/${name}.webp`]
+  if (!src) return null
+  return <img className={className} src={src} alt="" draggable={false} aria-hidden="true" />
+}
+
+/** The badge for a tenure level, by the month count the client files it under. */
+export const tenureBadge = (months: number) => `tenure-${months}`

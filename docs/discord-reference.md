@@ -411,3 +411,36 @@ A profile effect carries `staticFrameSrc`, `thumbnailPreviewSrc`,
 `width`, `height`, `duration`, `start`, `loopDelay`, `position` and `zIndex` —
 an intro layer that plays once, then an idle layer that loops. All of those
 `src` values are on `cdn.discordapp.com`.
+
+## Where Discord's own artwork is reachable from
+
+`cdn.discordapp.com` and `discord.com` are both denied by this environment's
+egress policy, so none of the web client's images can be fetched. The Android
+client is a way in: Wumpus-Central's `Discord-Datamining-Android` unpacks the
+APK with apktool and commits the result, and `res/values/public.xml` is a
+complete index of every resource name in it — 1,919 drawables — which is how a
+name like `images_native_premium_plan_selection_img_wumpus_nitro` is found
+without guessing. apktool files each drawable under whichever density the APK
+shipped it at, so a resource that is missing from `drawable-xxhdpi` is usually
+in `drawable-mdpi`.
+
+Names worth knowing:
+
+```
+images_native_premium_plan_selection_img_wumpus_nitro          the helmet Wumpus
+images_native_premium_plan_selection_img_wumpus_nitro_classic  Nitro Classic
+images_native_premium_plan_selection_img_wumpus_nitro_tier_0   Nitro Basic
+images_native_premium_plan_selection_img_boost                 the boost gem
+images_native_premium_plan_selection_img_wumpus_nitro_boost    Wumpus on a boost
+images_native_premium_plan_selection_yearly_upsell_wumpus      the yearly scene
+images_native_gifting_standard_{box_idle,chest_active,cake_idle,coffee_idle}
+images_native_avatars_default_avatar_0..5                      the real defaults
+images_native_empties_empty_channel_no_text_channels_{dark,light}
+images_native_empties_search_empty_state_dark
+images_native_icons_activenow{dark,light}2x
+images_native_icons_ic_file_small_*                            attachment icons
+images_platforms_img_account_sync_*                            connection logos
+modules_messages_images_noresults
+modules_auth_native_images_welcomesplashart
+modules_user_profile_images_banner_sample_banner
+```

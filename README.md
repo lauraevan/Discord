@@ -176,6 +176,19 @@ Nothing is cropped out of a screenshot.
   two-stop gradient with its own base mix), in `src/themes.ts`. They light the
   whole window the way the client's do, and they are the palette the profile
   themes offer too.
+- **Nitro art** — Discord's own, out of its Android client. The web client's
+  images are on `discord.com`, which this environment's egress policy denies,
+  and no repo mirrors them — but
+  [Wumpus-Central/Discord-Datamining-Android](https://github.com/Wumpus-Central/Discord-Datamining-Android)
+  unpacks the APK and commits its resources, so the plan-selection Wumpus in
+  his space helmet, the Nitro Basic and Classic tiers, the boost gem, the
+  yearly-upsell scene and the gifting chest and boxes are the real
+  illustrations. `res/values/public.xml` is the index that finds them by name.
+  The Nitro tenure badges — bronze, silver, gold, platinum, diamond, emerald,
+  ruby, opal, which are the client's own 1/3/6/12/24/36/60/72-month levels —
+  come from
+  [Fmasterpro27/Discord-badges](https://github.com/Fmasterpro27/Discord-badges)
+  (MIT). `tools/fetch-nitro-art.py` vendors the lot: 18 files, 72KB.
 - **Wumpus** — Discord's own, nine poses from
   [taiten312/wumpus](https://github.com/taiten312/wumpus) via
   `tools/fetch-wumpus.py`, one per empty state and matched to the line Discord

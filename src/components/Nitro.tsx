@@ -21,6 +21,7 @@ import {
   type Subscription,
   type Tier,
 } from '../nitro'
+import { NitroArt, tenureBadge } from '../ui/NitroArt'
 import * as Icons from '../ui/Icons'
 import {
   BoostIcon,
@@ -31,7 +32,6 @@ import {
   GiftIcon,
   HeartIcon,
   HeartOutlineIcon,
-  MedalIcon,
   NitroIcon,
   OrbsIcon,
   SparkleIcon,
@@ -119,6 +119,7 @@ export function NitroPage({
       >
         {active ? null : (
           <section className="nitro-banner">
+            <NitroArt name="yearly-upsell" className="nitro-banner-art" />
             <SparkleIcon size={18} />
             <b>Subscribe &amp; get a bonus bundle</b>
             <span>
@@ -203,6 +204,7 @@ function NitroHero({
   return (
     <section className="nitro-hero">
       <NitroHeroArt />
+      <NitroArt name="plan-nitro" className="nitro-hero-wumpus" />
       <div className="nitro-hero-body">
         <NitroWordmark />
         <p>
@@ -340,7 +342,7 @@ function Tenure({ subscription }: { subscription: Subscription | null }) {
           {TENURE_MONTHS.map((m, i) => (
             <li key={m} className={i < reached ? 'on' : ''}>
               <span className="nitro-tenure-node">
-                <MedalIcon size={16} />
+                <NitroArt name={tenureBadge(m)} />
               </span>
               {tenureLabel(m)}
             </li>
@@ -401,6 +403,10 @@ function Plans({
           return (
             <article key={t.key} className={'nitro-plan ' + t.key}>
               {t.key === 'nitro' ? <span className="nitro-popular">Popular</span> : null}
+              <NitroArt
+                name={t.key === 'nitro' ? 'plan-nitro' : 'plan-basic'}
+                className="nitro-plan-art"
+              />
               <h3>{t.name}</h3>
               <p className="nitro-price">
                 <b>{money(price)}</b>
@@ -542,7 +548,7 @@ function GiftInventory({ gifts, onRedeem }: { gifts: Gift[]; onRedeem: (code: st
       <ul className="nitro-gifts">
         {gifts.map((g) => (
           <li key={g.code} className={g.redeemedAt ? 'used' : ''}>
-            <GiftIcon size={20} />
+            <NitroArt name={g.redeemedAt ? 'gift-box' : 'gift-chest'} className="nitro-gift-art" />
             <div>
               <b>
                 {g.tier === 'nitro' ? 'Nitro' : 'Nitro Basic'} ·{' '}
@@ -604,6 +610,7 @@ export function SendGiftModal({
     <div className="overlay" onMouseDown={onClose}>
       <div className="gift" onMouseDown={(e) => e.stopPropagation()}>
         <div className="gift-head">
+          <NitroArt name="gift-chest" className="gift-art" />
           <h2>Send a Gift</h2>
           <button className="gift-close" onClick={onClose} aria-label="Close">
             <CloseIcon />

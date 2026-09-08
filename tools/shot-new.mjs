@@ -53,13 +53,13 @@ for (const [label, file] of [['Nitro', 'nitro'], ['Quests', 'quests'], ['Shop', 
   await p.screenshot({ path: `${out}/${file}.png` })
 }
 
-// Nitro's other tabs and the gift dialog
+// the Nitro surface, section by section, and the gift dialog
 await p.click('.dm-nav .row:has-text("Nitro")')
 await p.waitForTimeout(200)
-for (const tab of ['Plans', 'Compare', "What's New"]) {
-  await p.click(`.nitro-tab:has-text("${tab}")`)
+for (const [i, y] of [700, 1500, 2400].entries()) {
+  await p.evaluate((y) => document.querySelector('.nitro-body')?.scrollTo(0, y), y)
   await p.waitForTimeout(300)
-  await p.screenshot({ path: `${out}/nitro-${tab.toLowerCase().replace(/\W/g, '')}.png` })
+  await p.screenshot({ path: `${out}/nitro-scroll-${i}.png` })
 }
 await p.click('.nitro-gift-btn')
 await p.waitForTimeout(350)
