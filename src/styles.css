@@ -2026,44 +2026,7 @@ h3.md-h {
   white-space: nowrap;
 }
 
-.msg-actions {
-  position: absolute;
-  right: 8px;
-  top: -14px;
-  display: none;
-  align-items: center;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.28);
-  overflow: hidden;
-}
 
-.group:hover .msg-actions {
-  display: flex;
-}
-
-.msg-actions button {
-  width: 30px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-}
-
-.msg-actions button:hover {
-  background: var(--hover);
-  color: var(--strong);
-}
-
-.msg-actions button.on {
-  color: #f0b232;
-}
-
-.msg-actions svg {
-  width: 16px;
-  height: 16px;
-}
 
 .reactions {
   display: flex;
@@ -8547,6 +8510,14 @@ body.reduced-motion img.decoration.still {
   margin-bottom: 8px;
 }
 
+.switcher-empty b {
+  display: block;
+  font-size: 13.98px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
 .empty-art {
   width: 160px;
   margin: 0 auto 12px;
@@ -9712,4 +9683,174 @@ body.reduced-motion img.decoration.still {
   font-size: 15.98px;
   line-height: 1.3;
   color: var(--muted);
+}
+
+/* --------------------------------------------------------------- age gate
+   Discord's own screen in front of an age-restricted channel. */
+
+.age-gate {
+  flex: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.age-gate-art {
+  width: 220px;
+  margin-bottom: 24px;
+}
+
+.age-gate h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--strong);
+  margin-bottom: 8px;
+}
+
+.age-gate p {
+  max-width: 440px;
+  font-size: 15.98px;
+  line-height: 1.3;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.age-gate-acts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.age-gate-note {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* --------------------------------------------------------- forum settings
+   Discord's default-layout picker, with the previews it ships itself. */
+
+.layout-picks {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.layout-pick {
+  flex: 1;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--rail);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.layout-pick img {
+  width: 100%;
+  height: 132px;
+  object-fit: contain;
+  border-radius: 4px;
+  padding: 8px;
+  background: var(--card);
+  display: block;
+}
+
+.layout-pick:hover {
+  background: var(--hover);
+}
+
+.layout-pick.on {
+  border-color: var(--blurple);
+  color: var(--strong);
+}
+
+/* the forum's own layout toggle, next to New Post */
+.forum-layout {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.forum-layout:hover {
+  color: var(--strong);
+  background: var(--hover);
+}
+
+.forum-layout svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Gallery View: Discord tiles the posts instead of stacking them */
+.forum-posts.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.forum-posts.gallery .forum-post {
+  margin: 0;
+}
+
+/* the illustrated perks at the top of Server Boost Status */
+.srv-boost-top {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.srv-top-perk {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--selected);
+  opacity: 0.55;
+}
+
+.srv-top-perk.on {
+  opacity: 1;
+}
+
+.srv-top-perk img {
+  width: 96px;
+  border-radius: 6px;
+  flex: 0 0 96px;
+}
+
+.srv-top-perk b {
+  display: block;
+  font-size: 15px;
+  color: var(--strong);
+}
+
+.srv-top-perk span {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 2px 0 6px;
+}
+
+.srv-top-perk em {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ff73fa;
 }

@@ -1079,6 +1079,18 @@ const BOOST_PERKS: string[][] = [
   ['250 emoji slots', '60 sticker slots', '100MB uploads', 'Custom invite link', '384kbps audio'],
 ]
 
+/** The two perks Discord puts artwork behind, and the level each arrives at. */
+const TOP_PERKS: [string, string, number, string][] = [
+  ['perk-streaming', 'Better streaming', 2, '1080p 60fps screen share for everyone in voice.'],
+  ['perk-vanity', 'Custom invite link', 3, 'A discord.gg link with the server’s own name on it.'],
+]
+
+const BOOST_ART = import.meta.glob('../assets/boost/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
 function BoostStatus({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const boosts = server.boosts ?? 0
   const tier = boostTierOf(boosts)
@@ -1087,6 +1099,20 @@ function BoostStatus({ server, onPatch }: { server: Server; onPatch: Patch }) {
   return (
     <>
       <Title>Server Boost Status</Title>
+      {/* the two perks Discord itself illustrates on this page, with its own
+          artwork out of the mobile client's guild-boosting module */}
+      <div className="srv-boost-top">
+        {TOP_PERKS.map(([slug, name, at, blurb]) => (
+          <div className={'srv-top-perk' + (tier >= at ? ' on' : '')} key={slug}>
+            <img src={BOOST_ART[`../assets/boost/${slug}.webp`]} alt="" draggable={false} />
+            <div>
+              <b>{name}</b>
+              <span>{blurb}</span>
+              <em>{tier >= at ? 'Unlocked' : `Level ${at}`}</em>
+            </div>
+          </div>
+        ))}
+      </div>
       <div className="srv-boost">
         <div className="srv-boost-head">
           <b>Level {tier}</b>

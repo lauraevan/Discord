@@ -555,7 +555,82 @@ images_platforms_img_account_sync_*                            connection logos
 modules_messages_images_noresults
 modules_auth_native_images_welcomesplashart
 modules_user_profile_images_banner_sample_banner
+images_native_img_nsfw_dark_theme                              the NSFW mark
+modules_age_gate_native_images_nsfw_gate                       the age gate
+images_native_forum_channels_channel_settings_{grid,list}_view_example_post
+modules_guild_boosting_native_images_top_perk_{streaming_quality,vanity_url}
+images_native_wumpus_wumpus{ash,link,luigi,mario,pikachu,wizard,wump}
+modules_voice_panel_native_images_background
+images_native_super_reaction_coachmark
+images_native_gradient_overlays_chat_{dark,medium,light}
+modules_nuf_channels_native_images_{amanda,mallow,star_blue,star_green,star_pink,star_purple}
 ```
+
+`tools/fetch-android-art.py` pulls the ones this build uses. Two things worth
+recording so they are not chased again:
+
+- `res/values/strings.xml` in that repo is the Android **framework's** strings,
+  not Discord's. Discord's own copy is behind hashed intl keys (`i.t.cS889N`)
+  in the web bundle, so exact wording is not recoverable from either. The one
+  readable table is the Mana design system's `i18n` defaults, which is where
+  `AUTOCOMPLETE_NO_RESULTS_HEADER: "Nope!"` and
+  `AUTOCOMPLETE_NO_RESULTS_BODY: "Did you make a typo?"` — the quick switcher's
+  empty state — come from.
+- **Profile-effect artwork has no home on GitHub.** The collectibles archive
+  (`Infinitay/discord-collectibles-archive`) commits the catalogue as JSON but
+  no images; the two scrapers that do handle effects
+  (`JulesZYTB/discord-collectibles-downloader`,
+  `dev-rick-c137/Discord-Asset-Scraper`) `.gitignore` what they download. The
+  layers stay on `cdn.discordapp.com`, which is denied here, so the Shop shows
+  a collection's real `confetti_colors` for an effect instead.
+
+## Attachments: Discord's file-class table
+
+The client picks an attachment's badge with an ordered list of rules, the first
+match winning, checking the MIME type where it has one and the file name
+otherwise. Lifted verbatim out of the bundle and carried in `src/files.ts`:
+
+| rule | class |
+| --- | --- |
+| `^image/vnd.adobe.photoshop` | photoshop (`ic_file_small_ps`) |
+| `^image/svg\+xml` | webcode |
+| `^image/` | image |
+| `^video/` | video |
+| `.pdf` | acrobat |
+| `.ae` | ae |
+| `.sketch` | sketch |
+| `.ai` | ai |
+| `.rar .zip .7z .tar .tar.gz` | archive |
+| `.c++ .cpp .cc .c .h .hpp .mm .m .json .js .ts .rb .rake .py .asm .fs .pyc .dtd .cgi .bat .rss .java .graphml .idb .lua .o .gml .prl .sls .conf .cmake .make .sln .vbe .cxx .wbf .vbs .r .wml .php .bash .applescript .fcgi .yaml .ex .exs .sh .ml .actionscript` | code |
+| `.txt .rtf .doc .docx .md .pages .ppt .pptx .pptm .key .log` | document |
+| `.xls .xlsx .numbers .csv` | spreadsheet |
+| `.html .xhtml .htm .xml .xsd .css .styl` | webcode |
+| `.mp3 .ogg .opus .wav .aiff .flac` | audio |
+| anything else | unknown |
+
+## Connections
+
+The services the client's `ConnectionService` list carries, by the id Discord
+uses in its API — note `twitter` survived the rename to X, and `riotgames` and
+`leagueoflegends` are separate services:
+
+```
+battlenet  bluesky  bungie  crunchyroll  domain  ebay  epicgames  facebook
+github  instagram  leagueoflegends  mastodon  paypal  playstation  reddit
+riotgames  roblox  samsung  skype  spotify  steam  tiktok  twitch  twitter
+xbox  youtube
+```
+
+Only some of them take options: Spotify can drive your status
+(`show_activity`), Facebook and Steam can sync friends (`friend_sync`), and
+every one of them can be shown or hidden on your profile (`visibility`).
+
+## Forum channels
+
+`default_forum_layout`: `0` NOT_SET, `1` LIST_VIEW, `2` GALLERY_VIEW.
+`default_sort_order`: `0` LATEST_ACTIVITY, `1` CREATION_DATE. Both are per
+channel and both are only defaults — a member's own choice overrides them for
+themselves.
 
 ## Server Settings
 

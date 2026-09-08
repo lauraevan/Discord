@@ -14,9 +14,13 @@ const type = async (t) => {
   await p.press('.composer-input', 'Enter')
   await p.waitForTimeout(120)
 }
+let fails = 0
 const step = async (label, fn) => {
   try { await fn(); console.log('PASS ', label) }
-  catch (e) { console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0, 8).join('\n    ')) }
+  catch (e) {
+    fails += 1
+    console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0, 8).join('\n    '))
+  }
   await p.mouse.move(760, 300)
   await p.waitForTimeout(150)
 }
@@ -66,7 +70,7 @@ await step('date divider', async () => {
 })
 await step('hover toolbar + react', async () => {
   await p.locator('.group').last().hover()
-  await p.locator('.group').last().locator('.msg-actions button').first().click()
+  await p.locator('.group').last().locator('.msg-acts button[aria-label="Add reaction"]').click()
   await p.waitForSelector('.picker', { timeout: 2000 })
   await p.click('.picker-cell')
   await p.waitForSelector('.reaction.mine', { timeout: 2000 })
@@ -96,8 +100,11 @@ await step('up-arrow edits last message', async () => {
   await p.press('.edit-box textarea', 'Escape')
 })
 await step('pin + pins popover', async () => {
+  // Discord pins from the message's own menu rather than the hover toolbar
   await p.locator('.group').last().hover()
-  await p.locator('.group').last().locator('[aria-label="Pin message"]').click()
+  await p.locator('.group').last().locator('[aria-label="More"]').click()
+  await p.waitForSelector('.ctx-item', { timeout: 2000 })
+  await p.click('.ctx-item:has-text("Pin Message")')
   await p.click('[aria-label="Pinned messages"]')
   await p.waitForSelector('.pin-card', { timeout: 2000 })
   await p.keyboard.press('Escape')
@@ -181,14 +188,20 @@ await step('the hover toolbar reacts, replies and jumps back', async () => {
   await p.hover('.group >> nth=0')
   await p.click('.group >> nth=0 >> .msg-acts button[aria-label="Reply"]')
   await p.waitForTimeout(200)
+  const refsBefore = await p.locator('.reply-ref').count()
   await p.fill('.composer-input', 'answering it')
   await p.press('.composer-input', 'Enter')
   await p.waitForTimeout(300)
-  if (!((await p.locator('.reply-ref').count()) === 1)) throw new Error('no reply reference')
-  await p.click('.reply-ref')
+  if (!((await p.locator('.reply-ref').count()) === refsBefore + 1))
+    throw new Error('no reply reference')
+  await p.locator('.reply-ref').last().click()
   await p.waitForTimeout(200)
   if (!((await p.locator('.jump-target').count()) === 1)) throw new Error('jumping did not flash the parent')
 })
 
 console.log('\nerrors:', errs.length ? errs : 'none')
+// print a verdict and fail the process, so a `tail` of this output cannot hide
+// a failing step the way it did once
+console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()
+process.exit(fails ? 1 : 0)

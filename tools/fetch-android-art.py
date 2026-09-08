@@ -93,6 +93,21 @@ GROUPS: dict[str, dict[str, tuple[str, int]]] = {
         'xbox': ('images_platforms_img_account_sync_xbox_white', 96),
         'youtube': ('images_platforms_img_account_sync_youtube_light_and_dark', 96),
     },
+    # the gate Discord puts in front of an age-restricted channel, and the
+    # layout previews its forum settings show
+    'gates': {
+        'nsfw': ('images_native_img_nsfw_dark_theme', 240),
+        'nsfw-gate': ('modules_age_gate_native_images_nsfw_gate', 300),
+    },
+    'forum': {
+        'grid-view': ('images_native_forum_channels_channel_settings_grid_view_example_post', 320),
+        'list-view': ('images_native_forum_channels_channel_settings_list_view_example_post', 320),
+    },
+    # the perks Discord illustrates on a boosted server's own page
+    'boost': {
+        'perk-streaming': ('modules_guild_boosting_native_images_top_perk_streaming_quality', 240),
+        'perk-vanity': ('modules_guild_boosting_native_images_top_perk_vanity_url', 240),
+    },
     # the scene behind Discord's own login and register screens
     'auth': {
         'welcome-splash': ('modules_auth_native_images_welcomesplashart', 900),

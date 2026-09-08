@@ -30,6 +30,7 @@ import { ServerSettings } from './components/ServerSettings'
 import { ServerRail } from './components/ServerRail'
 import { ThemePanel } from './components/ThemePanel'
 import { EmptyArt } from './ui/Art'
+import { AgeGate } from './components/AgeGate'
 import { VoiceView } from './components/Voice'
 import { TitleBar } from './components/TitleBar'
 import { UserSettings } from './components/UserSettings'
@@ -188,6 +189,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
 
   const [activeServer, setActiveServer] = useState<string | null>(servers[0]?.id ?? null)
   const [activeChannel, setActiveChannel] = useState<string>(servers[0]?.channels?.[0]?.id ?? '')
+  // Discord asks once per session before opening an age-restricted channel
+  const [nsfwOk, setNsfwOk] = useState<string[]>([])
   const [collapsed, setCollapsed] = useState<string[]>([])
   const [muted, setMuted] = useState(true)
   const [deafened, setDeafened] = useState(false)
@@ -926,7 +929,18 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               ) : null}
               <div className="chat-body">
                 <div className="chat-main">
-                  {voice === channel.id ? (
+                  {channel.nsfw && !nsfwOk.includes(channel.id) ? (
+                    <AgeGate
+                      channel={channel}
+                      onEnter={() => setNsfwOk((all) => [...all, channel.id])}
+                      onLeave={() => {
+                        const other = server.channels.find(
+                          (c) => c.id !== channel.id && c.kind === 'text' && !c.nsfw,
+                        )
+                        if (other) setActiveChannel(other.id)
+                      }}
+                    />
+                  ) : voice === channel.id ? (
                     <VoiceView
                       channel={channel}
                       account={account}
@@ -967,7 +981,6 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     onEdit={editMessage}
                     onReply={setReplyTo}
                     onReact={react}
-                    onPin={togglePin}
                     onOpenPicker={(id, at) => setPicker({ target: id, at })}
                     onVote={vote}
                     onContext={(m, at) => setCtx({ at, items: messageMenu(m) })}

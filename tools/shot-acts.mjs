@@ -1,0 +1,16 @@
+import { chromium } from 'playwright'
+import { readFileSync } from 'node:fs'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 743 } })
+await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(500)
+await p.click('.composer-input')
+await p.fill('.composer-input', 'one hover toolbar, please')
+await p.press('.composer-input', 'Enter')
+await p.waitForTimeout(300)
+await p.hover('.group >> nth=-1')
+await p.waitForTimeout(400)
+await p.screenshot({ path: process.argv[2] })
+console.log('msg-acts:', await p.locator('.msg-acts').count(), 'msg-actions:', await p.locator('.msg-actions').count())
+await b.close()

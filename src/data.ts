@@ -178,7 +178,22 @@ export type Channel = {
   archived?: boolean
   /** onboarding: one of the channels a new member lands in */
   onboardingDefault?: boolean
+  /** forum channels: Discord's default_forum_layout */
+  forumLayout?: ForumLayout
+  /** forum channels: Discord's default_sort_order */
+  forumSort?: ForumSort
 }
+
+/**
+ * Discord's default_forum_layout. NOT_SET means the client picks, which in
+ * practice is the list.
+ */
+export const ForumLayout = { NOT_SET: 0, LIST: 1, GALLERY: 2 } as const
+export type ForumLayout = (typeof ForumLayout)[keyof typeof ForumLayout]
+
+/** Discord's default_sort_order for a forum. */
+export const ForumSort = { LATEST_ACTIVITY: 0, CREATION_DATE: 1 } as const
+export type ForumSort = (typeof ForumSort)[keyof typeof ForumSort]
 
 /** Discord's slowmode steps, as the channel settings slider offers them. */
 export const SLOWMODE_STEPS = [0, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 21600]

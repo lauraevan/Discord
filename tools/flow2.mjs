@@ -7,9 +7,13 @@ const errs = []
 p.on('pageerror', (e) => errs.push(String(e).split('\n')[0]))
 await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(400)
+let fails = 0
 const step = async (label, fn) => {
   try { await fn(); console.log('PASS ', label) }
-  catch (e) { console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0,6).join('\n    ')) }
+  catch (e) {
+    fails += 1
+    console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0,6).join('\n    '))
+  }
   await p.keyboard.press('Escape'); await p.mouse.move(700, 300); await p.waitForTimeout(150)
 }
 const say = async (t) => { await p.click('.composer-input'); await p.fill('.composer-input', t); await p.press('.composer-input','Enter'); await p.waitForTimeout(80) }
@@ -144,4 +148,6 @@ await step('friends page', async () => {
   await p.waitForSelector('.add-friend-note')
 })
 console.log('\nerrors:', errs.length ? errs : 'none')
+console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()
+process.exit(fails ? 1 : 0)

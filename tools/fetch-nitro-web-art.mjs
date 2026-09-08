@@ -45,6 +45,10 @@ const RASTER = {
   'bento-emoji': ['nitro/card3.svg', 720],
   'bento-profile': ['nitro/card2.svg', 720],
   'bento-collectibles': ['nitro/card6.svg', 720],
+  'bento-themes': ['nitro/card5.svg', 720],
+  'bento-sounds': ['nitro/card8.svg', 720],
+  'bento-super': ['nitro/card9.svg', 720],
+  'bento-video': ['nitro/card10.svg', 720],
 }
 
 const get = async (path) => {

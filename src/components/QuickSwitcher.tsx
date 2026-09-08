@@ -101,9 +101,12 @@ export function QuickSwitcher({
             </button>
           ))}
           {!hits.length ? (
+            /* the client's own empty-state copy, out of the design system's
+               i18n defaults: AUTOCOMPLETE_NO_RESULTS_HEADER and _BODY */
             <div className="switcher-empty">
               <EmptyArt kind="search" />
-              Nothing matched.
+              <b>Nope!</b>
+              <span>Did you make a typo?</span>
             </div>
           ) : null}
         </div>

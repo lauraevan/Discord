@@ -377,6 +377,42 @@ await step('a picked file waits in the composer, then sends with the message', a
   expect((await p.locator('.attachment').count()) === 1, 'attachment not carried')
 })
 
+/* ------------------------------------------------------ non-image uploads */
+
+await step('a file Discord cannot preview gets its own card', async () => {
+  await p.setInputFiles('.composer-wrap input[type=file]', {
+    name: 'notes.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 notes'),
+  })
+  await p.waitForTimeout(300)
+  expect((await p.locator('.upload-file').count()) === 1, 'pdf previewed as an image')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(400)
+  const card = p.locator('.file-card').last()
+  expect((await p.locator('.file-card').count()) === 1, 'no file card in the message')
+  expect((await card.locator('.file-name').innerText()) === 'notes.pdf', 'wrong file name')
+  // Discord's own class table puts a .pdf on the acrobat badge
+  const badge = await card.locator('.file-badge').getAttribute('src')
+  expect(badge != null && badge.length > 0, 'file badge missing')
+})
+
+/* ------------------------------------------------------------- age gate */
+
+await step('an age-restricted channel opens on the gate, then lets you in', async () => {
+  await p.locator('.row.active [aria-label="Edit channel"]').click({ force: true })
+  await p.waitForSelector('.settings-layer', { timeout: 4000 })
+  await p.locator('.set-row:has-text("Age-Restricted") .switch').click()
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(400)
+  expect((await p.locator('.age-gate').count()) === 1, 'no age gate')
+  expect((await p.locator('.composer-input').count()) === 0, 'composer still reachable')
+  await p.click('.age-gate .btn-primary')
+  await p.waitForTimeout(300)
+  expect((await p.locator('.age-gate').count()) === 0, 'gate did not clear')
+  expect((await p.locator('.composer-input').count()) === 1, 'composer did not come back')
+})
+
 console.log('\nerrors:', errs.length ? errs.join('\n  ') : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()

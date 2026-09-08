@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { uid, type Account, type Channel, type Message } from '../data'
+import { ForumLayout, ForumSort, uid, type Account, type Channel, type Message } from '../data'
 import { renderMarkdown, type MdContext } from '../markdown'
-import { ForumIcon, PlusIcon, SearchIcon, ThreadsIcon } from '../ui/Icons'
+import { ForumIcon, GalleryIcon, ListViewIcon, PlusIcon, SearchIcon, ThreadsIcon } from '../ui/Icons'
+import { Tooltip } from '../ui/Tooltip'
 import { Avatar } from './UserArea'
 
 /**
@@ -29,7 +30,11 @@ export function ForumView({
   const [composing, setComposing] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [sort, setSort] = useState<'activity' | 'date'>('activity')
+  // the channel's own defaults open the view; a member can still switch both
+  const [sort, setSort] = useState<'activity' | 'date'>(
+    channel.forumSort === ForumSort.CREATION_DATE ? 'date' : 'activity',
+  )
+  const [gallery, setGallery] = useState(channel.forumLayout === ForumLayout.GALLERY)
 
   const sorted = [...posts].sort((a, b) => (sort === 'date' ? a.time - b.time : b.time - a.time))
 
@@ -44,6 +49,16 @@ export function ForumView({
           <option value="activity">Latest Activity</option>
           <option value="date">Date Posted</option>
         </select>
+        <Tooltip label={gallery ? 'List View' : 'Gallery View'} side="below">
+          <button
+            className="forum-layout"
+            aria-label="Toggle layout"
+            aria-pressed={gallery}
+            onClick={() => setGallery((g) => !g)}
+          >
+            {gallery ? <ListViewIcon /> : <GalleryIcon />}
+          </button>
+        </Tooltip>
         <button className="btn-primary" onClick={() => setComposing(true)}>
           <PlusIcon />
           New Post
@@ -86,7 +101,7 @@ export function ForumView({
         </div>
       ) : null}
 
-      <div className="forum-posts">
+      <div className={'forum-posts' + (gallery ? ' gallery' : '')}>
         {sorted.map((p) => (
           <button className="forum-post" key={p.id} onClick={() => onOpen(p.id)}>
             <div className="forum-post-head">

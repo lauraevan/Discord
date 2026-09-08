@@ -304,6 +304,27 @@ const BENTO: { art: string; title: string; body: string; wide?: boolean }[] = [
     title: 'Collectibles, kept',
     body: 'Decorations and effects stay yours, at 15% off in the Shop.',
   },
+  {
+    art: 'bento-themes',
+    title: 'Paint the whole app',
+    body: 'Ten background gradients over Light or Dark, and custom app icons on the dock.',
+  },
+  {
+    art: 'bento-sounds',
+    title: 'Bring the soundboard',
+    body: 'Use any server’s sounds in every server, and upload your own.',
+  },
+  {
+    art: 'bento-super',
+    title: 'Super Reactions, uncapped',
+    body: 'Free accounts get a handful a week. Nitro takes the cap off.',
+  },
+  {
+    art: 'bento-video',
+    title: 'Go live in HD',
+    body: 'Stream and screen share up to 4K at 60fps, for as long as you like.',
+    wide: true,
+  },
 ]
 
 function Bento() {

@@ -376,6 +376,14 @@ export const FriendsIcon = glyph({
   ],
 })
 
+/** Discord's GridSquareIcon */
+export const GalleryIcon = glyph({
+  box: 24,
+  paths: [
+    ['M15 11a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2h5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-5ZM2 20c0 1.1.9 2 2 2h5a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5ZM13 20c0 1.1.9 2 2 2h5a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2h-5a2 2 0 0 0-2 2v5ZM2 9c0 1.1.9 2 2 2h5a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v5Z'],
+  ],
+})
+
 /** Discord's GameControllerIcon */
 export const GameControllerIcon = glyph({
   box: 24,
@@ -497,6 +505,14 @@ export const JumpIcon = glyph({
   box: 24,
   paths: [
     ['M13 16V5.41l3.3 3.3a1 1 0 1 0 1.4-1.42l-5-5a1 1 0 0 0-1.4 0l-5 5a1 1 0 0 0 1.4 1.42L11 5.4V16a1 1 0 1 0 2 0ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z'],
+  ],
+})
+
+/** Discord's ListViewIcon */
+export const ListViewIcon = glyph({
+  box: 24,
+  paths: [
+    ['M4 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM4 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM2 20a2 2 0 1 1 4 0 2 2 0 0 1-4 0ZM9 3a1 1 0 0 0 0 2h12a1 1 0 1 0 0-2H9ZM8 12a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1ZM9 19a1 1 0 1 0 0 2h12a1 1 0 1 0 0-2H9Z'],
   ],
 })
 

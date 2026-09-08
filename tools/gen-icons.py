@@ -23,6 +23,9 @@ MAP = {
     'MegaphoneIcon': 'AnnouncementsIcon',
     'StageIcon': 'StageIcon',
     'ForumIcon': 'ForumIcon',
+    # the forum's own layout switch
+    'GalleryIcon': 'GridSquareIcon',
+    'ListViewIcon': 'ListViewIcon',
     'MediaIcon': 'ImageIcon',
     'ThreadLockIcon': 'ThreadLockIcon',
     'AtIcon': 'AtIcon',

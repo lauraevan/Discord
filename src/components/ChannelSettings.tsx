@@ -1,9 +1,17 @@
 import { useState } from 'react'
-import { slowmodeLabel, SLOWMODE_STEPS, type Channel, type Server } from '../data'
+import {
+  ForumLayout,
+  ForumSort,
+  slowmodeLabel,
+  SLOWMODE_STEPS,
+  type Channel,
+  type Server,
+} from '../data'
 import {
   Divider,
   Field,
   Note,
+  Radio,
   SettingsLayer,
   Sub,
   Title,
@@ -11,6 +19,13 @@ import {
   Unavailable,
   type NavItem,
 } from './SettingsLayer'
+
+/** The layout previews Discord ships with its own forum settings. */
+const LAYOUT_ART = import.meta.glob('../assets/forum/*.webp', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
 
 /**
  * Channel Settings.
@@ -34,6 +49,7 @@ export function ChannelSettings({
 }) {
   const [section, setSection] = useState('overview')
   const voice = channel.kind === 'voice'
+  const forum = channel.kind === 'forum' || channel.kind === 'media'
 
   const nav: NavItem[] = [
     { head: channel.name },
@@ -92,6 +108,58 @@ export function ChannelSettings({
                 />
                 <span>{slowmodeLabel(channel.slowmode ?? 0)}</span>
               </div>
+              {forum ? (
+                <>
+                  <Divider />
+                  <Sub>Default Layout</Sub>
+                  <Note>
+                    Choose how posts are shown by default. Members can still switch to the other
+                    view for themselves.
+                  </Note>
+                  <div className="layout-picks">
+                    {(
+                      [
+                        [ForumLayout.LIST, 'List View', 'list-view'],
+                        [ForumLayout.GALLERY, 'Gallery View', 'grid-view'],
+                      ] as const
+                    ).map(([value, label, art]) => (
+                      <button
+                        key={value}
+                        className={
+                          'layout-pick' +
+                          ((channel.forumLayout ?? ForumLayout.LIST) === value ? ' on' : '')
+                        }
+                        onClick={() =>
+                          onPatch((c) => ({ ...c, forumLayout: value }), {
+                            action: 'Forum layout changed',
+                            target: label,
+                          })
+                        }
+                      >
+                        <img src={LAYOUT_ART[`../assets/forum/${art}.webp`]} alt="" draggable={false} />
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <Divider />
+                  <Sub>Default Sort Order</Sub>
+                  <Note>Choose the order posts are shown in by default.</Note>
+                  <Radio
+                    value={String(channel.forumSort ?? ForumSort.LATEST_ACTIVITY)}
+                    options={[
+                      [String(ForumSort.LATEST_ACTIVITY), 'Latest Activity'],
+                      [String(ForumSort.CREATION_DATE), 'Date Posted'],
+                    ]}
+                    onChange={(v) =>
+                      onPatch((c) => ({ ...c, forumSort: Number(v) as ForumSort }), {
+                        action: 'Forum sort changed',
+                        target: channel.name,
+                      })
+                    }
+                  />
+                </>
+              ) : null}
               <Divider />
               <Toggle
                 label="Age-Restricted Channel"

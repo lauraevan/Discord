@@ -288,7 +288,6 @@ export function ChatFeed({
   onEdit,
   onReply,
   onReact,
-  onPin,
   onOpenPicker,
   onContext,
   onVote,
@@ -307,7 +306,6 @@ export function ChatFeed({
   onEdit: (id: string, text: string) => void
   onReply: (m: Message) => void
   onReact: (id: string, name: string) => void
-  onPin: (id: string) => void
   onOpenPicker: (id: string, at: { x: number; y: number }) => void
   onContext: (m: Message, at: { x: number; y: number }) => void
   onVote: (id: string, answer: number) => void
@@ -430,40 +428,49 @@ export function ChatFeed({
                   reactions, add reaction, reply, edit on your own, and more */}
               <div className="msg-acts" role="group" aria-label="Message actions">
                 {['thumbsup', 'joy'].map((code) => (
-                  <button
-                    key={code}
-                    aria-label={`React with :${code}:`}
-                    onClick={() => onReact(m.id, code)}
-                  >
-                    <EmojiByName name={code} alt={`:${code}:`} />
-                  </button>
+                  <Tooltip key={code} label={`:${code}:`} side="above">
+                    <button
+                      aria-label={`React with :${code}:`}
+                      onClick={() => onReact(m.id, code)}
+                    >
+                      <EmojiByName name={code} alt={`:${code}:`} />
+                    </button>
+                  </Tooltip>
                 ))}
-                <button
-                  aria-label="Add Reaction"
-                  onClick={(e) => {
-                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                    onOpenPicker(m.id, { x: r.left, y: r.bottom + 4 })
-                  }}
-                >
-                  <ReactIcon size={20} />
-                </button>
-                <button aria-label="Reply" onClick={() => onReply(m)}>
-                  <ReplyIcon size={20} />
-                </button>
-                {m.author === account.handle ? (
-                  <button aria-label="Edit" onClick={() => onStartEdit(m.id)}>
-                    <PencilIcon size={20} />
+                <Tooltip label="Add Reaction" side="above">
+                  <button
+                    aria-label="Add reaction"
+                    onClick={(e) => {
+                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                      onOpenPicker(m.id, { x: r.left, y: r.bottom + 4 })
+                    }}
+                  >
+                    <ReactIcon size={20} />
                   </button>
+                </Tooltip>
+                <Tooltip label="Reply" side="above">
+                  <button aria-label="Reply" onClick={() => onReply(m)}>
+                    <ReplyIcon size={20} />
+                  </button>
+                </Tooltip>
+                {m.author === account.handle ? (
+                  <Tooltip label="Edit" side="above">
+                    <button aria-label="Edit" onClick={() => onStartEdit(m.id)}>
+                      <PencilIcon size={20} />
+                    </button>
+                  </Tooltip>
                 ) : null}
-                <button
-                  aria-label="More"
-                  onClick={(e) => {
-                    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                    onContext(m, { x: r.right - 4, y: r.bottom + 4 })
-                  }}
-                >
-                  <MoreIcon size={20} />
-                </button>
+                <Tooltip label="More" side="above">
+                  <button
+                    aria-label="More"
+                    onClick={(e) => {
+                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                      onContext(m, { x: r.right - 4, y: r.bottom + 4 })
+                    }}
+                  >
+                    <MoreIcon size={20} />
+                  </button>
+                </Tooltip>
               </div>
 
               {parent ? (
@@ -592,49 +599,6 @@ export function ChatFeed({
                 }}
               />
 
-              <div className="msg-actions">
-                <Tooltip label="Add Reaction" side="above">
-                  <button
-                    aria-label="Add reaction"
-                    onClick={(e) => {
-                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                      onOpenPicker(m.id, { x: r.right - 360, y: r.bottom + 6 })
-                    }}
-                  >
-                    <ReactIcon />
-                  </button>
-                </Tooltip>
-                <Tooltip label="Reply" side="above">
-                  <button aria-label="Reply" onClick={() => onReply(m)}>
-                    <ReplyIcon />
-                  </button>
-                </Tooltip>
-                <Tooltip label="Edit" side="above">
-                  <button aria-label="Edit" onClick={() => onStartEdit(m.id)}>
-                    <PencilIcon />
-                  </button>
-                </Tooltip>
-                <Tooltip label={m.pinned ? 'Unpin Message' : 'Pin Message'} side="above">
-                  <button
-                    aria-label="Pin message"
-                    className={m.pinned ? 'on' : undefined}
-                    onClick={() => onPin(m.id)}
-                  >
-                    <PinIcon />
-                  </button>
-                </Tooltip>
-                <Tooltip label="More" side="above">
-                  <button
-                    aria-label="More"
-                    onClick={(e) => {
-                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
-                      onContext(m, { x: r.left, y: r.bottom + 4 })
-                    }}
-                  >
-                    <MoreIcon />
-                  </button>
-                </Tooltip>
-              </div>
             </div>
           </div>
         )
