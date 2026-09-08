@@ -284,8 +284,47 @@ PREMIUM_TIER_0_BLUE              #007cc2   PREMIUM_TIER_0_PURPLE      #5865f2
 PREMIUM_TIER_0_HEADER_GRADIENT   #3736bb #4670e8 #8377eb #e782f1 #df90af
 ```
 
-The tab's five sections (Home, What's New, Best of Nitro, Plans, Compare), the
-heart and Gift Nitro buttons, and the contents of the Send a Gift dialog —
+The Nitro tab is a single route (`NITRO_HOME: "/store"`), and the client
+instruments it section by section rather than as tabs — the analytics names are
+the page's own structure:
+
+```
+premium marketing page banner        premium marketing hero cta
+premium marketing nitro home orbs section
+premium marketing bento box          premium marketing perk card (+ perk_card_flipped)
+premium_marketing_perks_see_all_clicked
+premium marketing tier card          premium marketing comparison table
+premium marketing tenure rewards section (+ tenure reward card)
+premium marketing gift section       premium marketing footer cta
+premium marketing floating cta       premium_marketing_what_is_new_card_hovered
+```
+
+The perk cards have their own ids, registered in the client:
+
+```
+badge  clientThemes  customAppIcons  customSounds  displayNameStyles
+earlyAccess  entranceSounds  hdVideo  largeUploads  moreEmojis  permadecos
+premiumGroup  profiles  serverBoosts  memberPricing  specialStickers
+superReactions  tenureBadge  videoBackgrounds  orbMultiplier
+nitroOrbsRewards  monthlyToYearlyUpsell  3p  logitech3PP  callOfDuty3PP
+xgppHero  xgppPerk
+```
+
+and each is tinted with one of the perk colours:
+
+```
+PREMIUM_PERK_BLUE       #80a6ff   PREMIUM_PERK_BLUE_ALT   #9cb8ff
+PREMIUM_PERK_DARK_BLUE  #4173da   PREMIUM_PERK_GOLD       #faa61a
+PREMIUM_PERK_GREEN      #86dcc5   PREMIUM_PERK_LIGHT_BLUE #aec7ff
+PREMIUM_PERK_ORANGE     #fc964b   PREMIUM_PERK_PINK       #ff80f4
+PREMIUM_PERK_PURPLE     #d09aff   PREMIUM_PERK_YELLOW     #fed648
+```
+
+The tenure badge levels are `PREMIUM_TENURE_{1,3,6,12,24,36,60,72}_MONTH`, and
+the sticker/emoji slots a tier carries are 15/100 at TIER_1, 30/150 at TIER_2
+and 60/250 at TIER_3.
+
+The heart and Gift Nitro buttons, and the contents of the Send a Gift dialog —
 both tiers with their prices and perk lists, the "8D LEFT / Get 5,000 Orbs /
 When you gift Nitro" promotion inside the Nitro column and the Patron Badge
 strip along the bottom — are from the client.

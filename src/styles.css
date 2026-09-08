@@ -5739,30 +5739,15 @@ body.streamer .invite-row code {
   border-bottom: 1px solid var(--border);
 }
 
-.nitro-tabs {
-  display: flex;
-  gap: 2px;
-  min-width: 0;
-  overflow: auto hidden;
+.nitro-mark {
+  flex: 0 0 auto;
+  color: #b473f5;
 }
 
-.nitro-tab {
-  padding: 6px 10px;
-  border-radius: 4px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.nitro-tab:hover {
-  color: var(--text);
-  background: var(--hover);
-}
-
-.nitro-tab.on {
+.nitro-title {
+  font-size: 15px;
+  font-weight: 600;
   color: var(--strong);
-  background: var(--selected);
 }
 
 .nitro-header-actions {
@@ -5816,12 +5801,68 @@ body.streamer .invite-row code {
   padding: 20px 24px 40px;
 }
 
+/* Discord's Nitro surface is its own dark, spacey world rather than the app's
+   grey: a deep blurple ground with a teal cast, everything on it glass. The
+   tokens are re-pointed inside it so every card, table and heading on the page
+   reads on that ground whichever theme the app is on. */
+.nitro .nitro-body {
+  --strong: #ffffff;
+  --text: rgba(255, 255, 255, 0.82);
+  --muted: rgba(255, 255, 255, 0.55);
+  --card: rgba(255, 255, 255, 0.05);
+  --selected: rgba(255, 255, 255, 0.12);
+  --hover: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.08);
+  --composer: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  background:
+    radial-gradient(120% 80% at 12% -10%, rgba(55, 54, 187, 0.5), transparent 60%),
+    radial-gradient(90% 70% at 92% 8%, rgba(53, 188, 213, 0.18), transparent 62%),
+    linear-gradient(180deg, #0d0c22 0%, #0b0a17 42%, var(--chat) 100%);
+}
+
+.nitro-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13.5px;
+}
+
+.nitro-banner svg {
+  color: #fed648;
+}
+
+.nitro-banner span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nitro-banner-cta {
+  margin-left: auto;
+  height: 30px;
+  padding: 0 16px;
+  border-radius: 15px;
+  background: #fff;
+  color: #11121a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nitro-banner-cta:hover {
+  background: #e6e3f0;
+}
+
 .nitro-hero {
   position: relative;
-  min-height: 320px;
+  min-height: 340px;
   display: flex;
   align-items: flex-end;
-  border-radius: 12px;
+  border-radius: 16px;
   color: #fff;
   overflow: hidden;
   isolation: isolate;
@@ -5836,8 +5877,24 @@ body.streamer .invite-row code {
 }
 
 .nitro-hero-body {
-  padding: 32px 34px;
+  padding: 34px 36px;
   max-width: 520px;
+}
+
+.nitro-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.nitro-cta.ghost {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.nitro-cta.ghost:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .nitro-wordmark {
@@ -5910,9 +5967,15 @@ body.streamer .invite-row code {
 
 .nitro-status {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .nitro-status {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .nitro-status-card {
@@ -5951,48 +6014,254 @@ body.streamer .invite-row code {
   color: var(--muted);
 }
 
-/* the perk cards are art-led: a three-up grid of large scenes with the copy
-   under each, rather than the row of small tiles this used to be */
+.nitro-section {
+  margin-top: 34px;
+}
+
+.nitro-section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nitro-section-head .nitro-h2 {
+  margin: 0;
+}
+
+.nitro-seeall {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px 0 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.nitro-seeall:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.nitro-seeall svg.up {
+  transform: rotate(180deg);
+}
+
+/* the perk cards: a tinted icon, a line of copy, and a back face the card
+   flips to — the client tracks the flip as its own event */
 .nitro-perks {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
   margin-top: 14px;
 }
 
 .nitro-perk {
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
-  background: var(--card);
-  overflow: hidden;
-}
-
-.nitro-perk-art {
+  position: relative;
   display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 280 / 192;
+  min-height: 148px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  text-align: left;
+  transition: background 0.12s ease-out, transform 0.12s ease-out;
 }
 
-.nitro-perk h3 {
-  margin: 16px 18px 0;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--strong);
+.nitro-perk:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateY(-2px);
 }
 
-.nitro-perk p {
-  margin: 5px 18px 18px;
-  font-size: 13.5px;
-  line-height: 19px;
-  color: var(--muted);
+.nitro-perk-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--perk) 22%, transparent);
+  color: var(--perk);
 }
 
-@media (max-width: 1100px) {
+.nitro-perk b {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* the copy under the title — matched off the title so it never catches the
+   icon tile, which is a span too and carries the perk's own colour */
+.nitro-perk-face > b + span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 17px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.nitro-perk-back {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--perk) 16%, #10101f);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--perk) 40%, transparent);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease-out;
+}
+
+.nitro-perk.flipped .nitro-perk-back {
+  opacity: 1;
+}
+
+@media (max-width: 1280px) {
+  .nitro-perks {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 980px) {
   .nitro-perks {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* the tenure ladder */
+.nitro-tenure {
+  position: relative;
+  margin-top: 18px;
+  padding: 22px 18px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.nitro-tenure-rail {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  top: 40px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.nitro-tenure-rail i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #b473f5, #47cbe2);
+}
+
+.nitro-tenure ol {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  list-style: none;
+}
+
+.nitro-tenure li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.nitro-tenure-node {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #15142c;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.nitro-tenure li.on {
+  color: #fff;
+}
+
+.nitro-tenure li.on .nitro-tenure-node {
+  background: linear-gradient(160deg, #b473f5, #5865f2);
+  box-shadow: none;
+  color: #fff;
+}
+
+/* the footer and the floating CTA the client shows once you have scrolled */
+.nitro-footer-cta {
+  margin-top: 40px;
+  padding: 34px 24px 38px;
+  border-radius: 16px;
+  background:
+    radial-gradient(80% 140% at 50% 0%, rgba(180, 115, 245, 0.28), transparent 70%),
+    rgba(255, 255, 255, 0.05);
+  text-align: center;
+  color: #fff;
+}
+
+.nitro-footer-cta h2 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.nitro-footer-cta p {
+  margin: 6px 0 18px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.nitro-floating-cta {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 16px;
+  border-radius: 24px;
+  background: rgba(20, 18, 44, 0.92);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 13.5px;
+}
+
+.nitro-floating-cta svg {
+  color: #b473f5;
+}
+
+.nitro-floating-cta span {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.nitro-floating-cta button {
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 16px;
+  background: #fff;
+  color: #11121a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.nitro-floating-cta button:hover {
+  background: #e6e3f0;
 }
 
 .nitro-news {

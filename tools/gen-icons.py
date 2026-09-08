@@ -129,6 +129,17 @@ MAP = {
     'MoreVerticalIcon': 'MoreVerticalIcon',
     'CircleInformationIcon': 'CircleInformationIcon',
     'ArrowRightIcon': 'ArrowSmallRightIcon',
+    # the Nitro perk cards, one icon per perk the client's own card ids name
+    'FileUpIcon': 'FileUpIcon',
+    'SoundboardIcon': 'SoundboardIcon',
+    'WaveformIcon': 'WaveformIcon',
+    'PaintPaletteIcon': 'PaintPaletteIcon',
+    'BadgeIcon': 'BadgeIcon',
+    'BeakerIcon': 'BeakerIcon',
+    'CrownIcon': 'CrownIcon',
+    'ImageSparkleIcon': 'ImageSparkleIcon',
+    'TextStyleIcon': 'TextIcon',
+    'StarShootingIcon': 'StarShootingIcon',
 }
 
 ALIASES = {

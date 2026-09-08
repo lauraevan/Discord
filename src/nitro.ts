@@ -235,15 +235,220 @@ export const TIERS: Tier[] = [
   },
 ]
 
-/** The perk cards on the Nitro tab's home view. */
-export const PERKS: { title: string; body: string; art: string }[] = [
-  { title: 'Bigger Uploads', body: 'Share files up to 500MB, so your clips and screenshots go up whole.', art: 'upload' },
-  { title: 'Custom Emoji Anywhere', body: 'Use your favourite emoji and stickers in every server, and in DMs.', art: 'emoji' },
-  { title: 'HD Video & Streaming', body: 'Stream and screen share up to 4K at 60fps, and go live in higher quality.', art: 'video' },
-  { title: 'Custom Profile', body: 'Animated avatar, profile banner, avatar decorations and a per-server look.', art: 'profile' },
-  { title: '2 Server Boosts', body: 'Two boosts to give away, plus 30% off every extra boost you buy.', art: 'boost' },
-  { title: 'Longer Messages', body: 'Say it in one go — the character limit goes from 2,000 up to 4,000.', art: 'message' },
+/**
+ * The perk colours, out of the client's own colour table
+ * (`unsafe_rawColors.PREMIUM_PERK_*`). Every perk card is tinted with one.
+ */
+export const PERK_COLORS = {
+  blue: '#80a6ff',
+  blueAlt: '#9cb8ff',
+  darkBlue: '#4173da',
+  gold: '#faa61a',
+  green: '#86dcc5',
+  lightBlue: '#aec7ff',
+  orange: '#fc964b',
+  pink: '#ff80f4',
+  purple: '#d09aff',
+  yellow: '#fed648',
+} as const
+
+export type Perk = {
+  /** the client's own perk-card id */
+  id: string
+  title: string
+  body: string
+  /** the back of the card, which the client flips to */
+  detail: string
+  color: string
+  icon: string
+}
+
+/**
+ * The perk cards.
+ *
+ * The set and the ids are Discord's: the client registers exactly these card
+ * ids for the Nitro page — badge, clientThemes, customAppIcons, customSounds,
+ * displayNameStyles, earlyAccess, entranceSounds, hdVideo, largeUploads,
+ * moreEmojis, permadecos, profiles, serverBoosts, memberPricing,
+ * specialStickers, superReactions, tenureBadge, videoBackgrounds,
+ * orbMultiplier and nitroOrbsRewards. The numbers on them are the client's own
+ * limits (see PLANS and the limits table), and each is tinted with one of the
+ * PREMIUM_PERK colours above.
+ */
+export const PERKS: Perk[] = [
+  {
+    id: 'largeUploads',
+    title: 'Bigger uploads',
+    body: 'Send files up to 500MB.',
+    detail: 'Free accounts stop at 10MB, so a clip goes up as a link. Nitro sends the file.',
+    color: PERK_COLORS.orange,
+    icon: 'FileUpIcon',
+  },
+  {
+    id: 'moreEmojis',
+    title: 'Custom emoji anywhere',
+    body: 'Every emoji from every server, everywhere.',
+    detail: 'Use any custom emoji you can see in any server and in DMs, animated ones included.',
+    color: PERK_COLORS.purple,
+    icon: 'SmileyIcon',
+  },
+  {
+    id: 'hdVideo',
+    title: 'HD video streaming',
+    body: 'Stream and screen share up to 4K at 60fps.',
+    detail: 'Go live at a resolution people can actually read code in.',
+    color: PERK_COLORS.green,
+    icon: 'VideoIcon',
+  },
+  {
+    id: 'profiles',
+    title: 'Custom profiles',
+    body: 'Animated avatar, banner, and a look per server.',
+    detail: 'A profile theme, an About Me, and a different profile in every server you are in.',
+    color: PERK_COLORS.pink,
+    icon: 'UserIcon',
+  },
+  {
+    id: 'serverBoosts',
+    title: '2 Server Boosts',
+    body: 'Plus 30% off every extra boost.',
+    detail: 'Two boosts to give away each month, and the rest at $2.49 instead of $4.99.',
+    color: PERK_COLORS.purple,
+    icon: 'BoostIcon',
+  },
+  {
+    id: 'superReactions',
+    title: 'Unlimited Super Reactions',
+    body: 'React with a burst, as often as you like.',
+    detail: 'Free accounts get a handful a week. Nitro takes the cap off.',
+    color: PERK_COLORS.yellow,
+    icon: 'StarShootingIcon',
+  },
+  {
+    id: 'clientThemes',
+    title: 'App themes',
+    body: 'Paint the whole client.',
+    detail: 'Ten background gradients over Light or Dark — Twilight, Denim, Ocean, and the rest.',
+    color: PERK_COLORS.blue,
+    icon: 'PaintPaletteIcon',
+  },
+  {
+    id: 'customSounds',
+    title: 'Soundboard sounds',
+    body: 'Use any server\u2019s soundboard, in every server.',
+    detail: 'And upload your own for the servers you are in.',
+    color: PERK_COLORS.lightBlue,
+    icon: 'SoundboardIcon',
+  },
+  {
+    id: 'entranceSounds',
+    title: 'Entrance sounds',
+    body: 'Pick what plays when you join a voice channel.',
+    detail: 'One sound, yours, on every channel you drop into.',
+    color: PERK_COLORS.blueAlt,
+    icon: 'WaveformIcon',
+  },
+  {
+    id: 'videoBackgrounds',
+    title: 'Video backgrounds',
+    body: 'Custom backgrounds on camera.',
+    detail: 'Blur, an image, or one of Discord\u2019s own, without a second app running.',
+    color: PERK_COLORS.darkBlue,
+    icon: 'ImageSparkleIcon',
+  },
+  {
+    id: 'displayNameStyles',
+    title: 'Display name styles',
+    body: 'Give your name a gradient.',
+    detail: 'A styled display name that shows wherever your name does.',
+    color: PERK_COLORS.pink,
+    icon: 'TextStyleIcon',
+  },
+  {
+    id: 'customAppIcons',
+    title: 'Custom app icons',
+    body: 'Change the icon on your desktop.',
+    detail: 'Swap the Discord icon for one of the alternates, on desktop and mobile.',
+    color: PERK_COLORS.gold,
+    icon: 'AppsIcon',
+  },
+  {
+    id: 'specialStickers',
+    title: 'Custom stickers anywhere',
+    body: 'Every sticker, in every server.',
+    detail: 'Nitro carries 30 sticker slots and 150 emoji slots of your own.',
+    color: PERK_COLORS.purple,
+    icon: 'StickerIcon',
+  },
+  {
+    id: 'badge',
+    title: 'Nitro badge',
+    body: 'A badge on your profile.',
+    detail: 'It shows from the day you subscribe.',
+    color: PERK_COLORS.blue,
+    icon: 'BadgeIcon',
+  },
+  {
+    id: 'tenureBadge',
+    title: 'Tenure badge',
+    body: 'It levels up the longer you stay.',
+    detail: 'One month, three, six, a year, two, three, five, six — the badge changes at each.',
+    color: PERK_COLORS.gold,
+    icon: 'MedalIcon',
+  },
+  {
+    id: 'permadecos',
+    title: 'Keep your collectibles',
+    body: 'Decorations you buy stay yours.',
+    detail: 'Bought collectibles are permanent, and Nitro takes 15% off them in the Shop.',
+    color: PERK_COLORS.green,
+    icon: 'CrownIcon',
+  },
+  {
+    id: 'nitroOrbsRewards',
+    title: 'Bonus Orbs',
+    body: 'Orbs every month, to spend in the Shop.',
+    detail: 'They land with each renewal and never expire while the subscription runs.',
+    color: PERK_COLORS.purple,
+    icon: 'OrbsIcon',
+  },
+  {
+    id: 'orbMultiplier',
+    title: 'Quest Orb multiplier',
+    body: 'Every Quest pays more.',
+    detail: 'The multiplier applies the moment a Quest is claimed.',
+    color: PERK_COLORS.yellow,
+    icon: 'QuestsIcon',
+  },
+  {
+    id: 'earlyAccess',
+    title: 'Early access',
+    body: 'New features before everyone else.',
+    detail: 'Subscribers get features while they are still rolling out.',
+    color: PERK_COLORS.lightBlue,
+    icon: 'BeakerIcon',
+  },
+  {
+    id: 'memberPricing',
+    title: 'Member pricing',
+    body: 'Discounts made for subscribers.',
+    detail: 'Lower prices on collectibles, boosts and gifts while the subscription is active.',
+    color: PERK_COLORS.orange,
+    icon: 'TicketIcon',
+  },
 ]
+
+/**
+ * The tenure ladder.
+ *
+ * The client's badge levels are exactly these month counts
+ * (`PREMIUM_TENURE_{1,3,6,12,24,36,60,72}_MONTH`), and the badge changes at
+ * each one.
+ */
+export const TENURE_MONTHS = [1, 3, 6, 12, 24, 36, 60, 72]
+
+export const tenureLabel = (m: number) =>
+  m < 12 ? `${m} mo` : m === 12 ? '1 yr' : `${m / 12} yrs`
 
 /**
  * The Compare tab's table. `null` means the tier does not get the row at all;

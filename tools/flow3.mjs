@@ -143,25 +143,34 @@ await step('Create My Own gives the two channels a new server gets', async () =>
 
 /* ------------------------------------------------------------------- nitro */
 
-await step('the Nitro tab opens on its five tabs', async () => {
+await step('the Nitro tab is one marketing surface, section by section', async () => {
   await p.click('.server-tile.home')
   await p.waitForTimeout(250)
   await p.click('.dm-nav .row:has-text("Nitro")')
   await p.waitForTimeout(300)
-  const tabs = await p.locator('.nitro-tab').allInnerTexts()
-  expect(
-    tabs.join('|') === "Home|What's New|Best of Nitro|Plans|Compare",
-    'wrong tabs: ' + tabs.join('|'),
-  )
+  // the client routes Nitro as a single page and instruments it by section,
+  // so every section is on the one surface rather than behind a tab
+  for (const sel of [
+    '.nitro-banner',
+    '.nitro-hero',
+    '.nitro-status',
+    '.nitro-perks',
+    '.nitro-tenure',
+    '.nitro-plans',
+    '.nitro-compare',
+    '.nitro-redeem',
+    '.nitro-footer-cta',
+  ])
+    expect((await p.locator(sel).count()) === 1, 'missing section ' + sel)
+  expect((await p.locator('.nitro-perk').count()) === 8, 'the perk shelf should start at eight')
+  await p.click('.nitro-seeall')
+  await p.waitForTimeout(200)
+  expect((await p.locator('.nitro-perk').count()) === 20, 'See all perks did not open the rest')
 })
 
 await step('subscribing grants the perks it says it does', async () => {
-  await p.click('.nitro-tab:has-text("Plans")')
-  await p.waitForTimeout(250)
   await p.click('.nitro-plan.nitro .nitro-plan-btn')
   await p.waitForTimeout(350)
-  await p.click('.nitro-tab:has-text("Home")')
-  await p.waitForTimeout(300)
   const cards = await p.locator('.nitro-status-card').allInnerTexts()
   expect(cards.join(' ').includes('500MB'), 'upload perk not applied: ' + cards)
   expect(cards.join(' ').includes('2'), 'boosts not applied')

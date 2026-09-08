@@ -41,9 +41,14 @@ channel; a template adds its own categories on top.
 
 The eleven plans Discord bills, with their `premium_type` numbers, billing
 intervals and SKU ids; the `PremiumFeatures` flags the client gates perks on;
-the brand hexes from its colour table. Five tabs (Home, What's New, Best of
-Nitro, Plans, Compare), the heart and Gift Nitro buttons, and the Send a Gift
-dialog with both tiers, the Orbs promotion and the Patron Badge strip.
+the brand hexes from its colour table. The tab is one long marketing surface
+rather than a set of tabs, because that is how the client routes it
+(`NITRO_HOME: "/store"`) and how it instruments it — page banner, hero CTA,
+Orbs section, perk cards that flip, tenure rewards, tier cards, comparison
+table, gift section, footer CTA and a floating CTA once you scroll. The twenty
+perk cards are the client's own card ids, each tinted with one of its
+`PREMIUM_PERK_*` colours, and the tenure ladder is its own badge levels
+(1, 3, 6, 12, 24, 36, 60, 72 months).
 
 Subscribing is not cosmetic. It grants the Nitro badge, moves the composer's
 character counter from 2,000 to 4,000 and its upload cap from 10MB to 500MB, and
@@ -178,7 +183,7 @@ Nothing is cropped out of a screenshot.
   nothing, the quiet Active Now panel, the Shop with no game shops, and the
   crash panel. Animated sources are reduced to the frame that reads as a
   portrait rather than to frame one, which on a zooming animation is an ear.
-- **Still drawn here** — the Nitro perk scenes and the quest key art, and the
+- **Still drawn here** — the Nitro hero's starfield and ringed planet, the quest key art, and the
   profile effects in the Shop (which show their collection's own confetti
   colours rather than a drawing pretending to be the effect). Discord's versions
   of those are only on `cdn.discordapp.com`, which this environment's egress

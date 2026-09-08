@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  BOOST_DISCOUNT,
-  BOOST_PRICE,
   COMPARISON,
   GIFT_HOST,
   GIFT_LENGTHS,
@@ -9,8 +7,10 @@ import {
   PERKS,
   PLANS,
   PremiumType,
+  TENURE_MONTHS,
   TIERS,
   WHATS_NEW,
+  tenureLabel,
   currentType,
   giftCode,
   giftLength,
@@ -21,19 +21,22 @@ import {
   type Subscription,
   type Tier,
 } from '../nitro'
+import * as Icons from '../ui/Icons'
 import {
   BoostIcon,
   CheckSmallIcon,
+  ChevronDownIcon,
   CloseIcon,
   CopyIcon,
   GiftIcon,
   HeartIcon,
   HeartOutlineIcon,
+  MedalIcon,
   NitroIcon,
   OrbsIcon,
   SparkleIcon,
 } from '../ui/Icons'
-import { NitroHeroArt, NitroWordmark, PerkArt } from '../ui/NitroArt'
+import { NitroHeroArt, NitroWordmark } from '../ui/NitroArt'
 
 /**
  * The Nitro tab.
@@ -46,8 +49,14 @@ import { NitroHeroArt, NitroWordmark, PerkArt } from '../ui/NitroArt'
  * the rest of the app gates its perks on.
  */
 
-const TABS = ['Home', "What's New", 'Best of Nitro', 'Plans', 'Compare'] as const
-type Tab = (typeof TABS)[number]
+/**
+ * The Nitro tab is one long marketing surface, not a set of tabs: the client
+ * routes it as a single page (`NITRO_HOME: "/store"`) and instruments it
+ * section by section — page banner, hero CTA, the Orbs section, perk cards
+ * that flip, the tenure rewards, tier cards, the comparison table, the gift
+ * section, a footer CTA and a floating CTA once you have scrolled. Those are
+ * the sections below, in that order.
+ */
 
 export function NitroPage({
   subscription,
@@ -66,25 +75,21 @@ export function NitroPage({
   onGift: (g: Gift) => void
   onRedeem: (code: string) => void
 }) {
-  const [tab, setTab] = useState<Tab>('Home')
   const [gifting, setGifting] = useState(false)
   const [wishlisted, setWishlisted] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const type = currentType(subscription)
+  const active = isActive(subscription)
+  const body = useRef<HTMLDivElement>(null)
+  const plans = useRef<HTMLDivElement>(null)
+
+  const toPlans = () => plans.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
     <main className="chat nitro">
       <header className="nitro-header">
-        <nav className="nitro-tabs">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              className={'nitro-tab' + (t === tab ? ' on' : '')}
-              onClick={() => setTab(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </nav>
+        <NitroIcon size={22} className="nitro-mark" />
+        <h2 className="nitro-title">Nitro</h2>
         <div className="nitro-header-actions">
           <button
             className={'nitro-heart' + (wishlisted ? ' on' : '')}
@@ -101,27 +106,73 @@ export function NitroPage({
         </div>
       </header>
 
-      <div className="nitro-body">
-        {tab === 'Home' ? (
-          <NitroHome
-            type={type}
-            subscription={subscription}
-            orbs={orbs}
-            onSubscribe={() => setTab('Plans')}
-            onCancel={onCancel}
-          />
-        ) : tab === "What's New" ? (
-          <WhatsNew />
-        ) : tab === 'Best of Nitro' ? (
-          <BestOfNitro />
-        ) : tab === 'Plans' ? (
-          <Plans subscription={subscription} onSubscribe={onSubscribe} onCancel={onCancel} />
-        ) : (
-          <Compare />
+      <div
+        className="nitro-body"
+        ref={body}
+        onScroll={(e) => {
+          const el = e.currentTarget
+          // the floating CTA rides in once the hero is gone and drops out
+          // again over the footer's own CTA, so the two never stack
+          const nearFoot = el.scrollTop + el.clientHeight > el.scrollHeight - 300
+          setScrolled(el.scrollTop > 420 && !nearFoot)
+        }}
+      >
+        {active ? null : (
+          <section className="nitro-banner">
+            <SparkleIcon size={18} />
+            <b>Subscribe &amp; get a bonus bundle</b>
+            <span>
+              {GIFT_PROMO.orbs.toLocaleString()} Orbs land with your first month, to spend in the
+              Shop.
+            </span>
+            <button className="nitro-banner-cta" onClick={toPlans}>
+              Subscribe
+            </button>
+          </section>
         )}
 
+        <NitroHero
+          type={type}
+          subscription={subscription}
+          onSubscribe={toPlans}
+          onCancel={onCancel}
+        />
+
+        <OrbsSection type={type} orbs={orbs} active={active} />
+
+        <Perks />
+
+        <Tenure subscription={subscription} />
+
+        <WhatsNew />
+
+        <div ref={plans}>
+          <Plans subscription={subscription} onSubscribe={onSubscribe} onCancel={onCancel} />
+        </div>
+
+        <Compare />
+
         <GiftInventory gifts={gifts} onRedeem={onRedeem} />
+
+        {active ? null : (
+          <section className="nitro-footer-cta">
+            <h2>Get more out of every server</h2>
+            <p>Cancel any time. The perks apply the moment you subscribe.</p>
+            <button className="nitro-cta" onClick={toPlans}>
+              Subscribe — {money(TIERS[0].monthly)}/month
+            </button>
+          </section>
+        )}
       </div>
+
+      {!active && scrolled ? (
+        <div className="nitro-floating-cta">
+          <NitroIcon size={18} />
+          <b>Nitro</b>
+          <span>{money(TIERS[0].monthly)}/month</span>
+          <button onClick={toPlans}>Subscribe</button>
+        </div>
+      ) : null}
 
       {gifting ? (
         <SendGiftModal
@@ -136,28 +187,27 @@ export function NitroPage({
   )
 }
 
-function NitroHome({
+/** The hero, with the page's one primary CTA. */
+function NitroHero({
   type,
   subscription,
-  orbs,
   onSubscribe,
   onCancel,
 }: {
   type: number
   subscription: Subscription | null
-  orbs: number
   onSubscribe: () => void
   onCancel: () => void
 }) {
   const active = isActive(subscription)
   return (
-    <>
-      <section className="nitro-hero">
-        <NitroHeroArt />
-        <div className="nitro-hero-body">
+    <section className="nitro-hero">
+      <NitroHeroArt />
+      <div className="nitro-hero-body">
         <NitroWordmark />
         <p>
-          Show off a new look, upload bigger files, and get more out of every server you are in.
+          Bigger uploads, custom emoji everywhere, a profile that looks like you — and Orbs to
+          spend in the Shop.
         </p>
         {active ? (
           <div className="nitro-hero-active">
@@ -175,52 +225,137 @@ function NitroHome({
             </button>
           </div>
         ) : (
-          <button className="nitro-cta" onClick={onSubscribe}>
-            Subscribe — {money(TIERS[0].monthly)}/month
-          </button>
+          <div className="nitro-hero-actions">
+            <button className="nitro-cta" onClick={onSubscribe}>
+              Subscribe — {money(TIERS[0].monthly)}/month
+            </button>
+            <button className="nitro-cta ghost" onClick={onSubscribe}>
+              Compare plans
+            </button>
+          </div>
         )}
-        </div>
-      </section>
+      </div>
+    </section>
+  )
+}
 
-      {active ? (
-        <section className="nitro-status">
-          <div className="nitro-status-card">
-            <OrbsIcon size={24} />
-            <b>{orbs.toLocaleString()}</b>
-            <span>Orbs</span>
-          </div>
-          <div className="nitro-status-card">
-            <BoostIcon size={24} />
-            <b>{type === PremiumType.TIER_2 ? 2 : 0}</b>
-            <span>Server Boosts included</span>
-          </div>
-          <div className="nitro-status-card">
-            <SparkleIcon size={24} />
-            <b>{uploadLimitMb(type as 0 | 1 | 2 | 3)}MB</b>
-            <span>Upload limit</span>
-          </div>
-        </section>
-      ) : null}
+/** The Orbs section, and what the subscription is currently worth. */
+function OrbsSection({ type, orbs, active }: { type: number; orbs: number; active: boolean }) {
+  return (
+    <section className="nitro-status">
+      <div className="nitro-status-card">
+        <OrbsIcon size={22} />
+        <b>{orbs.toLocaleString()}</b>
+        <span>Orbs</span>
+      </div>
+      <div className="nitro-status-card">
+        <BoostIcon size={22} />
+        <b>{type === PremiumType.TIER_2 ? 2 : 0}</b>
+        <span>Server Boosts included</span>
+      </div>
+      <div className="nitro-status-card">
+        <SparkleIcon size={22} />
+        <b>{uploadLimitMb(type as 0 | 1 | 2 | 3)}MB</b>
+        <span>Upload limit</span>
+      </div>
+      <div className="nitro-status-card">
+        <NitroIcon size={22} />
+        <b>{active ? 'Active' : 'None'}</b>
+        <span>Subscription</span>
+      </div>
+    </section>
+  )
+}
 
-      <h2 className="nitro-h2">Everything you get</h2>
-      <section className="nitro-perks">
-        {PERKS.map((p) => (
-          <article key={p.title} className="nitro-perk">
-            <PerkArt kind={p.art} />
-            <h3>{p.title}</h3>
-            <p>{p.body}</p>
-          </article>
-        ))}
-      </section>
-    </>
+/**
+ * The perk cards.
+ *
+ * They flip — the client tracks a `premium_marketing_perk_card_flipped` event
+ * — and the page shows a first row until "See all perks" opens the rest.
+ */
+function Perks() {
+  const [flipped, setFlipped] = useState<string | null>(null)
+  const [all, setAll] = useState(false)
+  const shown = all ? PERKS : PERKS.slice(0, 8)
+  return (
+    <section className="nitro-section">
+      <div className="nitro-section-head">
+        <h2 className="nitro-h2">Everything you get</h2>
+        <button className="nitro-seeall" onClick={() => setAll((v) => !v)}>
+          {all ? 'Show less' : 'See all perks'}
+          <ChevronDownIcon size={16} className={all ? 'up' : undefined} />
+        </button>
+      </div>
+      <div className="nitro-perks">
+        {shown.map((perk) => {
+          const Icon = (Icons as Record<string, typeof NitroIcon>)[perk.icon] ?? SparkleIcon
+          const on = flipped === perk.id
+          return (
+            <button
+              key={perk.id}
+              className={'nitro-perk' + (on ? ' flipped' : '')}
+              style={{ ['--perk' as string]: perk.color }}
+              onClick={() => setFlipped(on ? null : perk.id)}
+            >
+              <span className="nitro-perk-face">
+                <span className="nitro-perk-icon">
+                  <Icon size={20} />
+                </span>
+                <b>{perk.title}</b>
+                <span>{perk.body}</span>
+              </span>
+              <span className="nitro-perk-back">{perk.detail}</span>
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+/** The tenure ladder: the badge levels the client actually carries. */
+function Tenure({ subscription }: { subscription: Subscription | null }) {
+  const months = isActive(subscription)
+    ? Math.max(
+        1,
+        Math.round(
+          (Date.now() - (subscription!.until - (subscription!.interval === 2 ? 365 : 30) * 864e5)) /
+            (30 * 864e5),
+        ),
+      )
+    : 0
+  const reached = TENURE_MONTHS.filter((m) => m <= months).length
+  const pct = Math.min(100, (reached / TENURE_MONTHS.length) * 100)
+  return (
+    <section className="nitro-section">
+      <h2 className="nitro-h2">Tenure rewards</h2>
+      <p className="nitro-lede">
+        The badge on your profile levels up the longer the subscription runs.
+      </p>
+      <div className="nitro-tenure">
+        <span className="nitro-tenure-rail">
+          <i style={{ width: `${pct}%` }} />
+        </span>
+        <ol>
+          {TENURE_MONTHS.map((m, i) => (
+            <li key={m} className={i < reached ? 'on' : ''}>
+              <span className="nitro-tenure-node">
+                <MedalIcon size={16} />
+              </span>
+              {tenureLabel(m)}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
   )
 }
 
 function WhatsNew() {
   return (
-    <>
-      <h2 className="nitro-h2">What’s new in Nitro</h2>
-      <section className="nitro-news">
+    <section className="nitro-section">
+      <h2 className="nitro-h2">What’s new</h2>
+      <div className="nitro-news">
         {WHATS_NEW.map((n) => (
           <article key={n.title} className="nitro-news-item">
             <span className={'nitro-news-tag' + (n.tag === 'New' ? ' new' : '')}>{n.tag}</span>
@@ -230,48 +365,8 @@ function WhatsNew() {
             </div>
           </article>
         ))}
-      </section>
-    </>
-  )
-}
-
-function BestOfNitro() {
-  return (
-    <>
-      <h2 className="nitro-h2">Best of Nitro</h2>
-      <p className="nitro-lede">
-        The perks people use most, and what they actually change day to day.
-      </p>
-      <section className="nitro-best">
-        <article className="nitro-best-card wide">
-          <h3>500MB uploads</h3>
-          <p>
-            Free accounts stop at {uploadLimitMb(PremiumType.NONE)}MB. Nitro takes it to{' '}
-            {uploadLimitMb(PremiumType.TIER_2)}MB, so a clip goes up as a file instead of a link.
-          </p>
-        </article>
-        <article className="nitro-best-card">
-          <h3>Two boosts, and 30% off the rest</h3>
-          <p>
-            A boost costs {money(BOOST_PRICE)} a month. Nitro includes two and takes{' '}
-            {Math.round(BOOST_DISCOUNT * 100)}% off every extra one —{' '}
-            {money(BOOST_PRICE * (1 - BOOST_DISCOUNT))} each.
-          </p>
-        </article>
-        <article className="nitro-best-card">
-          <h3>Emoji and stickers everywhere</h3>
-          <p>Every custom emoji from every server you are in, in any server and in DMs.</p>
-        </article>
-        <article className="nitro-best-card">
-          <h3>4,000 character messages</h3>
-          <p>Twice the limit, so a long post stays one message instead of three.</p>
-        </article>
-        <article className="nitro-best-card">
-          <h3>Bonus Orbs every month</h3>
-          <p>Plus a multiplier on every Quest you finish, to spend in the Shop.</p>
-        </article>
-      </section>
-    </>
+      </div>
+    </section>
   )
 }
 
