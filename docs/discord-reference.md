@@ -609,8 +609,19 @@ one really takes.
 | a count rolling | duration 220ms, clamped, linear | `translate3d(0, 107%, 0)`, opacity 0 | 220ms | — |
 | a toast | t120 f14 | `translateY(120%)`, opacity 0 | 633ms | 7.2% |
 | the success toast | t500 f18 clamped, delayed 200ms | `translateY(16px)`, opacity 0 | 97ms | — |
-| a settings section sliding | t300 f28 clamped | — | 247ms | — |
+| a stepped modal | t300 f28 clamped | slides `left/right: 100%`, opacity `1 - abs(v)`, **and the shell's own width and height on the same spring** | 247ms | — |
+| a form error dropping in | t250, friction defaulted to 26, clamped | `height: 0`, `marginTop: 0`, `translate3d(0, -100%, 0)`, opacity 0 → `marginTop: 8` | 282ms | — |
 | the animated scroller | t200 f35 **mass 2** clamped | — | 540ms | — |
+| react-spring's `stiff`, asked for by name | t210 f20 | — | 510ms | 4.9% |
+
+The typing indicator is worth recording even though this build has nobody to
+type: three dots on a triangle wave, `A(x) = x % 2 > 1 ? 2 - (x % 2) : x % 2`,
+driven by a `dotCycle` that advances **4 units every 2400ms** linearly — so one
+bounce per dot per 1200ms — with each dot offset 0.25 units (150ms) from the
+last. `A` maps `[0, .4, .8, 1]` to a `cy` of `[0.8r, 0.8r, r, r]` and an opacity
+of `[.3, .3, 1, 1]`, so a dot lifts by a fifth of its radius and dims to 0.3 at
+the top of its arc. Showing and hiding the whole group is a separate t900/f50
+spring that collapses the three dots into one.
 
 The scroller is the one that cannot be CSS: a scroll position has to be driven
 frame by frame, so `src/motion.ts` runs the same integrator in JS and

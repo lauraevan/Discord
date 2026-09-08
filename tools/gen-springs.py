@@ -53,6 +53,11 @@ SPRINGS: dict[str, tuple[float, float, float, bool, str]] = {
     # react-spring's own default, which is what Discord gets wherever it passes
     # no config at all — the notice bar sliding up from y:80, for one
     'default': (170, 26, 1, False, 'anything Discord leaves on the default'),
+    # a field's error message dropping in from above it. Discord names only the
+    # tension here, so friction falls back to react-spring's own 26.
+    'error': (250, 26, 1, True, 'a form error dropping in'),
+    # react-spring's `stiff` preset, which the client asks for by name
+    'stiff': (210, 20, 1, False, "react-spring's stiff preset"),
 }
 
 STEP = 1.0  # ms, react-spring's own substep

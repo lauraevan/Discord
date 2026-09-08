@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { initialsOf, serverColors, uid, type Category, type Channel } from '../data'
 import { ChevronRightIcon, CloseIcon, GlobeEarthIcon, MembersIcon } from '../ui/Icons'
+import { Slide, Slides } from '../ui/Slides'
 
 /**
  * Create a server — Discord's own three steps.
@@ -134,139 +135,141 @@ export function CreateServerFlow({
           <CloseIcon />
         </button>
 
-        {step === 'template' ? (
-          <>
-            <div className="cs-head">
-              <h2>Create a server</h2>
-              <p>
-                Your server is where you and your friends hang out. Make yours and start talking.
-              </p>
-            </div>
-            <div className="cs-body">
-              <button className="cs-own" onClick={() => pick(null)}>
-                <span className="cs-own-art" aria-hidden>
-                  ✨
-                </span>
-                <span className="cs-own-name">Create My Own</span>
-                <ChevronRightIcon />
-              </button>
-              <h3 className="cs-section">Start from a template</h3>
-              <div className="cs-templates">
-                {TEMPLATES.map((t) => (
-                  <button key={t.id} className="cs-template" onClick={() => pick(t)}>
-                    <span className="cs-template-art" aria-hidden>
-                      {t.emoji}
-                    </span>
-                    <span className="cs-template-name">{t.name}</span>
-                    <ChevronRightIcon />
-                  </button>
-                ))}
+        {/* Discord's stepped modal: the shell resizes while the steps slide
+            past each other, forwards or back depending on which way the
+            index moved */}
+        <Slides active={step}>
+          <Slide id="template">
+              <div className="cs-head">
+                <h2>Create a server</h2>
+                <p>
+                  Your server is where you and your friends hang out. Make yours and start talking.
+                </p>
               </div>
-            </div>
-            <div className="cs-foot cs-foot-center">
-              <span>Have an invite already?</span>
-              <button className="btn-secondary" onClick={() => setStep('join')}>
-                Join a Server
-              </button>
-            </div>
-          </>
-        ) : step === 'intent' ? (
-          <>
-            <div className="cs-head">
-              <h2>Tell us more about your server</h2>
-              <p>
-                In order to help you with your setup, is your new server for just a few friends or
-                a larger community?
-              </p>
-            </div>
-            <div className="cs-body">
-              <button
-                className="cs-intent"
-                onClick={() => {
-                  setIntent('friends')
-                  setStep('customize')
-                }}
-              >
-                <MembersIcon />
-                <span>For me and my friends</span>
-                <ChevronRightIcon />
-              </button>
-              <button
-                className="cs-intent"
-                onClick={() => {
-                  setIntent('community')
-                  setStep('customize')
-                }}
-              >
-                <GlobeEarthIcon />
-                <span>For a club or community</span>
-                <ChevronRightIcon />
-              </button>
-              <p className="cs-skip">
-                Not sure? You can{' '}
-                <button className="cs-inline-link" onClick={() => setStep('customize')}>
-                  skip this question
-                </button>{' '}
-                for now.
-              </p>
-            </div>
-            <div className="cs-foot">
-              <button className="btn-ghost" onClick={() => setStep('template')}>
-                Back
-              </button>
-            </div>
-          </>
-        ) : step === 'join' ? (
-          <>
-            <div className="cs-head">
-              <h2>Join a Server</h2>
-              <p>Enter an invite below to join an existing server</p>
-            </div>
-            <div className="cs-body">
-              <label className="field-label" htmlFor="cs-invite">
-                Invite link
-              </label>
-              <input
-                id="cs-invite"
-                className="field"
-                autoFocus
-                value={invite}
-                placeholder="https://discord.gg/hTKzmak"
-                onChange={(e) => setInvite(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && invite.trim() && onJoin(invite.trim())}
-              />
-              <div className="cs-invite-hint">
-                <b>Invites should look like</b>
-                <span>hTKzmak</span>
-                <span>https://discord.gg/hTKzmak</span>
-                <span>https://discord.gg/cool-people</span>
+              <div className="cs-body">
+                <button className="cs-own" onClick={() => pick(null)}>
+                  <span className="cs-own-art" aria-hidden>
+                    ✨
+                  </span>
+                  <span className="cs-own-name">Create My Own</span>
+                  <ChevronRightIcon />
+                </button>
+                <h3 className="cs-section">Start from a template</h3>
+                <div className="cs-templates">
+                  {TEMPLATES.map((t) => (
+                    <button key={t.id} className="cs-template" onClick={() => pick(t)}>
+                      <span className="cs-template-art" aria-hidden>
+                        {t.emoji}
+                      </span>
+                      <span className="cs-template-name">{t.name}</span>
+                      <ChevronRightIcon />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="cs-foot">
-              <button className="btn-ghost" onClick={() => setStep('template')}>
-                Back
-              </button>
-              <button
-                className="btn-primary"
-                disabled={!invite.trim()}
-                onClick={() => onJoin(invite.trim())}
-              >
-                Join Server
-              </button>
-            </div>
-          </>
-        ) : (
-          <Customize
-            name={name}
-            color={color}
-            icon={icon}
-            onName={setName}
-            onColor={setColor}
-            onIcon={setIcon}
-            onBack={() => setStep(template || intent ? 'intent' : 'template')}
-            onCreate={() => onCreate({ name: name.trim(), color, icon, template, intent })}
-          />
-        )}
+              <div className="cs-foot cs-foot-center">
+                <span>Have an invite already?</span>
+                <button className="btn-secondary" onClick={() => setStep('join')}>
+                  Join a Server
+                </button>
+              </div>
+          </Slide>
+          <Slide id="intent">
+              <div className="cs-head">
+                <h2>Tell us more about your server</h2>
+                <p>
+                  In order to help you with your setup, is your new server for just a few friends or
+                  a larger community?
+                </p>
+              </div>
+              <div className="cs-body">
+                <button
+                  className="cs-intent"
+                  onClick={() => {
+                    setIntent('friends')
+                    setStep('customize')
+                  }}
+                >
+                  <MembersIcon />
+                  <span>For me and my friends</span>
+                  <ChevronRightIcon />
+                </button>
+                <button
+                  className="cs-intent"
+                  onClick={() => {
+                    setIntent('community')
+                    setStep('customize')
+                  }}
+                >
+                  <GlobeEarthIcon />
+                  <span>For a club or community</span>
+                  <ChevronRightIcon />
+                </button>
+                <p className="cs-skip">
+                  Not sure? You can{' '}
+                  <button className="cs-inline-link" onClick={() => setStep('customize')}>
+                    skip this question
+                  </button>{' '}
+                  for now.
+                </p>
+              </div>
+              <div className="cs-foot">
+                <button className="btn-ghost" onClick={() => setStep('template')}>
+                  Back
+                </button>
+              </div>
+          </Slide>
+          <Slide id="customize">
+            <Customize
+              name={name}
+              color={color}
+              icon={icon}
+              onName={setName}
+              onColor={setColor}
+              onIcon={setIcon}
+              onBack={() => setStep(template || intent ? 'intent' : 'template')}
+              onCreate={() => onCreate({ name: name.trim(), color, icon, template, intent })}
+            />
+          </Slide>
+          <Slide id="join">
+              <div className="cs-head">
+                <h2>Join a Server</h2>
+                <p>Enter an invite below to join an existing server</p>
+              </div>
+              <div className="cs-body">
+                <label className="field-label" htmlFor="cs-invite">
+                  Invite link
+                </label>
+                <input
+                  id="cs-invite"
+                  className="field"
+                  autoFocus
+                  value={invite}
+                  placeholder="https://discord.gg/hTKzmak"
+                  onChange={(e) => setInvite(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && invite.trim() && onJoin(invite.trim())}
+                />
+                <div className="cs-invite-hint">
+                  <b>Invites should look like</b>
+                  <span>hTKzmak</span>
+                  <span>https://discord.gg/hTKzmak</span>
+                  <span>https://discord.gg/cool-people</span>
+                </div>
+              </div>
+              <div className="cs-foot">
+                <button className="btn-ghost" onClick={() => setStep('template')}>
+                  Back
+                </button>
+                <button
+                  className="btn-primary"
+                  disabled={!invite.trim()}
+                  onClick={() => onJoin(invite.trim())}
+                >
+                  Join Server
+                </button>
+              </div>
+          </Slide>
+        </Slides>
       </div>
     </div>
   )

@@ -9408,6 +9408,91 @@ body.reduced-motion img.decoration.still {
   }
 }
 
+/* A form error, and anything else Discord drops in over what it belongs to:
+   from height 0 and translate3d(0, -100%, 0) on a clamped 250-tension spring,
+   with the 8px gap opening as it lands. */
+.composer-toobig {
+  animation: error-in var(--dur-error) var(--ease-error);
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    translate: 0 -100%;
+  }
+}
+
+/* Discord's stepped modal: the shell resizes while the steps slide past each
+   other, all on the one t300/f28 spring. `left`/`right` at 100% is how the
+   client moves them — a transform would take the shell's clip with it. */
+.slides {
+  position: relative;
+  overflow: hidden;
+  transition: height var(--dur-panel) var(--ease-panel);
+}
+
+.slides[data-sliding] {
+  overflow: hidden;
+}
+
+.slide {
+  display: flex;
+  flex-direction: column;
+}
+
+.slides[data-sliding] .slide {
+  position: absolute;
+  inset: 0 0 auto 0;
+}
+
+.slides[data-sliding] .slide.live {
+  animation: slide-in var(--dur-panel) var(--ease-panel);
+}
+
+.slides[data-sliding] .slide.live.back {
+  animation-name: slide-in-back;
+}
+
+.slides[data-sliding] .slide.leaving {
+  animation: slide-out var(--dur-panel) var(--ease-panel) forwards;
+}
+
+.slides[data-sliding] .slide.leaving.back {
+  animation-name: slide-out-back;
+}
+
+@keyframes slide-in {
+  from {
+    left: 100%;
+    right: -100%;
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in-back {
+  from {
+    left: -100%;
+    right: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out {
+  to {
+    left: -100%;
+    right: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-back {
+  to {
+    left: 100%;
+    right: -100%;
+    opacity: 0;
+  }
+}
+
 /* A count that changes rolls up into place. This is the one transition Discord
    gives a duration rather than a spring: 220ms, clamped. */
 .roll {

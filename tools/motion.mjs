@@ -128,6 +128,41 @@ const re = await sample(
 // the middle leg of Discord's three-spring sequence overshoots to 1.1
 bad += check('reaction', re, { peak: 1.1 }, { peak: 0.005 })
 
+// the stepped modal: the shell resizes on the panel spring while the steps
+// slide, so the height should ease over ~250ms rather than snap
+await p.click('[aria-label="Add a Server"]')
+await p.waitForSelector('.slides')
+await p.waitForTimeout(400)
+const steps = await p.evaluate(async () => {
+  const el = document.querySelector('.slides')
+  const from = Math.round(el.getBoundingClientRect().height)
+  document.querySelector('.cs-template').click()
+  const out = []
+  const t0 = performance.now()
+  while (performance.now() - t0 < 420) {
+    out.push([
+      Math.round(performance.now() - t0),
+      Math.round(el.getBoundingClientRect().height),
+      el.hasAttribute('data-sliding'),
+    ])
+    await new Promise((r) => requestAnimationFrame(r))
+  }
+  return { from, out }
+})
+const to = steps.out[steps.out.length - 1][1]
+const moving = steps.out.filter(([, h]) => Math.abs(h - to) > 2)
+const took = moving.length ? moving[moving.length - 1][0] : 0
+const slid = steps.out.some(([, , s]) => s)
+console.log(`slides     ${steps.from}px -> ${to}px over ${took}ms  sliding ${slid}`)
+if (!slid) {
+  console.log('  ^ slides: the step never got the sliding state')
+  bad += 1
+}
+if (took < 150 || took > 400) {
+  console.log(`  ^ slides: expected the shell to resize over ~250ms (took ${took}ms)`)
+  bad += 1
+}
+
 console.log(bad ? `\n${bad} off` : '\nall springs match the bundle')
 await b.close()
 process.exit(bad ? 1 : 0)
