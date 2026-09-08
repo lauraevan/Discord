@@ -9056,3 +9056,128 @@ body.reduced-motion img.decoration.still {
   position: relative;
   overflow: hidden;
 }
+
+/* --- quest key art -------------------------------------------------------- */
+
+/* the card is the reward, worn: the collectible a quest pays out, animating on
+   an avatar, or the Orbs mark for a quest that pays Orbs */
+.quest-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.quest-art-mark {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  margin-top: -12px;
+  color: rgba(255, 255, 255, 0.92);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+}
+
+.quest-art-mark b {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.quest-art-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+}
+
+.quest-art-avatar i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.quest-art-avatar img {
+  position: relative;
+  z-index: 1;
+}
+
+.quest-art-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  text-align: center;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.quest-art.wide .quest-art-title {
+  bottom: 16px;
+  font-size: 20px;
+}
+
+/* the Orbs shelf on Quest Home: what the Orbs a quest paid can buy */
+.orb-shelf .quests-shelf-title span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ca9ef9;
+  background: rgba(180, 115, 245, 0.16);
+}
+
+.orb-shelf-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.orb-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 10px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid transparent;
+}
+
+.orb-item.on {
+  border-color: #ca9ef9;
+}
+
+.orb-item-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 8px;
+}
+
+.orb-item-art > .art {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.orb-item b {
+  font-size: 13.5px;
+  color: var(--strong);
+  text-align: center;
+}
+
+.orb-item-collection {
+  font-size: 11px;
+  color: var(--muted);
+}

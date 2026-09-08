@@ -254,7 +254,8 @@ export const QUESTS: Quest[] = [
     'q-sketch-heads', '902271654783242291', 'Sketch Heads',
     'Draw and guess for 15 minutes',
     [{ type: TaskType.PLAY_ACTIVITY, target: 900 }],
-    [orbs(1000)], ['#ffb02e', '#5a3200'], 9,
+    [orbs(1000), decoration('1228234634379132958', 'Doodling avatar decoration', 14)],
+    ['#ffb02e', '#5a3200'], 9,
   ),
   activity(
     'q-chess', '832012774040141894', 'Chess In The Park',
@@ -266,7 +267,9 @@ export const QUESTS: Quest[] = [
       { type: TaskType.PLAY_ON_XBOX, target: 600 },
       { type: TaskType.PLAY_ON_PLAYSTATION, target: 600 },
     ],
-    [orbs(750), decoration('1194369811957661706', 'Chess Piece avatar decoration', 14)],
+    // the reward is a collectible this app actually holds the art for, so the
+    // card can wear it: Chuck, from Discord's Monsters collection
+    [orbs(750), decoration('1194369811957661706', 'Chuck avatar decoration', 14)],
     ['#8fbc6f', '#22331a'], 20,
   ),
   activity(
@@ -343,6 +346,21 @@ export const tasksOf = (q: Quest): QuestTask[] =>
   TASK_ORDER.map((t) => q.config.taskConfigV2.tasks[t]).filter(
     (t): t is QuestTask => t != null,
   )
+
+/**
+ * The collectible a quest pays out, by its id in the decoration set — which is
+ * what the card wears, since the decoration is real artwork and the game's key
+ * art is not reachable from here.
+ */
+export function collectibleReward(q: Quest): string | undefined {
+  const reward = q.config.rewardsConfig.rewards.find((r) => r.type === RewardType.COLLECTIBLE)
+  if (reward == null) return undefined
+  return reward.name
+    .toLowerCase()
+    .replace(/ avatar decoration$/, '')
+    .replace(/'/g, '')
+    .replace(/\s+/g, '-')
+}
 
 export const isVideoQuest = (q: Quest) =>
   q.config.contentType === QuestContentType.VIDEO

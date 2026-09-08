@@ -18,12 +18,16 @@ import {
   questState,
   sortQuests,
   taskLabel,
+  collectibleReward,
   taskOf,
   timeLeft,
   type Quest,
   type QuestUserStatus,
   type SortOrderValue,
 } from '../quests'
+import type { Account } from '../data'
+import { DECORATIONS, Decoration } from '../ui/Decorations'
+import { DefaultAvatar } from '../ui/Art'
 import { QuestKeyArt } from '../ui/QuestArt'
 import orbsHero from '../assets/quests/orbs-hero.jpg'
 import {
@@ -62,6 +66,10 @@ export function QuestsPage({
   status,
   orbs,
   multiplier,
+  account,
+  owned,
+  onBuy,
+  onEquip,
   onEnroll,
   onBeat,
   onClaim,
@@ -69,6 +77,11 @@ export function QuestsPage({
   status: Record<string, QuestUserStatus>
   orbs: number
   multiplier: boolean
+  account: Account
+  /** collectible ids already owned, for the Orbs shelf */
+  owned: string[]
+  onBuy: (id: string, price: number) => void
+  onEquip: (id: string) => void
   onEnroll: (q: Quest) => void
   onBeat: (questId: string, seconds: number, terminal?: boolean) => void
   onClaim: (q: Quest, orbs: number) => void
@@ -188,6 +201,15 @@ export function QuestsPage({
               <Shelf title="Ending soon" quests={endingSoon} onOpen={setOpenId} />
             ) : null}
 
+            <OrbShelf
+              account={account}
+              orbs={orbs}
+              owned={owned}
+              equipped={account.decoration}
+              onBuy={onBuy}
+              onEquip={onEquip}
+            />
+
             <div className="quests-bar">
               <h2>All Quests</h2>
               <div className="quests-controls">
@@ -257,6 +279,92 @@ export function QuestsPage({
 }
 
 /**
+ * The Orbs shelf — `QUEST_HOME_ORB_SECTION` in the client's own instrumentation,
+ * and the reason a quest pays anything: the Orbs it pays are spent here without
+ * leaving the tab. The collectibles, their names and their prices are Discord's
+ * catalogue, and the artwork is the real decoration, worn on your own avatar.
+ */
+function OrbShelf({
+  account,
+  orbs,
+  owned,
+  equipped,
+  onBuy,
+  onEquip,
+}: {
+  account: Account
+  orbs: number
+  owned: string[]
+  equipped?: string
+  onBuy: (id: string, price: number) => void
+  onEquip: (id: string) => void
+}) {
+  // the cheapest thing in each collection, so the shelf reads as a spread of
+  // the Shop rather than six of one set
+  const affordable = Object.values(
+    DECORATIONS.reduce<Record<string, (typeof DECORATIONS)[number]>>((best, d) => {
+      if (best[d.collection] == null || d.orbs < best[d.collection].orbs) best[d.collection] = d
+      return best
+    }, {}),
+  )
+    .sort((a, b) => a.orbs - b.orbs)
+    .slice(0, 6)
+  return (
+    <section className="quests-shelf orb-shelf">
+      <h2 className="quests-shelf-title">
+        Spend your Orbs
+        <span>
+          <OrbsIcon size={13} />
+          {orbs.toLocaleString()}
+        </span>
+      </h2>
+      <div className="orb-shelf-row">
+        {affordable.map((d) => {
+          const have = owned.includes(d.id)
+          const worn = equipped === d.id
+          return (
+            <article key={d.id} className={'orb-item' + (worn ? ' on' : '')}>
+              <span className="orb-item-art">
+                <DefaultAvatar color={account.color} />
+                <span className="avatar-decoration">
+                  <Decoration id={d.id} size={72} />
+                </span>
+              </span>
+              <b>{d.name}</b>
+              <span className="orb-item-collection">{d.collection}</span>
+              {have ? (
+                <button
+                  className={'shop-buy' + (worn ? ' equipped' : '')}
+                  onClick={() => onEquip(worn ? '' : d.id)}
+                >
+                  {worn ? (
+                    <>
+                      <CheckSmallIcon size={16} />
+                      Worn
+                    </>
+                  ) : (
+                    'Wear'
+                  )}
+                </button>
+              ) : (
+                <button
+                  className="shop-buy"
+                  disabled={orbs < d.orbs}
+                  onClick={() => onBuy(d.id, d.orbs)}
+                >
+                  <OrbsIcon size={14} />
+                  {d.orbs.toLocaleString()}
+                </button>
+              )}
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+/**
  * A shelf: one of Quest Home's sections, with its own row of cards. The client
  * files these separately — featured, in progress, ending soon, discovered,
  * expired — rather than showing one flat list.
@@ -302,6 +410,8 @@ function QuestPoster({
       id={quest.id}
       colors={quest.config.colors}
       title={quest.config.messages.gameTitle}
+      reward={collectibleReward(quest)}
+      orbs={orbValue(quest)}
       className={className}
       wide={wide}
     />

@@ -72,6 +72,16 @@ those are separate content locations in the client's instrumentation rather
 than one flat list. The quest object, the task types, the reward types, the
 feature flags and the sort orders are its own; see docs/discord-reference.md.
 
+Quest Home carries its Orbs shelf — `QUEST_HOME_ORB_SECTION` in the client's
+own instrumentation — so the Orbs a quest pays are spent without leaving the
+tab: the cheapest collectible in each collection, bought and worn there.
+
+Quest key art is the one piece of Discord artwork with no home on GitHub — it
+belongs to the games rather than to Discord and is served per quest from the
+CDN — so a card carries the real artwork a quest does have: the collectible it
+pays out, animating on your own avatar, or the Orbs mark and the number it
+pays. Nothing on a quest card is drawn.
+
 The heartbeat is the client's, to the constant: a beat a minute while a task
 runs, and when less than a minute is left the last beat is scheduled at exactly
 the remaining time plus a second, so a quest completes on a beat rather than up

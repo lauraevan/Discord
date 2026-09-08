@@ -873,6 +873,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               status={questStatus}
               orbs={orbs}
               multiplier={premiumType === PremiumType.TIER_2}
+              account={account}
+              owned={account.collectibles ?? []}
+              onBuy={(id, price) => {
+                setOrbs((n) => n - price)
+                setAccount((a) => ({ ...a, collectibles: [...(a.collectibles ?? []), id] }))
+              }}
+              onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
               onEnroll={enrollQuest}
               onBeat={beatQuest}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
