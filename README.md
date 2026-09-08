@@ -37,6 +37,21 @@ skippable), *Customize your server* (icon upload, name, guidelines line) — plu
 Join a Server. A new server gets exactly `#general` and a `General` voice
 channel; a template adds its own categories on top.
 
+### Quests
+
+Quest Home is built to the client's own section list — hero, in progress,
+ending soon, all quests, expired — with the search Discord gives it, because
+those are separate content locations in the client's instrumentation rather
+than one flat list. The quest object, the task types, the reward types, the
+feature flags and the sort orders are its own; see docs/discord-reference.md.
+
+The heartbeat is the client's, to the constant: a beat a minute while a task
+runs, and when less than a minute is left the last beat is scheduled at exactly
+the remaining time plus a second, so a quest completes on a beat rather than up
+to a minute after it. Stopping sends the terminal beat. A quest carries every
+platform variant Discord ships it with, and the one that runs is picked in the
+client's own order, with streaming last.
+
 ### Nitro
 
 The eleven plans Discord bills, with their `premium_type` numbers, billing
@@ -146,11 +161,14 @@ Nothing is cropped out of a screenshot.
   [jdecked/twemoji](https://github.com/jdecked/twemoji), bundled by
   `tools/gen-emoji.mjs` as a single `<symbol>` sprite (231KB) rather than 178
   data URIs (~960KB), since the same glyph repeats all over a channel.
-- **Badges** — twelve, each taken from whichever source scored closest against
+- **Badges** — fourteen. Twelve are each taken from whichever source scored closest against
   the reference at its own 14px: four are Discord's own PNGs mirrored in
   [Debuggingss/discord-badges](https://github.com/Debuggingss/discord-badges),
   eight are redraws from
-  [mezotv/discord-badges](https://github.com/mezotv/discord-badges).
+  [mezotv/discord-badges](https://github.com/mezotv/discord-badges). The Quest
+  and Orbs badges — the two the Quests tab hands out — come from
+  [Fmasterpro27/Discord-badges](https://github.com/Fmasterpro27/Discord-badges)
+  (MIT), which also carries Discord's Nitro tenure badges.
 - **Avatar decorations** — Discord's own, eight complete Shop collections
   (Anime, Cyberpunk, Elements, Fantasy, Monsters, Galaxy, Lofi Vibes, Lunar New
   Year), animated. They ship as 288x288 APNGs of 60-132 frames from a CDN this

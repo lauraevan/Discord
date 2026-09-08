@@ -10,7 +10,8 @@
  * +/-2px offset search. Six .png, six .svg, and the winner is noted on each.
  *
  * Order is Discord's own: staff, partner, HypeSquad, bug hunters, developer
- * programmes, then the paid ones last.
+ * programmes, then the paid ones last. The Quest and Orbs badges come from
+ * Fmasterpro27/Discord-badges (MIT), which carries the ones added since.
  */
 import staff from './assets/badges/discord-staff.png'
 import partner from './assets/badges/discord-partner.svg'
@@ -24,6 +25,8 @@ import mod from './assets/badges/discord-mod.svg'
 import activeDev from './assets/badges/active-developer.svg'
 import nitro from './assets/badges/discord-nitro.svg'
 import boost9 from './assets/badges/discord-boost-9.svg'
+import quest from './assets/badges/discord-quest.png'
+import orbs from './assets/badges/discord-orbs.svg'
 
 export type Badge = { id: string; label: string; src: string }
 
@@ -52,4 +55,8 @@ export const BADGES: Badge[] = [
   { id: 'nitro', label: 'Subscriber since 22 Mar 2017', src: nitro },
   // 10.6, redraw
   { id: 'boost', label: 'Server boosting since 12 Feb 2019', src: boost9 },
+  // the two the Quests tab hands out: the Quest badge for finishing one, and
+  // the Orbs badge Discord sells for 120 Orbs
+  { id: 'quest', label: 'Completed a Quest', src: quest },
+  { id: 'orbs', label: 'Orbs', src: orbs },
 ]

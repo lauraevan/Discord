@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   HEARTBEAT_INTERVAL_S,
+  nextBeatMs,
   ORB_MULTIPLIER,
   QUESTS,
   RewardType,
@@ -9,6 +10,7 @@ import {
   TASK_VERB,
   isClaimed,
   isComplete,
+  isExpired,
   isEnrolled,
   mmss,
   orbValue,
@@ -35,6 +37,7 @@ import {
   PauseIcon,
   PlayIcon,
   QuestsIcon,
+  SearchIcon,
   SparkleIcon,
   TrophyIcon,
 } from '../ui/Icons'
@@ -67,19 +70,40 @@ export function QuestsPage({
   orbs: number
   multiplier: boolean
   onEnroll: (q: Quest) => void
-  onBeat: (questId: string) => void
+  onBeat: (questId: string, seconds: number, terminal?: boolean) => void
   onClaim: (q: Quest, orbs: number) => void
 }) {
   const [sort, setSort] = useState<SortOrderValue>(SortOrder.SUGGESTED)
+  const [query, setQuery] = useState('')
   const [sortOpen, setSortOpen] = useState(false)
   const [tab, setTab] = useState<'all' | 'claimed'>('all')
   const [openId, setOpenId] = useState<string | null>(null)
 
   const quests: Quest[] = QUESTS.map((q) => ({ ...q, userStatus: status[q.id] ?? null }))
   const ordered = sortQuests(quests, sort)
-  const shown = tab === 'claimed' ? ordered.filter(isClaimed) : ordered
   const open = quests.find((q) => q.id === openId) ?? null
   const claimed = quests.filter(isClaimed).length
+
+  /**
+   * The tab's sections are the client's own: it instruments Quest Home as
+   * hero, featured, in progress, ending soon, discovered and expired, each a
+   * separate content location, so those are the shelves here.
+   */
+  const live = ordered.filter((q) => !isExpired(q))
+  const inProgress = live.filter((q) => isEnrolled(q) && !isComplete(q))
+  const endingSoon = live.filter(
+    (q) => !isClaimed(q) && q.config.expiresAt - Date.now() < 7 * 24 * 3600e3,
+  )
+  const expired = ordered.filter((q) => isExpired(q))
+  const hit = query.trim().toLowerCase()
+  const results = hit
+    ? quests.filter((q) =>
+        (q.config.messages.gameTitle + ' ' + q.config.messages.questName)
+          .toLowerCase()
+          .includes(hit),
+      )
+    : []
+  const shown = tab === 'claimed' ? ordered.filter(isClaimed) : live
 
   return (
     <main className="chat quests">
@@ -100,6 +124,14 @@ export function QuestsPage({
           </button>
         </nav>
         <div className="quests-header-right">
+          <label className="quests-search">
+            <input
+              value={query}
+              placeholder="Search Quests"
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <SearchIcon size={16} />
+          </label>
           {multiplier ? (
             <span className="quests-multiplier">
               <SparkleIcon size={14} />
@@ -114,62 +146,100 @@ export function QuestsPage({
       </header>
 
       <div className="quests-body">
-        <OrbsHero />
-
-        <div className="quests-bar">
-          <h2>{tab === 'claimed' ? 'Claimed Quests' : 'Available Quests'}</h2>
-          <div className="quests-controls">
-            <div className="quests-select">
-              <button className="quests-select-btn" onClick={() => setSortOpen((v) => !v)}>
-                {SORT_LABELS[sort]}
-                <ChevronDownIcon size={16} />
-              </button>
-              {sortOpen ? (
-                <>
-                  <div className="quests-select-away" onClick={() => setSortOpen(false)} />
-                  <ul className="quests-select-menu">
-                    {(Object.values(SortOrder) as SortOrderValue[]).map((s) => (
-                      <li key={s}>
-                        <button
-                          className={s === sort ? 'on' : ''}
-                          onClick={() => {
-                            setSort(s)
-                            setSortOpen(false)
-                          }}
-                        >
-                          {SORT_LABELS[s]}
-                          {s === sort ? <CheckSmallIcon size={16} /> : null}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-            </div>
-            <button className="quests-filters">
-              Filters
-              <FiltersIcon size={16} />
-            </button>
-          </div>
-        </div>
-
-        {shown.length ? (
-          <div className="quests-grid">
-            {shown.map((q) => (
-              <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
-            ))}
-          </div>
+        {hit ? (
+          <>
+            <h2 className="quests-shelf-title">
+              {results.length} result{results.length === 1 ? '' : 's'} for “{query.trim()}”
+            </h2>
+            {results.length ? (
+              <div className="quests-grid">
+                {results.map((q) => (
+                  <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+                ))}
+              </div>
+            ) : (
+              <p className="quests-count">No Quest matched that.</p>
+            )}
+          </>
+        ) : tab === 'claimed' ? (
+          <>
+            <h2 className="quests-shelf-title">Claimed Quests</h2>
+            {shown.length ? (
+              <div className="quests-grid">
+                {shown.map((q) => (
+                  <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+                ))}
+              </div>
+            ) : (
+              <p className="quests-count">
+                No claimed Quests yet — finish one and its reward lands here.
+              </p>
+            )}
+          </>
         ) : (
-          <p className="quests-count">
-            No claimed Quests yet — finish one and its reward lands here.
-          </p>
-        )}
+          <>
+            <OrbsHero />
 
-        {tab === 'all' ? (
-          <p className="quests-count">
-            {claimed} of {quests.length} Quests claimed.
-          </p>
-        ) : null}
+            {inProgress.length ? (
+              <Shelf title="In progress" quests={inProgress} onOpen={setOpenId} />
+            ) : null}
+
+            {endingSoon.length ? (
+              <Shelf title="Ending soon" quests={endingSoon} onOpen={setOpenId} />
+            ) : null}
+
+            <div className="quests-bar">
+              <h2>All Quests</h2>
+              <div className="quests-controls">
+                <div className="quests-select">
+                  <button className="quests-select-btn" onClick={() => setSortOpen((v) => !v)}>
+                    {SORT_LABELS[sort]}
+                    <ChevronDownIcon size={16} />
+                  </button>
+                  {sortOpen ? (
+                    <>
+                      <div className="quests-select-away" onClick={() => setSortOpen(false)} />
+                      <ul className="quests-select-menu">
+                        {(Object.values(SortOrder) as SortOrderValue[]).map((o) => (
+                          <li key={o}>
+                            <button
+                              className={o === sort ? 'on' : ''}
+                              onClick={() => {
+                                setSort(o)
+                                setSortOpen(false)
+                              }}
+                            >
+                              {SORT_LABELS[o]}
+                              {o === sort ? <CheckSmallIcon size={16} /> : null}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                </div>
+                <button className="quests-filters">
+                  Filters
+                  <FiltersIcon size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="quests-grid">
+              {shown.map((q) => (
+                <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+              ))}
+            </div>
+
+            {expired.length ? (
+              <Shelf title="Expired" quests={expired} onOpen={setOpenId} dim />
+            ) : null}
+
+            <p className="quests-count">
+              {claimed} of {quests.length} Quests claimed.
+            </p>
+          </>
+        )}
       </div>
 
       {open ? (
@@ -183,6 +253,37 @@ export function QuestsPage({
         />
       ) : null}
     </main>
+  )
+}
+
+/**
+ * A shelf: one of Quest Home's sections, with its own row of cards. The client
+ * files these separately — featured, in progress, ending soon, discovered,
+ * expired — rather than showing one flat list.
+ */
+function Shelf({
+  title,
+  quests,
+  onOpen,
+  dim,
+}: {
+  title: string
+  quests: Quest[]
+  onOpen: (id: string) => void
+  dim?: boolean
+}) {
+  return (
+    <section className={'quests-shelf' + (dim ? ' dim' : '')}>
+      <h2 className="quests-shelf-title">
+        {title}
+        <span>{quests.length}</span>
+      </h2>
+      <div className="quests-grid">
+        {quests.map((q) => (
+          <QuestCard key={q.id} quest={q} onOpen={() => onOpen(q.id)} />
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -301,7 +402,7 @@ function QuestSheet({
   multiplier: boolean
   onClose: () => void
   onEnroll: (q: Quest) => void
-  onBeat: (questId: string) => void
+  onBeat: (questId: string, seconds: number, terminal?: boolean) => void
   onClaim: (q: Quest, orbs: number) => void
 }) {
   const task = taskOf(quest)
@@ -312,11 +413,44 @@ function QuestSheet({
   const [started, setStarted] = useState(false)
   const running = started && !done
 
+  const value = progressOf(quest)
+
+  /**
+   * The heartbeat, scheduled the way the client's own manager schedules it: a
+   * beat a minute, except that when less than a minute of the task is left the
+   * next beat is set for exactly the remaining time plus a second, so the
+   * quest finishes on a beat instead of up to a minute after it. Each beat
+   * credits the time that has actually passed since the last one.
+   *
+   * The loop schedules its own next beat rather than re-arming off a render,
+   * so it keeps its cadence whether or not React has caught up — which is also
+   * what makes it testable against a faked clock.
+   */
+  const valueRef = useRef(value)
+  valueRef.current = value
+
   useEffect(() => {
     if (!running) return
-    const tick = setInterval(() => onBeat(questId), HEARTBEAT_INTERVAL_S * 1000)
-    return () => clearInterval(tick)
-  }, [running, questId, onBeat])
+    let timer = 0
+    let credited = valueRef.current
+    const schedule = () => {
+      const ms = nextBeatMs(task.target - credited)
+      timer = window.setTimeout(() => {
+        const seconds = Math.round(ms / 1000)
+        credited = Math.min(task.target, credited + seconds)
+        onBeat(questId, seconds)
+        if (credited < task.target) schedule()
+      }, ms)
+    }
+    schedule()
+    return () => window.clearTimeout(timer)
+  }, [running, questId, task.target, onBeat])
+
+  /** Stopping the task sends the terminal beat the client sends. */
+  const stop = useCallback(() => {
+    setStarted(false)
+    if (!done) onBeat(questId, 0, true)
+  }, [done, questId, onBeat])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -324,7 +458,11 @@ function QuestSheet({
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const value = progressOf(quest)
+  // leaving with the task running is what the client sends a terminal beat for
+  useEffect(() => () => stopRef.current?.(), [])
+  const stopRef = useRef<(() => void) | null>(null)
+  stopRef.current = running ? stop : null
+
   const pct = Math.min(100, (value / task.target) * 100)
   const payout = orbValue(quest) * (multiplier ? ORB_MULTIPLIER : 1)
 
@@ -400,7 +538,10 @@ function QuestSheet({
               Accept Quest
             </button>
           ) : (
-            <button className="btn-primary" onClick={() => setStarted((v) => !v)}>
+            <button
+              className="btn-primary"
+              onClick={() => (running ? stop() : setStarted(true))}
+            >
               {running ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
               {running ? 'Pause' : TASK_VERB[task.type]}
             </button>
@@ -409,8 +550,8 @@ function QuestSheet({
 
         {running ? (
           <p className="quest-running">
-            Task running — progress is sent every {HEARTBEAT_INTERVAL_S} seconds, as the client
-            does.
+            Task running — a heartbeat every {HEARTBEAT_INTERVAL_S} seconds, and a last one at
+            the moment the task finishes, as the client beats.
           </p>
         ) : null}
       </div>

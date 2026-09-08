@@ -7175,6 +7175,74 @@ body.streamer .invite-row code {
   gap: 20px 16px;
 }
 
+/* the search Quest Home carries in its header */
+.quests-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.quests-search input {
+  width: 156px;
+  height: 26px;
+  padding: 0 26px 0 8px;
+  border-radius: 4px;
+  background: var(--titlebar);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.quests-search input::placeholder {
+  color: var(--muted);
+}
+
+.quests-search svg {
+  position: absolute;
+  right: 6px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* a section of Quest Home, with its own row of cards */
+.quests-shelf {
+  margin-top: 30px;
+}
+
+.quests-shelf-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 14px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--strong);
+}
+
+.quests-shelf .quests-shelf-title {
+  margin-top: 0;
+}
+
+.quests-shelf-title span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.quests-shelf.dim .quest-card {
+  opacity: 0.55;
+}
+
+.quests-shelf.dim .quest-card:hover {
+  opacity: 0.8;
+}
+
 /* --- the Discord Orbs hero ------------------------------------------------- */
 
 .orbs-hero {

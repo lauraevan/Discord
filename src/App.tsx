@@ -78,7 +78,6 @@ import {
   type Subscription,
 } from './nitro'
 import {
-  HEARTBEAT_INTERVAL_S,
   QUESTS,
   beat,
   enroll,
@@ -394,11 +393,14 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
    * before React re-renders, so a tick that carried its own copy of the quest
    * would overwrite the progress the previous tick just wrote.
    */
-  const beatQuest = useCallback((questId: string) => {
+  const beatQuest = useCallback((questId: string, seconds: number, terminal = false) => {
     setQuestStatus((all) => {
       const q = QUESTS.find((x) => x.id === questId)
       if (!q) return all
-      return { ...all, [questId]: beat({ ...q, userStatus: all[questId] ?? null }, HEARTBEAT_INTERVAL_S) }
+      return {
+        ...all,
+        [questId]: beat({ ...q, userStatus: all[questId] ?? null }, seconds, terminal),
+      }
     })
   }, [])
 

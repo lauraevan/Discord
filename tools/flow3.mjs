@@ -226,15 +226,31 @@ await step('a gift can be bought and redeemed', async () => {
 await step('a quest enrols, runs, completes and pays out', async () => {
   await p.click('.dm-nav .row:has-text("Quests")')
   await p.waitForTimeout(300)
-  // the Orbs banner leads the tab, and every quest is a card in the grid
+  // the Orbs banner leads the tab, and the client's own sections follow it:
+  // ending soon, all quests, expired
   expect((await p.locator('.orbs-hero').count()) === 1, 'no Orbs banner')
-  expect((await p.locator('.quest-card').count()) === 6, 'expected six quest cards')
-  await p.click('.quest-card:has-text("Chess In The Park")')
+  const shelves = await p.locator('.quests-shelf-title').allInnerTexts()
+  expect(
+    shelves.some((t) => t.startsWith('Ending soon')),
+    'no ending-soon shelf: ' + shelves.join('|'),
+  )
+  expect(
+    shelves.some((t) => t.startsWith('Expired')),
+    'no expired shelf: ' + shelves.join('|'),
+  )
+  // the grid holds the live quests; the expired one is filed under its own
+  expect(
+    (await p.locator('.quests-body > .quests-grid .quest-card').count()) === 6,
+    'expected six live quest cards',
+  )
+  await p.click('.quests-body > .quests-grid .quest-card:has-text("Chess In The Park")')
   await p.waitForTimeout(300)
   await p.clock.install()
   await p.click('.quest-sheet-foot .btn-primary')     // Accept Quest, starts the task
   await p.waitForTimeout(200)
-  // the chess quest needs 600 seconds; run the clock past it
+  // the chess quest needs 600 seconds. The client beats once a minute and
+  // schedules its last beat at exactly the remaining time, so 700s of clock
+  // covers it either way.
   await p.clock.runFor(700_000)
   await p.waitForTimeout(300)
   const count = await p.locator('.quest-count').innerText()

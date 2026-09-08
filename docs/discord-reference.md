@@ -358,6 +358,106 @@ Sort orders: `suggested`, `most_recent`, `expiring_soon`,
 `QUESTS_SECONDARY #a365e6`, `QUESTS_GRADIENT_START #7d42f2`,
 `QUESTS_GRADIENT_END #1d0b24`.
 
+### Quest Home, section by section
+
+The client instruments Quest Home as a set of content locations, and they are
+the page's real structure:
+
+```
+QUEST_HOME_HERO=50            QUEST_HOME_HERO_SHELF=56
+QUEST_HOME_FEATURED_SECTION=59
+QUEST_HOME_IN_PROGRESS_SECTION=60
+QUEST_HOME_ENDING_SOON_SECTION=61
+QUEST_HOME_ORB_SECTION=62
+QUEST_HOME_DISCOVERED_SECTION=63
+QUEST_HOME_SEARCH_RESULT=64
+QUEST_HOME_EXPIRED_SECTION=69
+QUEST_HOME_PREVIEW_SECTION=70
+QUEST_HOME_SPECIAL_QUESTS_SECTION=72
+QUEST_HOME_TAKEOVER=42        QUEST_HOME_ENTRYPOINT=47 (+_THEMED=48)
+```
+
+Quests appear well beyond that page: `QUEST_BAR=1` and `QUEST_BAR_V2=10` (the
+bar over the chat), `QUEST_INVENTORY_CARD=2`, `QUESTS_EMBED=3`,
+`ACTIVITY_PANEL=4`, `MEMBERS_LIST=6`, `QUEST_BADGE=7`, `VIDEO_MODAL=23` with
+`VIDEO_MODAL_END_CARD=24` and `VIDEO_MODAL_ICON_END_CARD=57`,
+`REWARD_MODAL=25`, `ORBS_ANNOUNCEMENT_MODAL=28`, `ORBS_BALANCE_MENU=29`,
+`ORBS_SHOP_HERO_CTA=31`, `QUEST_ENROLLMENT_BLOCKED_MODAL=32`,
+`RUNNING_ACTIVITY=40`, `PLAY_QUEST_MODAL=65`, `TROPHY_CASE_CARD=22`,
+`NITRO_HOME_PERK_CARD=54`.
+
+### Quest features
+
+`config.features` carries numbers, not names:
+
+```
+POST_ENROLLMENT_CTA=1   QUEST_BAR_V2=3   EXCLUDE_RUSSIA=5
+IN_HOUSE_CONSOLE_QUEST=6   MOBILE_CONSOLE_QUEST=7   START_QUEST_CTA=8
+REWARD_HIGHLIGHTING=9   FRACTIONS_QUEST=10
+ADDITIONAL_REDEMPTION_INSTRUCTIONS=11   PACING_V2=12   DISMISSAL_SURVEY=13
+MOBILE_QUEST_DOCK=14   QUESTS_CDN=15   PACING_CONTROLLER=16
+QUEST_HOME_FORCE_STATIC_IMAGE=17   VIDEO_QUEST_FORCE_HLS_VIDEO=18
+VIDEO_QUEST_FORCE_END_CARD_CTA_SWAP=19   EXPERIMENTAL_TARGETING_TRAITS=20
+DO_NOT_DISPLAY=21   EXTERNAL_DIALOG=22   MOBILE_ONLY_QUEST_PUSH_TO_MOBILE=23
+MANUAL_HEARTBEAT_INITIALIZATION=24   CLOUD_GAMING_ACTIVITY=25
+NON_GAMING_PLAY_QUEST=26
+```
+
+A quest is `GAMEPLAY` or `VIDEO`; several tasks on one quest join with `and`
+or `or`; a quest is `shareable_everywhere` or `not_shareable`.
+
+### The heartbeat, exactly
+
+`QuestsManager` keeps a heartbeat map per task type — `PLAY_ON_DESKTOP`,
+`STREAM_ON_DESKTOP`, `PLAY_ACTIVITY` — and schedules each beat with:
+
+```js
+let b = +Millis.MINUTE, M = +Millis.SECOND
+calculateHeartbeatDurationMs = questId => {
+  const { progressSeconds, targetSeconds } = getProgress(quest, DESKTOP)
+  const remaining = Math.max(0, (targetSeconds - progressSeconds) * SECOND)
+  return remaining <= b ? remaining + M : b
+}
+```
+
+So: **a beat a minute**, and when less than a minute is left the last beat is
+scheduled at exactly the remaining time plus one second, so the quest completes
+on a beat. Terminating a task sends a final beat with `terminal: true`. A quest
+only beats while it is "actively progressing": not expired, enrolled, and not
+yet completed. A `STREAM_ON_DESKTOP` beat additionally requires a live Go Live
+and terminates the moment it goes away.
+
+```
+POST /quests/{id}/heartbeat
+  { stream_key, application_id, terminal, executable_path, executable_fingerprint }
+POST /quests/{id}/video-progress   { timestamp }
+POST /quests/{id}/enroll           { location, metadata_sealed, traffic_metadata_sealed }
+POST /quests/{id}/claim-reward     { platform, location, ... }
+     /quests/{id}/console/start    /quests/{id}/console/stop
+     /quests/{id}/reward-code      /quests/{id}/preview      /quests/@me
+     /quests/@me/claimed
+```
+
+Success dispatches `QUESTS_SEND_HEARTBEAT_SUCCESS` with the updated
+`userStatus`; failure dispatches `QUESTS_SEND_HEARTBEAT_FAILURE` with the
+error, and the client does not retry — the next attempt is the beat already
+scheduled. `stream_key` is built as `call:<channelId>:<ownerId>` or
+`guild:<guildId>:<channelId>:<ownerId>`.
+
+The current-quests fetch carries `quests`, `excludedQuests`,
+`questEnrollmentBlockedUntil` and `questAccessSuspendedUntil` — the client
+refuses to start a quest while either is set.
+
+Most quests offer the same job on more than one platform, so picking a task by
+a loose prefix picks the wrong one (`"PLAY_ACTIVITY".includes("PLAY")` is true).
+Match the exact keys first, take console variants after them, and put
+`STREAM_ON_DESKTOP` last: a stream task needs a live Go Live *and* someone else
+in the voice channel before Discord will beat at all, so a quest that offers a
+stream beside anything else should be driven by the other task. That ordering,
+the 60-second cadence and the no-retry behaviour are all corroborated by
+[nyxxbit/discord-quest-completer](https://github.com/nyxxbit/discord-quest-completer),
+which measured them against live Stable and Canary builds.
+
 The quests on offer are Discord's own Activities, with the application ids the
 client uses. Their tasks run on real time: enrolling writes a `userStatus`, and
 the task adds elapsed seconds to `progress[eventName].value` on the client's
