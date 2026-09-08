@@ -638,6 +638,51 @@ Mana design system ships its `i18n` defaults in the clear, which is where the
 quick switcher's empty state comes from: `AUTOCOMPLETE_NO_RESULTS_HEADER:
 "Nope!"`, `AUTOCOMPLETE_NO_RESULTS_BODY: "Did you make a typo?"`.
 
+## Nitro: display-name styles
+
+A styled name is the client's `DisplayNameStyles` proto — `{ font_id,
+effect_id, colors }` — and both enums are in the bundle.
+
+**DisplayNameFont**: `1` BANGERS, `2` BIO_RHYME, `3` CHERRY_BOMB, `4` CHICLE,
+`5` COMPAGNON, `6` MUSEO_MODERNO, `7` NEO_CASTEL, `8` PIXELIFY, `9` RIBES,
+`10` SINISTRE, `11` DEFAULT, `12` ZILLA_SLAB, `13` PLAYPEN_SANS, `14` ORBITRON,
+`15` NEW_ROCKER, `16` KALAM. The set the client actually maps to a face is
+DEFAULT plus CHERRY_BOMB, CHICLE, MUSEO_MODERNO, NEO_CASTEL, PIXELIFY,
+SINISTRE, ZILLA_SLAB, PLAYPEN_SANS, ORBITRON, NEW_ROCKER, KALAM — the other
+four are in the enum but unshipped.
+
+All but two are Google Fonts, and `google/fonts` carries them under the OFL
+where `fonts.gstatic.com` is denied, so `tools/fetch-name-fonts.py` vendors the
+real faces — subset to the characters a display name can hold and pinned to one
+weight, which takes 3MB of TTF down to 175KB of WOFF2. **Neo Castel and
+Sinistre are Discord-licensed and on no public mirror**, so they are absent
+rather than approximated.
+
+**DisplayNameEffect**: `1` SOLID, `2` GRADIENT, `3` NEON, `4` TOON, `5` POP,
+`6` GLOW, `7` PRISM, `8` GUMMY. How many colours each takes is the client's own
+switch — GRADIENT 2, GUMMY 4, PRISM 5, everything else 1 — and every shade an
+effect draws with is derived rather than stored:
+
+```
+main       the colour itself
+light1     l * 1.2          light2   l * 1.6
+dark1      l * 0.6          dark2    l * 0.2
+toonStroke l * 0.4, floored at 0.12
+neonStroke s * 1.2, l + 0.1 capped at 0.6
+```
+
+and where an effect wants more colours than were picked, they come off a
+four-stop spread of the first: hue shifts of `-18, -5, +9, +22` at saturations
+`.54 .66 .56 .60` and lightnesses `.72 .60 .68 .63`.
+
+## GIFs
+
+Discord's GIF picker is a Tenor search — a request to somebody else's server,
+which a page with no network cannot make. **Favourites are the half that is
+local**, so that is the half that works here: a GIF in the feed is badged and
+carries a star, starring it puts it in the picker, and the picker sends it. The
+Tenor half says what it is rather than pretending.
+
 ## The expression picker
 
 Every button on the right of the composer opens **one** popover, not a picker

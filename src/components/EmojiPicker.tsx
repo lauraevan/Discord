@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORIES, EMOJI } from '../emoji'
 import { EmojiByName, EmojiGlyph } from '../markdown'
 import { GifIcon, SearchIcon, SmileyIcon, SoundboardIcon, StickerIcon } from '../ui/Icons'
-import type { Server } from '../data'
+import type { FavouriteGif, Server } from '../data'
 
 /**
  * Discord's expression picker.
@@ -26,17 +26,24 @@ export function EmojiPicker({
   at,
   view: initialView = 'emoji',
   server,
+  gifs = [],
   onPick,
   onSticker,
+  onGif,
+  onAddGif,
   onClose,
 }: {
   at: { x: number; y: number }
   view?: PickerView
   server?: Server | null
+  gifs?: FavouriteGif[]
   onPick: (name: string) => void
   onSticker?: (id: string) => void
+  onGif?: (id: string) => void
+  onAddGif?: (file: File) => void
   onClose: () => void
 }) {
+  const gifFile = useRef<HTMLInputElement>(null)
   const [view, setView] = useState<PickerView>(initialView)
   const [q, setQ] = useState('')
   const [hover, setHover] = useState(EMOJI[0])
@@ -94,14 +101,60 @@ export function EmojiPicker({
       </div>
       {view === 'gif' ? (
         <div className="picker-body picker-plain">
-          <div className="picker-empty tall">
-            <GifIcon size={40} />
-            <b>GIFs come from Tenor</b>
-            <span>
-              Discord searches Tenor for these, which is a request to somebody else's
-              server — a page with no network of its own has nowhere to send it.
-            </span>
-          </div>
+          <input
+            ref={gifFile}
+            type="file"
+            accept="image/gif,image/webp,image/png,image/jpeg"
+            hidden
+            aria-hidden="true"
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              e.target.value = ''
+              if (f) onAddGif?.(f)
+            }}
+          />
+          {gifs.length ? (
+            <div className="picker-grid">
+              <div className="picker-cat">
+                Favourites
+                <button className="picker-add" onClick={() => gifFile.current?.click()}>
+                  Add
+                </button>
+              </div>
+              <div className="picker-row gifs">
+                {gifs.map((g) => (
+                  <button
+                    key={g.id}
+                    className="picker-gif"
+                    aria-label={g.name}
+                    title={g.name}
+                    onClick={() => {
+                      onGif?.(g.id)
+                      onClose()
+                    }}
+                  >
+                    <img src={g.url} alt={g.name} draggable={false} />
+                  </button>
+                ))}
+              </div>
+              <p className="picker-note">
+                Searching Tenor for more is a request to somebody else's server, which a
+                page with no network of its own cannot make.
+              </p>
+            </div>
+          ) : (
+            <div className="picker-empty tall">
+              <GifIcon size={40} />
+              <b>No favourites yet</b>
+              <span>
+                Discord searches Tenor for GIFs, which needs a network this page does not
+                have — but the ones you star are yours, and those work.
+              </span>
+              <button className="btn-primary" onClick={() => gifFile.current?.click()}>
+                Add a GIF
+              </button>
+            </div>
+          )}
         </div>
       ) : view === 'sticker' ? (
         <div className="picker-body picker-plain">

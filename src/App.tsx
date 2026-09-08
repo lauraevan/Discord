@@ -1025,6 +1025,18 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     onReact={react}
                     onOpenPicker={(id, at) => setPicker({ target: id, at })}
                     onOpenProfile={(el) => openProfileAt(el, 'right')}
+                    favourited={(url) => (account.gifs ?? []).some((g) => g.url === url)}
+                    onFavouriteGif={(a) =>
+                      setAccount((acc) => {
+                        const has = (acc.gifs ?? []).some((g) => g.url === a.url)
+                        return {
+                          ...acc,
+                          gifs: has
+                            ? (acc.gifs ?? []).filter((g) => g.url !== a.url)
+                            : [...(acc.gifs ?? []), { id: uid('gif'), name: a.name, url: a.url }],
+                        }
+                      })
+                    }
                     onVote={vote}
                     onContext={(m, at) => setCtx({ at, items: messageMenu(m) })}
                   />
@@ -1226,6 +1238,20 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             else react(picker.target, name)
           }}
           onSticker={(id) => sendSticker(id)}
+          gifs={account.gifs ?? []}
+          onGif={(id) => {
+            const g = (account.gifs ?? []).find((x) => x.id === id)
+            if (g) send('', [{ id: uid('att'), name: g.name, url: g.url, contentType: 'image/gif' }])
+          }}
+          onAddGif={(f) => {
+            const r = new FileReader()
+            r.onload = () =>
+              setAccount((a) => ({
+                ...a,
+                gifs: [...(a.gifs ?? []), { id: uid('gif'), name: f.name, url: String(r.result) }],
+              }))
+            r.readAsDataURL(f)
+          }}
           onClose={() => setPicker(null)}
         />
       ) : null}

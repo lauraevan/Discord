@@ -50,6 +50,10 @@ export function fileClass(name: string, type?: string) {
 export const fileIcon = (name: string, type?: string) =>
   icons[`./assets/files/${fileClass(name, type)}.webp`] ?? icons['./assets/files/unknown.webp']
 
+/** A GIF, which Discord badges and lets you favourite. */
+export const isGif = (name: string, type?: string) =>
+  type === 'image/gif' || /\.gif$/i.test(name)
+
 /** Whether the client previews a file inline rather than carding it. */
 export const isImage = (name: string, type?: string) => fileClass(name, type) === 'image'
 

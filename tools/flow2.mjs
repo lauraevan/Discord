@@ -191,6 +191,77 @@ await step('a sticker uploads, shows in the picker, and sends', async () => {
   if ((await p.locator('.msg-sticker').count()) !== 1) throw new Error('sticker not sent')
 })
 
+/* ------------------------------------------------------------------ GIFs */
+
+/** a three-frame animated GIF, so the badge and the favourite have something real */
+const GIF =
+  'R0lGODlhYABIAIEAAP///+tFngAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh+QQAFAAAACwAAAAAYABIAAAI6gADCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmyAB6Ny5EydHnkCD+rQYtKjQoRCNKj2KdOHSpzybKoRKVafUg1WzXiWYtevWAF3DXg1LVipZsUjPlh2qFi3OtmtvwnVrc65XuXbv1syrlyZfrXX/UsUr+CnhwkoPIy6qeDHQxo57QnbsMzLTwJYlv80MIC3nppnNWh5LeevirwILox74dzVXu64Lzo2NNS7t2oNvN0ysu7fv38CDCx9OvLjx48iTK1/OvDnSgAAh+QQBFAACACwAAAAAYABIAIH///9YZfIAAAAAAAAI/wADCBxIsKDBgwgTKlzIsKHDhxAjSpxIsaLFixgzatzIsaPHjyBDihxJsqTJkyhTqlzJsqXLlzBjypxJs6bNmygFANjJcydOjgKCCtXZk+dPi0OTBi1q9ChEpVCXMgXgtGHUq1OpVk14tWvWrQe7iv0KdqDYs2TBnl2b1unat21/vmU7tepcuHWP3qXLVO9evkXl/kWb9+Zgwn0NH0Yc2OZixj0VP8ZamOZkr5VnXqacuObmqHFlfoYaOuZopaVhnk6aWvVqop0dv27tejXt2p9v496se/fj3r4XAw/+d7jp35m3Ck+utjjzsnuN45wr3S/nxmUdkn6enSFs7N3DixUfT768+fPo06tfz769+/fw48tPHxAAIfkEARQAAgAsAAAAAGAASACBO6VdFBQYAAAAAAAACOoAAQgcSLCgwYMIEypcyLChw4cQI0qcSLGixYsYM2rcyLGjx48gQ4ocSbKkyZMoU6pcybKly5cwY8qcSbOmzZswA+jcuRMnR55Ag/q0GLSo0KEQjSo9inTh0qc8myqESlWn1INVs14lmLXrVgBdw14NS1YqWbFIz5YdqhYtzrZrb8J1a3OuV7l279bMq5cmX611/1LFK/gp4cJKDyMuqngx0MaOe0J27DMy08CWJb/NHCAt56aZzVoeS3nr4q8CC6Me+Hc1V7uuC86NjTUu7dqDbzdMrLu379/AgwsfTry48ePIkytfzrz5yoAAOw=='
+
+await step('a GIF is badged, stars into favourites, and sends from the picker', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  await p.setInputFiles('.composer-wrap input[type=file]', {
+    name: 'wave.gif',
+    mimeType: 'image/gif',
+    buffer: Buffer.from(GIF, 'base64'),
+  })
+  await p.waitForTimeout(250)
+  await p.click('.composer-input')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(350)
+  if (!(await p.locator('.attachment-gif').count())) throw new Error('no GIF badge')
+  await p.hover('.attachment')
+  await p.click('.attachment-fav')
+  await p.waitForTimeout(250)
+  if (!(await p.locator('.attachment-fav.on').count())) throw new Error('star did not stick')
+  const before = await p.locator('.attachment').count()
+  await p.click('[aria-label="GIF"]')
+  await p.waitForSelector('.picker-gif', { timeout: 3000 })
+  await p.click('.picker-gif')
+  await p.waitForTimeout(350)
+  if ((await p.locator('.attachment').count()) !== before + 1)
+    throw new Error('the favourite did not send')
+})
+
+/* -------------------------------------------------- display name styles */
+
+await step('Nitro letters the display name, and it follows the name around', async () => {
+  await p.evaluate(() =>
+    localStorage.setItem(
+      'discord-ui:v4:subscription',
+      JSON.stringify({ premiumType: 2, until: Date.now() + 250 * 864e5, source: 'purchase', interval: 2 }),
+    ),
+  )
+  await p.reload()
+  await p.waitForTimeout(700)
+  await p.click('[aria-label="User settings"]')
+  await p.click('.settings-item:has-text("Profiles")')
+  await p.waitForTimeout(400)
+  await p.locator('.name-font:has-text("Orbitron")').click()
+  await p.locator('.name-effect:has-text("Neon")').click()
+  await p.waitForTimeout(250)
+  const preview = await p.evaluate(() => {
+    const el = document.querySelector('.name-preview span')
+    const cs = getComputedStyle(el)
+    return { font: cs.fontFamily, shadow: cs.textShadow }
+  })
+  if (!/Orbitron/.test(preview.font)) throw new Error('font not applied: ' + preview.font)
+  if (preview.shadow === 'none') throw new Error('Neon drew no glow')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(400)
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  if (await p.locator('.age-gate').count()) await p.click('.age-gate .btn-primary')
+  await p.click('.composer-input')
+  await p.fill('.composer-input', 'lettered')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(350)
+  const inFeed = await p.evaluate(
+    () => getComputedStyle(document.querySelector('.author span')).fontFamily,
+  )
+  if (!/Orbitron/.test(inFeed)) throw new Error('the feed did not letter it: ' + inFeed)
+})
+
 console.log('\nerrors:', errs.length ? errs : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()

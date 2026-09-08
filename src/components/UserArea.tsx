@@ -18,6 +18,7 @@ import {
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 import { Nameplate } from '../ui/Nameplate'
+import { DisplayName } from '../ui/DisplayName'
 import { specFor, StatusGlyph, statusBox, statusMask } from '../ui/Status'
 import { BADGES } from '../badges'
 
@@ -204,7 +205,9 @@ export function ProfilePopout({
       <div className="popout-body">
         <div className="p-names">
           <Nameplate id={account.nameplate} />
-          <div className="p-name">{account.name}</div>
+          <div className="p-name">
+            <DisplayName account={account} />
+          </div>
         </div>
         <div className="p-sub">
           {account.handle}

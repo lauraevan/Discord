@@ -30,6 +30,7 @@ export const emojiByChar: Record<string, string> = {
 }
 
 import type { Connection } from './connections'
+import type { NameStyle } from './namestyles'
 
 /* --------------------------------------------------------------- account */
 
@@ -70,6 +71,13 @@ export type Account = {
   connections?: Connection[]
   /** the nameplate worn behind the name, by its id in src/nameplates.ts */
   nameplate?: string
+  /** Nitro's display-name style: a font, an effect and its colours */
+  nameStyle?: NameStyle
+  /**
+   * Favourite GIFs. Discord's picker keeps these locally and they are the one
+   * part of it that does not need Tenor, so they are the part that works here.
+   */
+  gifs?: FavouriteGif[]
   /**
    * Per-server profiles. Discord lets a member look different in each server:
    * a nickname, its own avatar colour, pronouns and bio.
@@ -84,6 +92,9 @@ export type Account = {
  * back to the avatar's own colour until you do.
  */
 export const bannerColorOf = (a: Account) => a.bannerColor ?? a.color
+
+/** A GIF the account has starred, kept as a data URL like everything else. */
+export type FavouriteGif = { id: string; name: string; url: string }
 
 /** What a member can override about themselves in one server. */
 export type ServerProfile = {

@@ -1,6 +1,7 @@
 import { statusLabel, type Account } from '../data'
 import { Avatar } from './UserArea'
 import { Nameplate } from '../ui/Nameplate'
+import { DisplayName } from '../ui/DisplayName'
 
 /**
  * The member list.
@@ -27,9 +28,7 @@ export function MemberList({
           <Avatar account={account} size={32} />
         </span>
         <span className="member-body">
-          <span className="member-name" style={{ color: account.color }}>
-            {account.name}
-          </span>
+          <DisplayName account={account} color={account.color} className="member-name" />
           <span className="member-sub">{statusLabel[account.status]}</span>
         </span>
       </button>

@@ -3,6 +3,7 @@ import {
   groupsWith,
   joinLine,
   type Account,
+  type Attachment,
   type Channel,
   type Message,
   type Poll,
@@ -26,14 +27,16 @@ import {
   ReplyIcon,
   RulesIcon,
   SparkleIcon,
+  StarIcon,
   ThreadsIcon as ThreadGlyph,
   SearchIcon,
   SpeakerIcon,
   ThreadsIcon,
 } from '../ui/Icons'
 import { FILTERS } from '../search'
-import { fileIcon, fileSize, isImage } from '../files'
+import { fileIcon, fileSize, isGif, isImage } from '../files'
 import { springScrollIntoView } from '../motion'
+import { DisplayName } from '../ui/DisplayName'
 import { Tooltip } from '../ui/Tooltip'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
@@ -321,6 +324,8 @@ export function ChatFeed({
   onReact,
   onOpenPicker,
   onOpenProfile,
+  onFavouriteGif,
+  favourited,
   onContext,
   onVote,
   onOnboard,
@@ -340,6 +345,8 @@ export function ChatFeed({
   onReact: (id: string, name: string) => void
   onOpenPicker: (id: string, at: { x: number; y: number }) => void
   onOpenProfile: (anchor: HTMLElement) => void
+  onFavouriteGif: (a: Attachment) => void
+  favourited: (url: string) => boolean
   onContext: (m: Message, at: { x: number; y: number }) => void
   onVote: (id: string, answer: number) => void
   onOnboard: (what: 'invite' | 'icon' | 'boosts' | 'apps') => void
@@ -537,12 +544,8 @@ export function ChatFeed({
                     <Avatar account={account} size={40} status={false} />
                   </button>
                   <div className="msg-head">
-                    <button
-                      className="author"
-                      style={nameColor ? { color: nameColor } : undefined}
-                      onClick={(e) => onOpenProfile(e.currentTarget)}
-                    >
-                      {account.name}
+                    <button className="author" onClick={(e) => onOpenProfile(e.currentTarget)}>
+                      <DisplayName account={account} color={nameColor} />
                     </button>
                     <span
                       className="timestamp"
@@ -615,15 +618,33 @@ export function ChatFeed({
                 <div className="attachments">
                   {m.attachments.map((a) =>
                     isImage(a.name, a.contentType) ? (
-                      <a
+                      <span
                         key={a.id}
                         className={'attachment' + (a.spoiler ? ' spoiler-file' : '')}
-                        href={a.url}
-                        target="_blank"
-                        rel="noreferrer noopener"
                       >
-                        <img src={a.url} alt={a.name} />
-                      </a>
+                        <a href={a.url} target="_blank" rel="noreferrer noopener">
+                          <img src={a.url} alt={a.name} />
+                        </a>
+                        {/* Discord marks a GIF and lets you star it from the
+                            message, which is where a favourite comes from */}
+                        {isGif(a.name, a.contentType) ? (
+                          <>
+                            <span className="attachment-gif">GIF</span>
+                            <Tooltip
+                              label={favourited(a.url) ? 'Favourited' : 'Add to Favourites'}
+                              side="above"
+                            >
+                              <button
+                                className={'attachment-fav' + (favourited(a.url) ? ' on' : '')}
+                                aria-label="Add to favourites"
+                                onClick={() => onFavouriteGif(a)}
+                              >
+                                <StarIcon size={16} />
+                              </button>
+                            </Tooltip>
+                          </>
+                        ) : null}
+                      </span>
                     ) : (
                       /* Discord cards anything it cannot show: the badge for
                          the file's class, its name as a link, its size, and a

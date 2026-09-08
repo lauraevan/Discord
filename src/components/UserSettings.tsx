@@ -9,10 +9,19 @@ import {
 } from '../data'
 import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
 import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
-import { CheckIcon, LockIcon } from '../ui/Icons'
+import { CheckIcon, CloseIcon, LockIcon } from '../ui/Icons'
 import { BADGES } from '../badges'
 import { COLLECTIONS } from '../shop'
 import { NAMEPLATES } from '../nameplates'
+import { NAME_FONTS } from '../namefonts'
+import {
+  colorCount,
+  NAME_EFFECTS,
+  NameEffect,
+  nameStyleCss,
+  type NameStyle,
+} from '../namestyles'
+import { DisplayName } from '../ui/DisplayName'
 import { Nameplate } from '../ui/Nameplate'
 import { DECORATIONS, Decoration } from '../ui/Decorations'
 import {
@@ -845,6 +854,13 @@ function Profiles({
   const owned = account.collectibles ?? []
   const decorations = DECORATIONS.filter((d) => owned.includes(d.id))
   const plates = NAMEPLATES.filter((n) => owned.includes(n.id))
+  const styleOf: NameStyle = account.nameStyle ?? {
+    fontId: 11,
+    effectId: NameEffect.SOLID,
+    colors: ['#5865f2'],
+  }
+  const setStyle = (part: Partial<NameStyle>) =>
+    onAccount({ ...account, nameStyle: { ...styleOf, ...part } })
   const effects = COLLECTIONS.flatMap((c) =>
     c.effects.filter((e) => owned.includes(e.id)).map((e) => ({ ...e, colors: c.confetti })),
   )
@@ -1031,6 +1047,80 @@ function Profiles({
                       </button>
                     ))}
                   </div>
+                )}
+              </div>
+
+              {/* Nitro letters a display name: a font, an effect and the
+                  colours the effect takes. Free accounts see it locked, which
+                  is what the client does rather than hiding it. */}
+              <div className="set-field">
+                <label>DISPLAY NAME STYLE</label>
+                {!premium ? (
+                  <p className="theme-note">
+                    <LockIcon /> Nitro letters your name in one of Discord's own
+                    typefaces, in the colours you pick.
+                  </p>
+                ) : (
+                  <>
+                    <div className="name-preview">
+                      <DisplayName account={account} />
+                    </div>
+                    <div className="name-fonts">
+                      {NAME_FONTS.map((f) => (
+                        <button
+                          key={f.id}
+                          className={'name-font' + (styleOf.fontId === f.id ? ' on' : '')}
+                          style={f.family === 'inherit' ? undefined : { fontFamily: f.family }}
+                          onClick={() => setStyle({ fontId: f.id })}
+                        >
+                          {f.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="name-effects">
+                      {NAME_EFFECTS.map((e) => (
+                        <button
+                          key={e.id}
+                          className={'name-effect' + (styleOf.effectId === e.id ? ' on' : '')}
+                          onClick={() => setStyle({ effectId: e.id })}
+                        >
+                          <span
+                            style={nameStyleCss({ ...styleOf, effectId: e.id })}
+                          >
+                            {e.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="swatch-row wrap">
+                      {[
+                        '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
+                        '#9b59b6', '#1abc9c', '#e67e22', '#607d8b', '#f47fff',
+                      ].map((c) => (
+                        <button
+                          key={c}
+                          className={'swatch' + (styleOf.colors[0] === c ? ' on' : '')}
+                          style={{ background: c }}
+                          aria-label={c}
+                          onClick={() => setStyle({ colors: [c] })}
+                        >
+                          {styleOf.colors[0] === c ? <CheckIcon /> : null}
+                        </button>
+                      ))}
+                      <button
+                        className="swatch none"
+                        aria-label="No style"
+                        onClick={() => onAccount({ ...account, nameStyle: undefined })}
+                      >
+                        <CloseIcon />
+                      </button>
+                    </div>
+                    <p className="theme-note">
+                      {colorCount(styleOf.effectId) > 1
+                        ? `${NAME_EFFECTS.find((e) => e.id === styleOf.effectId)?.name} takes ${colorCount(styleOf.effectId)} colours — Discord fills the rest in from the one you pick.`
+                        : 'Neo Castel and Sinistre are missing: Discord licensed those two and no public mirror carries them.'}
+                    </p>
+                  </>
                 )}
               </div>
 
