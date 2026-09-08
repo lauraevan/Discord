@@ -6,6 +6,7 @@ import { Composer } from './components/Composer'
 import { ContextMenu, type MenuItem } from './components/ContextMenu'
 import { ForumView, makePost } from './components/Forum'
 import { EmojiPicker, type PickerView } from './components/EmojiPicker'
+import { gifArt } from './gifs'
 import { FriendsPage, HomeSidebar, ProfileModal, type HomeView } from './components/Home'
 import { LoginScreen, RegisterScreen } from './components/Auth'
 import { CreateServerFlow, applyTemplate, type NewServer } from './components/CreateServer'
@@ -1242,6 +1243,10 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           onGif={(id) => {
             const g = (account.gifs ?? []).find((x) => x.id === id)
             if (g) send('', [{ id: uid('att'), name: g.name, url: g.url, contentType: 'image/gif' }])
+          }}
+          onLibraryGif={(id, name) => {
+            const url = gifArt(id)
+            if (url) send('', [{ id: uid('att'), name: `${name}.gif`, url, contentType: 'image/gif' }])
           }}
           onAddGif={(f) => {
             const r = new FileReader()

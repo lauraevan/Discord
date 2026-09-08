@@ -10686,7 +10686,7 @@ button.group-avatar:hover {
 
 .picker-row.gifs {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   padding: 0 8px 8px;
 }
@@ -10694,14 +10694,28 @@ button.group-avatar:hover {
 .picker-gif {
   border-radius: 6px;
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   background: var(--rail);
+  display: grid;
+  place-items: center;
+  transition: background var(--dur-hover) ease;
+}
+
+.picker-gif:hover {
+  background: var(--hover);
 }
 
 .picker-gif img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+}
+
+/* the rail's own tiles are the first GIF of each category */
+.picker-rail img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .picker-add {

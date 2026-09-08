@@ -677,11 +677,23 @@ four-stop spread of the first: hue shifts of `-18, -5, +9, +22` at saturations
 
 ## GIFs
 
-Discord's GIF picker is a Tenor search — a request to somebody else's server,
-which a page with no network cannot make. **Favourites are the half that is
-local**, so that is the half that works here: a GIF in the feed is badged and
-carries a star, starring it puts it in the picker, and the picker sends it. The
-Tenor half says what it is rather than pretending.
+Discord's GIF tab is a Tenor search. That route is closed twice over:
+`tenor.googleapis.com` answers but refuses an unregistered caller, and every
+media host it would hand back (`media.tenor.com`, `c.tenor.com`) is denied by
+this environment's egress policy, as are Giphy's. So the tab needed real GIFs
+from somewhere else.
+
+**`fonts.gstatic.com` is reachable**, and Google publishes Noto Animated Emoji
+there as actual GIFs — `/s/e/notoemoji/latest/<codepoint>/512.gif` — under
+CC BY 4.0. They are also the kind of thing people react with, which is what the
+tab is for. `tools/fetch-gifs.py` pulls 40 of them across six categories and
+re-encodes each to an animated WebP: they arrive as 512px, 50-frame,
+one-megabyte files, and a ladder drops resolution, then frames, then quality
+until each fits 24KB, the same shape as tools/fetch-decorations.py.
+
+**Favourites are the other half**, and entirely local: a GIF in the feed is
+badged and carries a star, starring it puts it at the top of the picker, and an
+Add button takes one off disk.
 
 ## The expression picker
 

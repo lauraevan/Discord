@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORIES, EMOJI } from '../emoji'
 import { EmojiByName, EmojiGlyph } from '../markdown'
-import { GifIcon, SearchIcon, SmileyIcon, SoundboardIcon, StickerIcon } from '../ui/Icons'
+import {
+  GifIcon,
+  SearchIcon,
+  SmileyIcon,
+  SoundboardIcon,
+  StarIcon,
+  StickerIcon,
+} from '../ui/Icons'
 import type { FavouriteGif, Server } from '../data'
+import { gifArt, GIFS, GIF_CATEGORIES } from '../gifs'
 
 /**
  * Discord's expression picker.
@@ -17,7 +25,7 @@ export type PickerView = 'emoji' | 'gif' | 'sticker' | 'soundboard'
 
 const PLACEHOLDER: Record<PickerView, string> = {
   emoji: 'Search emoji',
-  gif: 'Search Tenor',
+  gif: 'Search GIFs',
   sticker: 'Search stickers',
   soundboard: 'Search sounds',
 }
@@ -30,6 +38,7 @@ export function EmojiPicker({
   onPick,
   onSticker,
   onGif,
+  onLibraryGif,
   onAddGif,
   onClose,
 }: {
@@ -40,10 +49,12 @@ export function EmojiPicker({
   onPick: (name: string) => void
   onSticker?: (id: string) => void
   onGif?: (id: string) => void
+  onLibraryGif?: (id: string, name: string) => void
   onAddGif?: (file: File) => void
   onClose: () => void
 }) {
   const gifFile = useRef<HTMLInputElement>(null)
+  const gifScroller = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<PickerView>(initialView)
   const [q, setQ] = useState('')
   const [hover, setHover] = useState(EMOJI[0])
@@ -66,6 +77,13 @@ export function EmojiPicker({
   }, [onClose])
 
   const term = q.trim().toLowerCase()
+  const library = GIFS.filter(
+    (g) => !term || g.name.toLowerCase().includes(term) || g.tags.includes(term),
+  )
+  const favourites = gifs.filter((g) => !term || g.name.toLowerCase().includes(term))
+  const shownCategories = GIF_CATEGORIES.filter((c) => library.some((g) => g.category === c))
+  const jumpTo = (cat: string) =>
+    gifScroller.current?.querySelector(`[data-cat="${cat}"]`)?.scrollIntoView({ block: 'start' })
   const stickers = (server?.stickers ?? []).filter(
     (st) => !term || st.name.toLowerCase().includes(term) || st.related.includes(term),
   )
@@ -100,61 +118,106 @@ export function EmojiPicker({
         </div>
       </div>
       {view === 'gif' ? (
-        <div className="picker-body picker-plain">
-          <input
-            ref={gifFile}
-            type="file"
-            accept="image/gif,image/webp,image/png,image/jpeg"
-            hidden
-            aria-hidden="true"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              e.target.value = ''
-              if (f) onAddGif?.(f)
-            }}
-          />
-          {gifs.length ? (
-            <div className="picker-grid">
-              <div className="picker-cat">
-                Favourites
-                <button className="picker-add" onClick={() => gifFile.current?.click()}>
-                  Add
-                </button>
-              </div>
-              <div className="picker-row gifs">
-                {gifs.map((g) => (
-                  <button
-                    key={g.id}
-                    className="picker-gif"
-                    aria-label={g.name}
-                    title={g.name}
-                    onClick={() => {
-                      onGif?.(g.id)
-                      onClose()
-                    }}
-                  >
-                    <img src={g.url} alt={g.name} draggable={false} />
-                  </button>
-                ))}
-              </div>
-              <p className="picker-note">
-                Searching Tenor for more is a request to somebody else's server, which a
-                page with no network of its own cannot make.
-              </p>
-            </div>
-          ) : (
-            <div className="picker-empty tall">
-              <GifIcon size={40} />
-              <b>No favourites yet</b>
-              <span>
-                Discord searches Tenor for GIFs, which needs a network this page does not
-                have — but the ones you star are yours, and those work.
-              </span>
-              <button className="btn-primary" onClick={() => gifFile.current?.click()}>
-                Add a GIF
+        <div className="picker-body">
+          {/* the library's own categories down the side, the way the emoji
+              view rails its own */}
+          <div className="picker-rail">
+            {favourites.length ? (
+              <button
+                aria-label="Favourites"
+                title="Favourites"
+                onClick={() => jumpTo('favourites')}
+              >
+                <StarIcon size={18} />
               </button>
-            </div>
-          )}
+            ) : null}
+            {GIF_CATEGORIES.map((c) => {
+              const first = GIFS.find((g) => g.category === c)
+              return first ? (
+                <button key={c} aria-label={c} title={c} onClick={() => jumpTo(c)}>
+                  <img src={gifArt(first.id)} alt="" draggable={false} />
+                </button>
+              ) : null
+            })}
+          </div>
+          <div className="picker-grid" ref={gifScroller}>
+            <input
+              ref={gifFile}
+              type="file"
+              accept="image/gif,image/webp,image/png,image/jpeg"
+              hidden
+              aria-hidden="true"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
+                e.target.value = ''
+                if (f) onAddGif?.(f)
+              }}
+            />
+            {favourites.length ? (
+              <div data-cat="favourites">
+                <div className="picker-cat">
+                  Favourites
+                  <button className="picker-add" onClick={() => gifFile.current?.click()}>
+                    Add
+                  </button>
+                </div>
+                <div className="picker-row gifs">
+                  {favourites.map((g) => (
+                    <button
+                      key={g.id}
+                      className="picker-gif"
+                      aria-label={g.name}
+                      title={g.name}
+                      onClick={() => {
+                        onGif?.(g.id)
+                        onClose()
+                      }}
+                    >
+                      <img src={g.url} alt="" draggable={false} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {shownCategories.map((c) => (
+              <div key={c} data-cat={c}>
+                <div className="picker-cat">
+                  {c}
+                  {c === shownCategories[0] && !favourites.length ? (
+                    <button className="picker-add" onClick={() => gifFile.current?.click()}>
+                      Add
+                    </button>
+                  ) : null}
+                </div>
+                <div className="picker-row gifs">
+                  {library
+                    .filter((g) => g.category === c)
+                    .map((g) => (
+                      <button
+                        key={g.id}
+                        className="picker-gif"
+                        aria-label={g.name}
+                        title={g.name}
+                        onClick={() => {
+                          onLibraryGif?.(g.id, g.name)
+                          onClose()
+                        }}
+                      >
+                        <img src={gifArt(g.id)} alt="" draggable={false} />
+                      </button>
+                    ))}
+                </div>
+              </div>
+            ))}
+            {!library.length && !favourites.length ? (
+              <div className="picker-empty">No GIF matched.</div>
+            ) : null}
+            <p className="picker-note">
+              Discord searches Tenor, which needs a key and a network this page has
+              neither of. These are Google&rsquo;s animated emoji — real GIFs, from a host
+              that answers.
+            </p>
+          </div>
         </div>
       ) : view === 'sticker' ? (
         <div className="picker-body picker-plain">
