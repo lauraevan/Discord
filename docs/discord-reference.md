@@ -715,6 +715,15 @@ message carries `sticker_items` — and draws it at 160px with no bubble. The
 sticker itself is a 320x320 PNG or APNG uploaded in Server Settings, filed
 under an emoji, which is what people search it by.
 
+## Threads
+
+The channel header's threads button drops a panel listing the threads hanging
+off that channel, split **Active** and **Archived**, each row carrying the
+thread's name, how many messages are in it and the last line. Picking one opens
+it. A thread is a channel with a `parentId` and a `rootMessageId`, which is how
+Discord models one too — it lives under its parent in the sidebar rather than
+in the channel list proper.
+
 ## Timestamps
 
 The stamp on a group's first message is not the bare time: today is

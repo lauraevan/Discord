@@ -23,6 +23,7 @@ import {
   AppsPanel,
 } from './components/Modals'
 import { Pins } from './components/Pins'
+import { Threads } from './components/Threads'
 import { CustomStatus } from './components/CustomStatus'
 import { CreatePoll } from './components/Poll'
 import { QuickSwitcher } from './components/QuickSwitcher'
@@ -225,6 +226,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   // last state per user, so start where the reference does
   const [membersOpen, setMembersOpen] = useState(false)
   const [pinsOpen, setPinsOpen] = useState(false)
+  const [threadsOpen, setThreadsOpen] = useState(false)
   const [userSettings, setUserSettings] = useState(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [homeView, setHomeView] = useState<HomeView>('friends')
@@ -959,7 +961,25 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 membersOpen={membersOpen}
                 onToggleMembers={() => setMembersOpen((v) => !v)}
                 onPins={() => setPinsOpen((v) => !v)}
+                onThreads={() => setThreadsOpen((v) => !v)}
+                threadsOpen={threadsOpen}
               />
+              {threadsOpen ? (
+                <Threads
+                  channel={channel}
+                  threads={server.channels.filter((c) => c.parentId === channel.id)}
+                  counts={Object.fromEntries(
+                    server.channels
+                      .filter((c) => c.parentId === channel.id)
+                      .map((c) => [c.id, messages[`${server.id}/${c.id}`] ?? []]),
+                  )}
+                  onOpen={(id) => {
+                    setActiveChannel(id)
+                    setThreadsOpen(false)
+                  }}
+                  onClose={() => setThreadsOpen(false)}
+                />
+              ) : null}
               {pinsOpen ? (
                 <Pins
                   pinned={thread.filter((m) => m.pinned)}

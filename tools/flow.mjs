@@ -199,6 +199,27 @@ await step('the hover toolbar reacts, replies and jumps back', async () => {
   if (!((await p.locator('.jump-target').count()) === 1)) throw new Error('jumping did not flash the parent')
 })
 
+await step('the threads panel lists what hangs off the channel', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(250)
+  await type('a thread starts here')
+  await p.locator('.group').last().hover()
+  await p.locator('.group').last().locator('[aria-label="More"]').click()
+  await p.waitForSelector('.ctx-item', { timeout: 2000 })
+  const item = p.locator('.ctx-item:has-text("Thread")').first()
+  if (!(await item.count())) throw new Error('no Create Thread in the message menu')
+  await item.click()
+  await p.waitForTimeout(300)
+  await p.click('.row:has-text("general")')
+  await p.waitForTimeout(250)
+  await p.click('[aria-label="Threads"]')
+  await p.waitForSelector('.thread-card', { timeout: 2000 })
+  if (!(await p.locator('.thread-card').count())) throw new Error('the panel listed nothing')
+  await p.click('.thread-card')
+  await p.waitForTimeout(300)
+  if (await p.locator('.threads-panel').count()) throw new Error('the panel stayed open')
+})
+
 console.log('\nerrors:', errs.length ? errs : 'none')
 // print a verdict and fail the process, so a `tail` of this output cannot hide
 // a failing step the way it did once

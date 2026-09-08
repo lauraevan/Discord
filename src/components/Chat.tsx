@@ -59,6 +59,8 @@ export function ChatHeader({
   membersOpen,
   onToggleMembers,
   onPins,
+  onThreads,
+  threadsOpen,
 }: {
   channel: Channel
   serverName: string
@@ -67,6 +69,8 @@ export function ChatHeader({
   membersOpen: boolean
   onToggleMembers: () => void
   onPins: () => void
+  onThreads: () => void
+  threadsOpen: boolean
 }) {
   return (
     <header className="chat-header">
@@ -74,7 +78,7 @@ export function ChatHeader({
       <h2>{channel.name}</h2>
       <div className="chat-tools">
         <Tooltip label="Threads" side="below">
-          <button aria-label="Threads">
+          <button aria-label="Threads" className={threadsOpen ? 'on' : undefined} onClick={onThreads}>
             <ThreadsIcon />
           </button>
         </Tooltip>
