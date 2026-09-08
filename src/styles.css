@@ -8948,3 +8948,111 @@ body.reduced-motion img.decoration.still {
 .composer-blocked button:hover {
   opacity: 1;
 }
+
+/* --- Profiles: the two tabs, the pickers and the live card ---------------- */
+
+.profile-tabs {
+  display: flex;
+  gap: 2px;
+  margin: -4px 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-tab {
+  padding: 8px 12px;
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.profile-tab:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--hover);
+}
+
+.profile-tab.on {
+  color: var(--strong);
+  background: var(--selected);
+}
+
+.profile-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.profile-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 84px;
+  padding: 10px 6px 8px;
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 11.5px;
+  text-align: center;
+  line-height: 14px;
+}
+
+.profile-pick:hover {
+  background: var(--selected);
+  color: var(--text);
+}
+
+.profile-pick.on {
+  color: var(--strong);
+  box-shadow: inset 0 0 0 2px var(--blurple);
+}
+
+.profile-pick-art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--selected);
+  overflow: hidden;
+}
+
+.profile-pick-none {
+  display: block;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background:
+    linear-gradient(135deg, transparent 46%, var(--red) 46%, var(--red) 54%, transparent 54%),
+    var(--selected);
+}
+
+/* the effect drifting behind the preview's banner */
+.preview-effect {
+  position: absolute;
+  inset: 0;
+}
+
+.preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.preview-badges img {
+  width: 18px;
+  height: 18px;
+}
+
+.preview-banner {
+  position: relative;
+  overflow: hidden;
+}

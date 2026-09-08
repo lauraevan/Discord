@@ -56,6 +56,27 @@ export type Account = {
   collectibles?: string[]
   /** the avatar decoration currently worn, if any */
   decoration?: string
+  /** the profile effect worn, by its id in src/shop.ts */
+  effect?: string
+  /** an uploaded avatar, as a data URL; the default mark shows when there is none */
+  avatar?: string
+  /** an uploaded profile banner, as a data URL */
+  banner?: string
+  /** the banner colour, when there is no banner image */
+  bannerColor?: string
+  /**
+   * Per-server profiles. Discord lets a member look different in each server:
+   * a nickname, its own avatar colour, pronouns and bio.
+   */
+  serverProfiles?: Record<string, ServerProfile>
+}
+
+/** What a member can override about themselves in one server. */
+export type ServerProfile = {
+  nick?: string
+  color?: string
+  pronouns?: string
+  bio?: string
 }
 
 /**

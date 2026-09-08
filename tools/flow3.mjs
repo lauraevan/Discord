@@ -277,6 +277,40 @@ await step('the Orbs can be spent in the Shop, and the decoration is worn', asyn
   expect((await p.locator('.user-card .avatar-decoration').count()) === 1, 'not shown on the avatar')
 })
 
+/* ------------------------------------------------------------- profiles */
+
+await step('the profile can actually be changed, and the preview follows', async () => {
+  await p.click('.user-card .acts button[aria-label="User settings"]')
+  await p.waitForTimeout(400)
+  await p.click('.settings-item:has-text("Profiles")')
+  await p.waitForTimeout(300)
+  // a decoration bought earlier in this run is offered, and wearing it lands
+  // on the preview card and on the avatar everywhere else
+  expect((await p.locator('.profile-pick').count()) > 1, 'no decoration to wear')
+  await p.click('.profile-pick:has-text("Cozy Cat")')
+  await p.waitForTimeout(250)
+  expect(
+    (await p.locator('.preview-card .avatar-decoration').count()) === 1,
+    'the preview did not wear it',
+  )
+  await p.fill('.profile-edit-form textarea', 'wearing a cat')
+  await p.waitForTimeout(200)
+  expect(
+    (await p.locator('.preview-card p').innerText()) === 'wearing a cat',
+    'the preview did not follow About Me',
+  )
+  await p.click('.profile-tab:has-text("Server Profiles")')
+  await p.waitForTimeout(250)
+  await p.fill('.profile-edit-form input', 'Nebulaaa')
+  await p.waitForTimeout(200)
+  expect(
+    (await p.locator('.preview-card b').innerText()) === 'Nebulaaa',
+    'the server nickname did not reach the preview',
+  )
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(250)
+})
+
 /* -------------------------------------------------------- server settings */
 
 await step('an AutoMod rule really blocks a message', async () => {

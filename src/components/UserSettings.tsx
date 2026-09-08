@@ -1,8 +1,18 @@
 import { useState } from 'react'
-import { statusColor, statusLabel, type Account, type Status } from '../data'
+import {
+  statusColor,
+  statusLabel,
+  type Account,
+  type Server,
+  type ServerProfile,
+  type Status,
+} from '../data'
 import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
 import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
 import { CheckIcon, LockIcon } from '../ui/Icons'
+import { BADGES } from '../badges'
+import { COLLECTIONS } from '../shop'
+import { DECORATIONS, Decoration } from '../ui/Decorations'
 import {
   Divider,
   Field,
@@ -27,6 +37,7 @@ import { Avatar } from './UserArea'
  */
 export function UserSettings({
   account,
+  servers,
   prefs,
   themeId,
   premium,
@@ -37,6 +48,8 @@ export function UserSettings({
   onSignOut,
 }: {
   account: Account
+  /** the servers the account is in, for its per-server profiles */
+  servers: Server[]
   prefs: Prefs
   themeId: string
   /** Nitro subscribers get the background gradients, as they do in the client */
@@ -149,141 +162,12 @@ export function UserSettings({
       ) : null}
 
       {section === 'profiles' ? (
-        <>
-          <Title>Profiles</Title>
-          <div className="profile-edit">
-            <div className="profile-edit-form">
-              <Field
-                label="DISPLAY NAME"
-                value={account.name}
-                maxLength={32}
-                onChange={(name) => onAccount({ ...account, name })}
-              />
-              <Field
-                label="USERNAME"
-                value={account.handle}
-                maxLength={32}
-                onChange={(handle) =>
-                  onAccount({ ...account, handle: handle.toLowerCase().replace(/[^a-z0-9._]/g, '') })
-                }
-              />
-              <Field
-                label="PRONOUNS"
-                value={account.pronouns}
-                maxLength={40}
-                onChange={(pronouns) => onAccount({ ...account, pronouns })}
-              />
-              <Field
-                label="ABOUT ME"
-                value={account.bio}
-                maxLength={190}
-                textarea
-                onChange={(bio) => onAccount({ ...account, bio })}
-              />
-              <div className="set-field">
-                <label>AVATAR &amp; BANNER COLOUR</label>
-                <div className="swatch-row">
-                  {[
-                    '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
-                    '#9b59b6', '#1abc9c', '#e67e22', '#607d8b', '#f47fff',
-                  ].map((c) => (
-                    <button
-                      key={c}
-                      className={'swatch' + (c === account.color ? ' on' : '')}
-                      style={{ background: c }}
-                      aria-label={c}
-                      onClick={() => onAccount({ ...account, color: c })}
-                    >
-                      {c === account.color ? <CheckIcon /> : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="set-field">
-                <label>PROFILE THEME</label>
-                {/* Discord's profile theme is two colours, and it is a Nitro
-                    feature. The pairs offered are its own gradient presets. */}
-                <div className="swatch-row">
-                  <button
-                    className={'swatch none' + (account.profileTheme ? '' : ' on')}
-                    aria-label="No profile theme"
-                    onClick={() => onAccount({ ...account, profileTheme: undefined })}
-                  >
-                    {account.profileTheme ? null : <CheckIcon />}
-                  </button>
-                  {GRADIENTS.map((g) => {
-                    const on =
-                      account.profileTheme?.[0] === g.light[0] &&
-                      account.profileTheme?.[1] === g.light[1]
-                    return (
-                      <button
-                        key={g.key}
-                        className={'swatch' + (on ? ' on' : '') + (premium ? '' : ' locked')}
-                        style={{ background: `linear-gradient(160deg, ${g.light[0]}, ${g.light[1]})` }}
-                        aria-label={g.name}
-                        title={g.name}
-                        disabled={!premium}
-                        onClick={() =>
-                          onAccount({ ...account, profileTheme: [g.light[0], g.light[1]] })
-                        }
-                      >
-                        {on ? <CheckIcon /> : null}
-                        {premium ? null : <LockIcon size={12} />}
-                      </button>
-                    )
-                  })}
-                </div>
-                {premium ? null : (
-                  <p className="theme-note">Nitro unlocks profile themes.</p>
-                )}
-              </div>
-              <div className="set-field">
-                <label>STATUS</label>
-                <div className="status-row">
-                  {(['online', 'idle', 'dnd', 'invisible'] as Status[]).map((s) => (
-                    <button
-                      key={s}
-                      className={'status-pick' + (s === account.status ? ' on' : '')}
-                      onClick={() => onAccount({ ...account, status: s })}
-                    >
-                      <span className="p-dot" style={{ background: statusColor[s] }} />
-                      {statusLabel[s]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="profile-preview">
-              <div className="set-row-label">PREVIEW</div>
-              <div
-                className={'preview-card' + (account.profileTheme ? ' themed' : '')}
-                style={
-                  account.profileTheme
-                    ? {
-                        background: `linear-gradient(180deg, ${account.profileTheme[0]}, ${account.profileTheme[1]})`,
-                      }
-                    : undefined
-                }
-              >
-                <div
-                  className="preview-banner"
-                  style={{ background: account.profileTheme?.[0] ?? account.color }}
-                />
-                <span className="preview-avatar">
-                  <Avatar account={account} size={72} />
-                </span>
-                <div className="preview-body">
-                  <b>{account.name}</b>
-                  <span>
-                    {account.handle}
-                    {account.pronouns ? ` • ${account.pronouns}` : ''}
-                  </span>
-                  {account.bio ? <p>{account.bio}</p> : null}
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
+        <Profiles
+          account={account}
+          servers={servers}
+          premium={premium}
+          onAccount={onAccount}
+        />
       ) : null}
 
       {section === 'appearance' ? (
@@ -774,5 +658,342 @@ export function UserSettings({
         </>
       ) : null}
     </SettingsLayer>
+  )
+}
+
+/* ------------------------------------------------------------------ profiles
+ *
+ * Discord's Profiles pane, which this used to have a sketch of: two tabs —
+ * your profile, and the one you wear in a particular server — a column of
+ * controls on the left and a live profile card on the right that every control
+ * paints into. Everything that can be worn here is something the account
+ * actually owns: a decoration is one of the collectibles bought in the Shop, a
+ * profile effect likewise, and the themes are Nitro's own gradients.
+ */
+
+function Profiles({
+  account,
+  servers,
+  premium,
+  onAccount,
+}: {
+  account: Account
+  servers: Server[]
+  premium: boolean
+  onAccount: (a: Account) => void
+}) {
+  const [tab, setTab] = useState<'user' | 'server'>('user')
+  const [serverId, setServerId] = useState(servers[0]?.id ?? '')
+  const owned = account.collectibles ?? []
+  const decorations = DECORATIONS.filter((d) => owned.includes(d.id))
+  const effects = COLLECTIONS.flatMap((c) =>
+    c.effects.filter((e) => owned.includes(e.id)).map((e) => ({ ...e, colors: c.confetti })),
+  )
+  const profile: ServerProfile = account.serverProfiles?.[serverId] ?? {}
+
+  const patchProfile = (p: Partial<ServerProfile>) =>
+    onAccount({
+      ...account,
+      serverProfiles: {
+        ...(account.serverProfiles ?? {}),
+        [serverId]: { ...profile, ...p },
+      },
+    })
+
+  /** the account as this pane's preview should paint it */
+  const shown: Account =
+    tab === 'server'
+      ? {
+          ...account,
+          name: profile.nick || account.name,
+          color: profile.color ?? account.color,
+          pronouns: profile.pronouns ?? account.pronouns,
+          bio: profile.bio ?? account.bio,
+        }
+      : account
+
+  return (
+    <>
+      <Title>Profiles</Title>
+      <nav className="profile-tabs">
+        <button
+          className={'profile-tab' + (tab === 'user' ? ' on' : '')}
+          onClick={() => setTab('user')}
+        >
+          User Profile
+        </button>
+        <button
+          className={'profile-tab' + (tab === 'server' ? ' on' : '')}
+          onClick={() => setTab('server')}
+          disabled={servers.length === 0}
+        >
+          Server Profiles
+        </button>
+      </nav>
+
+      <div className="profile-edit">
+        <div className="profile-edit-form">
+          {tab === 'server' ? (
+            <div className="set-field">
+              <label>SERVER</label>
+              <select
+                className="field"
+                value={serverId}
+                onChange={(e) => setServerId(e.target.value)}
+              >
+                {servers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
+          <Field
+            label={tab === 'server' ? 'SERVER NICKNAME' : 'DISPLAY NAME'}
+            value={tab === 'server' ? (profile.nick ?? '') : account.name}
+            maxLength={32}
+            placeholder={tab === 'server' ? account.name : undefined}
+            onChange={(v) =>
+              tab === 'server' ? patchProfile({ nick: v }) : onAccount({ ...account, name: v })
+            }
+          />
+          {tab === 'user' ? (
+            <Field
+              label="USERNAME"
+              value={account.handle}
+              maxLength={32}
+              onChange={(handle) =>
+                onAccount({ ...account, handle: handle.toLowerCase().replace(/[^a-z0-9._]/g, '') })
+              }
+            />
+          ) : null}
+          <Field
+            label="PRONOUNS"
+            value={tab === 'server' ? (profile.pronouns ?? '') : account.pronouns}
+            maxLength={40}
+            placeholder={tab === 'server' ? account.pronouns : undefined}
+            onChange={(v) =>
+              tab === 'server'
+                ? patchProfile({ pronouns: v })
+                : onAccount({ ...account, pronouns: v })
+            }
+          />
+          <Field
+            label="ABOUT ME"
+            value={tab === 'server' ? (profile.bio ?? '') : account.bio}
+            maxLength={190}
+            textarea
+            placeholder={tab === 'server' ? account.bio : undefined}
+            onChange={(v) =>
+              tab === 'server' ? patchProfile({ bio: v }) : onAccount({ ...account, bio: v })
+            }
+          />
+
+          <div className="set-field">
+            <label>AVATAR &amp; BANNER COLOUR</label>
+            <div className="swatch-row">
+              {[
+                '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
+                '#9b59b6', '#1abc9c', '#e67e22', '#607d8b', '#f47fff',
+              ].map((c) => {
+                const on = (tab === 'server' ? (profile.color ?? account.color) : account.color) === c
+                return (
+                  <button
+                    key={c}
+                    className={'swatch' + (on ? ' on' : '')}
+                    style={{ background: c }}
+                    aria-label={c}
+                    onClick={() =>
+                      tab === 'server'
+                        ? patchProfile({ color: c })
+                        : onAccount({ ...account, color: c })
+                    }
+                  >
+                    {on ? <CheckIcon /> : null}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {tab === 'user' ? (
+            <>
+              <div className="set-field">
+                <label>AVATAR DECORATION</label>
+                {decorations.length === 0 ? (
+                  <p className="theme-note">
+                    None owned yet — the Shop sells them, and Quests pay the Orbs for one.
+                  </p>
+                ) : (
+                  <div className="profile-picker">
+                    <button
+                      className={'profile-pick' + (account.decoration ? '' : ' on')}
+                      onClick={() => onAccount({ ...account, decoration: undefined })}
+                    >
+                      <span className="profile-pick-none" />
+                      None
+                    </button>
+                    {decorations.map((d) => (
+                      <button
+                        key={d.id}
+                        className={'profile-pick' + (account.decoration === d.id ? ' on' : '')}
+                        onClick={() => onAccount({ ...account, decoration: d.id })}
+                      >
+                        <span className="profile-pick-art">
+                          <Decoration id={d.id} size={52} />
+                        </span>
+                        {d.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="set-field">
+                <label>PROFILE EFFECT</label>
+                {effects.length === 0 ? (
+                  <p className="theme-note">
+                    None owned yet. Profile effects are sold in the Shop, beside the decorations.
+                  </p>
+                ) : (
+                  <div className="profile-picker">
+                    <button
+                      className={'profile-pick' + (account.effect ? '' : ' on')}
+                      onClick={() => onAccount({ ...account, effect: undefined })}
+                    >
+                      <span className="profile-pick-none" />
+                      None
+                    </button>
+                    {effects.map((e) => (
+                      <button
+                        key={e.id}
+                        className={'profile-pick' + (account.effect === e.id ? ' on' : '')}
+                        onClick={() => onAccount({ ...account, effect: e.id })}
+                      >
+                        <span className="profile-pick-art">
+                          <span className="shop-effect">
+                            {(e.colors.length ? e.colors : ['#ca9ef9']).slice(0, 4).map((c, i) => (
+                              <i key={i} style={{ background: c, animationDelay: `${i * 0.4}s` }} />
+                            ))}
+                          </span>
+                        </span>
+                        {e.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="set-field">
+                <label>PROFILE THEME</label>
+                <div className="swatch-row">
+                  <button
+                    className={'swatch none' + (account.profileTheme ? '' : ' on')}
+                    aria-label="No profile theme"
+                    onClick={() => onAccount({ ...account, profileTheme: undefined })}
+                  >
+                    {account.profileTheme ? null : <CheckIcon />}
+                  </button>
+                  {GRADIENTS.map((g) => {
+                    const on =
+                      account.profileTheme?.[0] === g.light[0] &&
+                      account.profileTheme?.[1] === g.light[1]
+                    return (
+                      <button
+                        key={g.key}
+                        className={'swatch' + (on ? ' on' : '') + (premium ? '' : ' locked')}
+                        style={{
+                          background: `linear-gradient(160deg, ${g.light[0]}, ${g.light[1]})`,
+                        }}
+                        aria-label={g.name}
+                        title={g.name}
+                        disabled={!premium}
+                        onClick={() =>
+                          onAccount({ ...account, profileTheme: [g.light[0], g.light[1]] })
+                        }
+                      >
+                        {on ? <CheckIcon /> : null}
+                        {premium ? null : <LockIcon size={12} />}
+                      </button>
+                    )
+                  })}
+                </div>
+                {premium ? null : <p className="theme-note">Nitro unlocks profile themes.</p>}
+              </div>
+
+              <div className="set-field">
+                <label>STATUS</label>
+                <div className="status-row">
+                  {(['online', 'idle', 'dnd', 'invisible'] as Status[]).map((s) => (
+                    <button
+                      key={s}
+                      className={'status-pick' + (s === account.status ? ' on' : '')}
+                      onClick={() => onAccount({ ...account, status: s })}
+                    >
+                      <span className="p-dot" style={{ background: statusColor[s] }} />
+                      {statusLabel[s]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        <div className="profile-preview">
+          <div className="set-row-label">PREVIEW</div>
+          <ProfileCard account={shown} />
+        </div>
+      </div>
+    </>
+  )
+}
+
+/** The preview: the profile as the popout paints it, with what is worn on it. */
+function ProfileCard({ account }: { account: Account }) {
+  const themed = account.profileTheme
+  const badges = BADGES.filter((b) => (account.badges ?? []).includes(b.id))
+  const effect = COLLECTIONS.flatMap((c) =>
+    c.effects.filter((e) => e.id === account.effect).map(() => c.confetti),
+  )[0]
+  return (
+    <div
+      className={'preview-card' + (themed ? ' themed' : '')}
+      style={
+        themed
+          ? { background: `linear-gradient(180deg, ${themed[0]}, ${themed[1]})` }
+          : undefined
+      }
+    >
+      <div className="preview-banner" style={{ background: themed?.[0] ?? account.color }}>
+        {effect ? (
+          <span className="shop-effect preview-effect">
+            {effect.slice(0, 6).map((c, i) => (
+              <i key={i} style={{ background: c, animationDelay: `${i * 0.42}s` }} />
+            ))}
+          </span>
+        ) : null}
+      </div>
+      <span className="preview-avatar">
+        <Avatar account={account} size={72} />
+      </span>
+      <div className="preview-body">
+        <b>{account.name}</b>
+        <span>
+          {account.handle}
+          {account.pronouns ? ` • ${account.pronouns}` : ''}
+        </span>
+        {badges.length ? (
+          <div className="preview-badges">
+            {badges.map((b) => (
+              <img key={b.id} src={b.src} alt={b.label} title={b.label} />
+            ))}
+          </div>
+        ) : null}
+        {account.bio ? <p>{account.bio}</p> : null}
+      </div>
+    </div>
   )
 }

@@ -28,6 +28,17 @@ the shape Discord's uses — `src/qr.ts` is a byte-mode encoder with version
 selection, Reed-Solomon and all eight data masks scored by the standard's
 penalty rules, verified against an independent decoder.
 
+### Profiles
+
+The Profiles pane is Discord's: User Profile and Server Profiles tabs, the
+controls on the left and a live profile card on the right that every one of
+them paints into. What can be worn is what the account owns — a decoration is
+a collectible bought in the Shop with Orbs from a Quest, a profile effect
+likewise — and the profile themes are Nitro's own gradients, gated behind
+Nitro the way the client gates them. A server profile overrides the nickname,
+colour, pronouns and About Me for one server, which is what Discord's per-
+server profiles do.
+
 ### Servers
 
 Discord's three-step create flow — *Create a server* (Create My Own, or one of

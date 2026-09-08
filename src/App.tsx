@@ -1076,6 +1076,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
       {userSettings ? (
         <UserSettings
           account={account}
+          servers={servers}
           prefs={prefs}
           themeId={themeId}
           premium={premiumType === PremiumType.TIER_2}
