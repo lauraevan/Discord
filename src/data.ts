@@ -143,6 +143,8 @@ export type Channel = {
   /** set on threads: the message the thread was started from */
   rootMessageId?: string
   archived?: boolean
+  /** onboarding: one of the channels a new member lands in */
+  onboardingDefault?: boolean
 }
 
 /** Discord's slowmode steps, as the channel settings slider offers them. */
@@ -179,6 +181,101 @@ export type Role = {
 
 export type GuildEmoji = { id: string; name: string; code: string }
 
+/** A server sticker. Discord gives a server 5 slots before boosts. */
+export type GuildSticker = {
+  id: string
+  name: string
+  description: string
+  /** the emoji the sticker is filed under, as a shortcode */
+  related: string
+}
+
+/** A soundboard sound. 8 slots before boosts, 0-1 volume. */
+export type GuildSound = {
+  id: string
+  name: string
+  emoji: string
+  volume: number
+}
+
+/**
+ * A server tag: up to four characters worn beside a member's name, with a
+ * badge from one of the packs the server has unlocked. The packs are the
+ * client's own — Pets, Flex, Plant and Creepy Crawlies — and their badge ids
+ * are its numbering (21-25, 26-30, 31-35, 36-40).
+ */
+export type ServerTag = { text: string; badge: number }
+
+/** `AutoModerationTriggerType` */
+export const AutoModTrigger = {
+  KEYWORD: 1,
+  SPAM_LINK: 2,
+  ML_SPAM: 3,
+  DEFAULT_KEYWORD_LIST: 4,
+  MENTION_SPAM: 5,
+} as const
+
+/** `AutoModerationActionType` */
+export const AutoModAction = {
+  BLOCK_MESSAGE: 1,
+  FLAG_TO_CHANNEL: 2,
+  USER_COMMUNICATION_DISABLED: 3,
+  QUARANTINE_USER: 4,
+} as const
+
+/** `KeywordPresetType` */
+export const KeywordPreset = { PROFANITY: 1, SEXUAL_CONTENT: 2, SLURS: 3 } as const
+
+export type AutoModRule = {
+  id: string
+  name: string
+  trigger: (typeof AutoModTrigger)[keyof typeof AutoModTrigger]
+  enabled: boolean
+  /** KEYWORD */
+  keywords: string[]
+  /** DEFAULT_KEYWORD_LIST */
+  presets: number[]
+  /** MENTION_SPAM */
+  mentionLimit?: number
+  actions: number[]
+  alertChannelId?: string
+  /** USER_COMMUNICATION_DISABLED, in seconds */
+  timeoutSeconds?: number
+}
+
+/** A webhook, as the server settings list them. */
+export type Webhook = {
+  id: string
+  name: string
+  channelId: string
+  token: string
+  createdAt: number
+}
+
+/** `GuildVerificationLevel` */
+export const VerificationLevel = {
+  NONE: 0,
+  LOW: 1,
+  MEDIUM: 2,
+  HIGH: 3,
+  VERY_HIGH: 4,
+} as const
+
+/** `GuildExplicitContentFilter` */
+export const ExplicitFilter = {
+  DISABLED: 0,
+  MEMBERS_WITHOUT_ROLES: 1,
+  ALL_MEMBERS: 2,
+} as const
+
+/** `SystemChannelFlags` — set a bit to suppress that message. */
+export const SystemChannelFlags = {
+  SUPPRESS_JOIN_NOTIFICATIONS: 1,
+  SUPPRESS_PREMIUM_SUBSCRIPTIONS: 2,
+  SUPPRESS_GUILD_REMINDER_NOTIFICATIONS: 4,
+  SUPPRESS_JOIN_NOTIFICATION_REPLIES: 8,
+} as const
+
 export type Invite = {
   code: string
   createdAt: number
@@ -202,13 +299,40 @@ export type Server = {
   channels: Channel[]
   roles: Role[]
   emojis: GuildEmoji[]
+  stickers?: GuildSticker[]
+  sounds?: GuildSound[]
+  webhooks?: Webhook[]
+  automod?: AutoModRule[]
   invites: Invite[]
   bans: { id: string; name: string; reason: string }[]
   audit: AuditEntry[]
   /** ALL_MESSAGES 0 | ONLY_MENTIONS 1 | NO_MESSAGES 2 */
   notifyLevel: 0 | 1 | 2
   boostTier: 0 | 1 | 2 | 3
+  /** boosts the server has; the tiers sit at 2, 7 and 14 */
+  boosts?: number
+  /** the tag members can wear, four characters and a badge */
+  tag?: ServerTag
+  /** the vanity invite, which Discord gates behind Level 3 */
+  vanity?: string
+  widget?: { enabled: boolean; channelId: string | null }
+  /** where Discord posts joins, boosts and the reminder messages */
+  systemChannelId?: string | null
+  systemFlags?: number
+  /** the inactive channel members are moved to, and after how many seconds */
+  afkChannelId?: string | null
+  afkTimeout?: number
+  verificationLevel?: number
+  explicitFilter?: number
+  /** a community server has rules and updates channels */
+  community?: { rulesChannelId: string | null; updatesChannelId: string | null }
 }
+
+/** Discord's boost thresholds. */
+export const BOOST_TIERS = [0, 2, 7, 14]
+
+export const boostTierOf = (boosts: number): 0 | 1 | 2 | 3 =>
+  boosts >= 14 ? 3 : boosts >= 7 ? 2 : boosts >= 2 ? 1 : 0
 
 let seq = 0
 export const uid = (p: string) => `${p}-${Date.now().toString(36)}-${++seq}`

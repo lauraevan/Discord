@@ -983,6 +983,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     }}
                     onApps={() => setAppsPanel(true)}
                     premiumType={premiumType}
+                    automod={server?.automod}
                     onGiftNitro={() => {
                       setActiveServer(null)
                       setHomeView('nitro')

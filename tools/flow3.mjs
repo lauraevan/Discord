@@ -277,6 +277,38 @@ await step('the Orbs can be spent in the Shop, and the decoration is worn', asyn
   expect((await p.locator('.user-card .avatar-decoration').count()) === 1, 'not shown on the avatar')
 })
 
+/* -------------------------------------------------------- server settings */
+
+await step('an AutoMod rule really blocks a message', async () => {
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  await p.click('.server-header')
+  await p.waitForTimeout(250)
+  await p.click('text=Server Settings')
+  await p.waitForTimeout(350)
+  await p.click('.settings-item:has-text("AutoMod")')
+  await p.waitForTimeout(250)
+  await p.click('.srv-automod-add button:has-text("Custom words")')
+  await p.waitForTimeout(250)
+  expect((await p.locator('.srv-rules li').count()) === 1, 'rule not created')
+  await p.fill('.srv-rules .field', 'bananas')
+  await p.waitForTimeout(200)
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(300)
+
+  const before = await p.locator('.group').count()
+  await p.fill('.composer-input', 'i love bananas')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(300)
+  expect((await p.locator('.composer-blocked').count()) === 1, 'AutoMod did not block')
+  expect((await p.locator('.group').count()) === before, 'the blocked message was sent anyway')
+
+  await p.fill('.composer-input', 'i love apples')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(300)
+  expect((await p.locator('.group').count()) === before + 1, 'a clean message was blocked too')
+})
+
 /* -------------------------------------------------------------- uploads */
 
 await step('a picked file waits in the composer, then sends with the message', async () => {

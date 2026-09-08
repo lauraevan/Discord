@@ -1,10 +1,18 @@
 import { useState } from 'react'
 import {
-  inviteCode,
+  AutoModAction,
+  AutoModTrigger,
+  BOOST_TIERS,
+  ExplicitFilter,
+  KeywordPreset,
   PERMISSION_GROUPS,
   ROLE_COLORS,
+  VerificationLevel,
+  boostTierOf,
+  inviteCode,
   uid,
   type Account,
+  type AutoModRule,
   type Role,
   type Server,
 } from '../data'
@@ -17,9 +25,11 @@ import {
   Note,
   Radio,
   SettingsLayer,
+  Slider,
   Sub,
   Title,
   Toggle,
+  Unavailable,
   type NavItem,
 } from './SettingsLayer'
 import { Avatar } from './UserArea'
@@ -51,27 +61,39 @@ export function ServerSettings({
   const nav: NavItem[] = [
     { head: server.name },
     { id: 'overview', label: 'Overview' },
+    { id: 'channels', label: 'Channels' },
     { id: 'roles', label: 'Roles' },
     { id: 'emoji', label: 'Emoji' },
     { id: 'stickers', label: 'Stickers' },
     { id: 'soundboard', label: 'Soundboard' },
+    { id: 'tag', label: 'Server Tag' },
     { id: 'widget', label: 'Widget' },
     { id: 'templates', label: 'Server Template' },
     { id: 'vanity_url', label: 'Custom Invite Link' },
-    { sep: true },
-    { head: 'Community' },
-    { id: 'community', label: 'Enable Community' },
-    { id: 'onboarding', label: 'Onboarding' },
+    { id: 'boost_status', label: 'Server Boost Status' },
     { sep: true },
     { head: 'Apps' },
     { id: 'integrations', label: 'Integrations' },
     { id: 'app_directory', label: 'App Directory' },
+    { id: 'webhooks', label: 'Webhooks' },
     { sep: true },
     { head: 'Moderation' },
     { id: 'safety', label: 'Safety Setup' },
     { id: 'automod', label: 'AutoMod' },
     { id: 'audit_log', label: 'Audit Log' },
     { id: 'bans', label: 'Bans' },
+    { sep: true },
+    { head: 'Community' },
+    { id: 'community', label: 'Enable Community' },
+    { id: 'onboarding', label: 'Onboarding' },
+    { id: 'engagement', label: 'Server Guide' },
+    { id: 'discovery', label: 'Discovery' },
+    { id: 'partner', label: 'Partner Program' },
+    { id: 'analytics', label: 'Analytics' },
+    { sep: true },
+    { head: 'Monetization' },
+    { id: 'role_subscriptions', label: 'Server Subscriptions' },
+    { id: 'guild_products', label: 'Server Shop' },
     { sep: true },
     { head: 'User Management' },
     { id: 'members', label: 'Members' },
@@ -550,23 +572,1020 @@ export function ServerSettings({
         </>
       ) : null}
 
-      {['stickers', 'soundboard', 'widget', 'templates', 'vanity_url', 'community', 'onboarding', 'integrations', 'app_directory', 'safety', 'automod'].includes(
+      {section === 'channels' ? <Channels server={server} onPatch={onPatch} /> : null}
+      {section === 'stickers' ? <Stickers server={server} onPatch={onPatch} /> : null}
+      {section === 'soundboard' ? <Soundboard server={server} onPatch={onPatch} /> : null}
+      {section === 'tag' ? <ServerTagSection server={server} onPatch={onPatch} /> : null}
+      {section === 'widget' ? <Widget server={server} onPatch={onPatch} /> : null}
+      {section === 'templates' ? <Template server={server} /> : null}
+      {section === 'vanity_url' ? <Vanity server={server} onPatch={onPatch} /> : null}
+      {section === 'boost_status' ? <BoostStatus server={server} onPatch={onPatch} /> : null}
+      {section === 'webhooks' ? <Webhooks server={server} onPatch={onPatch} /> : null}
+      {section === 'safety' ? <Safety server={server} onPatch={onPatch} /> : null}
+      {section === 'automod' ? <AutoMod server={server} onPatch={onPatch} /> : null}
+      {section === 'community' ? <Community server={server} onPatch={onPatch} /> : null}
+      {section === 'onboarding' ? <Onboarding server={server} onPatch={onPatch} /> : null}
+      {section === 'engagement' ? <ServerGuide server={server} /> : null}
+
+      {['integrations', 'app_directory', 'discovery', 'partner', 'analytics', 'role_subscriptions', 'guild_products'].includes(
         section,
       ) ? (
         <>
           <Title>{(nav.find((n) => 'id' in n && n.id === section) as { label: string }).label}</Title>
-          <div className="set-unavailable">
-            <b>Needs Discord's servers</b>
-            <span>
-              {section === 'stickers' || section === 'soundboard'
-                ? 'Stickers and soundboard sounds are uploaded files served from Discord’s CDN.'
-                : section === 'integrations' || section === 'app_directory' || section === 'automod'
-                  ? 'Webhooks, bots and AutoMod rules all run server-side.'
-                  : 'This section configures how the server appears to other people, which needs a real server.'}
-            </span>
-          </div>
+          <Unavailable
+            what="Not available in a page"
+            why={
+              section === 'integrations' || section === 'app_directory'
+                ? 'Bots and apps are programs on Discord’s side; there is nothing here for them to connect to.'
+                : section === 'role_subscriptions' || section === 'guild_products'
+                  ? 'Selling anything needs Discord’s billing systems and a payout account.'
+                  : 'Discovery, the partner programme and analytics are decided by Discord about a real server.'
+            }
+          />
         </>
       ) : null}
     </SettingsLayer>
+  )
+}
+
+/* -------------------------------------------------------------- the sections
+ *
+ * Each of these is a section the client's own GuildSettingsSections enum
+ * names, built so it does the thing it says rather than describing it. What
+ * the server stores for them lives on the Server object in src/data.ts.
+ */
+
+type Patch = (fn: (s: Server) => Server, audit?: { action: string; target: string }) => void
+
+/** CHANNELS — the list, with the categories and the ordering. */
+function Channels({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const [name, setName] = useState('')
+  const inCategory = (id: string | null) => server.channels.filter((c) => c.categoryId === id)
+  return (
+    <>
+      <Title>Channels</Title>
+      <Note>
+        Categories and channels, in the order the sidebar shows them. Dragging is not wired up;
+        the arrows move a channel between categories.
+      </Note>
+      <div className="srv-channels">
+        {[null, ...server.categories.map((c) => c.id)].map((catId) => {
+          const cat = server.categories.find((c) => c.id === catId)
+          const rows = inCategory(catId)
+          if (catId !== null && rows.length === 0 && cat == null) return null
+          return (
+            <section key={catId ?? 'none'} className="srv-cat">
+              <h4>{cat ? cat.name : 'No category'}</h4>
+              {rows.length === 0 ? (
+                <div className="table-empty">Nothing in here.</div>
+              ) : (
+                <ul>
+                  {rows.map((ch) => (
+                    <li key={ch.id}>
+                      <span className="srv-chan-kind">{ch.kind}</span>
+                      <b>{ch.name}</b>
+                      <select
+                        value={ch.categoryId ?? ''}
+                        onChange={(e) =>
+                          onPatch(
+                            (s) => ({
+                              ...s,
+                              channels: s.channels.map((c) =>
+                                c.id === ch.id
+                                  ? { ...c, categoryId: e.target.value || null }
+                                  : c,
+                              ),
+                            }),
+                            { action: 'Channel moved', target: ch.name },
+                          )
+                        }
+                      >
+                        <option value="">No category</option>
+                        {server.categories.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        className="icon-btn"
+                        aria-label={`Delete ${ch.name}`}
+                        onClick={() =>
+                          onPatch(
+                            (s) => ({ ...s, channels: s.channels.filter((c) => c.id !== ch.id) }),
+                            { action: 'Channel deleted', target: ch.name },
+                          )
+                        }
+                      >
+                        <TrashIcon size={16} />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )
+        })}
+      </div>
+      <Divider />
+      <Sub>New category</Sub>
+      <div className="set-row-add">
+        <input
+          className="field"
+          value={name}
+          placeholder="Category name"
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button
+          className="btn-primary"
+          disabled={!name.trim()}
+          onClick={() => {
+            onPatch(
+              (s) => ({
+                ...s,
+                categories: [...s.categories, { id: uid('cat'), name: name.trim().toUpperCase() }],
+              }),
+              { action: 'Category created', target: name.trim() },
+            )
+            setName('')
+          }}
+        >
+          Create
+        </button>
+      </div>
+    </>
+  )
+}
+
+/** STICKERS — five slots before boosts, each filed under an emoji. */
+function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const [name, setName] = useState('')
+  const [related, setRelated] = useState('joy')
+  const stickers = server.stickers ?? []
+  const slots = 5 + server.boostTier * 10
+  return (
+    <>
+      <Title>Stickers</Title>
+      <Note>
+        {stickers.length} of {slots} slots used. A server starts with five and each boost level
+        adds ten. Every sticker is filed under an emoji, which is what people search it by.
+      </Note>
+      <div className="set-row-add">
+        <input
+          className="field"
+          value={name}
+          maxLength={30}
+          placeholder="Sticker name"
+          onChange={(e) => setName(e.target.value)}
+        />
+        <input
+          className="field short"
+          value={related}
+          maxLength={32}
+          placeholder="Related emoji"
+          onChange={(e) => setRelated(e.target.value.replace(/[^a-z0-9_]/g, ''))}
+        />
+        <button
+          className="btn-primary"
+          disabled={!name.trim() || stickers.length >= slots}
+          onClick={() => {
+            onPatch(
+              (s) => ({
+                ...s,
+                stickers: [
+                  ...(s.stickers ?? []),
+                  {
+                    id: uid('stk'),
+                    name: name.trim(),
+                    description: '',
+                    related: related || 'joy',
+                  },
+                ],
+              }),
+              { action: 'Sticker uploaded', target: name.trim() },
+            )
+            setName('')
+          }}
+        >
+          Upload
+        </button>
+      </div>
+      {stickers.length === 0 ? (
+        <div className="table-empty">No stickers yet.</div>
+      ) : (
+        <ul className="srv-stickers">
+          {stickers.map((st) => (
+            <li key={st.id}>
+              <span className="srv-sticker-art">
+                <EmojiGlyph code={st.related} alt="" />
+              </span>
+              <b>{st.name}</b>
+              <span className="srv-sticker-related">:{st.related}:</span>
+              <button
+                className="icon-btn"
+                aria-label={`Delete ${st.name}`}
+                onClick={() =>
+                  onPatch(
+                    (s) => ({ ...s, stickers: (s.stickers ?? []).filter((x) => x.id !== st.id) }),
+                    { action: 'Sticker deleted', target: st.name },
+                  )
+                }
+              >
+                <TrashIcon size={16} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+/** SOUNDBOARD — eight slots before boosts, each with an emoji and a volume. */
+function Soundboard({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const [name, setName] = useState('')
+  const sounds = server.sounds ?? []
+  const slots = 8 + server.boostTier * 8
+  return (
+    <>
+      <Title>Soundboard</Title>
+      <Note>
+        {sounds.length} of {slots} slots used. Playing one needs an audio file and a voice
+        connection, neither of which a page has, so these are the entries rather than the sounds.
+      </Note>
+      <div className="set-row-add">
+        <input
+          className="field"
+          value={name}
+          maxLength={32}
+          placeholder="Sound name"
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button
+          className="btn-primary"
+          disabled={!name.trim() || sounds.length >= slots}
+          onClick={() => {
+            onPatch(
+              (s) => ({
+                ...s,
+                sounds: [
+                  ...(s.sounds ?? []),
+                  { id: uid('snd'), name: name.trim(), emoji: 'loud_sound', volume: 1 },
+                ],
+              }),
+              { action: 'Sound added', target: name.trim() },
+            )
+            setName('')
+          }}
+        >
+          Upload
+        </button>
+      </div>
+      {sounds.length === 0 ? (
+        <div className="table-empty">No sounds yet.</div>
+      ) : (
+        <ul className="srv-sounds">
+          {sounds.map((sd) => (
+            <li key={sd.id}>
+              <EmojiGlyph code={sd.emoji} alt="" />
+              <b>{sd.name}</b>
+              <Slider
+                label="Volume"
+                value={Math.round(sd.volume * 100)}
+                min={0}
+                max={100}
+                step={5}
+                suffix="%"
+                onChange={(v: number) =>
+                  onPatch((s) => ({
+                    ...s,
+                    sounds: (s.sounds ?? []).map((x) =>
+                      x.id === sd.id ? { ...x, volume: v / 100 } : x,
+                    ),
+                  }))
+                }
+              />
+              <button
+                className="icon-btn"
+                aria-label={`Delete ${sd.name}`}
+                onClick={() =>
+                  onPatch(
+                    (s) => ({ ...s, sounds: (s.sounds ?? []).filter((x) => x.id !== sd.id) }),
+                    { action: 'Sound deleted', target: sd.name },
+                  )
+                }
+              >
+                <TrashIcon size={16} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+/**
+ * SERVER TAG — four characters and a badge, worn beside a member's name.
+ *
+ * The badge packs are the client's own features, and their badge ids are its
+ * numbering: Pets 21-25, Flex 26-30, Plant 31-35, Creepy Crawlies 36-40.
+ */
+const BADGE_PACKS: { name: string; ids: number[]; emoji: string[] }[] = [
+  { name: 'Pets', ids: [21, 22, 23, 24, 25], emoji: ['dog', 'cat', 'rabbit', 'hamster', 'bird'] },
+  { name: 'Flex', ids: [26, 27, 28, 29, 30], emoji: ['crown', 'gem', 'trophy', 'fire', 'star'] },
+  { name: 'Plant', ids: [31, 32, 33, 34, 35], emoji: ['seedling', 'herb', 'cactus', 'maple_leaf', 'sunflower'] },
+  {
+    name: 'Creepy Crawlies',
+    ids: [36, 37, 38, 39, 40],
+    emoji: ['spider', 'bug', 'ant', 'honeybee', 'snail'],
+  },
+]
+
+function ServerTagSection({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const tag = server.tag
+  return (
+    <>
+      <Title>Server Tag</Title>
+      <Note>
+        Four characters members can wear beside their name, with a badge from one of the packs.
+        Discord unlocks the packs per server; all four are offered here.
+      </Note>
+      <div className="srv-tag-row">
+        <Field
+          label="TAG"
+          value={tag?.text ?? ''}
+          maxLength={4}
+          placeholder="ABCD"
+          onChange={(text) =>
+            onPatch(
+              (s) => ({
+                ...s,
+                tag: { text: text.toUpperCase().slice(0, 4), badge: s.tag?.badge ?? 21 },
+              }),
+              { action: 'Server tag updated', target: text.toUpperCase() },
+            )
+          }
+        />
+        <div className="srv-tag-preview">
+          <span className="set-row-label">PREVIEW</span>
+          <span className="srv-tag-chip">
+            <EmojiGlyph code={
+                BADGE_PACKS.flatMap((p) => p.emoji)[
+                  BADGE_PACKS.flatMap((p) => p.ids).indexOf(tag?.badge ?? 21)
+                ] ?? 'dog'
+              } alt="" />
+            {tag?.text || 'TAG'}
+          </span>
+        </div>
+      </div>
+      {BADGE_PACKS.map((pack) => (
+        <div key={pack.name} className="set-field">
+          <label>{pack.name.toUpperCase()}</label>
+          <div className="srv-badges">
+            {pack.ids.map((id, i) => (
+              <button
+                key={id}
+                className={'srv-badge' + (tag?.badge === id ? ' on' : '')}
+                aria-label={`${pack.name} badge ${i + 1}`}
+                onClick={() =>
+                  onPatch((s) => ({ ...s, tag: { text: s.tag?.text ?? '', badge: id } }))
+                }
+              >
+                <EmojiGlyph code={pack.emoji[i]} alt="" />
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}
+
+/** WIDGET — the embeddable widget, its invite channel and its JSON endpoint. */
+function Widget({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const widget = server.widget ?? { enabled: false, channelId: null }
+  return (
+    <>
+      <Title>Widget</Title>
+      <Toggle
+        label="Enable server widget"
+        note="Lets a website show who is online and offer an invite."
+        value={widget.enabled}
+        onChange={(enabled) =>
+          onPatch((s) => ({ ...s, widget: { ...widget, enabled } }), {
+            action: enabled ? 'Widget enabled' : 'Widget disabled',
+            target: server.name,
+          })
+        }
+      />
+      <div className="set-field">
+        <label>INVITE CHANNEL</label>
+        <select
+          className="field"
+          value={widget.channelId ?? ''}
+          onChange={(e) =>
+            onPatch((s) => ({
+              ...s,
+              widget: { ...widget, channelId: e.target.value || null },
+            }))
+          }
+        >
+          <option value="">No invite</option>
+          {server.channels
+            .filter((c) => c.kind === 'text')
+            .map((c) => (
+              <option key={c.id} value={c.id}>
+                #{c.name}
+              </option>
+            ))}
+        </select>
+      </div>
+      <Sub>Widget endpoints</Sub>
+      <pre className="srv-code">
+        https://discord.com/api/guilds/{server.id}/widget.json{'\n'}
+        https://discord.com/api/guilds/{server.id}/widget.png?style=banner2
+      </pre>
+      <Note>Both are Discord's own endpoints, and both need a real server behind them.</Note>
+    </>
+  )
+}
+
+/** SERVER TEMPLATE — a template is the channels and roles, minus the content. */
+function Template({ server }: { server: Server }) {
+  const [code] = useState(() => inviteCode())
+  return (
+    <>
+      <Title>Server Template</Title>
+      <Note>
+        A template copies this server's channels, categories, roles and settings — not its
+        messages, members or invites.
+      </Note>
+      <div className="srv-template">
+        <b>{server.name}</b>
+        <span>
+          {server.categories.length} categories · {server.channels.length} channels ·{' '}
+          {server.roles.length} roles
+        </span>
+        <code>https://discord.new/{code}</code>
+      </div>
+      <Note>
+        The link is the shape Discord mints. It resolves on Discord's side, so it will not open
+        anything from here.
+      </Note>
+    </>
+  )
+}
+
+/** CUSTOM INVITE LINK — the vanity URL, which Discord gates behind Level 3. */
+function Vanity({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const unlocked = server.boostTier >= 3
+  return (
+    <>
+      <Title>Custom Invite Link</Title>
+      {unlocked ? null : (
+        <Note>
+          Level 3 unlocks this. The server is Level {server.boostTier} with{' '}
+          {server.boosts ?? 0} boosts — {BOOST_TIERS[3] - (server.boosts ?? 0)} more to go.
+        </Note>
+      )}
+      <div className="srv-vanity">
+        <span>discord.gg/</span>
+        <input
+          className="field"
+          value={server.vanity ?? ''}
+          maxLength={32}
+          disabled={!unlocked}
+          placeholder="your-link"
+          onChange={(e) =>
+            onPatch(
+              (s) => ({ ...s, vanity: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }),
+              { action: 'Custom invite link set', target: e.target.value },
+            )
+          }
+        />
+      </div>
+    </>
+  )
+}
+
+/** SERVER BOOST STATUS — the tier ladder and what each level unlocks. */
+const BOOST_PERKS: string[][] = [
+  ['50 emoji slots', '5 sticker slots', '25MB uploads'],
+  ['100 emoji slots', '15 sticker slots', '50MB uploads', 'Animated server icon', '128kbps audio'],
+  ['150 emoji slots', '30 sticker slots', '100MB uploads', 'Server banner', '256kbps audio'],
+  ['250 emoji slots', '60 sticker slots', '100MB uploads', 'Custom invite link', '384kbps audio'],
+]
+
+function BoostStatus({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const boosts = server.boosts ?? 0
+  const tier = boostTierOf(boosts)
+  const next = BOOST_TIERS[tier + 1]
+  const pct = next ? Math.min(100, (boosts / next) * 100) : 100
+  return (
+    <>
+      <Title>Server Boost Status</Title>
+      <div className="srv-boost">
+        <div className="srv-boost-head">
+          <b>Level {tier}</b>
+          <span>
+            {boosts} {boosts === 1 ? 'boost' : 'boosts'}
+            {next ? ` · ${next - boosts} to Level ${tier + 1}` : ' · top level'}
+          </span>
+        </div>
+        <span className="srv-boost-bar">
+          <i style={{ width: `${pct}%` }} />
+        </span>
+        <div className="srv-boost-ladder">
+          {[1, 2, 3].map((t) => (
+            <div key={t} className={'srv-boost-tier' + (tier >= t ? ' on' : '')}>
+              <b>Level {t}</b>
+              <span>{BOOST_TIERS[t]} boosts</span>
+              <ul>
+                {BOOST_PERKS[t].map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <button
+          className="btn-primary"
+          onClick={() =>
+            onPatch(
+              (s) => {
+                const n = (s.boosts ?? 0) + 1
+                return { ...s, boosts: n, boostTier: boostTierOf(n) }
+              },
+              { action: 'Server boosted', target: server.name },
+            )
+          }
+        >
+          Boost this server
+        </button>
+      </div>
+    </>
+  )
+}
+
+/** WEBHOOKS — real rows with real tokens, since a webhook is just a URL. */
+function Webhooks({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const [name, setName] = useState('')
+  const hooks = server.webhooks ?? []
+  const first = server.channels.find((c) => c.kind === 'text')
+  return (
+    <>
+      <Title>Webhooks</Title>
+      <Note>
+        A webhook is a URL that posts into a channel. These are minted in Discord's own shape;
+        nothing will receive a POST, since there is no server on the other end.
+      </Note>
+      <div className="set-row-add">
+        <input
+          className="field"
+          value={name}
+          maxLength={80}
+          placeholder="Webhook name"
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button
+          className="btn-primary"
+          disabled={!name.trim() || first == null}
+          onClick={() => {
+            onPatch(
+              (s) => ({
+                ...s,
+                webhooks: [
+                  ...(s.webhooks ?? []),
+                  {
+                    id: uid('wh'),
+                    name: name.trim(),
+                    channelId: first!.id,
+                    token: inviteCode() + inviteCode(),
+                    createdAt: Date.now(),
+                  },
+                ],
+              }),
+              { action: 'Webhook created', target: name.trim() },
+            )
+            setName('')
+          }}
+        >
+          New Webhook
+        </button>
+      </div>
+      {hooks.length === 0 ? (
+        <div className="table-empty">No webhooks.</div>
+      ) : (
+        <ul className="srv-hooks">
+          {hooks.map((h) => (
+            <li key={h.id}>
+              <div>
+                <b>{h.name}</b>
+                <span className="mono">
+                  https://discord.com/api/webhooks/{h.id}/{h.token}
+                </span>
+              </div>
+              <select
+                value={h.channelId}
+                onChange={(e) =>
+                  onPatch((s) => ({
+                    ...s,
+                    webhooks: (s.webhooks ?? []).map((x) =>
+                      x.id === h.id ? { ...x, channelId: e.target.value } : x,
+                    ),
+                  }))
+                }
+              >
+                {server.channels
+                  .filter((c) => c.kind === 'text')
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      #{c.name}
+                    </option>
+                  ))}
+              </select>
+              <button
+                className="icon-btn"
+                aria-label={`Delete ${h.name}`}
+                onClick={() =>
+                  onPatch(
+                    (s) => ({ ...s, webhooks: (s.webhooks ?? []).filter((x) => x.id !== h.id) }),
+                    { action: 'Webhook deleted', target: h.name },
+                  )
+                }
+              >
+                <TrashIcon size={16} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+/** SAFETY SETUP — the verification level and the content filter, as Discord has them. */
+function Safety({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  return (
+    <>
+      <Title>Safety Setup</Title>
+      <Sub>Verification level</Sub>
+      <Radio
+        value={String(server.verificationLevel ?? VerificationLevel.NONE)}
+        onChange={(v) =>
+          onPatch((s) => ({ ...s, verificationLevel: Number(v) }), {
+            action: 'Verification level changed',
+            target: server.name,
+          })
+        }
+        options={[
+          [String(VerificationLevel.NONE), 'None', 'Anyone can send a message.'],
+          [String(VerificationLevel.LOW), 'Low', 'Must have a verified email.'],
+          [String(VerificationLevel.MEDIUM), 'Medium', 'Registered on Discord for longer than 5 minutes.'],
+          [String(VerificationLevel.HIGH), 'High', 'A member of this server for longer than 10 minutes.'],
+          [String(VerificationLevel.VERY_HIGH), 'Highest', 'Must have a verified phone number.'],
+        ]}
+      />
+      <Divider />
+      <Sub>Explicit media content filter</Sub>
+      <Radio
+        value={String(server.explicitFilter ?? ExplicitFilter.MEMBERS_WITHOUT_ROLES)}
+        onChange={(v) =>
+          onPatch((s) => ({ ...s, explicitFilter: Number(v) }), {
+            action: 'Content filter changed',
+            target: server.name,
+          })
+        }
+        options={[
+          [String(ExplicitFilter.DISABLED), 'Do not scan', 'Nothing is scanned.'],
+          [
+            String(ExplicitFilter.MEMBERS_WITHOUT_ROLES),
+            'Scan media from members without a role',
+            'The default.',
+          ],
+          [String(ExplicitFilter.ALL_MEMBERS), 'Scan media from all members', 'Recommended.'],
+        ]}
+      />
+    </>
+  )
+}
+
+/**
+ * AUTOMOD — rules that really run.
+ *
+ * The trigger and action numbers are Discord's own
+ * (`AutoModerationTriggerType`, `AutoModerationActionType`), and a rule with
+ * BLOCK_MESSAGE is enforced in the composer, so a blocked word is actually
+ * blocked rather than described.
+ */
+const PRESET_WORDS: Record<number, string[]> = {
+  [KeywordPreset.PROFANITY]: ['damn', 'crap', 'hell'],
+  [KeywordPreset.SEXUAL_CONTENT]: ['nsfw'],
+  [KeywordPreset.SLURS]: ['slur'],
+}
+
+export function autoModHit(rules: AutoModRule[] | undefined, text: string) {
+  for (const rule of rules ?? []) {
+    if (!rule.enabled) continue
+    const lower = text.toLowerCase()
+    if (rule.trigger === AutoModTrigger.KEYWORD) {
+      const hit = rule.keywords.find((k) => k && lower.includes(k.toLowerCase()))
+      if (hit != null) return { rule, hit }
+    }
+    if (rule.trigger === AutoModTrigger.DEFAULT_KEYWORD_LIST) {
+      for (const preset of rule.presets) {
+        const hit = (PRESET_WORDS[preset] ?? []).find((k) => lower.includes(k))
+        if (hit != null) return { rule, hit }
+      }
+    }
+    if (rule.trigger === AutoModTrigger.SPAM_LINK && /https?:\/\//i.test(text)) {
+      return { rule, hit: 'a link' }
+    }
+    if (rule.trigger === AutoModTrigger.MENTION_SPAM) {
+      const mentions = text.match(/@\w+/g)?.length ?? 0
+      if (mentions > (rule.mentionLimit ?? 5)) return { rule, hit: `${mentions} mentions` }
+    }
+  }
+  return null
+}
+
+const TRIGGER_LABEL: Record<number, string> = {
+  [AutoModTrigger.KEYWORD]: 'Custom words',
+  [AutoModTrigger.SPAM_LINK]: 'Suspicious links',
+  [AutoModTrigger.ML_SPAM]: 'Spam content',
+  [AutoModTrigger.DEFAULT_KEYWORD_LIST]: 'Commonly flagged words',
+  [AutoModTrigger.MENTION_SPAM]: 'Mention spam',
+}
+
+function AutoMod({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const rules = server.automod ?? []
+  const add = (trigger: number, name: string) =>
+    onPatch(
+      (s) => ({
+        ...s,
+        automod: [
+          ...(s.automod ?? []),
+          {
+            id: uid('am'),
+            name,
+            trigger: trigger as AutoModRule['trigger'],
+            enabled: true,
+            keywords: [],
+            presets: trigger === AutoModTrigger.DEFAULT_KEYWORD_LIST ? [KeywordPreset.PROFANITY] : [],
+            mentionLimit: trigger === AutoModTrigger.MENTION_SPAM ? 5 : undefined,
+            actions: [AutoModAction.BLOCK_MESSAGE],
+          },
+        ],
+      }),
+      { action: 'AutoMod rule created', target: name },
+    )
+
+  const patchRule = (id: string, fn: (r: AutoModRule) => AutoModRule) =>
+    onPatch((s) => ({
+      ...s,
+      automod: (s.automod ?? []).map((r) => (r.id === id ? fn(r) : r)),
+    }))
+
+  return (
+    <>
+      <Title>AutoMod</Title>
+      <Note>
+        The trigger and action numbers are Discord's own. A rule that blocks a message really
+        blocks it — the composer refuses to send one that matches.
+      </Note>
+      <div className="srv-automod-add">
+        {Object.entries(TRIGGER_LABEL).map(([t, label]) => (
+          <button
+            key={t}
+            className="btn-secondary"
+            disabled={Number(t) === AutoModTrigger.ML_SPAM}
+            onClick={() => add(Number(t), label)}
+          >
+            <PlusIcon size={14} />
+            {label}
+          </button>
+        ))}
+      </div>
+      {rules.length === 0 ? (
+        <div className="table-empty">No rules yet.</div>
+      ) : (
+        <ul className="srv-rules">
+          {rules.map((r) => (
+            <li key={r.id}>
+              <div className="srv-rule-head">
+                <b>{r.name}</b>
+                <span className="srv-rule-trigger">{TRIGGER_LABEL[r.trigger]}</span>
+                <Toggle
+                  label=""
+                  value={r.enabled}
+                  onChange={(enabled) => patchRule(r.id, (x) => ({ ...x, enabled }))}
+                />
+                <button
+                  className="icon-btn"
+                  aria-label={`Delete ${r.name}`}
+                  onClick={() =>
+                    onPatch(
+                      (s) => ({ ...s, automod: (s.automod ?? []).filter((x) => x.id !== r.id) }),
+                      { action: 'AutoMod rule deleted', target: r.name },
+                    )
+                  }
+                >
+                  <TrashIcon size={16} />
+                </button>
+              </div>
+
+              {r.trigger === AutoModTrigger.KEYWORD ? (
+                <input
+                  className="field"
+                  value={r.keywords.join(', ')}
+                  placeholder="Words to block, comma separated"
+                  onChange={(e) =>
+                    patchRule(r.id, (x) => ({
+                      ...x,
+                      keywords: e.target.value
+                        .split(',')
+                        .map((k) => k.trim())
+                        .filter(Boolean),
+                    }))
+                  }
+                />
+              ) : null}
+
+              {r.trigger === AutoModTrigger.DEFAULT_KEYWORD_LIST ? (
+                <div className="srv-presets">
+                  {Object.entries(KeywordPreset).map(([label, value]) => (
+                    <label key={label}>
+                      <input
+                        type="checkbox"
+                        checked={r.presets.includes(value)}
+                        onChange={(e) =>
+                          patchRule(r.id, (x) => ({
+                            ...x,
+                            presets: e.target.checked
+                              ? [...x.presets, value]
+                              : x.presets.filter((p) => p !== value),
+                          }))
+                        }
+                      />
+                      {label.replace('_', ' ').toLowerCase()}
+                    </label>
+                  ))}
+                </div>
+              ) : null}
+
+              {r.trigger === AutoModTrigger.MENTION_SPAM ? (
+                <Slider
+                  label="Mention limit"
+                  value={r.mentionLimit ?? 5}
+                  min={1}
+                  max={50}
+                  step={1}
+                  onChange={(v) => patchRule(r.id, (x) => ({ ...x, mentionLimit: v }))}
+                />
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  )
+}
+
+/** ENABLE COMMUNITY — the two channels a community server must name. */
+function Community({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const community = server.community
+  const text = server.channels.filter((c) => c.kind === 'text')
+  return (
+    <>
+      <Title>Enable Community</Title>
+      <Note>
+        A community server needs a rules channel and a channel for Discord's own updates, and
+        Discord requires verification and the content filter turned up before it will switch on.
+      </Note>
+      <Toggle
+        label="Community enabled"
+        note="Adds the rules and updates channels, and the Server Guide."
+        value={community != null}
+        onChange={(on) =>
+          onPatch(
+            (s) => ({
+              ...s,
+              community: on
+                ? {
+                    rulesChannelId: text[0]?.id ?? null,
+                    updatesChannelId: text[0]?.id ?? null,
+                  }
+                : undefined,
+            }),
+            { action: on ? 'Community enabled' : 'Community disabled', target: server.name },
+          )
+        }
+      />
+      {community ? (
+        <>
+          <div className="set-field">
+            <label>RULES OR GUIDELINES CHANNEL</label>
+            <select
+              className="field"
+              value={community.rulesChannelId ?? ''}
+              onChange={(e) =>
+                onPatch((s) => ({
+                  ...s,
+                  community: { ...community, rulesChannelId: e.target.value || null },
+                }))
+              }
+            >
+              {text.map((c) => (
+                <option key={c.id} value={c.id}>
+                  #{c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="set-field">
+            <label>COMMUNITY UPDATES CHANNEL</label>
+            <select
+              className="field"
+              value={community.updatesChannelId ?? ''}
+              onChange={(e) =>
+                onPatch((s) => ({
+                  ...s,
+                  community: { ...community, updatesChannelId: e.target.value || null },
+                }))
+              }
+            >
+              {text.map((c) => (
+                <option key={c.id} value={c.id}>
+                  #{c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      ) : null}
+    </>
+  )
+}
+
+/** ONBOARDING — the default channels a new member lands in. */
+function Onboarding({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const text = server.channels.filter((c) => c.kind === 'text')
+  const defaults = server.channels.filter((c) => c.kind === 'text' && c.onboardingDefault)
+  return (
+    <>
+      <Title>Onboarding</Title>
+      <Note>
+        Discord requires a community server, a default channel, and questions before onboarding
+        can be turned on. The default channels are the ones a new member sees first.
+      </Note>
+      <Sub>Default channels ({defaults.length})</Sub>
+      <ul className="srv-onboarding">
+        {text.map((c) => (
+          <li key={c.id}>
+            <Toggle
+              label={`#${c.name}`}
+              value={c.onboardingDefault === true}
+              onChange={(on) =>
+                onPatch((s) => ({
+                  ...s,
+                  channels: s.channels.map((x) =>
+                    x.id === c.id ? { ...x, onboardingDefault: on } : x,
+                  ),
+                }))
+              }
+            />
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
+/** SERVER GUIDE — what a new member is shown, from the server's own channels. */
+function ServerGuide({ server }: { server: Server }) {
+  const text = server.channels.filter((c) => c.kind === 'text')
+  return (
+    <>
+      <Title>Server Guide</Title>
+      <Note>
+        The guide is built out of the server's own channels: the ones to read first, and the ones
+        to say hello in.
+      </Note>
+      <div className="srv-guide">
+        <h4>Resources</h4>
+        <ul>
+          {text.slice(0, 3).map((c) => (
+            <li key={c.id}>#{c.name}</li>
+          ))}
+        </ul>
+        <h4>New member todos</h4>
+        <ul>
+          {text.slice(0, 2).map((c) => (
+            <li key={c.id}>Say hello in #{c.name}</li>
+          ))}
+        </ul>
+      </div>
+    </>
   )
 }

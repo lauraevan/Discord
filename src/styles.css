@@ -8557,3 +8557,394 @@ body.reduced-motion img.decoration.still {
   opacity: 0.6;
   filter: grayscale(0.5);
 }
+
+/* --- server settings: the sections the client's own list names ------------- */
+
+.srv-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.srv-cat h4 {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.srv-cat ul,
+.srv-stickers,
+.srv-sounds,
+.srv-hooks,
+.srv-rules,
+.srv-onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+}
+
+.srv-cat li,
+.srv-sounds li,
+.srv-hooks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 14px;
+  color: var(--text);
+}
+
+.srv-cat li b,
+.srv-sounds li b,
+.srv-hooks b {
+  color: var(--strong);
+  font-weight: 500;
+}
+
+.srv-chan-kind {
+  min-width: 62px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.srv-cat select,
+.srv-hooks select {
+  margin-left: auto;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--deep, var(--titlebar));
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.srv-sounds li .set-slider {
+  flex: 1 1 160px;
+  margin: 0;
+}
+
+.srv-stickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.srv-stickers li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-radius: 10px;
+  background: var(--card);
+  font-size: 13px;
+  color: var(--strong);
+}
+
+.srv-sticker-art {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  background: var(--selected);
+}
+
+.srv-sticker-related {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.set-row-add {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.set-row-add .field {
+  flex: 1 1 auto;
+}
+
+.set-row-add .field.short {
+  flex: 0 0 140px;
+}
+
+.srv-tag-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.srv-tag-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.srv-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--selected);
+  color: var(--strong);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.srv-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.srv-badge {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.srv-badge:hover {
+  background: var(--selected);
+}
+
+.srv-badge.on {
+  box-shadow: inset 0 0 0 2px var(--blurple);
+}
+
+.srv-code,
+.srv-template code {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--titlebar);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 18px;
+  overflow-x: auto;
+}
+
+.srv-template {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.srv-template b {
+  font-size: 15px;
+  color: var(--strong);
+}
+
+.srv-template span {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.srv-vanity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.srv-vanity .field {
+  flex: 1 1 auto;
+}
+
+.srv-boost {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.srv-boost-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.srv-boost-head b {
+  font-size: 18px;
+  color: var(--strong);
+}
+
+.srv-boost-head span {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.srv-boost-bar {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--selected);
+  overflow: hidden;
+}
+
+.srv-boost-bar i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff73fa, #b473f5);
+}
+
+.srv-boost-ladder {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.srv-boost-tier {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+  opacity: 0.65;
+}
+
+.srv-boost-tier.on {
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 115, 250, 0.4);
+}
+
+.srv-boost-tier b {
+  font-size: 14px;
+  color: var(--strong);
+}
+
+.srv-boost-tier > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.srv-boost-tier ul {
+  list-style: none;
+  font-size: 12px;
+  line-height: 19px;
+  color: var(--text);
+}
+
+.srv-hooks li > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.srv-hooks .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.srv-automod-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.srv-rules li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.srv-rule-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.srv-rule-head b {
+  font-size: 14.5px;
+  color: var(--strong);
+}
+
+.srv-rule-trigger {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: var(--selected);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.srv-rule-head .set-toggle {
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+}
+
+.srv-presets {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.srv-presets label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.srv-guide h4 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.srv-guide ul {
+  list-style: none;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--text);
+}
+
+/* AutoMod caught a message before it was sent */
+.composer-blocked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(242, 63, 67, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(242, 63, 67, 0.35);
+  color: var(--red, #f23f43);
+  font-size: 13px;
+}
+
+.composer-blocked button {
+  margin-left: auto;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.composer-blocked button:hover {
+  opacity: 1;
+}

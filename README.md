@@ -37,6 +37,22 @@ skippable), *Customize your server* (icon upload, name, guidelines line) — plu
 Join a Server. A new server gets exactly `#general` and a `General` voice
 channel; a template adds its own categories on top.
 
+### Servers
+
+Server Settings is built from the client's own `GuildSettingsSections` list,
+in its groups: the server's own sections, then Apps, Moderation, Community,
+Monetization and User Management. The ones a page can actually run do run —
+Overview, Channels, Roles, Emoji, Stickers, Soundboard, Server Tag, Widget,
+Server Template, Custom Invite Link, Boost Status, Webhooks, Safety Setup,
+AutoMod, Enable Community, Onboarding, Server Guide, Members, Invites, Bans,
+Audit Log and Delete. The rest say what they would need instead of pretending.
+
+AutoMod is real: the trigger and action numbers are Discord's own, and a rule
+with BLOCK_MESSAGE stops a matching message in the composer rather than
+describing that it would. Verification levels, the explicit content filter,
+the boost ladder (2, 7 and 14 boosts) and the server tag badge packs are the
+client's own values too.
+
 ### Quests
 
 Quest Home is built to the client's own section list — hero, in progress,

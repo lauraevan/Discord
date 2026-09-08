@@ -1,12 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { uid, SLASH, type Account, type Attachment, type Channel, type Message } from '../data'
+import {
+  AutoModAction,
+  SLASH,
+  uid,
+  type Account,
+  type Attachment,
+  type AutoModRule,
+  type Channel,
+  type Message,
+} from '../data'
+import { autoModHit } from './ServerSettings'
 import { messageLimit, uploadLimitMb, type PremiumTypeValue } from '../nitro'
 import { EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
 import {
   AppsIcon,
   ChevronRightIcon,
+  CircleInformationIcon,
   CloseIcon,
+  CloseSmallIcon,
   EyeIcon,
   GifIcon,
   GiftIcon,
@@ -99,6 +111,7 @@ export function Composer({
   onSchedule,
   premiumType,
   onGiftNitro,
+  automod,
 }: {
   channel: Channel
   channels: Channel[]
@@ -115,8 +128,11 @@ export function Composer({
   /** the account's premium type, which is what sets the two caps below */
   premiumType: PremiumTypeValue
   onGiftNitro: () => void
+  /** the server's AutoMod rules, which block a message before it is sent */
+  automod?: AutoModRule[]
 }) {
   const [value, setValue] = useState('')
+  const [blocked, setBlocked] = useState<string | null>(null)
   // Discord holds a picked file in the composer until you send, with its own
   // preview card and a spoiler / rename / remove toolbar
   const [pending, setPending] = useState<Attachment[]>([])
@@ -179,6 +195,14 @@ export function Composer({
     const raw = value.trim()
     if (raw.length > limit) return
     if (!raw && pending.length === 0) return
+    // AutoMod runs before the send, the way Discord's does: a rule that blocks
+    // a message stops it here and says which rule caught it
+    const caught = autoModHit(automod, raw)
+    if (caught && caught.rule.actions.includes(AutoModAction.BLOCK_MESSAGE)) {
+      setBlocked(`${caught.rule.name} blocked this message.`)
+      return
+    }
+    setBlocked(null)
     const slash = /^\/(\w+)\s*([\s\S]*)$/.exec(raw)
     const run = slash && SLASH[slash[1]]
     onSend(run ? run(slash[2]) : raw, pending)
@@ -204,6 +228,15 @@ export function Composer({
 
   return (
     <div className="composer-wrap">
+      {blocked ? (
+        <div className="composer-blocked" role="alert">
+          <CircleInformationIcon size={16} />
+          {blocked}
+          <button aria-label="Dismiss" onClick={() => setBlocked(null)}>
+            <CloseSmallIcon size={14} />
+          </button>
+        </div>
+      ) : null}
       {replyTo ? (
         <div className="reply-bar">
           <span>
