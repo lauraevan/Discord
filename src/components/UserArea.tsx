@@ -21,6 +21,7 @@ import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
 import { specFor, StatusGlyph, statusBox, statusMask } from '../ui/Status'
 import { BADGES } from '../badges'
+import { U } from '../zoom'
 
 /**
  * The status indicator's diameter for a given avatar size, from Discord's own
@@ -51,9 +52,13 @@ export function Avatar({
 }) {
   const spec = specFor(size)
   const box = statusBox(size)
+  // `size` is Discord's own number — 40 in a message, 32 in the member list —
+  // so the mask spec is looked up on it, and only the box it draws into is
+  // brought back into the frame's units
+  const px = size * U
   return (
-    <span className="avatar-wrap" style={{ width: size, height: size, flex: `0 0 ${size}px` }}>
-      <svg className="avatar-svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <span className="avatar-wrap" style={{ width: px, height: px, flex: `0 0 ${px}px` }}>
+      <svg className="avatar-svg" width={px} height={px} viewBox={`0 0 ${size} ${size}`}>
         <foreignObject
           x={0}
           y={0}
@@ -81,7 +86,7 @@ export function Avatar({
       {/* Discord draws a decoration at 1.2x the avatar box, centred over it */}
       {account.decoration ? (
         <span className="avatar-decoration">
-          <Decoration id={account.decoration} size={size * 1.2} />
+          <Decoration id={account.decoration} size={px * 1.2} />
         </span>
       ) : null}
     </span>
@@ -182,7 +187,7 @@ export function ProfilePopout({
         {themed ? <ProfileBanner /> : null}
       </div>
       <div className="popout-avatar">
-        <Avatar account={account} size={64} />
+        <Avatar account={account} size={80} />
       </div>
       {/* Discord's status bubble: a pill with a two-circle tail pointing back
           at the avatar, not the plain chip this used to draw */}
@@ -296,7 +301,7 @@ export function UserArea({
           is none; hovering the card — or opening the popout — swaps it for the
           username, which is what all four reference frames show */}
       <button className={'id' + (profileOpen ? ' open' : '')} onClick={onOpenProfile}>
-        <Avatar account={account} size={26} />
+        <Avatar account={account} size={32} />
         <span className="user-meta">
           <span className="name">{account.name}</span>
           <span className="state">

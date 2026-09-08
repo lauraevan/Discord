@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
+import { box } from '../zoom'
 
 type Side = 'right' | 'below' | 'above'
 
@@ -25,8 +26,7 @@ export function Tooltip({
       <span
         style={{ display: 'contents' }}
         onMouseEnter={(e) => {
-          const r = (e.currentTarget as HTMLElement)
-            .firstElementChild!.getBoundingClientRect()
+          const r = box((e.currentTarget as HTMLElement).firstElementChild!)
           setPos(
             side === 'right'
               ? { x: r.right + 12, y: r.top + r.height / 2 }

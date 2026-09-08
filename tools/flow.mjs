@@ -20,6 +20,11 @@ const step = async (label, fn) => {
   catch (e) {
     fails += 1
     console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0, 8).join('\n    '))
+    // a failing step is nearly always something left open by the one before it,
+    // so keep the frame it failed on
+    const shot = `/tmp/flow-fail-${label.replace(/\W+/g, '-')}.png`
+    await p.screenshot({ path: shot }).catch(() => {})
+    console.log('    frame:', shot)
   }
   await p.mouse.move(760, 300)
   await p.waitForTimeout(150)

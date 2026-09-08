@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { ChevronRightIcon } from '../ui/Icons'
+import { box, vh, vw } from '../zoom'
 
 export type MenuItem =
   | { sep: true }
@@ -51,9 +52,9 @@ export function ContextMenu({
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const r = el.getBoundingClientRect()
-    if (r.bottom > window.innerHeight - 8) el.style.top = `${at.y - r.height}px`
-    if (r.right > window.innerWidth - 8) el.style.left = `${at.x - r.width}px`
+    const r = box(el)
+    if (r.bottom > vh() - 8) el.style.top = `${at.y - r.height}px`
+    if (r.right > vw() - 8) el.style.left = `${at.x - r.width}px`
   }, [at])
 
   return (

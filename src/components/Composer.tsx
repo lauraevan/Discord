@@ -35,6 +35,7 @@ import {
   UploadFileIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { box } from '../zoom'
 
 type Suggestion = { key: string; label: string; hint?: string; insert: string; code?: string }
 
@@ -221,7 +222,7 @@ export function Composer({
    * button only says where to start.
    */
   const openPicker = (e: React.MouseEvent, view: PickerView) => {
-    const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const r = box(e.currentTarget as HTMLElement)
     onOpenPicker({ x: r.right - 360, y: r.top - 440 }, view)
   }
 

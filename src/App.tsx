@@ -89,6 +89,7 @@ import {
   type QuestUserStatus,
 } from './quests'
 import { allThemes, applyTheme, defaultThemes } from './themes'
+import { box, vh, vw } from './zoom'
 
 purgeOldSchemas()
 const themeIds = allThemes.map((t) => t.id)
@@ -239,13 +240,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
    * what the client does rather than letting it run off an edge.
    */
   const openProfileAt = (anchor: HTMLElement, side: 'right' | 'left' = 'right') => {
-    const r = anchor.getBoundingClientRect()
+    const r = box(anchor)
     const W = 247
     const H = 380
     const x = side === 'right' ? r.right + 8 : r.left - W - 8
     setUserPopout({
-      x: Math.max(8, Math.min(x, window.innerWidth - W - 8)),
-      y: Math.max(8, Math.min(r.top - 8, window.innerHeight - H - 8)),
+      x: Math.max(8, Math.min(x, vw() - W - 8)),
+      y: Math.max(8, Math.min(r.top - 8, vh() - H - 8)),
     })
   }
   const [pollModal, setPollModal] = useState(false)
@@ -274,8 +275,10 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   // the appearance pane drives real CSS variables, not a mock preview
   useEffect(() => {
     const r = document.documentElement.style
+    // both are Discord's own settings in Discord's own pixels; styles.css
+    // multiplies them by --u to land in the reference frame's units
     r.setProperty('--msg-font', `${prefs.fontScale}px`)
-    r.setProperty('--msg-gap', `${prefs.spaceBetween}px`)
+    r.setProperty('--msg-gap', `${prefs.spaceBetween + 1}px`)
     r.setProperty('--app-zoom', String(prefs.zoom / 100))
     r.setProperty('--app-saturate', String(prefs.saturation / 100))
     r.setProperty('--link-underline', prefs.underlineLinks ? 'underline' : 'none')

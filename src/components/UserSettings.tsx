@@ -1280,7 +1280,7 @@ function ProfileCard({ account }: { account: Account }) {
         ) : null}
       </div>
       <span className="preview-avatar">
-        <Avatar account={account} size={72} />
+        <Avatar account={account} size={80} />
       </span>
       <div className="preview-body">
         <b>{account.name}</b>

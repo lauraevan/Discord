@@ -82,7 +82,7 @@ export function Inbox({
               </div>
               {list.map((m) => (
                 <button className="inbox-msg" key={m.id} onClick={() => onJump(c, m.id)}>
-                  <Avatar account={account} size={28} status={false} />
+                  <Avatar account={account} size={32} status={false} />
                   <span className="inbox-author">{account.name}</span>
                   <span className="inbox-text">{m.text.replace(/\n/g, ' ').slice(0, 90)}</span>
                 </button>

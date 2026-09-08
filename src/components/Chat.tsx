@@ -38,6 +38,7 @@ import { fileIcon, fileSize, isGif, isImage } from '../files'
 import { springScrollIntoView } from '../motion'
 import { DisplayName } from '../ui/DisplayName'
 import { Tooltip } from '../ui/Tooltip'
+import { box, point } from '../zoom'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
 
@@ -186,18 +187,19 @@ function preview(text: string) {
 /**
  * The stamp on a group's first message.
  *
- * Discord does not print the bare time there: today is "Today at 5:42 PM",
- * yesterday is "Yesterday at 5:42 PM", and anything older is the short date
- * followed by the time. Compact mode is the exception — it prints the time
- * alone in the gutter, which is the point of it — and the full date stays on
- * the element's title either way.
+ * Today is the bare time — docs/refs shows "bullet  7:59 PM" against a
+ * "September 5, 2026" divider, so the day is already on screen and Discord
+ * does not repeat it. Yesterday is "Yesterday at 5:42 PM", and anything older
+ * is the short date followed by the time. Compact mode prints the time alone
+ * in the gutter, which is the point of it, and the full date stays on the
+ * element's title either way.
  */
 function stamp(t: number) {
   const d = new Date(t)
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(today.getDate() - 1)
-  if (d.toDateString() === today.toDateString()) return `Today at ${time(t)}`
+  if (d.toDateString() === today.toDateString()) return time(t)
   if (d.toDateString() === yesterday.toDateString()) return `Yesterday at ${time(t)}`
   return `${d.toLocaleDateString(undefined, {
     day: '2-digit',
@@ -467,7 +469,7 @@ export function ChatFeed({
               className={'group' + (grouped && !newDay ? ' grouped' : '') + (m.pinned ? ' pinned' : '')}
               onContextMenu={(e) => {
                 e.preventDefault()
-                onContext(m, { x: e.clientX, y: e.clientY })
+                onContext(m, point(e))
               }}
             >
               {/* the toolbar Discord floats over a hovered message: two quick
@@ -487,7 +489,7 @@ export function ChatFeed({
                   <button
                     aria-label="Add reaction"
                     onClick={(e) => {
-                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                      const r = box(e.currentTarget as HTMLElement)
                       onOpenPicker(m.id, { x: r.left, y: r.bottom + 4 })
                     }}
                   >
@@ -510,7 +512,7 @@ export function ChatFeed({
                   <button
                     aria-label="More"
                     onClick={(e) => {
-                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                      const r = box(e.currentTarget as HTMLElement)
                       onContext(m, { x: r.right - 4, y: r.bottom + 4 })
                     }}
                   >
@@ -688,7 +690,7 @@ export function ChatFeed({
                 self={account.handle}
                 onToggle={(name) => onReact(m.id, name)}
                 onAdd={() => {
-                  const r = ref.current?.getBoundingClientRect()
+                  const r = ref.current ? box(ref.current) : undefined
                   onOpenPicker(m.id, { x: (r?.right ?? 0) - 380, y: (r?.bottom ?? 0) - 440 })
                 }}
               />

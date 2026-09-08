@@ -21,6 +21,7 @@ import {
   ThreadsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { box, point } from '../zoom'
 
 /** The client's own channel-type switch, glyph for glyph. */
 function Glyph({ kind, thread }: { kind: Channel['kind']; thread?: boolean }) {
@@ -63,7 +64,7 @@ function ChannelRow({
       onClick={onSelect}
       onContextMenu={(e) => {
         e.preventDefault()
-        onContext({ x: e.clientX, y: e.clientY })
+        onContext(point(e))
       }}
     >
       {unread && !active ? <span className="unread-pip" /> : null}
@@ -154,7 +155,7 @@ export function ChannelSidebar({
       <button
         className="server-header"
         onClick={(e) => {
-          const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+          const r = box(e.currentTarget as HTMLElement)
           onHeader({ x: r.left + 8, y: r.bottom + 4 })
         }}
       >

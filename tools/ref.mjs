@@ -32,6 +32,9 @@ await p.addInitScript(() => {
   )
 })
 await p.goto('file://' + process.cwd() + '/dist/index.html')
+// docs/reference.png is Discord captured at 80%, which is the scale the
+// stylesheet is written in, so the shipped `html { zoom: 1.25 }` comes back off
+await p.addStyleTag({ content: 'html{zoom:1}' })
 await p.waitForTimeout(700)
 // select the second server and its first channel, as the reference shows
 await p.evaluate(() => {

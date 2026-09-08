@@ -38,12 +38,28 @@
 
   --font: 'gg sans', 'gg sans fallback', 'Noto Sans', 'Helvetica Neue', Arial,
     sans-serif;
+
+  /* The reference frame is Discord captured at 80%, so anything written in
+     Discord's own numbers — the message list is measured straight off
+     docs/refs, in real pixels — is multiplied by this to land in the frame's
+     units. `html { zoom }` at the top of the file puts it back on screen. */
+  --u: 0.8;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* The stylesheet is written in the reference frame's units, and the reference
+   frame is Discord captured at 80%. `zoom` puts the app back at the size
+   Discord actually ships at: a 72px rail, a 48px channel header, 40px message
+   avatars, 16px message text. Scoring against docs/reference.png sets this to
+   1 so the frame can be compared as captured; src/zoom.ts divides it back out
+   of everything JavaScript measures. */
+html {
+  zoom: 1.25;
 }
 
 html,
@@ -1049,8 +1065,13 @@ textarea {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 12px 18px;
+  /* NOT justify-content: flex-end — that pins the feed to the bottom but puts
+     the overflow out of the top, where no browser will scroll to it, so every
+     message above the fold becomes unreachable. `margin-top: auto` on the
+     first child pins it the same way and leaves the scroll range intact.
+     No horizontal padding either: Discord's hover band runs the full width of
+     the scroller, so the 16px inset is carried by the rows themselves. */
+  padding: 0 0 18px;
   scrollbar-width: thin;
   scrollbar-color: var(--selected) transparent;
 }
@@ -1246,48 +1267,66 @@ textarea {
   height: 12px;
 }
 
+/* Measured off docs/refs, which are Discord at 1:1 — the message list is the
+   one surface the reference frame never shows, so it is written in Discord's
+   own numbers and scaled by --u. A cozy message is padded 2px 48px 2px 72px,
+   the avatar sits absolutely at 16px, and both the header and the body run on
+   a 22px line. The avatar takes no `top`: its static position is after the
+   reply row, which is what puts it beside the name rather than above it. */
 .group {
   position: relative;
-  margin-top: 14px;
-  padding-left: 52px;
-  min-height: 40px;
+  margin-top: calc(17px * var(--u));
+  padding: calc(2px * var(--u)) calc(48px * var(--u)) calc(2px * var(--u))
+    calc(72px * var(--u));
+  min-height: calc(44px * var(--u));
   flex: 0 0 auto;
 }
 
 .group.grouped {
-  margin-top: 2px;
+  margin-top: 0;
   min-height: 0;
 }
 
 .group-avatar {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: calc(16px * var(--u));
+  margin-top: calc(2px * var(--u));
 }
 
 .msg-head {
   display: flex;
   align-items: baseline;
-  height: 21px;
+  height: calc(22px * var(--u));
   white-space: nowrap;
 }
 
 .author {
-  font-size: 13.98px;
-  font-weight: 600;
+  font-size: calc(16px * var(--u));
+  line-height: calc(22px * var(--u));
+  font-weight: 500;
   color: var(--strong);
 }
 
 .timestamp {
-  margin-left: 7px;
-  font-size: 10.25px;
+  margin-left: calc(6px * var(--u));
+  font-size: calc(12px * var(--u));
   font-weight: 500;
   color: var(--muted);
 }
 
+/* Figtree stands in for the proprietary gg sans, and sets about 5% wider at
+   the same size — measured on the shared string in docs/refs, whose cap height
+   it matches exactly. The reference frame's own text was fitted to Figtree's
+   widths, so the correction belongs here, on the one surface measured against
+   a 1:1 capture, and not on the body. */
+.msg-line,
+.author {
+  letter-spacing: -0.021em;
+}
+
 .msg-line {
-  font-size: 13.98px;
-  line-height: 21px;
+  font-size: calc(16px * var(--u));
+  line-height: 1.375;
   color: var(--text);
   overflow-wrap: anywhere;
 }
@@ -1990,10 +2029,10 @@ h3.md-h {
 .gutter-time {
   position: absolute;
   left: 0;
-  width: 46px;
+  width: calc(56px * var(--u));
   text-align: right;
-  font-size: 10.25px;
-  line-height: 21px;
+  font-size: calc(11px * var(--u));
+  line-height: calc(22px * var(--u));
   color: var(--muted);
   opacity: 0;
 }
@@ -2003,31 +2042,34 @@ h3.md-h {
 }
 
 .edited {
-  margin-left: 4px;
-  font-size: 9.32px;
+  margin-left: calc(3px * var(--u));
+  font-size: calc(10px * var(--u));
   color: var(--muted);
 }
 
 .reply-ref {
   display: flex;
   align-items: center;
-  gap: 5px;
-  height: 18px;
-  margin-bottom: 2px;
-  font-size: 12.12px;
+  gap: calc(4px * var(--u));
+  height: calc(18px * var(--u));
+  margin-bottom: calc(4px * var(--u));
+  font-size: calc(14px * var(--u));
   color: var(--muted);
   position: relative;
 }
 
+/* Discord's elbow: it drops from the middle of the reply row down the avatar's
+   own centre line — 36px left of the content edge, which is 72px in with a
+   40px avatar at 16px — and turns right into the preview. */
 .reply-spine {
   position: absolute;
-  left: -30px;
-  top: 9px;
-  width: 26px;
-  height: 10px;
+  left: calc(-36px * var(--u));
+  right: calc(100% + 4px * var(--u));
+  top: 50%;
+  bottom: 0;
   border-left: 2px solid color-mix(in srgb, var(--text) 22%, transparent);
   border-top: 2px solid color-mix(in srgb, var(--text) 22%, transparent);
-  border-top-left-radius: 6px;
+  border-top-left-radius: calc(6px * var(--u));
 }
 
 .reply-author {
@@ -3709,11 +3751,11 @@ h3.md-h {
 /* --- appearance prefs applied for real ---------------------------------- */
 
 .msg-line {
-  font-size: var(--msg-font, 15px);
+  font-size: calc(var(--msg-font, 16px) * var(--u));
 }
 
-.group {
-  margin-top: var(--msg-gap, 14px);
+.group:not(.grouped) {
+  margin-top: calc(var(--msg-gap, 17px) * var(--u));
 }
 
 .md-link {
@@ -9944,8 +9986,9 @@ button.author {
   background: none;
   border: 0;
   padding: 0;
-  font: inherit;
-  color: inherit;
+  /* not `font: inherit` — that wipes the weight and size .author sets, and
+     Discord's username is 500 at 16px, not the body's 400 */
+  font-family: inherit;
   text-align: left;
   cursor: pointer;
 }
@@ -10805,4 +10848,25 @@ button.group-avatar:hover {
   border-top: 1px solid var(--border);
   font-size: 12px;
   color: var(--muted);
+}
+
+
+.feed > :first-child {
+  margin-top: auto;
+}
+
+/* .feed carries no horizontal padding any more — the message row wants to run
+   edge to edge so its hover band does — so the blocks that used to sit inside
+   it take the inset themselves. The divider draws its rule as a border, which
+   padding would sit inside, so that one takes a margin. */
+.intro,
+.onboard,
+.system-row {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.divider {
+  margin-left: 12px;
+  margin-right: 12px;
 }

@@ -11,6 +11,8 @@
  * Discord's curve and not on the browser's `behavior: 'smooth'`.
  */
 
+import { box as viewBox } from './zoom'
+
 export type SpringConfig = {
   tension: number
   friction: number
@@ -81,8 +83,8 @@ export function springScroll(
 
 /** Scrolls `target` to the middle of `scroller`, on the same spring. */
 export function springScrollIntoView(scroller: Element, target: Element) {
-  const box = scroller.getBoundingClientRect()
-  const t = target.getBoundingClientRect()
+  const box = viewBox(scroller)
+  const t = viewBox(target)
   const to = scroller.scrollTop + (t.top - box.top) - (box.height - t.height) / 2
   const max = scroller.scrollHeight - scroller.clientHeight
   return springScroll(scroller, Math.max(0, Math.min(max, to)))

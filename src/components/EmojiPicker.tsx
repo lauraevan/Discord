@@ -11,6 +11,7 @@ import {
 } from '../ui/Icons'
 import type { FavouriteGif, Server } from '../data'
 import { gifArt, GIFS, GIF_CATEGORIES } from '../gifs'
+import { vh, vw } from '../zoom'
 
 /**
  * Discord's expression picker.
@@ -100,8 +101,8 @@ export function EmojiPicker({
     })).filter((g) => g.items.length)
   }, [q])
 
-  const x = Math.max(8, Math.min(at.x, window.innerWidth - 372))
-  const y = Math.max(8, Math.min(at.y, window.innerHeight - 452))
+  const x = Math.max(8, Math.min(at.x, vw() - 372))
+  const y = Math.max(8, Math.min(at.y, vh() - 452))
 
   return (
     <div className="picker" style={{ left: x, top: y }} ref={ref}>
