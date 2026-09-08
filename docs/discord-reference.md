@@ -638,6 +638,63 @@ Mana design system ships its `i18n` defaults in the clear, which is where the
 quick switcher's empty state comes from: `AUTOCOMPLETE_NO_RESULTS_HEADER:
 "Nope!"`, `AUTOCOMPLETE_NO_RESULTS_BODY: "Did you make a typo?"`.
 
+## Presence, and the avatar it is cut into
+
+A status indicator is not a coloured dot. The client draws one coloured square
+per status and puts an SVG mask over it, and the mask is the whole shape:
+
+| status | mask, in `objectBoundingBox` units |
+| --- | --- |
+| online | `circle(.5, .5, .5)` |
+| idle | that circle minus `circle(.25, .25, .375)` — a crescent |
+| dnd | minus `rect(x .125, y .375, w .75, h .25, r .125)` — a bar |
+| offline / invisible | minus `circle(.5, .5, .25)` — a ring |
+| streaming | minus `polygon(0.35,0.25 0.78301275,0.5 0.35,0.75)` — a play triangle |
+| typing | `rect(1 × 1, rx .2, ry .5)` |
+
+The gap around it is a **hole cut out of the avatar**, not a ring drawn over
+one, which is what lets the crescent and the ring show whatever is behind. The
+hole is a second mask: `circle(.5, .5, .5)` minus a circle at
+`(1 - corner, 1 - corner)` with radius `corner + 0.05`, where
+`corner = (status / 2 + offset) / size`. So the avatar has to sit inside an SVG
+the mask can apply to, which is how the client builds it and how
+`src/ui/Status.tsx` builds it here.
+
+None of the numbers are proportions. Discord's avatar table:
+
+| size | 16 | 20 | 24 | 32 | 40 | 44 | 48 | 56 | 72 | 80 | 96 | 120 | 152 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| status | 6 | 6 | 8 | 10 | 12 | 12 | 12 | 14 | 16 | 16 | 20 | 24 | 30 |
+| stroke | 2 | 2 | 3 | 3 | 4 | 4 | 4 | 4 | 6 | 6 | 8 | 8 | 10 |
+| offset | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 2 | 4 | 4 | 6 | 8 | 10 |
+
+**Where presence appears.** The member list, the DM list, the account card, a
+profile, a voice tile. Never on an avatar in the message feed, and never in
+pins, search results, forum posts or a settings member row.
+
+## Nameplates
+
+The newest collectible: a strip painted behind a member's name in the member
+list and the DM list, and behind the name on a profile. The client stores only
+`{ sku_id, asset, label, palette }` and **derives the gradient from the artwork
+itself** — it fetches the nameplate's `static.png`, keeps its dominant colours,
+and desaturates them by the user's own saturation setting.
+
+The artwork lives at
+`cdn.discordapp.com/assets/collectibles/nameplates/nameplates/<name>/{static.png,asset.webm}`,
+which is denied here, and **no repository commits those files**: Safauri/nameplates
+and Dev-Rick-C137/Discord-Shop-Assets fetch at runtime or park the results on
+Google Drive, and both collectibles archives (Infinitay's and
+happyendermangit/discarchives) predate the feature — every item in them is type
+0 (decoration) or 1 (effect), never a nameplate.
+
+The country nameplates are the exception, because their artwork is a flag.
+lipis/flag-icons (MIT) commits every flag as SVG, so `tools/fetch-nameplates.py`
+builds those for real and samples each palette out of the rendered flag the way
+the client samples it. Only the four the Shop screenshot actually shows are
+emitted — Canada, France, Norway, Scotland, all at $5.99 — because guessing at
+the rest of the catalogue would be inventing a product line.
+
 ## Attachments: Discord's file-class table
 
 The client picks an attachment's badge with an ordered list of rules, the first

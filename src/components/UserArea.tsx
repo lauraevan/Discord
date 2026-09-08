@@ -7,6 +7,7 @@ import {
   CloseIcon,
   ChevronRightIcon,
   GearIcon,
+  MembersIcon,
   HeadphonesIcon,
   HeadphonesOffIcon,
   MicIcon,
@@ -16,50 +17,72 @@ import {
   SwitchAccountsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { Nameplate } from '../ui/Nameplate'
+import { specFor, StatusGlyph, statusBox, statusMask } from '../ui/Status'
 import { BADGES } from '../badges'
 
 /**
- * The status indicator's diameter for a given avatar size.
- *
- * Discord does not scale it proportionally at small sizes — it steps, and a
- * 16px avatar needs a dot that is a third of it to be visible at all. From
- * 40px up it settles at a fifth of the avatar, which is where the profile
- * sizes live: 16 on an 80px avatar, 13 on the popout's 64px one.
+ * The status indicator's diameter for a given avatar size, from Discord's own
+ * avatar table rather than a proportion of the avatar — see src/ui/Status.tsx.
  */
-export function statusSize(avatar: number) {
-  const steps: [number, number][] = [
-    [16, 6],
-    [20, 6],
-    [24, 8],
-    [32, 10],
-    [40, 12],
-  ]
-  for (const [at, dot] of steps) if (avatar <= at) return dot
-  return Math.round(avatar * 0.2)
-}
+export const statusSize = (avatar: number) => statusBox(avatar).d
 
-export function Avatar({ account, size }: { account: Account; size: number }) {
-  const dot = statusSize(size)
+/**
+ * An avatar, with presence cut into it.
+ *
+ * Discord does not lay a dot on top of the avatar: it masks a hole out of the
+ * avatar's bottom-right corner and puts the indicator in the gap, so the gap
+ * shows whatever is behind. That needs the image inside an SVG the mask can
+ * apply to, which is exactly how the client builds it.
+ *
+ * `status={false}` is for the message feed, where Discord shows no presence at
+ * all — presence belongs to the member list, the DM list, the account card and
+ * a profile.
+ */
+export function Avatar({
+  account,
+  size,
+  status = true,
+}: {
+  account: Account
+  size: number
+  status?: boolean
+}) {
+  const spec = specFor(size)
+  const box = statusBox(size)
   return (
     <span className="avatar-wrap" style={{ width: size, height: size, flex: `0 0 ${size}px` }}>
-      <DefaultAvatar color={account.color} />
+      <svg className="avatar-svg" width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <foreignObject
+          x={0}
+          y={0}
+          width={size}
+          height={size}
+          mask={status ? `url(#dc-hole-${spec.size})` : undefined}
+        >
+          {account.avatar ? (
+            <img className="art" src={account.avatar} alt="" draggable={false} />
+          ) : (
+            <DefaultAvatar color={account.color} />
+          )}
+        </foreignObject>
+        {status ? (
+          <rect
+            x={box.x}
+            y={box.y}
+            width={box.d}
+            height={box.d}
+            fill={statusColor[account.status]}
+            mask={`url(#${statusMask(account.status)})`}
+          />
+        ) : null}
+      </svg>
       {/* Discord draws a decoration at 1.2x the avatar box, centred over it */}
       {account.decoration ? (
         <span className="avatar-decoration">
           <Decoration id={account.decoration} size={size * 1.2} />
         </span>
       ) : null}
-      <span
-        className="status-dot"
-        style={{
-          background: statusColor[account.status],
-          width: dot,
-          height: dot,
-          // the gap around the dot is a hole punched through the avatar, so it
-          // takes the colour of whatever the avatar is sitting on
-          boxShadow: `0 0 0 ${Math.max(2, Math.round(dot * 0.2))}px var(--avatar-ring, var(--card))`,
-        }}
-      />
     </span>
   )
 }
@@ -68,19 +91,32 @@ export function Avatar({ account, size }: { account: Account; size: number }) {
 const STATUS_PROMPT = 'Best dad joke?'
 
 /** The profile popout that opens from the user area. */
+/**
+ * Discord's user popout.
+ *
+ * The same card wherever it opens from: anchored above the account card when
+ * it has no `at`, and pinned to whatever was clicked when it does — an avatar
+ * in the feed, a row in the member list. Discord clamps it into the window,
+ * which is what the caller passes an already-clamped point for.
+ */
 export function ProfilePopout({
   account,
+  at,
   onEdit,
   onStatus,
   onSwitch,
   onCustomStatus,
+  onViewProfile,
   onClose,
 }: {
   account: Account
+  /** viewport coordinates when the popout is anchored to something */
+  at?: { x: number; y: number }
   onEdit: () => void
   onStatus: () => void
   onSwitch: () => void
   onCustomStatus: () => void
+  onViewProfile?: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
@@ -134,7 +170,13 @@ export function ProfilePopout({
       }
 
   return (
-    <div className="popout" ref={ref} style={skin as React.CSSProperties}>
+    <div
+      className={'popout' + (at ? ' anchored' : '')}
+      ref={ref}
+      style={
+        (at ? { ...skin, left: at.x, top: at.y } : skin) as React.CSSProperties
+      }
+    >
       <div className="popout-banner" style={themed ? undefined : { background: bannerColorOf(account) }}>
         {themed ? <ProfileBanner /> : null}
       </div>
@@ -160,7 +202,10 @@ export function ProfilePopout({
         </span>
       </button>
       <div className="popout-body">
-        <div className="p-name">{account.name}</div>
+        <div className="p-names">
+          <Nameplate id={account.nameplate} />
+          <div className="p-name">{account.name}</div>
+        </div>
         <div className="p-sub">
           {account.handle}
           {account.pronouns ? ` • ${account.pronouns}` : ''}
@@ -182,12 +227,19 @@ export function ProfilePopout({
             <span>Edit Profile</span>
           </button>
           <button className="p-btn" onClick={onStatus}>
-            <span className="p-dot" style={{ background: statusColor[account.status] }} />
+            <StatusGlyph status={account.status} size={10} />
             <span>{statusLabel[account.status]}</span>
             <ChevronRightIcon className="p-caret" />
           </button>
         </div>
         <div className="p-group">
+          {onViewProfile ? (
+            <button className="p-btn" onClick={onViewProfile}>
+              <MembersIcon />
+              <span>View Full Profile</span>
+              <ChevronRightIcon className="p-caret" />
+            </button>
+          ) : null}
           <button className="p-btn" onClick={onSwitch}>
             <SwitchAccountsIcon />
             <span>Switch Accounts</span>

@@ -105,7 +105,7 @@ export function ForumView({
         {sorted.map((p) => (
           <button className="forum-post" key={p.id} onClick={() => onOpen(p.id)}>
             <div className="forum-post-head">
-              <Avatar account={account} size={20} />
+              <Avatar account={account} size={20} status={false} />
               <span className="forum-post-author">{account.name}</span>
               <span className="forum-post-time">
                 {new Date(p.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}

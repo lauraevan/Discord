@@ -47,7 +47,7 @@ export function Pins({
         {pinned.length ? (
           pinned.map((m) => (
             <div className="pin-card" key={m.id}>
-              <Avatar account={account} size={32} />
+              <Avatar account={account} size={32} status={false} />
               <div className="pin-main">
                 <div className="pin-author">{account.name}</div>
                 <div className="pin-text">{renderMarkdown(m.text, md)}</div>

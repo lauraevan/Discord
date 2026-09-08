@@ -1,5 +1,6 @@
-import { statusColor, statusLabel, type Account } from '../data'
+import { statusLabel, type Account } from '../data'
 import { Avatar } from './UserArea'
+import { Nameplate } from '../ui/Nameplate'
 
 /**
  * The member list.
@@ -14,13 +15,14 @@ export function MemberList({
   onOpenProfile,
 }: {
   account: Account
-  onOpenProfile: () => void
+  onOpenProfile: (anchor: HTMLElement) => void
 }) {
   const offline = account.status === 'invisible'
   return (
     <aside className="members">
       <div className="members-head">{offline ? 'OFFLINE — 1' : 'ONLINE — 1'}</div>
-      <button className="member" onClick={onOpenProfile}>
+      <button className="member" onClick={(e) => onOpenProfile(e.currentTarget)}>
+        <Nameplate id={account.nameplate} />
         <span className="member-avatar">
           <Avatar account={account} size={32} />
         </span>
@@ -30,7 +32,6 @@ export function MemberList({
           </span>
           <span className="member-sub">{statusLabel[account.status]}</span>
         </span>
-        <span className="member-dot" style={{ background: statusColor[account.status] }} />
       </button>
     </aside>
   )

@@ -597,24 +597,24 @@ textarea {
   overflow: hidden;
 }
 
-/* the ring around a status dot is a hole through the avatar, so it takes the
-   colour of the surface behind it — the popout's own card when it is themed */
-.status-dot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
+.avatar-svg .art {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
+  object-fit: cover;
 }
 
-.popout {
-  --avatar-ring: var(--pop-card);
+/* the avatar is drawn inside an SVG so Discord's own mask can cut the gap for
+   the status indicator out of it — the gap is a hole, not a ring, which is what
+   lets the crescent and the offline ring show what is behind them */
+.avatar-svg {
+  display: block;
+  overflow: visible;
 }
 
-.feed,
-.member-list,
-.pins,
-.search-results {
-  --avatar-ring: var(--chat);
+.status-glyph {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .user-meta {
@@ -714,6 +714,15 @@ textarea {
 }
 
 /* --------------------------------------------------------- profile popout */
+
+/* anchored to something rather than to the account card: same card, fixed to
+   the point the caller worked out, which is how Discord opens it from a
+   message avatar or a member row */
+.popout.anchored {
+  position: fixed;
+  bottom: auto;
+  z-index: 90;
+}
 
 .popout {
   /* every number here is measured off the reference frame: the card is
@@ -2226,6 +2235,7 @@ h3.md-h {
 }
 
 .member {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -9926,6 +9936,27 @@ body.reduced-motion img.decoration.still {
 }
 
 /* Discord's No Text Channels screen, when a server has none you can read */
+/* the avatar and the author name open the popout, so they are buttons — they
+   still have to read as an avatar and a name */
+button.group-avatar,
+button.author {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+button.author:hover {
+  text-decoration: underline;
+}
+
+button.group-avatar:hover {
+  filter: brightness(1.06);
+}
+
 .no-channels {
   flex: 1;
   display: grid;
@@ -10122,4 +10153,104 @@ body.reduced-motion img.decoration.still {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: #ff73fa;
+}
+
+/* ---------------------------------------------------------------- nameplates
+   The strip Discord paints behind a member's name: a wash taken from the
+   artwork's own colours, with the art at the trailing edge fading out. */
+
+.nameplate {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.nameplate img {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 62%;
+  object-fit: cover;
+  opacity: 0.85;
+  -webkit-mask: linear-gradient(to right, transparent, #000 78%) 0 0 / 100% 100% no-repeat;
+  mask: linear-gradient(to right, transparent, #000 78%) 0 0 / 100% 100% no-repeat;
+}
+
+/* whatever sits on a nameplate has to sit above it — the plate itself
+   excepted, since it is the thing being sat on */
+.member > *:not(.nameplate),
+.p-names > *:not(.nameplate),
+.profile-names > *:not(.nameplate) {
+  position: relative;
+  z-index: 1;
+}
+
+.p-names,
+.profile-names {
+  position: relative;
+}
+
+.p-names .nameplate,
+.profile-names .nameplate {
+  inset: -2px -8px;
+}
+
+/* the Shop previews a nameplate as the row it becomes */
+.plate-preview {
+  position: relative;
+  width: 100%;
+  height: 44px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  background: var(--rail);
+}
+
+.plate-preview .avatar-wrap {
+  z-index: 1;
+}
+
+.plate-preview b {
+  position: relative;
+  z-index: 1;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--strong);
+}
+
+/* the nameplate picker in Profiles: each option is the plate it becomes */
+.plate-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.plate-pick {
+  position: relative;
+  min-width: 108px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--rail);
+  color: var(--text);
+  font-size: 13px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.plate-pick > span {
+  position: relative;
+  z-index: 1;
+}
+
+.plate-pick.on {
+  border-color: var(--blurple);
 }

@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import {
   CHANNEL_TYPES,
   serverColors,
-  statusColor,
   statusLabel,
   type Account,
   type Channel,
   type Status,
 } from '../data'
+import { StatusGlyph } from '../ui/Status'
 import {
   ForumIcon,
   HashIcon,
@@ -266,7 +266,7 @@ export function StatusMenu({
             className={'status-opt' + (s === account.status ? ' on' : '')}
             onClick={() => onPick(s)}
           >
-            <span className="p-dot" style={{ background: statusColor[s] }} />
+            <StatusGlyph status={s} size={10} />
             {statusLabel[s]}
           </button>
         ))}
@@ -304,7 +304,7 @@ export function SwitchAccounts({
       <div className="status-menu accounts" onMouseDown={(e) => e.stopPropagation()}>
         <div className="accounts-head">Accounts</div>
         <button className="status-opt on">
-          <span className="p-dot" style={{ background: statusColor[account.status] }} />
+          <StatusGlyph status={account.status} size={10} />
           <span className="accounts-name">
             {account.name}
             <span>{account.handle}</span>

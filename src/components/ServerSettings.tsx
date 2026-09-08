@@ -399,7 +399,7 @@ export function ServerSettings({
                 <EmojiGlyph code={e.code} alt={e.name} />
                 <span className="emoji-name">:{e.name}:</span>
                 <span className="emoji-by">
-                  <Avatar account={account} size={20} />
+                  <Avatar account={account} size={20} status={false} />
                   {account.name}
                 </span>
                 <button
@@ -434,7 +434,7 @@ export function ServerSettings({
             </div>
             <div className="member-table-row">
               <span className="mt-name">
-                <Avatar account={account} size={32} />
+                <Avatar account={account} size={32} status={false} />
                 <b>{account.name}</b>
                 <i>{account.handle}</i>
               </span>
@@ -492,7 +492,7 @@ export function ServerSettings({
             {server.invites.map((i) => (
               <div className="invite-row" key={i.code}>
                 <span className="mt-name">
-                  <Avatar account={account} size={24} />
+                  <Avatar account={account} size={24} status={false} />
                   {account.name}
                 </span>
                 <code>discord.gg/{i.code}</code>
@@ -538,7 +538,7 @@ export function ServerSettings({
             {server.audit.length ? (
               server.audit.map((a) => (
                 <div className="audit-row" key={a.id}>
-                  <Avatar account={account} size={32} />
+                  <Avatar account={account} size={32} status={false} />
                   <span className="audit-text">
                     <b>{account.name}</b> {a.action.toLowerCase()} <b>{a.target}</b>
                   </span>

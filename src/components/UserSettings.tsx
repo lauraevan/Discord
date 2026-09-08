@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   bannerColorOf,
-  statusColor,
   statusLabel,
   type Account,
   type Server,
@@ -13,6 +12,8 @@ import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '..
 import { CheckIcon, LockIcon } from '../ui/Icons'
 import { BADGES } from '../badges'
 import { COLLECTIONS } from '../shop'
+import { NAMEPLATES } from '../nameplates'
+import { Nameplate } from '../ui/Nameplate'
 import { DECORATIONS, Decoration } from '../ui/Decorations'
 import {
   Divider,
@@ -30,6 +31,7 @@ import {
 import { Avatar } from './UserArea'
 import { DEFAULT_AVATAR_COLORS, DefaultAvatar, defaultAvatarIndex } from '../ui/Art'
 import { SERVICES, connect, logoOf, serviceOf, type Connection } from '../connections'
+import { StatusGlyph } from '../ui/Status'
 
 /**
  * User Settings.
@@ -842,6 +844,7 @@ function Profiles({
   const [serverId, setServerId] = useState(servers[0]?.id ?? '')
   const owned = account.collectibles ?? []
   const decorations = DECORATIONS.filter((d) => owned.includes(d.id))
+  const plates = NAMEPLATES.filter((n) => owned.includes(n.id))
   const effects = COLLECTIONS.flatMap((c) =>
     c.effects.filter((e) => owned.includes(e.id)).map((e) => ({ ...e, colors: c.confetti })),
   )
@@ -1031,6 +1034,36 @@ function Profiles({
                 )}
               </div>
 
+              {/* Discord's Profiles pane picks the nameplate here too, from
+                  the ones the account owns */}
+              <div className="set-field">
+                <label>NAMEPLATE</label>
+                {plates.length === 0 ? (
+                  <p className="theme-note">
+                    None owned yet — the Shop sells them beside the decorations.
+                  </p>
+                ) : (
+                  <div className="plate-picker">
+                    <button
+                      className={'plate-pick' + (account.nameplate ? '' : ' on')}
+                      onClick={() => onAccount({ ...account, nameplate: undefined })}
+                    >
+                      None
+                    </button>
+                    {plates.map((n) => (
+                      <button
+                        key={n.id}
+                        className={'plate-pick' + (account.nameplate === n.id ? ' on' : '')}
+                        onClick={() => onAccount({ ...account, nameplate: n.id })}
+                      >
+                        <Nameplate id={n.id} />
+                        <span>{n.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="set-field">
                 <label>PROFILE EFFECT</label>
                 {effects.length === 0 ? (
@@ -1112,7 +1145,7 @@ function Profiles({
                       className={'status-pick' + (s === account.status ? ' on' : '')}
                       onClick={() => onAccount({ ...account, status: s })}
                     >
-                      <span className="p-dot" style={{ background: statusColor[s] }} />
+                      <StatusGlyph status={s} size={10} />
                       {statusLabel[s]}
                     </button>
                   ))}

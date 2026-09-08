@@ -413,6 +413,89 @@ await step('an age-restricted channel opens on the gate, then lets you in', asyn
   expect((await p.locator('.composer-input').count()) === 1, 'composer did not come back')
 })
 
+/* --------------------------------------------------------- nameplates */
+
+await step('a nameplate can be bought, worn, and shows behind the name', async () => {
+  await p.evaluate(() => localStorage.setItem('discord-ui:v4:orbs', '9800'))
+  await p.reload()
+  await p.waitForTimeout(600)
+  await p.click('.dm-nav .row:has-text("Shop")').catch(async () => {
+    await p.click('.server-tile.home, [aria-label="Direct Messages"]')
+    await p.click('.dm-nav .row:has-text("Shop")')
+  })
+  await p.waitForTimeout(400)
+  await p.fill('.shop-search input', 'norway')
+  await p.waitForTimeout(300)
+  const card = p.locator('.shop-item:has-text("Norway")')
+  expect((await card.count()) === 1, 'no Norway nameplate in the Shop')
+  await card.locator('.shop-buy').click()
+  await p.waitForTimeout(200)
+  expect(
+    (await card.locator('.shop-buy').innerText()).trim() === 'Wear',
+    'buying did not turn the button into Wear',
+  )
+  await card.locator('.shop-buy').click()
+  await p.waitForTimeout(200)
+  expect((await p.locator('.shop-item.on').count()) === 1, 'wearing did not mark it worn')
+
+  // and it shows behind the name in the member list
+  await p.click('.server-tile.srv')
+  await p.waitForTimeout(300)
+  await p.click('[aria-label="Toggle member list"]')
+  await p.waitForTimeout(300)
+  expect((await p.locator('.member .nameplate').count()) === 1, 'no nameplate on the member row')
+  const laid = await p.evaluate(() => {
+    const el = document.querySelector('.member .nameplate')
+    const r = el.getBoundingClientRect()
+    return { w: Math.round(r.width), pos: getComputedStyle(el).position }
+  })
+  expect(laid.pos === 'absolute' && laid.w > 100, `nameplate not laid out: ${JSON.stringify(laid)}`)
+})
+
+/* ------------------------------------------- profiles open from anywhere */
+
+await step('an avatar in the feed opens the user popout, and it can go full', async () => {
+  await p.click('[aria-label="Toggle member list"]')
+  // the reload above dropped the age gate's session consent, so pass it again
+  if (await p.locator('.age-gate').count()) {
+    await p.click('.age-gate .btn-primary')
+    await p.waitForTimeout(300)
+  }
+  await p.click('.composer-input')
+  await p.fill('.composer-input', 'open me')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(300)
+  await p.locator('button.group-avatar').last().click()
+  await p.waitForSelector('.popout.anchored', { timeout: 3000 })
+  expect((await p.locator('.popout.anchored').count()) === 1, 'no anchored popout')
+  await p.click('.popout .p-btn:has-text("View Full Profile")')
+  await p.waitForTimeout(300)
+  expect((await p.locator('.profile-modal').count()) === 1, 'View Full Profile did nothing')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(200)
+})
+
+/* ------------------------------------------------------------ presence */
+
+await step('presence is on the member list but never on a message', async () => {
+  // leave whatever the last step opened
+  if (await p.locator('.profile-modal').count()) await p.click('.profile-close')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(250)
+  const feed = await p.evaluate(
+    () => document.querySelectorAll('.group .avatar-svg rect').length,
+  )
+  expect(feed === 0, `the feed is drawing ${feed} status indicators`)
+  if (!(await p.locator('.member').count())) {
+    await p.click('[aria-label="Toggle member list"]')
+    await p.waitForTimeout(300)
+  }
+  const member = await p.evaluate(
+    () => document.querySelectorAll('.member .avatar-svg rect').length,
+  )
+  expect(member === 1, `the member row drew ${member} status indicators`)
+})
+
 console.log('\nerrors:', errs.length ? errs.join('\n  ') : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()

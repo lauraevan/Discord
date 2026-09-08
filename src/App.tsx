@@ -223,6 +223,23 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [homeView, setHomeView] = useState<HomeView>('friends')
   const [profileModal, setProfileModal] = useState(false)
+  // Discord's user popout, anchored to whatever opened it
+  const [userPopout, setUserPopout] = useState<{ x: number; y: number } | null>(null)
+
+  /**
+   * Places the popout beside an anchor and clamps it into the window, which is
+   * what the client does rather than letting it run off an edge.
+   */
+  const openProfileAt = (anchor: HTMLElement, side: 'right' | 'left' = 'right') => {
+    const r = anchor.getBoundingClientRect()
+    const W = 247
+    const H = 380
+    const x = side === 'right' ? r.right + 8 : r.left - W - 8
+    setUserPopout({
+      x: Math.max(8, Math.min(x, window.innerWidth - W - 8)),
+      y: Math.max(8, Math.min(r.top - 8, window.innerHeight - H - 8)),
+    })
+  }
   const [pollModal, setPollModal] = useState(false)
   const [channelSettings, setChannelSettings] = useState<string | null>(null)
   const [customStatus, setCustomStatus] = useState(false)
@@ -900,6 +917,9 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 setAccount((a) => ({ ...a, collectibles: [...(a.collectibles ?? []), id] }))
               }}
               onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
+              onEquipNameplate={(id) =>
+                setAccount((a) => ({ ...a, nameplate: id || undefined }))
+              }
             />
           ) : (
             <FriendsPage tab={friendsTab} onTab={setFriendsTab} />
@@ -982,6 +1002,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     onReply={setReplyTo}
                     onReact={react}
                     onOpenPicker={(id, at) => setPicker({ target: id, at })}
+                    onOpenProfile={(el) => openProfileAt(el, 'right')}
                     onVote={vote}
                     onContext={(m, at) => setCtx({ at, items: messageMenu(m) })}
                   />
@@ -1027,7 +1048,10 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     onClose={() => setQuery('')}
                   />
                 ) : membersOpen ? (
-                  <MemberList account={account} onOpenProfile={() => setProfileModal(true)} />
+                  <MemberList
+                    account={account}
+                    onOpenProfile={(el) => openProfileAt(el, 'left')}
+                  />
                 ) : null}
               </div>
             </>
@@ -1094,6 +1118,28 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             ])
             setPollModal(false)
           }}
+        />
+      ) : null}
+
+      {userPopout ? (
+        <ProfilePopout
+          account={account}
+          at={userPopout}
+          onEdit={() => {
+            setUserPopout(null)
+            setEditingProfile(true)
+          }}
+          onStatus={() => setStatusMenu(true)}
+          onSwitch={() => setSwitchAccounts(true)}
+          onCustomStatus={() => {
+            setUserPopout(null)
+            setCustomStatus(true)
+          }}
+          onViewProfile={() => {
+            setUserPopout(null)
+            setProfileModal(true)
+          }}
+          onClose={() => setUserPopout(null)}
         />
       ) : null}
 

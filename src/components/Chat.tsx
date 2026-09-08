@@ -306,6 +306,7 @@ export function ChatFeed({
   onReply,
   onReact,
   onOpenPicker,
+  onOpenProfile,
   onContext,
   onVote,
   onOnboard,
@@ -324,6 +325,7 @@ export function ChatFeed({
   onReply: (m: Message) => void
   onReact: (id: string, name: string) => void
   onOpenPicker: (id: string, at: { x: number; y: number }) => void
+  onOpenProfile: (anchor: HTMLElement) => void
   onContext: (m: Message, at: { x: number; y: number }) => void
   onVote: (id: string, answer: number) => void
   onOnboard: (what: 'invite' | 'icon' | 'boosts' | 'apps') => void
@@ -501,7 +503,7 @@ export function ChatFeed({
                   onKeyDown={(e) => e.key === 'Enter' && jumpTo(parent.id)}
                 >
                   <span className="reply-spine" />
-                  <Avatar account={account} size={16} />
+                  <Avatar account={account} size={16} status={false} />
                   <span className="reply-author">{account.name}</span>
                   <span className="reply-text">{preview(parent.text)}</span>
                 </div>
@@ -511,13 +513,23 @@ export function ChatFeed({
                 <span className="gutter-time">{time(m.time)}</span>
               ) : (
                 <>
-                  <span className="group-avatar">
-                    <Avatar account={account} size={40} />
-                  </span>
+                  {/* Discord opens the user popout from either the avatar or
+                      the name, anchored to whichever was clicked */}
+                  <button
+                    className="group-avatar"
+                    aria-label={`${account.name}'s profile`}
+                    onClick={(e) => onOpenProfile(e.currentTarget)}
+                  >
+                    <Avatar account={account} size={40} status={false} />
+                  </button>
                   <div className="msg-head">
-                    <span className="author" style={nameColor ? { color: nameColor } : undefined}>
+                    <button
+                      className="author"
+                      style={nameColor ? { color: nameColor } : undefined}
+                      onClick={(e) => onOpenProfile(e.currentTarget)}
+                    >
                       {account.name}
-                    </span>
+                    </button>
                     <span className="timestamp">{stamp(m.time)}</span>
                   </div>
                 </>

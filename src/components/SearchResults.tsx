@@ -41,7 +41,7 @@ export function SearchResults({
               <span>{channel.name}</span>
             </div>
             <div className="result-card">
-              <Avatar account={account} size={32} />
+              <Avatar account={account} size={32} status={false} />
               <div className="result-main">
                 <div className="result-author">{account.name}</div>
                 <div className="result-text">{renderMarkdown(message.text, md)}</div>

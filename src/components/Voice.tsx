@@ -1,4 +1,4 @@
-import { statusColor, type Account, type Channel } from '../data'
+import type { Account, Channel } from '../data'
 import {
   CloseIcon,
   ExpandIcon,
@@ -11,6 +11,7 @@ import {
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 import { Avatar } from './UserArea'
+import { StatusGlyph } from '../ui/Status'
 
 /**
  * The voice channel view.
@@ -48,7 +49,7 @@ export function VoiceView({
             {muted ? <MicOffIcon /> : null}
             {account.name}
           </span>
-          <span className="voice-dot-lg" style={{ background: statusColor[account.status] }} />
+          <StatusGlyph status={account.status} size={16} />
         </div>
       </div>
 

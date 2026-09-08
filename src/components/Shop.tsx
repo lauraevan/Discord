@@ -15,6 +15,9 @@ import {
 } from '../ui/Icons'
 import { DECORATIONS, Decoration } from '../ui/Decorations'
 import { DefaultAvatar, WumpusMark } from '../ui/Art'
+import { NAMEPLATES, type Nameplate } from '../nameplates'
+import { Nameplate as NameplateArt } from '../ui/Nameplate'
+import { Avatar } from './UserArea'
 
 /**
  * The Shop tab.
@@ -76,6 +79,7 @@ export function ShopPage({
   equipped,
   onBuy,
   onEquip,
+  onEquipNameplate,
 }: {
   account: Account
   orbs: number
@@ -84,6 +88,7 @@ export function ShopPage({
   equipped?: string
   onBuy: (id: string, price: number) => void
   onEquip: (id: string) => void
+  onEquipNameplate: (id: string) => void
 }) {
   const [tab, setTab] = useState<Tab>('featured')
   const [openId, setOpenId] = useState<string | null>(null)
@@ -137,6 +142,31 @@ export function ShopPage({
       onEquip={() => onEquip(equipped === d.id ? '' : d.id)}
     />
   )
+
+  const plateCard = (n: Nameplate) => (
+    <PlateCard
+      key={n.id}
+      account={account}
+      plate={n}
+      orbs={priceOf(n.orbs)}
+      full={n.orbs}
+      discounted={discounted}
+      owned={owned.includes(n.id)}
+      worn={account.nameplate === n.id}
+      affordable={orbs >= priceOf(n.orbs)}
+      wished={wishlist.includes(n.id)}
+      onWish={() =>
+        setWishlist((w) => (w.includes(n.id) ? w.filter((x) => x !== n.id) : [...w, n.id]))
+      }
+      onBuy={() => onBuy(n.id, priceOf(n.orbs))}
+      onEquip={() => onEquipNameplate(account.nameplate === n.id ? '' : n.id)}
+    />
+  )
+
+  const plates = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return NAMEPLATES.filter((n) => !q || n.name.toLowerCase().includes(q))
+  }, [query])
 
   return (
     <main className="chat shop">
@@ -197,10 +227,14 @@ export function ShopPage({
         ) : query.trim() ? (
           <>
             <h2 className="shop-heading">
-              {items.length} result{items.length === 1 ? '' : 's'} for “{query.trim()}”
+              {items.length + plates.length} result{items.length + plates.length === 1 ? '' : 's'}{' '}
+              for “{query.trim()}”
             </h2>
-            <div className="shop-grid">{items.map(card)}</div>
-            {items.length === 0 ? (
+            <div className="shop-grid">
+              {items.map(card)}
+              {plates.map(plateCard)}
+            </div>
+            {items.length === 0 && plates.length === 0 ? (
               <Empty
                 pose="shrug"
                 line="Wumpus looked everywhere and found nothing."
@@ -282,6 +316,9 @@ export function ShopPage({
               </div>
             </div>
             <div className="shop-grid">{items.map(card)}</div>
+
+            <h2 className="shop-heading">Nameplates</h2>
+            <div className="shop-grid">{plates.map(plateCard)}</div>
 
             <h2 className="shop-heading">More collections</h2>
             <div className="shop-strips">
@@ -584,6 +621,82 @@ function ItemCard({
       </span>
       <b>{name}</b>
       <span className="shop-item-collection">{collection}</span>
+      {owned ? (
+        <button className={'shop-buy' + (worn ? ' equipped' : '')} onClick={onEquip}>
+          {worn ? (
+            <>
+              <CheckSmallIcon size={16} />
+              Worn
+            </>
+          ) : (
+            'Wear'
+          )}
+        </button>
+      ) : (
+        <button className="shop-buy" disabled={!affordable} onClick={onBuy}>
+          {affordable ? <OrbsIcon size={14} /> : <LockIcon size={14} />}
+          {orbs.toLocaleString()}
+          {discounted ? <s>{full.toLocaleString()}</s> : null}
+        </button>
+      )}
+    </article>
+  )
+}
+
+/**
+ * A nameplate on the Shop grid.
+ *
+ * Discord previews one as the row it becomes — an avatar, a name, and the
+ * plate behind both — rather than as a swatch, so this does too.
+ */
+function PlateCard({
+  account,
+  plate,
+  orbs,
+  full,
+  discounted,
+  owned,
+  worn,
+  affordable,
+  wished,
+  onWish,
+  onBuy,
+  onEquip,
+}: {
+  account: Account
+  plate: Nameplate
+  orbs: number
+  full: number
+  discounted: boolean
+  owned: boolean
+  worn: boolean
+  affordable: boolean
+  wished: boolean
+  onWish: () => void
+  onBuy: () => void
+  onEquip: () => void
+}) {
+  return (
+    <article className={'shop-item' + (worn ? ' on' : '')}>
+      <span
+        className="shop-item-art"
+        style={{ background: `linear-gradient(140deg, ${plate.palette[0]}, ${plate.palette[1]})` }}
+      >
+        <span className="plate-preview">
+          <NameplateArt id={plate.id} />
+          <Avatar account={account} size={24} status={false} />
+          <b>{account.name}</b>
+        </span>
+        <button
+          className={'shop-wish' + (wished ? ' on' : '')}
+          aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+          onClick={onWish}
+        >
+          {wished ? <HeartIcon size={16} /> : <HeartOutlineIcon size={16} />}
+        </button>
+      </span>
+      <b>{plate.name}</b>
+      <span className="shop-item-collection">Nameplate · ${plate.price.toFixed(2)}</span>
       {owned ? (
         <button className={'shop-buy' + (worn ? ' equipped' : '')} onClick={onEquip}>
           {worn ? (

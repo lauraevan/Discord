@@ -68,6 +68,8 @@ export type Account = {
   bannerColor?: string
   /** linked platform accounts, from src/connections.ts */
   connections?: Connection[]
+  /** the nameplate worn behind the name, by its id in src/nameplates.ts */
+  nameplate?: string
   /**
    * Per-server profiles. Discord lets a member look different in each server:
    * a nickname, its own avatar colour, pronouns and bio.

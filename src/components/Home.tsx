@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { bannerColorOf, type Account } from '../data'
 import { logoOf, serviceOf } from '../connections'
+import { Nameplate } from '../ui/Nameplate'
 import { WumpusMark, type WumpusPose } from '../ui/Art'
 import {
   CheckIcon,
@@ -254,6 +255,7 @@ export function ProfileModal({
         </div>
         <div className="profile-card">
           <div className="profile-names">
+            <Nameplate id={account.nameplate} />
             <b>{account.name}</b>
             <span>{account.handle}</span>
             {account.pronouns ? <i>{account.pronouns}</i> : null}
