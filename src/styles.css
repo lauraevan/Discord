@@ -614,10 +614,12 @@ body.resizing .side-grip {
   display: flex;
   align-items: center;
   height: 22px;
-  /* Measured off the frame: the heading box opens 12 under the plate above it
-     and the first row under it starts 0.4 below the box, which puts the label's
-     ink on 249..258 and the row's on 275..281, both the frame's own. */
-  margin: 12px 10px 0.4px 14px;
+  /* The heading box opens 12 under the plate above it and closes 1.2 inside
+     it, which lands the row under it on the capture's device row 425, the
+     next heading on 538 and the row under that on 591 — all three within one.
+     The 7 on the right follows the rows to the pane's edge and puts the plus
+     on the capture's 705..726 exactly. */
+  margin: 12px 7px -1.2px 14px;
   color: color-mix(in srgb, var(--text) 47%, transparent);
   width: auto;
 }
