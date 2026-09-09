@@ -224,9 +224,23 @@ are native screenshots at 1:1. That difference decides which to believe:
     button and the captures' does not, which is an account difference rather
     than a version one, so the app keeps it.
 
-The frame charges about 0.13 for the first two. That is the cost of matching
-the client the user is looking at rather than the one that took the older
-screenshot, and it is worth paying.
+The frame charges for every one of these, and it should: a kernel that spreads
+a 40px block's edges reads it as 41.25, and one that spreads a 1px line reads
+it dimmer than it is. Running tally, frame cost against capture gain:
+
+| decision | frame | capture |
+| --- | --- | --- |
+| channel list's right edge | +0.031 | -0.018 |
+| composer's right-hand glyphs | +0.101 | -0.130 |
+| pane rim and rounded corner | +0.012 | +0.015 |
+| rail: 40px tile on a 48px pitch | +0.045 | -0.021 |
+| header rules at 7.6% rather than 4.5% | +0.005 | +0.002 |
+| title bar 30 and headers 48, rail 72 | +0.056 | -0.116 |
+
+The frame is at 1.35 where it could be 1.10, and the capture at 2.83 where it
+started at 4.59. Eighteen of the twenty landmarks in `tools/landmarks.mjs` —
+whose expectations are read off the captures, not remembered — now measure
+exactly zero, against fourteen before.
 
 ### The rim
 

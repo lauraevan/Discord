@@ -130,10 +130,13 @@ textarea {
 /* --------------------------------------------------------------- titlebar */
 
 .titlebar {
-  /* 23px, not 24: measured off the reference, and a pixel here moves
-     every row in the app */
-  flex: 0 0 23px;
-  height: 23px;
+  /* 30 real px, off the 1:1 captures: they put the panes' top rim on 29.5 and
+     the header's rule on 78.75, so the bar is 30 and the header 48. The frame
+     reads that split as 23 and 40 of its own units, which is 28.75 and 50 —
+     the sum is right there and the halves are not. A pixel here moves every
+     row in the app, so it is worth the trouble of getting from the capture. */
+  flex: 0 0 calc(30px * var(--u));
+  height: calc(30px * var(--u));
   background: var(--titlebar);
   display: flex;
   align-items: center;
@@ -211,8 +214,9 @@ textarea {
 /* ------------------------------------------------------------------- rail */
 
 .rail {
-  width: 58px;
-  flex: 0 0 58px;
+  /* 72 real px — the capture puts the seam with the sidebar on 72..72.5 */
+  width: calc(72px * var(--u));
+  flex: 0 0 calc(72px * var(--u));
   background: var(--rail);
   overflow: hidden;
   position: relative;
@@ -246,7 +250,7 @@ textarea {
 .server {
   position: relative;
   height: calc(40px * var(--u));
-  width: 58px;
+  width: calc(72px * var(--u));
   margin-bottom: calc(8px * var(--u));
   display: flex;
   justify-content: center;
@@ -340,8 +344,8 @@ textarea {
 
 /* the rail plus the channel list; --side-w is the draggable half */
 .left-col {
-  width: calc(58px + var(--side-w, 247px));
-  flex: 0 0 calc(58px + var(--side-w, 247px));
+  width: calc(72px * var(--u) + var(--side-w, 247px));
+  flex: 0 0 calc(72px * var(--u) + var(--side-w, 247px));
   display: flex;
   position: relative;
 }
@@ -413,8 +417,8 @@ body.resizing .side-grip {
 }
 
 .server-header {
-  height: 40px;
-  flex: 0 0 40px;
+  height: calc(48px * var(--u));
+  flex: 0 0 calc(48px * var(--u));
   display: flex;
   align-items: center;
   padding: 2px 12px 0 14px;
@@ -1076,8 +1080,8 @@ body.resizing .side-grip {
 }
 
 .chat-header {
-  height: 40px;
-  flex: 0 0 40px;
+  height: calc(48px * var(--u));
+  flex: 0 0 calc(48px * var(--u));
   display: flex;
   align-items: center;
   padding: 0 10px 0 12px;
