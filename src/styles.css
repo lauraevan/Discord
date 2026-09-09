@@ -1164,7 +1164,11 @@ body.resizing .side-grip {
   /* docs/refs measures the checklist column at 400px */
   width: calc(400px * var(--u));
   margin: 0 auto;
-  padding: 24px 0 18px;
+  /* almost nothing under the last card: the capture puts 24.75 real px
+     between it and the date divider's rule, and the divider's own 22.5 is
+     nearly all of that. It used to be 18 here on top of the divider's, which
+     lifted the whole checklist 20 px off where Discord has it. */
+  padding: 24px 0 2.4px;
   text-align: center;
   flex: 0 0 auto;
 }
@@ -1172,13 +1176,18 @@ body.resizing .side-grip {
 .onboard h2 {
   font-size: 24.3px;
   font-weight: 400;
-  line-height: 32.4px;
+  /* 39 real px between the two lines' cap tops, which the capture measures as
+     77 device rows */
+  line-height: 31.2px;
   color: var(--strong);
   letter-spacing: 0.1px;
 }
 
 .onboard p {
-  margin: 13px auto 0;
+  /* the capture puts 89 device rows between the heading's second cap top and
+     the body's first, which this is what is left of once the line boxes are
+     taken out */
+  margin: 7.4px auto 0;
   max-width: 312px;
   font-size: 10.65px;
   line-height: 14.6px;
@@ -2068,13 +2077,17 @@ h3.md-h {
   height: 0;
 }
 
+/* The label rides the rule rather than sitting above it: the box is 0 tall and
+   centres its child, so the translateY this used to carry pushed the date half
+   a line clear of the line it is meant to interrupt — 8 real px, plainly wrong
+   once the capture is beside it. The type is Discord's 12 real px at 600, not
+   the 12.8 at 700 it was. */
 .divider span {
   margin: 0 auto;
-  transform: translateY(-50%);
   background: var(--chat);
   padding: 0 6px;
-  font-size: 10.25px;
-  font-weight: 700;
+  font-size: 9.6px;
+  font-weight: 600;
   color: var(--muted);
 }
 
