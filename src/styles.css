@@ -11768,3 +11768,128 @@ img.wumpus {
 .p-note::placeholder {
   color: var(--pop-caret);
 }
+
+
+/* --- the Billing pages --------------------------------------------------- */
+.bill-card {
+  margin-top: calc(16px * var(--u));
+  padding: calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--card);
+}
+
+.bill-head {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  margin-bottom: calc(12px * var(--u));
+}
+
+.bill-head b {
+  font-size: calc(16px * var(--u));
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.bill-pill {
+  height: calc(20px * var(--u));
+  padding: 0 calc(8px * var(--u));
+  border-radius: calc(10px * var(--u));
+  background: var(--green);
+  color: #fff;
+  font-size: calc(11px * var(--u));
+  font-weight: 700;
+  line-height: calc(20px * var(--u));
+  text-transform: uppercase;
+}
+
+.bill-pill.used {
+  margin-left: auto;
+  background: var(--btn2);
+  color: var(--muted);
+}
+
+.bill-rows > div {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(16px * var(--u));
+  padding: calc(6px * var(--u)) 0;
+  font-size: calc(14px * var(--u));
+}
+
+.bill-rows span {
+  color: var(--muted);
+}
+
+.bill-rows b {
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+}
+
+.bill-acts {
+  display: flex;
+  gap: calc(8px * var(--u));
+  margin-top: calc(14px * var(--u));
+}
+
+.bill-list {
+  margin-top: calc(12px * var(--u));
+  border-radius: calc(8px * var(--u));
+  overflow: hidden;
+  background: var(--card);
+}
+
+.bill-row {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--u));
+  padding: calc(12px * var(--u)) calc(16px * var(--u));
+}
+
+.bill-row + .bill-row {
+  border-top: 1px solid var(--border);
+}
+
+.bill-srv {
+  display: grid;
+  place-items: center;
+  width: calc(36px * var(--u));
+  height: calc(36px * var(--u));
+  flex: 0 0 calc(36px * var(--u));
+  border-radius: calc(12px * var(--u));
+  color: #fff;
+  font-size: calc(13px * var(--u));
+  font-weight: 700;
+}
+
+.bill-srv.nitro {
+  background: var(--blurple);
+}
+
+.bill-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--u));
+  min-width: 0;
+}
+
+.bill-row-body b {
+  font-size: calc(15px * var(--u));
+  font-weight: 500;
+  color: var(--strong);
+}
+
+.bill-row-body span {
+  font-size: calc(13px * var(--u));
+  color: var(--muted);
+}
+
+.bill-row-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text);
+}
+
+.bill-row .btn-secondary {
+  margin-left: auto;
+}

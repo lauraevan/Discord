@@ -189,6 +189,33 @@ await step('the message limit really moves to 4,000', async () => {
   await p.fill('.composer-input', '')
 })
 
+await step('the billing pages read the subscription that was just bought', async () => {
+  await p.click('[aria-label="User settings"]')
+  await p.click('.settings-item:has-text("Nitro")')
+  await p.waitForSelector('.bill-card')
+  expect(
+    (await p.locator('.bill-pill').innerText()).toLowerCase() === 'active',
+    'the Nitro page does not show the subscription as active',
+  )
+  const rows = await p.locator('.bill-rows > div b').allInnerTexts()
+  expect(rows.length === 3 && /\$/.test(rows[1]), 'the plan rows are wrong: ' + rows.join('|'))
+  // and Subscriptions lists the same one
+  await p.click('.settings-item:has-text("Subscriptions")')
+  await p.waitForSelector('.bill-row')
+  expect(
+    (await p.locator('.bill-row-body b').innerText()).startsWith('Nitro'),
+    'Subscriptions does not list it',
+  )
+  // the gift inventory is empty until something is bought, and says so
+  await p.click('.settings-item:has-text("Gift Inventory")')
+  await p.waitForSelector('.set-note')
+  expect(
+    (await p.locator('.bill-row').count()) === 0,
+    'the gift inventory has something in it already',
+  )
+  await p.keyboard.press('Escape')
+})
+
 await step('and back to 2,000 once the subscription is cancelled', async () => {
   await p.click('.server-tile.home')
   await p.waitForTimeout(200)

@@ -1331,6 +1331,16 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           prefs={prefs}
           themeId={themeId}
           premium={premiumType === PremiumType.TIER_2}
+          subscription={subscription}
+          gifts={gifts}
+          orbs={orbs}
+          onCancel={cancelSubscription}
+          onNitro={() => {
+            setUserSettings(false)
+            setDiscover(null)
+            setActiveServer(null)
+            setHomeView('nitro')
+          }}
           onAccount={setAccount}
           onPrefs={(p) => setPrefs((old) => ({ ...old, ...p }))}
           onTheme={(t) => setThemeId(t.id)}

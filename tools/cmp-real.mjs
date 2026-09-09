@@ -7,6 +7,8 @@ const zoom = process.argv[3]
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: 1366, height: 882 }, deviceScaleFactor: 2 })
 await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+// the captures were taken with the channel list dragged to 303
+await p.addInitScript(() => localStorage.setItem('discord-ui:v4:sidebar', '303'))
 p.on('pageerror', (e) => console.log('ERR', String(e).split('\n')[0]))
 await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(700)

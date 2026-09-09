@@ -11,6 +11,14 @@ import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
 import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
 import { BrowserIcon, CheckIcon, CloseIcon, LockIcon, MobilePhoneIcon } from '../ui/Icons'
 import { BADGES } from '../badges'
+import {
+  BOOST_PRICE,
+  PLANS,
+  PremiumType,
+  isActive,
+  type Gift,
+  type Subscription,
+} from '../nitro'
 import { COLLECTIONS } from '../shop'
 import { NAMEPLATES } from '../nameplates'
 import { NAME_FONTS } from '../namefonts'
@@ -55,6 +63,11 @@ export function UserSettings({
   prefs,
   themeId,
   premium,
+  subscription,
+  gifts,
+  orbs,
+  onCancel,
+  onNitro,
   onAccount,
   onPrefs,
   onTheme,
@@ -68,6 +81,13 @@ export function UserSettings({
   themeId: string
   /** Nitro subscribers get the background gradients, as they do in the client */
   premium: boolean
+  /** what the billing pages read: the subscription, the gifts, the balance */
+  subscription: Subscription | null
+  gifts: Gift[]
+  orbs: number
+  onCancel: () => void
+  /** the Nitro page proper, which the settings pages link across to */
+  onNitro: () => void
   onAccount: (a: Account) => void
   onPrefs: (p: Partial<Prefs>) => void
   onTheme: (t: Theme) => void
@@ -641,6 +661,27 @@ export function UserSettings({
           one you are reading this in, and the browser will say what it is. */}
       {section === 'sessions' ? <Devices /> : null}
 
+      {/* The billing pages read the subscription, the gifts and the boosts the
+          app already keeps, rather than saying they cannot be shown. What is
+          not here is a card on file — Discord's own payment sources — so the
+          pages that would only be about one say so. */}
+      {section === 'premium' ? (
+        <Billing
+          subscription={subscription}
+          orbs={orbs}
+          onCancel={onCancel}
+          onNitro={onNitro}
+        />
+      ) : null}
+
+      {section === 'guild_boosting' ? <Boosts servers={servers} /> : null}
+
+      {section === 'subscriptions' ? (
+        <Subscriptions subscription={subscription} onCancel={onCancel} onNitro={onNitro} />
+      ) : null}
+
+      {section === 'inventory' ? <GiftInventory gifts={gifts} onNitro={onNitro} /> : null}
+
       {section === 'clips' ? (
         <>
           <Title>Clips</Title>
@@ -718,10 +759,6 @@ export function UserSettings({
       {[
         'family_center',
         'authorized_apps',
-        'premium',
-        'guild_boosting',
-        'subscriptions',
-        'inventory',
         'billing',
         'registered_games',
         'overlay',
@@ -731,8 +768,8 @@ export function UserSettings({
           <Unavailable
             what="Not available in a page"
             why={
-              section === 'premium' || section === 'guild_boosting' || section === 'subscriptions' || section === 'billing' || section === 'inventory'
-                ? 'Nitro, boosts and the gift inventory are purchases, which need Discord’s billing systems.'
+              section === 'billing'
+                ? 'A card on file is Discord’s to hold; there is nowhere on this page to keep one, and nothing here has ever been charged for.'
                 : section === 'overlay' || section === 'registered_games'
                   ? 'The game overlay and game detection are desktop-app features.'
                   : 'This section needs Discord’s account servers — sessions, connections, authorized apps and friend data all live there.'
@@ -1456,6 +1493,203 @@ function Devices() {
         what="No other sessions"
         why="A session is a row on Discord's servers. This page has none behind it, so the browser you are in is the only one there can be — and nothing else can be signed in to log out of."
       />
+    </>
+  )
+}
+
+
+/* ------------------------------------------------------------ the billing pages
+ *
+ * Discord's Billing group is four pages about the same three things: the
+ * subscription, the boosts and the gifts. All three are state this app already
+ * keeps — the Nitro tab buys and cancels for real — so these read it rather
+ * than apologising for it.
+ */
+
+/** The date Discord prints on a renewal or an expiry. */
+const on = (at: number) =>
+  new Date(at).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })
+
+function Billing({
+  subscription,
+  orbs,
+  onCancel,
+  onNitro,
+}: {
+  subscription: Subscription | null
+  orbs: number
+  onCancel: () => void
+  onNitro: () => void
+}) {
+  const live = isActive(subscription)
+  const plan = live
+    ? PLANS.find(
+        (p) => p.premiumType === subscription.premiumType && p.interval === subscription.interval,
+      )
+    : undefined
+  return (
+    <>
+      <Title>Nitro</Title>
+      {live ? (
+        <>
+          <div className="bill-card">
+            <div className="bill-head">
+              <b>{plan?.label ?? 'Nitro'}</b>
+              <span className="bill-pill">Active</span>
+            </div>
+            <div className="bill-rows">
+              <div>
+                <span>Renews</span>
+                <b>{on(subscription.until)}</b>
+              </div>
+              <div>
+                <span>Price</span>
+                <b>
+                  ${plan?.price.toFixed(2) ?? '—'} / {subscription.interval === 2 ? 'year' : 'month'}
+                </b>
+              </div>
+              <div>
+                <span>Started</span>
+                <b>{subscription.source === 'gift' ? 'Redeemed from a gift' : 'Bought on the Nitro tab'}</b>
+              </div>
+            </div>
+            <div className="bill-acts">
+              <button className="btn-secondary" onClick={onNitro}>
+                Switch plans
+              </button>
+              <button className="btn-danger" onClick={onCancel}>
+                Cancel
+              </button>
+            </div>
+          </div>
+          <Note>
+            Cancelling keeps the subscription until {on(subscription.until)} and then stops it,
+            which is what Discord does.
+          </Note>
+        </>
+      ) : (
+        <>
+          <Note>No subscription. Nitro is bought on the Nitro tab.</Note>
+          <button className="btn-primary" onClick={onNitro}>
+            Go to Nitro
+          </button>
+        </>
+      )}
+      <Divider />
+      <Sub>Orbs</Sub>
+      <Note>
+        {orbs.toLocaleString()} in the balance. Orbs are earned from Quests and spent in the Shop.
+      </Note>
+    </>
+  )
+}
+
+function Boosts({ servers }: { servers: Server[] }) {
+  const boosted = servers.filter((s) => (s.boosts ?? 0) > 0)
+  const total = boosted.reduce((n, s) => n + (s.boosts ?? 0), 0)
+  return (
+    <>
+      <Title>Server Boost</Title>
+      <Note>
+        A boost costs ${BOOST_PRICE.toFixed(2)} a month and lifts one server a tier at a time — two
+        for level 1, seven for level 2, fourteen for level 3.
+      </Note>
+      {total ? (
+        <div className="bill-list">
+          {boosted.map((s) => (
+            <div className="bill-row" key={s.id}>
+              <span className="bill-srv" style={{ background: s.color }}>
+                {s.initials}
+              </span>
+              <span className="bill-row-body">
+                <b>{s.name}</b>
+                <span>
+                  Level {s.boostTier} · {s.boosts} boost{s.boosts === 1 ? '' : 's'}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <Note>Nothing boosted yet. A server takes its boosts on its own Server Boost page.</Note>
+      )}
+    </>
+  )
+}
+
+function Subscriptions({
+  subscription,
+  onCancel,
+  onNitro,
+}: {
+  subscription: Subscription | null
+  onCancel: () => void
+  onNitro: () => void
+}) {
+  const live = isActive(subscription)
+  return (
+    <>
+      <Title>Subscriptions</Title>
+      <Note>Everything this account is subscribed to, and when each renews.</Note>
+      {live ? (
+        <div className="bill-list">
+          <div className="bill-row">
+            <span className="bill-srv nitro">N</span>
+            <span className="bill-row-body">
+              <b>
+                {subscription.premiumType === PremiumType.TIER_2 ? 'Nitro' : 'Nitro Basic'}
+              </b>
+              <span>Renews {on(subscription.until)}</span>
+            </span>
+            <button className="btn-secondary" onClick={onCancel}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <Note>Nothing yet.</Note>
+          <button className="btn-primary" onClick={onNitro}>
+            Go to Nitro
+          </button>
+        </>
+      )}
+    </>
+  )
+}
+
+function GiftInventory({ gifts, onNitro }: { gifts: Gift[]; onNitro: () => void }) {
+  return (
+    <>
+      <Title>Gift Inventory</Title>
+      <Note>Gifts you have bought, and the codes that redeem them.</Note>
+      {gifts.length ? (
+        <div className="bill-list">
+          {gifts.map((g) => (
+            <div className="bill-row" key={g.code}>
+              <span className="bill-srv nitro">N</span>
+              <span className="bill-row-body">
+                <b>
+                  {g.tier === 'nitro' ? 'Nitro' : 'Nitro Basic'} ·{' '}
+                  {g.interval === 2 ? '1 year' : '1 month'}
+                </b>
+                <span>
+                  <code>{g.code}</code>
+                  {g.redeemedAt ? ` · redeemed ${on(g.redeemedAt)}` : ' · not redeemed'}
+                </span>
+              </span>
+              {g.redeemedAt ? <span className="bill-pill used">Used</span> : null}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          <Note>Nothing here. Gifts are bought on the Nitro tab.</Note>
+          <button className="btn-primary" onClick={onNitro}>
+            Go to Nitro
+          </button>
+        </>
+      )}
     </>
   )
 }
