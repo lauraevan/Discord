@@ -380,6 +380,20 @@ body.resizing .side-grip {
   pointer-events: auto;
 }
 
+/* Discord draws the panes right of the rail as one card: a 1px rim along the
+   top and down the seam with the rail, and an 11px round on the corner where
+   the two meet. Both references carry it — the frame at y=23-24 and x=58-59,
+   the 1:1 capture at y=59-60 and x=144-145, in rgb(34,33,38) — and the app
+   carried neither, which is the first thing the eye finds when the two are put
+   side by side. It is an inset ring rather than a border so it costs the panes
+   no width, and it sits under their children, so the account popout crosses it
+   the way it does in the client. */
+.sidebar,
+.dm-sidebar {
+  border-top-left-radius: calc(11px * var(--u));
+  box-shadow: inset 1px 1px 0 var(--border);
+}
+
 .sidebar {
   flex: 1;
   background: var(--side);
@@ -1028,6 +1042,8 @@ body.resizing .side-grip {
   display: flex;
   flex-direction: column;
   position: relative;
+  /* the other half of the pane rim; see .sidebar above */
+  box-shadow: inset 0 1px 0 var(--border);
 }
 
 .chat-body {
