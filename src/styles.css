@@ -497,7 +497,13 @@ body.resizing .side-grip {
 .row {
   position: relative;
   height: 26px;
-  margin: 0 8px 2px 7px;
+  /* The list runs to the pane's edge on the right. Three of the four 1:1
+     captures put the selected plate 1.25 real px short of it; reference.png
+     says 9.75, which is a reserved scrollbar gutter — the one thing that
+     shifts a whole list's right edge by a uniform 9.5 and nothing else. This
+     list hides its scrollbar outright, so the gutter is the frame's to have
+     and not this one's. */
+  margin: 0 1px 2px 7px;
   border-radius: 4px;
   display: flex;
   align-items: center;
