@@ -1667,7 +1667,9 @@ body.resizing .side-grip {
   border-radius: 8px;
   background: var(--card);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .modal-head {
@@ -1856,9 +1858,11 @@ body.resizing .side-grip {
 .status-menu {
   width: 200px;
   border-radius: 6px;
-  background: var(--card);
+  background: var(--menu);
   padding: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .status-opt {
@@ -2331,9 +2335,11 @@ h3.md-h {
   right: 6px;
   bottom: 100%;
   margin-bottom: 6px;
-  background: var(--card);
+  background: var(--menu);
   border-radius: 8px;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.4);
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 0.4),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
   z-index: 5;
 }
@@ -2542,9 +2548,11 @@ h3.md-h {
   max-height: 60vh;
   display: flex;
   flex-direction: column;
-  background: var(--card);
+  background: var(--menu);
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  box-shadow:
+    0 10px 30px rgb(0 0 0 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 20;
 }
 
@@ -2613,9 +2621,11 @@ h3.md-h {
   height: 444px;
   display: flex;
   flex-direction: column;
-  background: var(--card);
+  background: var(--menu);
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.5);
+  box-shadow:
+    0 10px 30px rgb(0 0 0 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 60;
   overflow: hidden;
 }
@@ -2748,9 +2758,11 @@ h3.md-h {
 .switcher {
   width: 560px;
   max-width: calc(100vw - 32px);
-  background: var(--card);
+  background: var(--menu);
   border-radius: 8px;
-  box-shadow: 0 12px 40px rgb(0 0 0 / 0.55);
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 0.55),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
 }
 
@@ -4212,7 +4224,9 @@ body.streamer .invite-row code {
   overflow-y: auto;
   border-radius: 8px;
   background: var(--card);
-  box-shadow: 0 12px 40px rgb(0 0 0 / 0.55);
+  box-shadow:
+    0 12px 40px rgb(0 0 0 / 0.55),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .profile-close {
@@ -4846,8 +4860,10 @@ body.streamer .invite-row code {
   width: 300px;
   padding: 8px;
   border-radius: 6px;
-  background: var(--card);
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.5);
+  background: var(--menu);
+  box-shadow:
+    0 8px 24px rgb(0 0 0 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 40;
 }
 
@@ -5204,8 +5220,10 @@ body.streamer .invite-row code {
   display: flex;
   flex-direction: column;
   border-radius: 8px;
-  background: var(--card);
-  box-shadow: 0 12px 36px rgb(0 0 0 / 0.5);
+  background: var(--menu);
+  box-shadow:
+    0 12px 36px rgb(0 0 0 / 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 75;
   overflow: hidden;
 }
@@ -5684,7 +5702,9 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 8px;
   background: var(--card);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
 }
 
@@ -7023,7 +7043,9 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 10px;
   background: var(--card);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
 }
 
@@ -7710,7 +7732,9 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 10px;
   background: var(--card);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   overflow: hidden;
 }
 

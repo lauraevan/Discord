@@ -45,6 +45,11 @@ if (which !== 'b251') {
   await p.press('.composer-input', 'Enter')
   await p.waitForTimeout(250)
 }
+if (which === 'b251') {
+  // the b251 capture has the account popout open over the channel list
+  await p.click('.user-card .id')
+  await p.waitForTimeout(400)
+}
 await p.mouse.move(1200, 820)
 await p.waitForTimeout(250)
 await p.screenshot({ path: out })
