@@ -8615,21 +8615,27 @@ body.streamer .invite-row code {
   border-bottom: 1px solid var(--border);
 }
 
+/* Measured off docs/refs/1aa6b935.jpg, which is one image staged in the
+   composer at 1:1. This block had been written in the frame's units where it
+   should have been in Discord's, so every number came out a quarter too big:
+   the card 270 real px wide against Discord's 218, and square there rather
+   than sized by whatever was dropped on it. The fill is the capture's
+   rgb(36,35,40) inside the same 1px rim its other cards carry. */
 .upload-card {
   position: relative;
-  width: 216px;
-  padding: 8px;
-  border-radius: 4px;
-  background: var(--chat);
+  width: calc(218px * var(--u));
+  padding: calc(8px * var(--u));
+  border-radius: calc(7px * var(--u));
+  background: var(--disc);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent);
 }
 
 .upload-thumb {
   position: relative;
   display: grid;
   place-items: center;
-  height: 128px;
-  border-radius: 3px;
-  background: var(--rail);
+  height: calc(175px * var(--u));
+  border-radius: calc(3px * var(--u));
   overflow: hidden;
 }
 
@@ -8655,23 +8661,25 @@ body.streamer .invite-row code {
 }
 
 .upload-card figcaption {
-  margin-top: 8px;
-  font-size: 12px;
+  margin-top: calc(8px * var(--u));
+  font-size: calc(12px * var(--u));
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* the capture puts the bar 91 x 34 real px in the card's own top-right
+   corner, not inset from it */
 .upload-acts {
   position: absolute;
-  right: 12px;
-  top: 12px;
+  right: 0;
+  top: 0;
   display: none;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 4px;
-  background: var(--card);
+  gap: calc(1px * var(--u));
+  padding: calc(3px * var(--u));
+  border-radius: calc(6px * var(--u));
+  background: var(--menu);
   box-shadow: 0 0 0 1px var(--border);
 }
 
@@ -8681,11 +8689,11 @@ body.streamer .invite-row code {
 }
 
 .upload-acts button {
-  width: 26px;
-  height: 26px;
+  width: calc(28px * var(--u));
+  height: calc(28px * var(--u));
   display: grid;
   place-items: center;
-  border-radius: 3px;
+  border-radius: calc(4px * var(--u));
   color: var(--text);
 }
 
@@ -8698,8 +8706,8 @@ body.streamer .invite-row code {
 }
 
 .upload-acts svg {
-  width: 16px;
-  height: 16px;
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
 }
 
 img.decoration {
