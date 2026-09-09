@@ -21,6 +21,14 @@ MAP = {
     # the client's own channel-type switch: GUILD_VOICE -> VoiceNormalIcon
     'SpeakerIcon': 'VoiceNormalIcon',
     'MegaphoneIcon': 'AnnouncementsIcon',
+    # the icons Discord hangs off the right of a context-menu item
+    'LinkIcon': 'LinkIcon',
+    'IdIcon': 'IdIcon',
+    'PinSlashIcon': 'PinUprightSlashIcon',
+    'ShieldIcon': 'ShieldIcon',
+    'DoorExitIcon': 'DoorExitIcon',
+    'FlagIcon': 'FlagIcon',
+    'MarkUnreadIcon': 'ChatMarkUnreadIcon',
     # Devices lists what is signed in, and Clips is its own settings page
     'LaptopIcon': 'LaptopIcon',
     'BrowserIcon': 'BrowserIcon',

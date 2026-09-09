@@ -4545,10 +4545,22 @@ body.streamer .invite-row code {
   color: var(--muted);
 }
 
+/* Discord hangs the icon off the right of the label, at 18px */
 .ctx-item svg {
-  width: 13px;
-  height: 13px;
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
+  flex: 0 0 calc(18px * var(--u));
   margin-left: auto;
+}
+
+/* and the label takes the room, so the icon stays pinned right */
+.ctx-item > span:first-child {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: calc(8px * var(--u));
 }
 
 .ctx-item.checked::after {

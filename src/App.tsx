@@ -88,6 +88,28 @@ import {
   type Quest,
   type QuestUserStatus,
 } from './quests'
+import {
+  BellIcon,
+  BellOffIcon,
+  BoostIcon,
+  ChannelCreateIcon,
+  CopyIcon,
+  FolderIcon,
+  GearIcon,
+  IdIcon,
+  InvitePersonIcon,
+  LinkIcon,
+  MarkReadIcon,
+  MarkUnreadIcon,
+  PencilIcon,
+  PinIcon,
+  PinSlashIcon,
+  ReactIcon,
+  ReplyIcon,
+  ShieldIcon,
+  ThreadPlusIcon,
+  TrashIcon,
+} from './ui/Icons'
 import { allThemes, applyTheme, defaultThemes } from './themes'
 import { DiscoverPage, DiscoverSidebar, type DiscoverTab } from './components/Discover'
 import { box, vh, vw } from './zoom'
@@ -699,27 +721,33 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   }
 
   const messageMenu = (m: Message): MenuItem[] => [
-    { label: 'Add Reaction', onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 } }) },
-    { label: 'Edit Message', onPick: () => setEditingId(m.id) },
-    { label: 'Reply', onPick: () => setReplyTo(m) },
+    { label: 'Add Reaction', icon: <ReactIcon />, onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 } }) },
+    { label: 'Edit Message', icon: <PencilIcon />, onPick: () => setEditingId(m.id) },
+    { label: 'Reply', icon: <ReplyIcon />, onPick: () => setReplyTo(m) },
     {
       label: 'Create Thread',
+      icon: <ThreadPlusIcon />,
       onPick: () =>
         createThread(m, m.text.slice(0, 40).replace(/\s+/g, '-').toLowerCase() || 'thread'),
     },
-    { label: m.pinned ? 'Unpin Message' : 'Pin Message', onPick: () => togglePin(m.id) },
+    {
+      label: m.pinned ? 'Unpin Message' : 'Pin Message',
+      icon: m.pinned ? <PinSlashIcon /> : <PinIcon />,
+      onPick: () => togglePin(m.id),
+    },
     { sep: true },
-    { label: 'Copy Text', onPick: () => navigator.clipboard?.writeText(m.text) },
+    { label: 'Copy Text', icon: <CopyIcon />, onPick: () => navigator.clipboard?.writeText(m.text) },
     {
       label: 'Copy Message Link',
+      icon: <LinkIcon />,
       onPick: () =>
         navigator.clipboard?.writeText(`${location.origin}/channels/${server?.id}/${channel?.id}/${m.id}`),
     },
-    { label: 'Mark Unread', onPick: () => setLastRead((r) => ({ ...r, [key]: m.time - 1 })) },
+    { label: 'Mark Unread', icon: <MarkUnreadIcon />, onPick: () => setLastRead((r) => ({ ...r, [key]: m.time - 1 })) },
     { sep: true },
-    { label: 'Delete Message', danger: true, onPick: () => deleteMessage(m.id) },
+    { label: 'Delete Message', danger: true, icon: <TrashIcon />, onPick: () => deleteMessage(m.id) },
     ...(prefs.developerMode
-      ? [{ sep: true as const }, { label: 'Copy Message ID', onPick: () => navigator.clipboard?.writeText(m.id) }]
+      ? [{ sep: true as const }, { label: 'Copy Message ID', icon: <IdIcon />, onPick: () => navigator.clipboard?.writeText(m.id) }]
       : []),
   ]
 
@@ -825,22 +853,22 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 setCtx({
                   at,
                   items: [
-                    { label: 'Server Boost', onPick: () => setServerSettings(true) },
-                    { label: 'Invite People', onPick: () => setServerSettings(true) },
-                    { label: 'Server Settings', onPick: () => setServerSettings(true) },
-                    { label: 'Create Channel', onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
-                    { label: 'Create Category', onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
+                    { label: 'Server Boost', icon: <BoostIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Server Settings', icon: <GearIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Create Channel', icon: <ChannelCreateIcon />, onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
+                    { label: 'Create Category', icon: <FolderIcon />, onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
                     { sep: true },
-                    { label: 'Notification Settings', onPick: () => setServerSettings(true) },
-                    { label: 'Privacy Settings', onPick: () => setUserSettings(true) },
-                    { label: 'Edit Server Profile', onPick: () => setUserSettings(true) },
+                    { label: 'Notification Settings', icon: <BellIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Privacy Settings', icon: <ShieldIcon />, onPick: () => setUserSettings(true) },
+                    { label: 'Edit Server Profile', icon: <PencilIcon />, onPick: () => setUserSettings(true) },
                     { sep: true },
-                    { label: 'Mark As Read', onPick: markServerRead },
+                    { label: 'Mark As Read', icon: <MarkReadIcon />, onPick: markServerRead },
                     ...(prefs.developerMode
-                      ? [{ label: 'Copy Server ID', onPick: () => navigator.clipboard?.writeText(server.id) }]
+                      ? [{ label: 'Copy Server ID', icon: <IdIcon />, onPick: () => navigator.clipboard?.writeText(server.id) }]
                       : []),
                     { sep: true },
-                    { label: 'Delete Server', danger: true, onPick: () => setServerSettings(true) },
+                    { label: 'Delete Server', danger: true, icon: <TrashIcon />, onPick: () => setServerSettings(true) },
                   ],
                 })
               }
@@ -850,11 +878,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 setCtx({
                   at,
                   items: [
-                    { label: 'Mark As Read', onPick: markRead },
+                    { label: 'Mark As Read', icon: <MarkReadIcon />, onPick: markRead },
                     { sep: true },
-                    { label: 'Invite People', onPick: () => setServerSettings(true) },
+                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings(true) },
                     {
                       label: 'Copy Link',
+                      icon: <LinkIcon />,
                       onPick: () =>
                         navigator.clipboard?.writeText(
                           `${location.origin}/channels/${server.id}/${id}`,
@@ -864,11 +893,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     muted
                       ? {
                           label: 'Unmute Channel',
+                          icon: <BellIcon />,
                           onPick: () =>
                             setMutes(({ [id]: _drop, ...rest }) => rest),
                         }
                       : {
                           label: 'Mute Channel',
+                          icon: <BellOffIcon />,
                           sub: MUTE_DURATIONS.map(([label, ms]) => ({
                             label,
                             onPick: () =>
@@ -877,6 +908,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                         },
                     {
                       label: 'Notification Settings',
+                      icon: <BellIcon />,
                       sub: [
                         { head: 'Notification Settings' },
                         { label: 'Use Server Default', check: true },
@@ -886,9 +918,10 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                       ],
                     },
                     { sep: true },
-                    { label: 'Edit Channel', onPick: () => setChannelSettings(id) },
+                    { label: 'Edit Channel', icon: <GearIcon />, onPick: () => setChannelSettings(id) },
                     {
                       label: 'Duplicate Channel',
+                      icon: <CopyIcon />,
                       onPick: () =>
                         c &&
                         patchServer(server.id, (s) => ({
@@ -897,11 +930,11 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                         })),
                     },
                     { sep: true },
-                    { label: 'Delete Channel', danger: true, onPick: () => deleteChannel(id) },
+                    { label: 'Delete Channel', danger: true, icon: <TrashIcon />, onPick: () => deleteChannel(id) },
                     ...(prefs.developerMode
                       ? [
                           { sep: true as const },
-                          { label: 'Copy Channel ID', onPick: () => navigator.clipboard?.writeText(id) },
+                          { label: 'Copy Channel ID', icon: <IdIcon />, onPick: () => navigator.clipboard?.writeText(id) },
                         ]
                       : []),
                   ],
