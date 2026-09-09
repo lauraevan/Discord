@@ -764,6 +764,24 @@ textarea {
      bare rail, so the drop shadow is far tighter than it looks */
   box-shadow: 0 8px 12px rgba(0, 0, 0, 0.09);
   z-index: 20;
+  /* a server popout carries three more sections than the account one, so the
+     card can outgrow a short window; Discord scrolls the body rather than
+     letting it hang off the bottom */
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 16px);
+}
+
+.popout-banner,
+.popout-avatar,
+.popout-chip {
+  flex: 0 0 auto;
+}
+
+.popout-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .popout-banner {
@@ -11610,4 +11628,100 @@ img.wumpus {
   color: var(--text);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+
+/* --- what the popout adds when it opens inside a server ------------------ */
+.p-section {
+  margin-top: calc(12px * var(--u));
+}
+
+.p-label {
+  margin-bottom: calc(6px * var(--u));
+  font-size: calc(12px * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--pop-label);
+}
+
+.p-since {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  font-size: calc(14px * var(--u));
+  color: var(--pop-bio);
+}
+
+.p-since span {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(6px * var(--u));
+  white-space: nowrap;
+}
+
+.p-since svg {
+  width: calc(16px * var(--u));
+  height: calc(16px * var(--u));
+}
+
+/* the divider Discord puts between the two dates */
+.p-since > i {
+  width: calc(4px * var(--u));
+  height: calc(4px * var(--u));
+  flex: 0 0 calc(4px * var(--u));
+  border-radius: 50%;
+  background: var(--pop-caret);
+  opacity: 0.6;
+}
+
+.p-since-srv {
+  display: grid;
+  place-items: center;
+  width: calc(16px * var(--u));
+  height: calc(16px * var(--u));
+  border-radius: 50%;
+  color: #fff;
+  font-size: calc(7px * var(--u));
+  font-weight: 700;
+}
+
+.p-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(4px * var(--u));
+}
+
+.p-role {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4px * var(--u));
+  height: calc(22px * var(--u));
+  padding: 0 calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  background: var(--pop-chip);
+  color: var(--pop-chip-text);
+  font-size: calc(12px * var(--u));
+}
+
+.p-role i {
+  width: calc(12px * var(--u));
+  height: calc(12px * var(--u));
+  border-radius: 50%;
+}
+
+.p-note {
+  width: 100%;
+  min-height: calc(24px * var(--u));
+  padding: calc(4px * var(--u)) 0;
+  font-size: calc(14px * var(--u));
+  line-height: 1.35;
+  color: var(--pop-bio);
+  background: none;
+  resize: none;
+  field-sizing: content;
+}
+
+.p-note::placeholder {
+  color: var(--pop-caret);
 }

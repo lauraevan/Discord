@@ -32,6 +32,8 @@ export const K = {
   gifts: `${PREFIX}gifts`,
   orbs: `${PREFIX}orbs`,
   quests: `${PREFIX}quests`,
+  /** Discord's per-user notes, which never leave the client */
+  notes: `${PREFIX}notes`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>

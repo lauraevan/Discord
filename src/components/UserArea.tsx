@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Decoration } from '../ui/Decorations'
-import { bannerColorOf, statusColor, statusLabel, type Account } from '../data'
+import { bannerColorOf, statusColor, statusLabel, type Account, type Server } from '../data'
 import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
@@ -17,6 +17,7 @@ import {
   SwitchAccountsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { ClydeIcon } from '../ui/Icons'
 import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
 import { specFor, StatusGlyph, statusBox, statusMask } from '../ui/Status'
@@ -93,6 +94,16 @@ export function Avatar({
   )
 }
 
+/** Discord prints join dates as "12 Mar 2021" under Member Since. */
+function joined(at?: number) {
+  if (!at) return '—'
+  return new Date(at).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
 /** One of the prompts Discord rotates through on an empty status bubble. */
 const STATUS_PROMPT = 'Best dad joke?'
 
@@ -108,6 +119,10 @@ const STATUS_PROMPT = 'Best dad joke?'
 export function ProfilePopout({
   account,
   at,
+  server,
+  since,
+  note,
+  onNote,
   onEdit,
   onStatus,
   onSwitch,
@@ -118,6 +133,12 @@ export function ProfilePopout({
   account: Account
   /** viewport coordinates when the popout is anchored to something */
   at?: { x: number; y: number }
+  /** the server it was opened in, if any — Discord shows more there */
+  server?: Server | null
+  /** when the account was made */
+  since?: number
+  note?: string
+  onNote?: (v: string) => void
   onEdit: () => void
   onStatus: () => void
   onSwitch: () => void
@@ -226,6 +247,56 @@ export function ProfilePopout({
           ))}
         </div>
         {account.bio ? <div className="p-bio">{account.bio}</div> : null}
+
+        {/* Opened inside a server, Discord adds three things the account panel
+            has no room for: when you joined Discord and when you joined here,
+            the roles you hold, and a private note only you ever see. */}
+        {server ? (
+          <>
+            <div className="p-section">
+              <div className="p-label">Member Since</div>
+              <div className="p-since">
+                <span>
+                  <ClydeIcon />
+                  {joined(since)}
+                </span>
+                <i />
+                <span>
+                  <span className="p-since-srv" style={{ background: server.color }}>
+                    {server.initials}
+                  </span>
+                  {joined(server.createdAt)}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-section">
+              <div className="p-label">Roles</div>
+              <div className="p-roles">
+                {server.roles
+                  .filter((r) => (server.memberRoles ?? []).includes(r.id) || r.id === 'everyone')
+                  .map((r) => (
+                    <span className="p-role" key={r.id}>
+                      <i style={{ background: r.color ?? '#99aab5' }} />
+                      {r.name}
+                    </span>
+                  ))}
+              </div>
+            </div>
+
+            <div className="p-section">
+              <div className="p-label">Note</div>
+              <textarea
+                className="p-note"
+                rows={1}
+                value={note ?? ''}
+                placeholder="Click to add a note"
+                aria-label="Note"
+                onChange={(e) => onNote?.(e.target.value)}
+              />
+            </div>
+          </>
+        ) : null}
         {/* Discord groups these: Edit Profile and the status row share a card,
             Switch Accounts sits in its own. Custom status lives inside the
             status submenu, not as a row of its own. */}

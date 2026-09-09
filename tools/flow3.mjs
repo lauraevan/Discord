@@ -496,9 +496,50 @@ await step('presence is on the member list but never on a message', async () => 
   expect(member === 1, `the member row drew ${member} status indicators`)
 })
 
+await step('the popout adds Discord\'s server sections, and only there', async () => {
+  await p.click('.composer-input')
+  await p.fill('.composer-input', 'for the popout')
+  await p.press('.composer-input', 'Enter')
+  await p.waitForTimeout(250)
+  // from a message avatar, Discord adds Member Since, Roles and a note
+  await p.click('.group-avatar >> nth=-1')
+  await p.waitForSelector('.popout .p-note')
+  // the labels are uppercased in CSS, so compare on the text itself
+  const labels = (await p.locator('.popout .p-label').allInnerTexts()).map((t) => t.toLowerCase())
+  expect(
+    labels.join('|') === 'member since|roles|note',
+    'the server popout reads ' + labels.join('|'),
+  )
+  expect(
+    (await p.locator('.popout .p-role').innerText()).includes('@everyone'),
+    'the roles section is empty',
+  )
+  // the note is Discord's, private and kept
+  await p.fill('.popout .p-note', 'talks to himself')
+  await p.keyboard.press('Escape')
+  await p.waitForTimeout(200)
+  await p.click('.group-avatar >> nth=-1')
+  expect(
+    (await p.locator('.popout .p-note').inputValue()) === 'talks to himself',
+    'the note was not kept',
+  )
+  await p.keyboard.press('Escape')
+  // the account panel's own popout has no server behind it, so none of that
+  await p.click('.user-card .id')
+  await p.waitForSelector('.popout')
+  expect(
+    (await p.locator('.popout .p-label').count()) === 0,
+    'the account popout grew server sections',
+  )
+  await p.keyboard.press('Escape')
+})
+
 await step('a staged upload sits above the input, inside the same box', async () => {
   const png =
     'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVR42mNk+M9QzzCKRsEoGgWjAAA6TQP9lRe0KgAAAABJRU5ErkJggg=='
+  await p.keyboard.press('Escape')
+  await p.mouse.move(760, 300)
+  await p.waitForTimeout(200)
   await p.setInputFiles('input[type=file]', {
     name: 'shot.png',
     mimeType: 'image/png',

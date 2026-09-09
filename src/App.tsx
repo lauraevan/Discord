@@ -263,6 +263,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [homeView, setHomeView] = useState<HomeView>('friends')
   // Discover is its own surface behind the compass, with its own sidebar
   const [discover, setDiscover] = useState<DiscoverTab | null>(null)
+  // Discord's per-user notes are private and never leave the client, which is
+  // the one part of a profile this page can keep exactly as Discord keeps it
+  const [notes, setNotes] = useState<Record<string, string>>(() =>
+    load(K.notes, {}, (v): v is Record<string, string> => !!v && typeof v === 'object'),
+  )
+  useEffect(() => save(K.notes, notes), [notes])
   const [profileModal, setProfileModal] = useState(false)
   // Discord's user popout, anchored to whatever opened it
   const [userPopout, setUserPopout] = useState<{ x: number; y: number } | null>(null)
@@ -271,10 +277,17 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
    * Places the popout beside an anchor and clamps it into the window, which is
    * what the client does rather than letting it run off an edge.
    */
+  /**
+   * Discord opens the popout beside whatever was clicked and keeps it inside
+   * the window. Its height depends on what the profile has in it — a server
+   * popout carries Member Since, Roles and a note — so this clamps to a
+   * height the card cannot exceed, and .popout scrolls its own body if the
+   * window is shorter than that.
+   */
   const openProfileAt = (anchor: HTMLElement, side: 'right' | 'left' = 'right') => {
     const r = box(anchor)
     const W = 247
-    const H = 380
+    const H = Math.min(560, vh() - 16)
     const x = side === 'right' ? r.right + 8 : r.left - W - 8
     setUserPopout({
       x: Math.max(8, Math.min(x, vw() - W - 8)),
@@ -1270,6 +1283,10 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
         <ProfilePopout
           account={account}
           at={userPopout}
+          server={server}
+          since={me?.createdAt}
+          note={notes[account.handle] ?? ''}
+          onNote={(v) => setNotes((n) => ({ ...n, [account.handle]: v }))}
           onEdit={() => {
             setUserPopout(null)
             setEditingProfile(true)
