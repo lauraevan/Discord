@@ -21,6 +21,11 @@ MAP = {
     # the client's own channel-type switch: GUILD_VOICE -> VoiceNormalIcon
     'SpeakerIcon': 'VoiceNormalIcon',
     'MegaphoneIcon': 'AnnouncementsIcon',
+    # Devices lists what is signed in, and Clips is its own settings page
+    'LaptopIcon': 'LaptopIcon',
+    'BrowserIcon': 'BrowserIcon',
+    'MobilePhoneIcon': 'MobilePhoneIcon',
+    'ClipsIcon': 'ClipsIcon',
     'StageIcon': 'StageIcon',
     'ForumIcon': 'ForumIcon',
     # the forum's own layout switch

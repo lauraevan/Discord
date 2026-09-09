@@ -11504,3 +11504,58 @@ img.wumpus {
   width: calc(12px * var(--u));
   height: calc(12px * var(--u));
 }
+
+
+/* a switch another switch is holding on */
+.set-row-held .set-row-label {
+  opacity: 0.55;
+}
+
+.set-row-held .switch {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* --- Settings > Devices -------------------------------------------------- */
+.device {
+  display: flex;
+  align-items: center;
+  gap: calc(16px * var(--u));
+  margin-top: calc(12px * var(--u));
+  padding: calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--card);
+}
+
+.device-art {
+  display: grid;
+  place-items: center;
+  width: calc(40px * var(--u));
+  height: calc(40px * var(--u));
+  flex: 0 0 calc(40px * var(--u));
+  color: var(--text);
+}
+
+.device-art svg {
+  width: calc(32px * var(--u));
+  height: calc(32px * var(--u));
+}
+
+.device-body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(2px * var(--u));
+  min-width: 0;
+}
+
+.device-body b {
+  font-size: calc(16px * var(--u));
+  font-weight: 500;
+  color: var(--strong);
+}
+
+.device-body span {
+  font-size: calc(13px * var(--u));
+  color: var(--muted);
+}

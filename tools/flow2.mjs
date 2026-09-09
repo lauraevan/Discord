@@ -13,6 +13,9 @@ const step = async (label, fn) => {
   catch (e) {
     fails += 1
     console.log('FAIL ', label, '\n    ' + String(e).split('\n').slice(0,6).join('\n    '))
+    const shot = `/tmp/flow-fail-${label.replace(/\W+/g, '-')}.png`
+    await p.screenshot({ path: shot }).catch(() => {})
+    console.log('    frame:', shot)
   }
   await p.keyboard.press('Escape'); await p.mouse.move(700, 300); await p.waitForTimeout(150)
 }
@@ -43,6 +46,28 @@ await step('appearance: font scale drives CSS', async () => {
   const v = await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--msg-font'))
   if (v.trim() !== '20px') throw new Error('got ' + v)
   await p.locator('[aria-label="Chat Font Scaling"]').fill('16')
+})
+await step('content & social and friend requests are real pages', async () => {
+  await p.click('[aria-label="User settings"]')
+  await p.click('.settings-item:has-text("Content & Social")')
+  await p.waitForSelector('.set-radio:has-text("Blur")')
+  await p.click('.set-radio:has-text("Block") >> nth=0')
+  const scan = await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('discord-ui:v4:prefs') ?? '{}').sensitiveDms,
+  )
+  if (scan !== 2) throw new Error('sensitive content did not save: ' + scan)
+  await p.click('.settings-item:has-text("Friend Requests")')
+  // Everyone holds the other two on
+  const held = await p.locator('.set-row-held').count()
+  if (held !== 2) throw new Error(`${held} switches held, not 2`)
+  await p.click('[aria-label="Everyone"]')
+  if ((await p.locator('.set-row-held').count()) !== 0) throw new Error('still held')
+  await p.click('[aria-label="Server Members"]')
+  const fr = await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('discord-ui:v4:prefs') ?? '{}').friendRequests,
+  )
+  if (fr.everyone !== false || fr.serverMembers !== false)
+    throw new Error('friend requests did not save: ' + JSON.stringify(fr))
 })
 await step('developer mode adds Copy IDs', async () => {
   await p.click('[aria-label="User settings"]')

@@ -134,6 +134,15 @@ export const BrowseChannelsIcon = glyph({
   ],
 })
 
+/** Discord's BrowserIcon */
+export const BrowserIcon = glyph({
+  box: 24,
+  paths: [
+    ['M20 3a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h16ZM4 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm3 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm3 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z'],
+    ['M20 3a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H4a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3h16ZM4 5a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm3 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm3 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z', 1],
+  ],
+})
+
 /** Discord's ChevronLargeDownIcon */
 export const CaretIcon = glyph({
   box: 24,
@@ -211,6 +220,15 @@ export const CirclePlayIcon = glyph({
   box: 24,
   paths: [
     ['M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22ZM9 8.09c0-.88 1-1.4 1.73-.9l5.8 3.91c.63.44.63 1.36 0 1.8l-5.8 3.9C10 17.3 9 16.8 9 15.92V8.1Z', 1],
+  ],
+})
+
+/** Discord's ClipsIcon */
+export const ClipsIcon = glyph({
+  box: 24,
+  paths: [
+    ['M15.74 5.74a.5.5 0 0 0 .54.7l5.01-.88a.5.5 0 0 0 .4-.58l-.26-1.47a3 3 0 0 0-3.2-2.47.46.46 0 0 0-.37.26l-2.12 4.44ZM15.13 2.37a.5.5 0 0 0-.53-.7l-4.25.74a.5.5 0 0 0-.37.28L7.87 7.13a.5.5 0 0 0 .53.7l4.25-.74a.5.5 0 0 0 .37-.28l2.11-4.44ZM6.72 3.05l-2.55.45a3 3 0 0 0-2.43 3.48L2 8.46c.05.27.3.45.58.4l2.2-.39a.5.5 0 0 0 .36-.27l2.12-4.44a.5.5 0 0 0-.54-.7Z'],
+    ['M2 10.5c0-.28.22-.5.5-.5h19c.28 0 .5.22.5.5V19a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3v-8.5ZM5 14a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2H6Z', 1],
   ],
 })
 
@@ -508,6 +526,14 @@ export const JumpIcon = glyph({
   ],
 })
 
+/** Discord's LaptopIcon */
+export const LaptopIcon = glyph({
+  box: 24,
+  paths: [
+    ['M22 18a1 1 0 1 1 0 2H2a1 1 0 1 1 0-2h20ZM18 3a3 3 0 0 1 3 3v9.5a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V6a3 3 0 0 1 3-3h12Z'],
+  ],
+})
+
 /** Discord's ListViewIcon */
 export const ListViewIcon = glyph({
   box: 24,
@@ -598,6 +624,14 @@ export const MinimizeIcon = glyph({
   box: 24,
   paths: [
     ['M22 12a1 1 0 0 1-1 1H3a1 1 0 1 1 0-2h18a1 1 0 0 1 1 1Z', 1],
+  ],
+})
+
+/** Discord's MobilePhoneIcon */
+export const MobilePhoneIcon = glyph({
+  box: 24,
+  paths: [
+    ['M5 4a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v16a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V4Zm5 16a1 1 0 0 1 1-1h2a1 1 0 1 1 0 2h-2a1 1 0 0 1-1-1ZM8 3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H8Z', 1],
   ],
 })
 

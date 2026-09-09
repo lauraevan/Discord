@@ -95,15 +95,18 @@ export function Toggle({
   label,
   note,
   value,
+  disabled,
   onChange,
 }: {
   label: string
   note?: string
   value: boolean
+  /** held on by another switch, the way Everyone holds the other two */
+  disabled?: boolean
   onChange: (v: boolean) => void
 }) {
   return (
-    <div className="set-row">
+    <div className={'set-row' + (disabled ? ' set-row-held' : '')}>
       <div className="set-row-main">
         <div className="set-row-label">{label}</div>
         {note ? <div className="set-row-note">{note}</div> : null}
@@ -112,6 +115,8 @@ export function Toggle({
         role="switch"
         aria-checked={value}
         aria-label={label}
+        aria-disabled={disabled || undefined}
+        disabled={disabled}
         className={'switch' + (value ? ' on' : '')}
         onClick={() => onChange(!value)}
       >

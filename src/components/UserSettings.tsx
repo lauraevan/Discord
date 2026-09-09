@@ -9,7 +9,7 @@ import {
 } from '../data'
 import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
 import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
-import { CheckIcon, CloseIcon, LockIcon } from '../ui/Icons'
+import { BrowserIcon, CheckIcon, CloseIcon, LockIcon, MobilePhoneIcon } from '../ui/Icons'
 import { BADGES } from '../badges'
 import { COLLECTIONS } from '../shop'
 import { NAMEPLATES } from '../nameplates'
@@ -572,38 +572,134 @@ export function UserSettings({
       {section === 'data_privacy' ? (
         <>
           <Title>Data &amp; Privacy</Title>
-          <Sub>Safe Direct Messaging</Sub>
-          <Radio
-            value={String(prefs.dmScanLevel) as '0' | '1' | '2'}
-            onChange={(v) => set('dmScanLevel', Number(v) as 0 | 1 | 2)}
-            options={[
-              ['0', 'Keep me safe', 'Scan direct messages from everyone.'],
-              ['1', 'My friends are nice', 'Scan direct messages from everyone except friends.'],
-              ['2', 'Do not scan', 'Direct messages will not be scanned.'],
-            ]}
+          <Sub>How we use your data</Sub>
+          <Toggle
+            label="Use data to improve Discord"
+            note="Discord uses this to work out which features are worth keeping."
+            value={prefs.recommendations}
+            onChange={(v) => set('recommendations', v)}
           />
           <Divider />
-          <Sub>Server Privacy Defaults</Sub>
+          <Sub>Request your data</Sub>
+          <Note>
+            Everything this app keeps is already on your machine, in this browser's localStorage
+            under <code>discord-ui:v4:*</code> — there is no copy of it anywhere else to ask for.
+          </Note>
+        </>
+      ) : null}
+
+      {/* Discord moved the social permissions out of Data & Privacy and onto
+          their own page; these are the switches it puts there. */}
+      {section === 'content_social' ? (
+        <>
+          <Title>Content &amp; Social</Title>
+          <Sub>Social permissions</Sub>
           <Toggle
             label="Allow direct messages from server members"
+            note="Applies to servers you join from now on."
             value={prefs.allowDmsFromServerMembers}
             onChange={(v) => set('allowDmsFromServerMembers', v)}
           />
           <Divider />
-          <Sub>Who Can Add You As A Friend</Sub>
+          <Sub>Filter direct messages</Sub>
+          <Note>Discord scans direct messages for explicit media and removes what it finds.</Note>
           <Radio
-            value={prefs.friendRequests}
-            onChange={(v) => set('friendRequests', v)}
+            value={String(prefs.dmScanLevel) as '0' | '1' | '2'}
+            onChange={(v) => set('dmScanLevel', Number(v) as 0 | 1 | 2)}
             options={[
-              ['everyone', 'Everyone'],
-              ['friends_of_friends', 'Friends of Friends'],
-              ['server_members', 'Server Members'],
-              ['none', 'No one'],
+              ['0', 'Filter all direct messages', 'Scan direct messages from everyone.'],
+              ['1', 'Filter direct messages from non-friends', 'Scan everyone except your friends.'],
+              ['2', "Don't filter direct messages", 'Direct messages will not be scanned.'],
             ]}
           />
           <Divider />
-          <Sub>Request Your Data</Sub>
-          <Note>Everything this app stores is in your browser's localStorage, under `discord-ui:v3:*`.</Note>
+          <Sub>Sensitive content in direct messages</Sub>
+          <Radio
+            value={String(prefs.sensitiveDms) as '0' | '1' | '2'}
+            onChange={(v) => set('sensitiveDms', Number(v) as 0 | 1 | 2)}
+            options={[
+              ['0', 'Blur', 'Cover it until you choose to look.'],
+              ['1', 'Show', 'Leave it as it was sent.'],
+              ['2', 'Block', 'Do not deliver it at all.'],
+            ]}
+          />
+          <Divider />
+          <Sub>Sensitive content in servers</Sub>
+          <Radio
+            value={String(prefs.sensitiveServers) as '0' | '1' | '2'}
+            onChange={(v) => set('sensitiveServers', Number(v) as 0 | 1 | 2)}
+            options={[
+              ['0', 'Blur', 'Cover it until you choose to look.'],
+              ['1', 'Show', 'Leave it as it was sent.'],
+              ['2', 'Block', 'Do not deliver it at all.'],
+            ]}
+          />
+        </>
+      ) : null}
+
+      {/* Devices lists what is signed in. The only session there can be is the
+          one you are reading this in, and the browser will say what it is. */}
+      {section === 'sessions' ? <Devices /> : null}
+
+      {section === 'clips' ? (
+        <>
+          <Title>Clips</Title>
+          <Note>
+            Clips record the last stretch of a voice call or stream after the fact. Capturing one
+            needs the desktop app's screen recorder; the settings it keeps are here and are kept.
+          </Note>
+          <Toggle
+            label="Enable Clips"
+            note="Lets you save the last few minutes of a call or stream."
+            value={prefs.clipsEnabled}
+            onChange={(v) => set('clipsEnabled', v)}
+          />
+          <Divider />
+          <Sub>Clip length</Sub>
+          <Radio
+            value={String(prefs.clipLength) as '30' | '60' | '120' | '180' | '300'}
+            onChange={(v) => set('clipLength', Number(v) as 30 | 60 | 120 | 180 | 300)}
+            options={[
+              ['30', '30 seconds'],
+              ['60', '1 minute'],
+              ['120', '2 minutes'],
+              ['180', '3 minutes'],
+              ['300', '5 minutes'],
+            ]}
+          />
+        </>
+      ) : null}
+
+      {section === 'friend_requests' ? (
+        <>
+          <Title>Friend Requests</Title>
+          <Sub>Who can send you a friend request?</Sub>
+          <Note>
+            These stack: with Everyone on, the other two are on as well and cannot be turned off.
+          </Note>
+          <Toggle
+            label="Everyone"
+            value={prefs.friendRequests.everyone}
+            onChange={(v) =>
+              set('friendRequests', {
+                everyone: v,
+                friendsOfFriends: v ? true : prefs.friendRequests.friendsOfFriends,
+                serverMembers: v ? true : prefs.friendRequests.serverMembers,
+              })
+            }
+          />
+          <Toggle
+            label="Friends of Friends"
+            disabled={prefs.friendRequests.everyone}
+            value={prefs.friendRequests.friendsOfFriends}
+            onChange={(v) => set('friendRequests', { ...prefs.friendRequests, friendsOfFriends: v })}
+          />
+          <Toggle
+            label="Server Members"
+            disabled={prefs.friendRequests.everyone}
+            value={prefs.friendRequests.serverMembers}
+            onChange={(v) => set('friendRequests', { ...prefs.friendRequests, serverMembers: v })}
+          />
         </>
       ) : null}
 
@@ -620,12 +716,8 @@ export function UserSettings({
       ) : null}
 
       {[
-        'content_social',
         'family_center',
         'authorized_apps',
-        'sessions',
-        'clips',
-        'friend_requests',
         'premium',
         'guild_boosting',
         'subscriptions',
@@ -1298,5 +1390,72 @@ function ProfileCard({ account }: { account: Account }) {
         {account.bio ? <p>{account.bio}</p> : null}
       </div>
     </div>
+  )
+}
+
+/**
+ * Devices.
+ *
+ * Discord lists every session signed in to the account and lets you end the
+ * others. There is only ever one here — the browser you are reading this in —
+ * and rather than describe a session, this reads the real one: what the
+ * browser reports itself to be, on what platform, at what size, in what
+ * timezone. The "other devices" half of the page is honestly empty, because
+ * an account with sessions on it is a thing Discord's servers keep.
+ */
+function Devices() {
+  const ua = navigator.userAgent
+  const brands = (navigator as { userAgentData?: { brands?: { brand: string; version: string }[] } })
+    .userAgentData?.brands
+  const named = brands?.find((b) => !/Not.?A.?Brand/i.test(b.brand))
+  const browser =
+    named?.brand ??
+    (/Firefox\/([\d.]+)/.exec(ua)?.[0] ||
+      /Edg\/([\d.]+)/.exec(ua)?.[0] ||
+      /Chrome\/([\d.]+)/.exec(ua)?.[0] ||
+      /Version\/([\d.]+).*Safari/.exec(ua)?.[0] ||
+      'Browser')
+  const platform =
+    (navigator as { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+    (/Windows/.test(ua)
+      ? 'Windows'
+      : /Mac OS X/.test(ua)
+        ? 'macOS'
+        : /Android/.test(ua)
+          ? 'Android'
+          : /iPhone|iPad/.test(ua)
+            ? 'iOS'
+            : /Linux/.test(ua)
+              ? 'Linux'
+              : 'Unknown')
+  const mobile = /Android|iPhone|iPad|Mobile/.test(ua)
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+  return (
+    <>
+      <Title>Devices</Title>
+      <Note>
+        Here are all the devices currently logged in with your Discord account. Log out of any
+        session that is not you.
+      </Note>
+      <Sub>Current device</Sub>
+      <div className="device">
+        <span className="device-art">{mobile ? <MobilePhoneIcon /> : <BrowserIcon />}</span>
+        <span className="device-body">
+          <b>
+            {browser} on {platform}
+          </b>
+          <span>
+            {zone} · {window.screen.width}×{window.screen.height}
+          </span>
+        </span>
+      </div>
+      <Divider />
+      <Sub>Other devices</Sub>
+      <Unavailable
+        what="No other sessions"
+        why="A session is a row on Discord's servers. This page has none behind it, so the browser you are in is the only one there can be — and nothing else can be signed in to log out of."
+      />
+    </>
   )
 }

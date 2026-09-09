@@ -61,7 +61,25 @@ export type Prefs = {
   activityStatus: boolean
   dmScanLevel: 0 | 1 | 2
   allowDmsFromServerMembers: boolean
-  friendRequests: 'everyone' | 'friends_of_friends' | 'server_members' | 'none'
+  /**
+   * Discord asks this as three switches rather than one choice, because they
+   * stack: Everyone turns the other two on and holds them there.
+   */
+  friendRequests: {
+    everyone: boolean
+    friendsOfFriends: boolean
+    serverMembers: boolean
+  }
+  /** how sensitive media is treated: 0 blur, 1 show, 2 block */
+  sensitiveDms: 0 | 1 | 2
+  sensitiveServers: 0 | 1 | 2
+  /** whether activity may be used to recommend servers */
+  recommendations: boolean
+
+  /* Clips */
+  clipsEnabled: boolean
+  /** how far back a clip reaches, in seconds — Discord's own five lengths */
+  clipLength: 30 | 60 | 120 | 180 | 300
 
   /* Misc */
   locale: string
@@ -114,7 +132,12 @@ export const defaultPrefs: Prefs = {
   activityStatus: true,
   dmScanLevel: 1,
   allowDmsFromServerMembers: true,
-  friendRequests: 'everyone',
+  friendRequests: { everyone: true, friendsOfFriends: true, serverMembers: true },
+  sensitiveDms: 0,
+  sensitiveServers: 0,
+  recommendations: true,
+  clipsEnabled: false,
+  clipLength: 30,
 
   locale: 'en-US',
   hideMutedChannels: false,
