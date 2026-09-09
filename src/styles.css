@@ -10933,3 +10933,247 @@ button.group-avatar:hover {
   background-color: color-mix(in srgb, var(--chat) 88%, #fff);
   background-clip: padding-box;
 }
+
+
+/* --- the Roles pane ------------------------------------------------------
+ *
+ * Discord's shape: @everyone on its own card at the top, because it is the
+ * floor everyone stands on rather than a role you order or delete; then a
+ * search and Create Role over a ranked table; then three tabs over the editor.
+ */
+.role-default {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.role-default-art {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 50%;
+  background: var(--btn2);
+  color: var(--text);
+}
+
+.role-default-art svg {
+  width: 18px;
+  height: 18px;
+}
+
+.role-default-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.role-default-body b {
+  font-size: 13.05px;
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.role-default-body span {
+  font-size: 11.18px;
+  color: var(--muted);
+}
+
+.role-default-go {
+  margin-left: auto;
+  color: var(--muted);
+}
+
+.role-default-go svg {
+  width: 16px;
+  height: 16px;
+}
+
+.role-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.role-search {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 4px;
+  background: var(--wash);
+}
+
+.role-search.wide {
+  margin: 16px 0 4px;
+  height: 32px;
+}
+
+.role-search svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  color: var(--muted);
+}
+
+.role-search input {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.8px;
+  color: var(--text);
+}
+
+.role-search input::placeholder {
+  color: var(--muted);
+}
+
+.role-table-head {
+  display: flex;
+  align-items: center;
+  margin: 18px 0 6px;
+  padding: 0 14px;
+  font-size: 10.25px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.role-table-head span:last-child {
+  margin-left: auto;
+}
+
+.role-grip {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.role-grip button {
+  display: grid;
+  place-items: center;
+  height: 11px;
+  color: inherit;
+}
+
+.role-grip button:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.role-grip button:first-child svg {
+  rotate: 180deg;
+}
+
+.role-grip svg {
+  width: 12px;
+  height: 12px;
+}
+
+.role-grip-gap {
+  width: 12px;
+  flex: 0 0 12px;
+}
+
+.role-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12.12px;
+}
+
+.role-count svg {
+  width: 13px;
+  height: 13px;
+}
+
+.role-del-gap {
+  width: 15px;
+  flex: 0 0 15px;
+}
+
+.role-edit-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-edit-head .role-dot {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+}
+
+.role-tabs {
+  display: flex;
+  gap: 24px;
+  margin: 14px 0 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.role-tab {
+  position: relative;
+  padding: 0 0 10px;
+  font-size: 12.12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.role-tab:hover {
+  color: var(--text);
+}
+
+.role-tab.on {
+  color: var(--strong);
+}
+
+.role-tab.on::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--strong);
+}
+
+.role-members {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.role-member-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--strong);
+  font-weight: 500;
+}
+
+.role-member-name span {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 11.18px;
+}
+
+.role-members .btn-secondary {
+  margin-left: auto;
+}

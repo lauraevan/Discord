@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import {
   groupsWith,
   joinLine,
+  roleColor,
   type Account,
   type Attachment,
   type Channel,
@@ -385,7 +386,7 @@ export function ChatFeed({
   // Discord paints an author's name in their top coloured role. @everyone
   // carries no colour, so on a server with no roles set up the name is just
   // the header colour — which is what the reference frames show.
-  const nameColor = server?.roles.find((r) => r.color)?.color ?? null
+  const nameColor = roleColor(server)
 
   useLayoutEffect(() => {
     const el = ref.current

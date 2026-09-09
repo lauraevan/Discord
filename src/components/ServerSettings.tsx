@@ -18,7 +18,18 @@ import {
 } from '../data'
 import { EMOJI } from '../emoji'
 import { EmojiByName, EmojiGlyph } from '../markdown'
-import { CheckIcon, CloseIcon, PlusIcon, TrashIcon } from '../ui/Icons'
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  MembersIcon,
+  PlusIcon,
+  SearchIcon,
+  TrashIcon,
+  UserIcon,
+} from '../ui/Icons'
 import {
   Divider,
   Field,
@@ -56,6 +67,9 @@ export function ServerSettings({
 }) {
   const [section, setSection] = useState('overview')
   const [roleId, setRoleId] = useState<string | null>(null)
+  const [roleTab, setRoleTab] = useState<'display' | 'permissions' | 'members'>('display')
+  const [roleQuery, setRoleQuery] = useState('')
+  const [permQuery, setPermQuery] = useState('')
   const [emojiQuery, setEmojiQuery] = useState('')
 
   const nav: NavItem[] = [
@@ -103,6 +117,44 @@ export function ServerSettings({
   ]
 
   const role = server.roles.find((r) => r.id === roleId) ?? null
+
+  // @everyone is the floor and always sits last, however the others are ordered
+  const ranked = [
+    ...server.roles.filter((r) => r.id !== 'everyone'),
+    ...server.roles.filter((r) => r.id === 'everyone'),
+  ]
+
+  /** Moves a role one place up or down the list, which is its rank. */
+  const move = (id: string, by: number) =>
+    onPatch(
+      (s) => {
+        const rest = s.roles.filter((r) => r.id !== 'everyone')
+        const i = rest.findIndex((r) => r.id === id)
+        const j = i + by
+        if (i < 0 || j < 0 || j >= rest.length) return s
+        const next = [...rest]
+        ;[next[i], next[j]] = [next[j], next[i]]
+        return { ...s, roles: [...next, ...s.roles.filter((r) => r.id === 'everyone')] }
+      },
+      { action: 'Role order changed', target: server.roles.find((r) => r.id === id)?.name ?? id },
+    )
+
+  const memberHas = (id: string) => (server.memberRoles ?? []).includes(id)
+
+  const toggleMember = (id: string) =>
+    onPatch(
+      (s) => {
+        const held = s.memberRoles ?? []
+        return {
+          ...s,
+          memberRoles: held.includes(id) ? held.filter((x) => x !== id) : [...held, id],
+        }
+      },
+      {
+        action: memberHas(id) ? 'Role removed from member' : 'Role given to member',
+        target: server.roles.find((r) => r.id === id)?.name ?? id,
+      },
+    )
 
   const patchRole = (id: string, fn: (r: Role) => Role, action: string) =>
     onPatch(
@@ -194,8 +246,45 @@ export function ServerSettings({
 
       {section === 'roles' && !role ? (
         <>
-          <div className="set-head-row">
-            <Title>Roles</Title>
+          <Title>Roles</Title>
+          <Note>
+            Use roles to group your server members and assign permissions. Members use the colour of
+            the highest role they have.
+          </Note>
+
+          {/* Discord leads the pane with @everyone on its own, because it is
+              not a role you order or delete — it is the floor everyone stands
+              on — and it opens straight onto its permissions */}
+          <div className="role-default">
+            <span className="role-default-art">
+              <MembersIcon />
+            </span>
+            <span className="role-default-body">
+              <b>Default Permissions</b>
+              <span>@everyone · applies to all server members</span>
+            </span>
+            <button
+              className="role-default-go"
+              aria-label="Default Permissions"
+              onClick={() => {
+                setRoleId('everyone')
+                setRoleTab('permissions')
+              }}
+            >
+              <ChevronRightIcon />
+            </button>
+          </div>
+
+          <div className="role-bar">
+            <div className="role-search">
+              <SearchIcon />
+              <input
+                value={roleQuery}
+                placeholder="Search Roles"
+                aria-label="Search roles"
+                onChange={(e) => setRoleQuery(e.target.value)}
+              />
+            </div>
             <button
               className="btn-primary"
               onClick={() => {
@@ -212,39 +301,77 @@ export function ServerSettings({
                   target: r.name,
                 })
                 setRoleId(r.id)
+                setRoleTab('display')
               }}
             >
               Create Role
             </button>
           </div>
-          <Note>
-            Use roles to group your server members and assign permissions. Members use the colour of
-            the highest role they have.
-          </Note>
+
+          <div className="role-table-head">
+            <span>Roles — {ranked.length}</span>
+            <span>Members</span>
+          </div>
           <div className="role-list">
-            {server.roles.map((r) => (
-              <div className="role-row" key={r.id}>
-                <span className="role-dot" style={{ background: r.color ?? '#99aab5' }} />
-                <button className="role-name" onClick={() => setRoleId(r.id)}>
-                  {r.name}
-                </button>
-                <span className="role-count">{r.id === 'everyone' ? 1 : 0} member</span>
-                {r.id !== 'everyone' ? (
+            {ranked
+              .filter((r) => r.name.toLowerCase().includes(roleQuery.trim().toLowerCase()))
+              .map((r, i, list) => (
+                <div className="role-row" key={r.id}>
+                  {/* ordering is what a role's rank is, so the handles move it
+                      rather than just decorating the row. @everyone has no
+                      rank to move — it is always the floor — so it has none. */}
+                  {r.id === 'everyone' ? (
+                    <span className="role-grip-gap" />
+                  ) : (
+                    <span className="role-grip">
+                      <button
+                        aria-label={`Move ${r.name} up`}
+                        disabled={i === 0}
+                        onClick={() => move(r.id, -1)}
+                      >
+                        <ChevronDownIcon />
+                      </button>
+                      <button
+                        aria-label={`Move ${r.name} down`}
+                        disabled={i === list.length - 2}
+                        onClick={() => move(r.id, 1)}
+                      >
+                        <ChevronDownIcon />
+                      </button>
+                    </span>
+                  )}
+                  <span className="role-dot" style={{ background: r.color ?? '#99aab5' }} />
                   <button
-                    className="role-del"
-                    aria-label={`Delete ${r.name}`}
-                    onClick={() =>
-                      onPatch((s) => ({ ...s, roles: s.roles.filter((x) => x.id !== r.id) }), {
-                        action: 'Role deleted',
-                        target: r.name,
-                      })
-                    }
+                    className="role-name"
+                    onClick={() => {
+                      setRoleId(r.id)
+                      setRoleTab(r.id === 'everyone' ? 'permissions' : 'display')
+                    }}
                   >
-                    <TrashIcon />
+                    {r.name}
                   </button>
-                ) : null}
-              </div>
-            ))}
+                  <span className="role-count">
+                    {r.id === 'everyone' ? 1 : 0}
+                    <UserIcon />
+                  </span>
+                  {r.id !== 'everyone' ? (
+                    <button
+                      className="role-del"
+                      aria-label={`Delete ${r.name}`}
+                      onClick={() =>
+                        onPatch((s) => ({ ...s, roles: s.roles.filter((x) => x.id !== r.id) }), {
+                          action: 'Role deleted',
+                          target: r.name,
+                        })
+                      }
+                    >
+                      <TrashIcon />
+                    </button>
+                  ) : (
+                    <span className="role-del-gap" />
+                  )}
+                </div>
+              ))}
           </div>
         </>
       ) : null}
@@ -252,10 +379,41 @@ export function ServerSettings({
       {role ? (
         <>
           <button className="back-link" onClick={() => setRoleId(null)}>
-            ← Back to roles
+            <ChevronLeftIcon />
+            Back
           </button>
-          <Title>Edit Role — {role.name}</Title>
-          {role.id !== 'everyone' ? (
+          <div className="role-edit-head">
+            {role.id === 'everyone' ? null : (
+              <span className="role-dot" style={{ background: role.color ?? '#99aab5' }} />
+            )}
+            <Title>Edit Role — {role.name}</Title>
+          </div>
+
+          {/* Discord splits the editor in three. @everyone has no display of
+              its own — it cannot be coloured, hoisted or mentioned as a role —
+              so it gets the permissions tab alone. */}
+          <div className="role-tabs" role="tablist">
+            {(role.id === 'everyone'
+              ? ([['permissions', 'Permissions']] as const)
+              : ([
+                  ['display', 'Display'],
+                  ['permissions', 'Permissions'],
+                  ['members', 'Manage Members'],
+                ] as const)
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={roleTab === id}
+                className={'role-tab' + (roleTab === id ? ' on' : '')}
+                onClick={() => setRoleTab(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {roleTab === 'display' && role.id !== 'everyone' ? (
             <>
               <Field
                 label="ROLE NAME"
@@ -265,11 +423,16 @@ export function ServerSettings({
               />
               <div className="set-field">
                 <label>ROLE COLOUR</label>
+                <Note>
+                  Members use the colour of the highest role they have that is not the default.
+                </Note>
                 <div className="swatch-row wrap">
                   <button
                     className={'swatch none' + (role.color === null ? ' on' : '')}
                     aria-label="Default colour"
-                    onClick={() => patchRole(role.id, (r) => ({ ...r, color: null }), 'Role colour changed')}
+                    onClick={() =>
+                      patchRole(role.id, (r) => ({ ...r, color: null }), 'Role colour changed')
+                    }
                   >
                     <CloseIcon />
                   </button>
@@ -279,13 +442,16 @@ export function ServerSettings({
                       className={'swatch' + (c === role.color ? ' on' : '')}
                       style={{ background: c }}
                       aria-label={c}
-                      onClick={() => patchRole(role.id, (r) => ({ ...r, color: c }), 'Role colour changed')}
+                      onClick={() =>
+                        patchRole(role.id, (r) => ({ ...r, color: c }), 'Role colour changed')
+                      }
                     >
                       {c === role.color ? <CheckIcon /> : null}
                     </button>
                   ))}
                 </div>
               </div>
+              <Divider />
               <Toggle
                 label="Display role members separately from online members"
                 value={role.hoist}
@@ -298,45 +464,90 @@ export function ServerSettings({
                   patchRole(role.id, (r) => ({ ...r, mentionable }), 'Role mentionable changed')
                 }
               />
-              <Divider />
             </>
           ) : null}
-          <Sub>Permissions</Sub>
-          {PERMISSION_GROUPS.map(([group, perms]) => (
-            <div key={group} className="perm-group">
-              <div className="perm-head">{group}</div>
-              {perms.map(([id, label, note]) => (
-                <div className="perm" key={id}>
-                  <div className="set-row">
-                    <div className="set-row-main">
-                      <div className="set-row-label">{label}</div>
-                      <div className="set-row-note">{note}</div>
-                    </div>
-                    <button
-                      role="switch"
-                      aria-checked={role.permissions.includes(id)}
-                      aria-label={label}
-                      className={'switch' + (role.permissions.includes(id) ? ' on' : '')}
-                      onClick={() =>
-                        patchRole(
-                          role.id,
-                          (r) => ({
-                            ...r,
-                            permissions: r.permissions.includes(id)
-                              ? r.permissions.filter((p) => p !== id)
-                              : [...r.permissions, id],
-                          }),
-                          'Role permissions updated',
-                        )
-                      }
-                    >
-                      <span />
-                    </button>
+
+          {roleTab === 'permissions' ? (
+            <>
+              <div className="role-search wide">
+                <SearchIcon />
+                <input
+                  value={permQuery}
+                  placeholder="Search Permissions"
+                  aria-label="Search permissions"
+                  onChange={(e) => setPermQuery(e.target.value)}
+                />
+              </div>
+              {PERMISSION_GROUPS.map(([group, perms]) => {
+                const q = permQuery.trim().toLowerCase()
+                const hits = q
+                  ? perms.filter(([, label, note]) =>
+                      (label + ' ' + note).toLowerCase().includes(q),
+                    )
+                  : perms
+                if (!hits.length) return null
+                return (
+                  <div key={group} className="perm-group">
+                    <div className="perm-head">{group}</div>
+                    {hits.map(([id, label, note]) => (
+                      <div className="perm" key={id}>
+                        <div className="set-row">
+                          <div className="set-row-main">
+                            <div className="set-row-label">{label}</div>
+                            <div className="set-row-note">{note}</div>
+                          </div>
+                          <button
+                            role="switch"
+                            aria-checked={role.permissions.includes(id)}
+                            aria-label={label}
+                            className={'switch' + (role.permissions.includes(id) ? ' on' : '')}
+                            onClick={() =>
+                              patchRole(
+                                role.id,
+                                (r) => ({
+                                  ...r,
+                                  permissions: r.permissions.includes(id)
+                                    ? r.permissions.filter((p) => p !== id)
+                                    : [...r.permissions, id],
+                                }),
+                                'Role permissions updated',
+                              )
+                            }
+                          >
+                            <span />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                )
+              })}
+            </>
+          ) : null}
+
+          {roleTab === 'members' && role.id !== 'everyone' ? (
+            <>
+              <Note>
+                Roles are handed out here. This server has one member — you — because there is no
+                account server behind the page to hold anybody else.
+              </Note>
+              <div className="role-members">
+                <div className="member-table-row">
+                  <Avatar account={account} size={32} status={false} />
+                  <span className="role-member-name">
+                    {account.name}
+                    <span>{account.handle}</span>
+                  </span>
+                  <button
+                    className={'btn-secondary' + (memberHas(role.id) ? ' on' : '')}
+                    onClick={() => toggleMember(role.id)}
+                  >
+                    {memberHas(role.id) ? 'Remove' : 'Add'}
+                  </button>
                 </div>
-              ))}
-            </div>
-          ))}
+              </div>
+            </>
+          ) : null}
         </>
       ) : null}
 

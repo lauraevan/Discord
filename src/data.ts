@@ -361,6 +361,8 @@ export type Server = {
   categories: Category[]
   channels: Channel[]
   roles: Role[]
+  /** the role ids the one account here holds in this server */
+  memberRoles?: string[]
   emojis: GuildEmoji[]
   stickers?: GuildSticker[]
   sounds?: GuildSound[]
@@ -514,6 +516,17 @@ export type Message = {
  * after about seven minutes.
  */
 export const GROUP_WINDOW = 7 * 60 * 1000
+
+/**
+ * The colour Discord paints a name in: the highest role the member actually
+ * holds that carries one. Roles are ranked top-first, and @everyone sits last
+ * and has no colour, so the first match down the list is the right one.
+ */
+export function roleColor(server: Server | undefined | null): string | null {
+  if (!server) return null
+  const held = server.memberRoles ?? []
+  return server.roles.find((r) => r.color && held.includes(r.id))?.color ?? null
+}
 
 export const groupsWith = (prev: Message | undefined, m: Message) =>
   !!prev &&

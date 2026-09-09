@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useId, type ReactNode } from 'react'
 import { CloseIcon } from '../ui/Icons'
 
 export type NavItem =
@@ -204,11 +204,14 @@ export function Field({
   onChange: (v: string) => void
   textarea?: boolean
 }) {
+  // the label has to actually be the control's label, not just text above it
+  const id = useId()
   return (
     <div className="set-field">
-      <label>{label}</label>
+      <label htmlFor={id}>{label}</label>
       {textarea ? (
         <textarea
+          id={id}
           value={value}
           placeholder={placeholder}
           maxLength={maxLength}
@@ -216,6 +219,7 @@ export function Field({
         />
       ) : (
         <input
+          id={id}
           value={value}
           placeholder={placeholder}
           maxLength={maxLength}

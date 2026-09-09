@@ -1110,6 +1110,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 ) : membersOpen ? (
                   <MemberList
                     account={account}
+                    server={server}
                     onOpenProfile={(el) => openProfileAt(el, 'left')}
                   />
                 ) : null}
