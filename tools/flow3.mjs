@@ -496,6 +496,45 @@ await step('presence is on the member list but never on a message', async () => 
   expect(member === 1, `the member row drew ${member} status indicators`)
 })
 
+await step('the channel list drags, clamps and remembers', async () => {
+  const left = () =>
+    p.evaluate(() => Math.round(document.querySelector('.chat').getBoundingClientRect().x))
+  const drag = async (by) => {
+    const g = await p.locator('.side-grip').boundingBox()
+    await p.mouse.move(g.x + g.width / 2, 400)
+    await p.mouse.down()
+    await p.mouse.move(g.x + g.width / 2 + by, 400, { steps: 8 })
+    await p.mouse.up()
+    await p.waitForTimeout(150)
+  }
+  const start = await left()
+  await drag(-40)
+  // the width is rounded to a whole pixel, so allow one either way
+  expect(Math.abs((await left()) - (start - 40)) <= 1, 'dragging did not narrow the list')
+  // Discord clamps the list between 240 and 340
+  await drag(500)
+  const wide = await left()
+  await drag(-900)
+  const narrow = await left()
+  expect(
+    Math.abs(wide - narrow - 100) <= 1,
+    `the clamps span ${wide - narrow}px, not Discord's 100`,
+  )
+  // and it is written down, because Discord remembers where you left it
+  await drag(30)
+  const set = await left()
+  const kept = await p.evaluate(() =>
+    Number(JSON.parse(localStorage.getItem('discord-ui:v4:sidebar') ?? 'null')),
+  )
+  expect(
+    Math.abs(Math.round(kept + 72.5) - set) <= 1,
+    `the width on screen is ${set} but ${kept} was written down`,
+  )
+  await p.dblclick('.side-grip')
+  await p.waitForTimeout(150)
+  expect(Math.abs((await left()) - start) <= 1, 'double click did not put it back')
+})
+
 await step('the popout adds Discord\'s server sections, and only there', async () => {
   await p.click('.composer-input')
   await p.fill('.composer-input', 'for the popout')

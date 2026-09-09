@@ -330,11 +330,54 @@ textarea {
 
 /* --------------------------------------------------------------- sidebar */
 
+/* the rail plus the channel list; --side-w is the draggable half */
 .left-col {
-  width: 305px;
-  flex: 0 0 305px;
+  width: calc(58px + var(--side-w, 247px));
+  flex: 0 0 calc(58px + var(--side-w, 247px));
   display: flex;
   position: relative;
+}
+
+/* Discord's resize handle: a hair of hit area over the seam, invisible until
+   you are on it, and it lights up while you drag */
+.side-grip {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(-3px * var(--u));
+  width: calc(7px * var(--u));
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+}
+
+.side-grip::after {
+  content: '';
+  position: absolute;
+  inset: 0 calc(3px * var(--u));
+  background: var(--blurple);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.side-grip:hover::after,
+.side-grip:focus-visible::after,
+body.resizing .side-grip::after {
+  opacity: 1;
+}
+
+/* while dragging, nothing else should take the pointer or select */
+body.resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+body.resizing * {
+  pointer-events: none;
+}
+
+body.resizing .side-grip {
+  pointer-events: auto;
 }
 
 .sidebar {
@@ -441,7 +484,7 @@ textarea {
   padding: 0 7px;
   color: color-mix(in srgb, var(--text) 47%, transparent);
   cursor: pointer;
-  width: 232px;
+  width: calc(var(--side-w, 247px) - 15px);
 }
 
 .row:hover {
@@ -3818,8 +3861,8 @@ body.streamer .invite-row code {
    ========================================================================== */
 
 .dm-sidebar {
-  width: 247px;
-  flex: 0 0 247px;
+  width: var(--side-w, 247px);
+  flex: 0 0 var(--side-w, 247px);
   background: var(--side);
   display: flex;
   flex-direction: column;

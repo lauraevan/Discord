@@ -112,6 +112,7 @@ import {
 } from './ui/Icons'
 import { allThemes, applyTheme, defaultThemes } from './themes'
 import { DiscoverPage, DiscoverSidebar, type DiscoverTab } from './components/Discover'
+import { SIDE_DEFAULT, SidebarGrip, sideVar } from './ui/SidebarGrip'
 import { box, vh, vw } from './zoom'
 
 purgeOldSchemas()
@@ -265,6 +266,15 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [discover, setDiscover] = useState<DiscoverTab | null>(null)
   // Discord's per-user notes are private and never leave the client, which is
   // the one part of a profile this page can keep exactly as Discord keeps it
+  // Discord's channel list is draggable and remembers where you left it
+  const [sideWidth, setSideWidth] = useState<number>(() =>
+    load(K.sidebar, SIDE_DEFAULT, (v): v is number => typeof v === 'number'),
+  )
+  useEffect(() => save(K.sidebar, sideWidth), [sideWidth])
+  useEffect(() => {
+    document.documentElement.style.setProperty('--side-w', sideVar(sideWidth))
+  }, [sideWidth])
+
   const [notes, setNotes] = useState<Record<string, string>>(() =>
     load(K.notes, {}, (v): v is Record<string, string> => !!v && typeof v === 'object'),
   )
@@ -806,6 +816,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
       ) : null}
       <div className="app-body">
         <div className="left-col">
+          <SidebarGrip width={sideWidth} onWidth={setSideWidth} />
           <ServerRail
             servers={servers}
             activeId={activeServer}

@@ -34,6 +34,8 @@ export const K = {
   quests: `${PREFIX}quests`,
   /** Discord's per-user notes, which never leave the client */
   notes: `${PREFIX}notes`,
+  /** where the channel list was last dragged to */
+  sidebar: `${PREFIX}sidebar`,
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
