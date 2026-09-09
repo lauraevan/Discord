@@ -243,6 +243,20 @@ as a theme. Measured so far, all off the 1:1 captures:
 | plus menu, context menus | rgb(40,39,44) | rgb(55,54,60) — 8% |
 | staged upload card | rgb(36,35,40) | 12% |
 
+### Comparing ink between a render and a capture
+
+A headless render at deviceScaleFactor 2 lays down about half again as much
+measurable ink as the same type in `docs/refs/*.jpg` — 1638 pixels over 140
+against 1112 for one line of message body, 1034 against 698 for the channel
+name in the header. The render carries subpixel fringes the capture does not,
+and greyscale conversion turns those into ink.
+
+So an ink or stem-width comparison between the two is only meaningful as a
+*ratio against a string whose weight is already known to match*. The channel
+name in the chat header reads 48% heavy against the capture and looks bolder
+under magnification, and it is not: the message body under it, which is
+Discord's 400 at 16px and verified, reads 47% heavy by the same measure.
+
 ## Accounts
 
 Registration and login are local — there is no account server behind a page —

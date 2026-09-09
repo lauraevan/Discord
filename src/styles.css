@@ -452,7 +452,9 @@ body.resizing .side-grip {
   width: 12.2px;
   height: 12.2px;
   flex: 0 0 12.2px;
-  margin-left: 4px;
+  /* the frame puts the caret's ink on 188..194 against the name's 182; this
+     was opening 2 further out */
+  margin-left: 2px;
   color: var(--text);
 }
 
