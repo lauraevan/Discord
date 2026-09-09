@@ -12,6 +12,8 @@ export type Tokens = {
   side: string
   chat: string
   card: string
+  /** floating surfaces — context menus and the composer's plus menu */
+  menu: string
   composer: string
   selected: string
   hover: string
@@ -32,6 +34,7 @@ const dark: Tokens = {
   side: '#121214',
   chat: '#1a1a1e',
   card: '#222327',
+  menu: '#28272c',
   composer: '#222327',
   selected: '#2c2c30',
   hover: '#1e1e22',
@@ -48,6 +51,7 @@ const ash: Tokens = {
   side: '#2b2d31',
   chat: '#313338',
   card: '#383a40',
+  menu: '#111214',
   composer: '#383a40',
   selected: '#404249',
   hover: '#35373c',
@@ -64,6 +68,7 @@ const onyx: Tokens = {
   side: '#000000',
   chat: '#050506',
   card: '#131316',
+  menu: '#17171b',
   composer: '#131316',
   selected: '#1c1c20',
   hover: '#111114',
@@ -80,6 +85,7 @@ const light: Tokens = {
   side: '#f2f3f5',
   chat: '#ffffff',
   card: '#ffffff',
+  menu: '#ffffff',
   composer: '#ebedef',
   selected: '#d7d9dd',
   hover: '#e6e8eb',
@@ -171,6 +177,7 @@ function colorTheme(g: Gradient, scheme: 'light' | 'dark'): Theme {
       side: veil(scheme === 'light' ? 0.28 : 0.34),
       chat: veil(scheme === 'light' ? 0.55 : 0.22),
       card: veil(scheme === 'light' ? 0.75 : 0.32),
+      menu: veil(scheme === 'light' ? 0.88 : 0.45),
       composer: veil(scheme === 'light' ? 0.62 : 0.32),
       selected: scheme === 'light' ? veil(0.85) : lift(0.13),
       hover: scheme === 'light' ? veil(0.5) : lift(0.07),
@@ -194,6 +201,7 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--side', k.side)
   r.style.setProperty('--chat', k.chat)
   r.style.setProperty('--card', k.card)
+  r.style.setProperty('--menu', k.menu)
   r.style.setProperty('--composer', k.composer)
   r.style.setProperty('--selected', k.selected)
   r.style.setProperty('--hover', k.hover)

@@ -17,6 +17,9 @@
   --side: #121214;
   --chat: #1a1a1e;
   --card: #222327;
+  /* floating surfaces sit a shade over the card: the 1:1 capture reads the
+     plus menu as rgb(40,39,44) where the composer under it is rgb(35,34,39) */
+  --menu: #28272c;
   --composer: #222327;
   --selected: #2c2c30;
   /* the reference uses three different raised greys, not one: the selected
@@ -2821,9 +2824,11 @@ h3.md-h {
   position: fixed;
   min-width: 188px;
   padding: 6px 8px;
-  background: var(--card);
+  background: var(--menu);
   border-radius: 6px;
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 0.45),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
   z-index: 70;
 }
 
@@ -4552,17 +4557,26 @@ body.streamer .invite-row code {
 
 /* Measured off docs/refs/444926d4.jpg, which is Discord at 1:1: a 192px menu
    of 32px rows, 14px labels, and 12px between an 18px glyph and its label. */
+/* Measured against docs/refs/444926d4.jpg, which is this menu open at 1:1.
+   Discord opens it 8.5 real px further right than this did and 14 lower — its
+   bottom clears the composer rather than the plus button, which is what the
+   negative margin is for — on a surface a shade over the composer's, inside
+   the same 1px rim its other floating surfaces carry. The plate lands on
+   623.5..819 against the capture's 623.5..819, and the first row's ink is
+   centred on 649.75 against 649.75. */
 .plus-menu {
   position: absolute;
-  left: 6px;
+  left: calc(15.5px * var(--u));
   bottom: 100%;
-  margin-bottom: calc(8px * var(--u));
+  margin-bottom: calc(-6px * var(--u));
   z-index: 5;
   min-width: calc(192px * var(--u));
-  padding: calc(8px * var(--u));
+  padding: calc(11.5px * var(--u));
   border-radius: calc(8px * var(--u));
-  background: var(--card);
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.45);
+  background: var(--menu);
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 0.45),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .plus-menu button {
@@ -4571,8 +4585,10 @@ body.streamer .invite-row code {
   margin-bottom: calc(4px * var(--u));
   display: flex;
   align-items: center;
-  gap: calc(12px * var(--u));
-  padding: 0 calc(8px * var(--u));
+  /* the capture puts the icon's ink 22 real px in from the plate and the label
+     9 clear of the icon */
+  gap: calc(9px * var(--u));
+  padding: 0 calc(12.5px * var(--u));
   border-radius: calc(4px * var(--u));
   font-size: calc(14px * var(--u));
   font-weight: 500;
@@ -4585,9 +4601,9 @@ body.streamer .invite-row code {
 }
 
 .plus-menu button svg {
-  width: calc(18px * var(--u));
-  height: calc(18px * var(--u));
-  flex: 0 0 calc(18px * var(--u));
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  flex: 0 0 calc(20px * var(--u));
   color: var(--muted);
 }
 
