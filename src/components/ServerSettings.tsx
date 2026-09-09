@@ -44,6 +44,8 @@ import {
   type NavItem,
 } from './SettingsLayer'
 import { Avatar } from './UserArea'
+import { DISCOVERY_CATEGORIES } from './Discover'
+import { LOCALES } from '../prefs'
 
 /**
  * Server Settings.
@@ -798,7 +800,9 @@ export function ServerSettings({
       {section === 'onboarding' ? <Onboarding server={server} onPatch={onPatch} /> : null}
       {section === 'engagement' ? <ServerGuide server={server} /> : null}
 
-      {['integrations', 'app_directory', 'discovery', 'partner', 'analytics', 'role_subscriptions', 'guild_products'].includes(
+      {section === 'discovery' ? <Discovery server={server} onPatch={onPatch} /> : null}
+
+      {['integrations', 'app_directory', 'partner', 'analytics', 'role_subscriptions', 'guild_products'].includes(
         section,
       ) ? (
         <>
@@ -810,7 +814,7 @@ export function ServerSettings({
                 ? 'Bots and apps are programs on Discord’s side; there is nothing here for them to connect to.'
                 : section === 'role_subscriptions' || section === 'guild_products'
                   ? 'Selling anything needs Discord’s billing systems and a payout account.'
-                  : 'Discovery, the partner programme and analytics are decided by Discord about a real server.'
+                  : 'The partner programme and analytics are decided by Discord about a real server.'
             }
           />
         </>
@@ -1720,6 +1724,202 @@ function AutoMod({ server, onPatch }: { server: Server; onPatch: Patch }) {
 }
 
 /** ENABLE COMMUNITY — the two channels a community server must name. */
+/**
+ * Server Settings > Discovery.
+ *
+ * Discord gates the listing behind a checklist and then asks for the listing
+ * itself. The checklist is its own — Community on, a healthy server, five
+ * hundred members, eight weeks old, a description, verification at medium or
+ * higher, and the media filter on for everyone — and every row here is
+ * answered from what this server actually is rather than ticked for show. The
+ * form below is what /guilds/:id/discovery-metadata stores: a primary
+ * category, up to four more, the language it is in, and up to ten search
+ * terms.
+ */
+function Discovery({ server, onPatch }: { server: Server; onPatch: Patch }) {
+  const [term, setTerm] = useState('')
+  const d = server.discovery
+  const weeks = server.createdAt ? (Date.now() - server.createdAt) / 6048e5 : 0
+  const members = 1
+
+  const checks: [boolean, string, string][] = [
+    [
+      server.community != null,
+      'Community enabled',
+      'Discovery is only open to Community servers.',
+    ],
+    [true, 'Healthy server', 'No rule violations in the last 30 days.'],
+    [
+      members >= 500,
+      '500 or more members',
+      `This server has ${members}, because there is no account server behind the page for anyone else to join from.`,
+    ],
+    [
+      weeks >= 8,
+      'At least 8 weeks old',
+      weeks >= 8
+        ? 'Old enough.'
+        : `This one is ${weeks < 1 ? 'less than a week' : `${Math.floor(weeks)} week${Math.floor(weeks) === 1 ? '' : 's'}`} old.`,
+    ],
+    [
+      !!server.description?.trim(),
+      'Server description',
+      'Set one under Overview so people know what they are joining.',
+    ],
+    [
+      (server.verificationLevel ?? 0) >= 2,
+      'Verification level at Medium or higher',
+      'Set it under Moderation.',
+    ],
+    [
+      (server.explicitFilter ?? 0) === 2,
+      'Media content filter on for all members',
+      'Set it under Moderation.',
+    ],
+  ]
+  const passed = checks.filter(([ok]) => ok).length
+
+  const patchDiscovery = (fn: (v: NonNullable<Server['discovery']>) => NonNullable<Server['discovery']>) =>
+    onPatch((s) => ({
+      ...s,
+      discovery: fn(
+        s.discovery ?? { primaryCategory: null, categories: [], language: 'en-US', keywords: [] },
+      ),
+    }))
+
+  const extra = d?.categories ?? []
+  const keywords = d?.keywords ?? []
+
+  return (
+    <>
+      <Title>Discovery</Title>
+      <Note>
+        Discovery puts this server in the directory the compass opens, where anyone can find and
+        join it. Discord checks the server against the list below before it will list it.
+      </Note>
+
+      <div className="discovery-checklist">
+        <div className="discovery-checkhead">
+          Requirements — {passed} of {checks.length} met
+        </div>
+        {checks.map(([ok, label, note]) => (
+          <div className={'discovery-check' + (ok ? ' ok' : '')} key={label}>
+            <span className="discovery-tick">{ok ? <CheckIcon /> : <CloseIcon />}</span>
+            <span className="discovery-check-body">
+              <b>{label}</b>
+              <span>{note}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+
+      <Divider />
+      <Sub>Listing</Sub>
+      <Note>
+        What the directory would show. It is kept whether or not the checklist passes, the way
+        Discord keeps a draft listing.
+      </Note>
+
+      <div className="set-field">
+        <label htmlFor="disc-primary">PRIMARY CATEGORY</label>
+        <select
+          id="disc-primary"
+          className="field"
+          value={d?.primaryCategory ?? ''}
+          onChange={(e) =>
+            patchDiscovery((v) => ({ ...v, primaryCategory: e.target.value || null }))
+          }
+        >
+          <option value="">Pick a category</option>
+          {DISCOVERY_CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="set-field">
+        <label>ADDITIONAL CATEGORIES</label>
+        <Note>Up to four more, on top of the primary one.</Note>
+        <div className="discovery-cats">
+          {DISCOVERY_CATEGORIES.filter((c) => c !== d?.primaryCategory).map((c) => {
+            const on = extra.includes(c)
+            return (
+              <button
+                key={c}
+                className={'discovery-pick' + (on ? ' on' : '')}
+                aria-pressed={on}
+                disabled={!on && extra.length >= 4}
+                onClick={() =>
+                  patchDiscovery((v) => ({
+                    ...v,
+                    categories: on ? v.categories.filter((x) => x !== c) : [...v.categories, c],
+                  }))
+                }
+              >
+                {c}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="set-field">
+        <label htmlFor="disc-lang">PREFERRED LANGUAGE</label>
+        <select
+          id="disc-lang"
+          className="field"
+          value={d?.language ?? 'en-US'}
+          onChange={(e) => patchDiscovery((v) => ({ ...v, language: e.target.value }))}
+        >
+          {LOCALES.map(([id, native, english]) => (
+            <option key={id} value={id}>
+              {native === english ? native : `${native} — ${english}`}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="set-field">
+        <label htmlFor="disc-term">SEARCH TERMS</label>
+        <Note>Up to ten words people might search for. {keywords.length} of 10 used.</Note>
+        <div className="discovery-terms">
+          {keywords.map((k) => (
+            <span className="discovery-term" key={k}>
+              {k}
+              <button
+                aria-label={`Remove ${k}`}
+                onClick={() =>
+                  patchDiscovery((v) => ({ ...v, keywords: v.keywords.filter((x) => x !== k) }))
+                }
+              >
+                <CloseIcon />
+              </button>
+            </span>
+          ))}
+        </div>
+        <input
+          id="disc-term"
+          className="field"
+          value={term}
+          maxLength={24}
+          placeholder={keywords.length >= 10 ? 'Ten is the limit' : 'Add a term and press enter'}
+          disabled={keywords.length >= 10}
+          onChange={(e) => setTerm(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return
+            const t = term.trim().toLowerCase()
+            if (!t || keywords.includes(t)) return
+            patchDiscovery((v) => ({ ...v, keywords: [...v.keywords, t] }))
+            setTerm('')
+          }}
+        />
+      </div>
+    </>
+  )
+}
+
 function Community({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const community = server.community
   const text = server.channels.filter((c) => c.kind === 'text')
@@ -1738,6 +1938,10 @@ function Community({ server, onPatch }: { server: Server; onPatch: Patch }) {
           onPatch(
             (s) => ({
               ...s,
+              // Community is a guild feature, and Discovery reads it back
+              features: on
+                ? [...new Set([...(s.features ?? []), 'COMMUNITY' as const])]
+                : (s.features ?? []).filter((f) => f !== 'COMMUNITY'),
               community: on
                 ? {
                     rulesChannelId: text[0]?.id ?? null,

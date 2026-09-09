@@ -394,6 +394,17 @@ export type Server = {
   explicitFilter?: number
   /** a community server has rules and updates channels */
   community?: { rulesChannelId: string | null; updatesChannelId: string | null }
+  /** when the server was made — Discord's discovery checklist wants 8 weeks */
+  createdAt?: number
+  /** the listing Server Settings > Discovery keeps */
+  discovery?: {
+    primaryCategory: string | null
+    /** up to four more, on top of the primary one */
+    categories: string[]
+    language: string
+    /** the search terms Discord matches the server on, up to ten */
+    keywords: string[]
+  }
 }
 
 /** Discord's boost thresholds. */
@@ -447,6 +458,7 @@ export const makeServer = (name: string, color = '#5865f2'): Server => ({
   audit: [],
   notifyLevel: 1,
   boostTier: 0,
+  createdAt: Date.now(),
 })
 
 /** Invite codes are 8 characters of Discord's alphabet. */

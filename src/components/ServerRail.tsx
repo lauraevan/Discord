@@ -34,17 +34,27 @@ export function ServerRail({
   onSelect,
   onHome,
   onCreate,
+  discover = false,
+  onDiscover,
 }: {
   servers: Server[]
   activeId: string | null
   onSelect: (id: string) => void
   onHome: () => void
   onCreate: () => void
+  /** Discover is open, so the compass takes the pill the way a server does */
+  discover?: boolean
+  onDiscover?: () => void
 }) {
   return (
     <nav className="rail">
       <div className="rail-scroll">
-        <RailItem label="Direct Messages" active={activeId === null} className="home" onClick={onHome}>
+        <RailItem
+          label="Direct Messages"
+          active={activeId === null && !discover}
+          className="home"
+          onClick={onHome}
+        >
           <ClydeIcon size={20} />
         </RailItem>
         <div className="rail-sep" />
@@ -68,7 +78,7 @@ export function ServerRail({
         <RailItem label="Add a Server" className="plain green" onClick={onCreate}>
           <AddServerIcon size={16.8} />
         </RailItem>
-        <RailItem label="Discover" className="plain green">
+        <RailItem label="Discover" active={discover} className="plain green" onClick={onDiscover}>
           <CompassIcon size={16.8} />
         </RailItem>
         <RailItem label="Download Apps" className="plain green">

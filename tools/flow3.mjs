@@ -496,6 +496,37 @@ await step('presence is on the member list but never on a message', async () => 
   expect(member === 1, `the member row drew ${member} status indicators`)
 })
 
+await step('the compass opens Discover, with Discord\'s own three tabs', async () => {
+  await p.click('[aria-label="Discover"]')
+  await p.waitForSelector('.discover-hero')
+  const nav = await p.locator('.dm-sidebar .row.nav .row-name').allInnerTexts()
+  expect(
+    nav.join('|') === 'Servers|Apps|Quests',
+    'the Discover sidebar reads ' + nav.join('|'),
+  )
+  // the compass takes the rail's pill the way a server does
+  const on = await p.locator('.server.active .server-tile.plain').count()
+  expect(on === 1, 'the compass did not take the rail pill')
+  // all sixteen of the directory's categories
+  const cats = await p.locator('.discover-cat').count()
+  expect(cats === 16, `the servers tab shows ${cats} categories, not 16`)
+  await p.click('.discover-cat:has-text("Gaming")')
+  const head = await p.locator('.discover-heading').innerText()
+  expect(head === 'Gaming', 'picking a category did not retitle the grid: ' + head)
+})
+await step('Discover searches its categories, and switches to Apps', async () => {
+  await p.fill('[aria-label="Explore communities"]', 'anime')
+  expect((await p.locator('.discover-cat').count()) === 1, 'the search did not narrow')
+  await p.fill('[aria-label="Explore communities"]', '')
+  await p.click('.row.nav:has-text("Apps")')
+  await p.waitForSelector('[aria-label="Search apps"]')
+  const cats = await p.locator('.discover-cat').count()
+  expect(cats === 9, `the apps tab shows ${cats} categories, not 9`)
+  // Quests is the third tab, and it is the same page the home nav opens
+  await p.click('.row.nav:has-text("Quests")')
+  await p.waitForSelector('.quests-header, .quest-card, .quests')
+})
+
 console.log('\nerrors:', errs.length ? errs.join('\n  ') : 'none')
 console.log(fails ? `${fails} failing` : 'all passing')
 await b.close()

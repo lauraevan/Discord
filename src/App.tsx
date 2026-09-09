@@ -89,6 +89,7 @@ import {
   type QuestUserStatus,
 } from './quests'
 import { allThemes, applyTheme, defaultThemes } from './themes'
+import { DiscoverPage, DiscoverSidebar, type DiscoverTab } from './components/Discover'
 import { box, vh, vw } from './zoom'
 
 purgeOldSchemas()
@@ -99,6 +100,13 @@ const HOME_TITLES: Record<HomeView, string> = {
   friends: 'Friends',
   nitro: 'Nitro',
   shop: 'Shop',
+  quests: 'Quests',
+}
+
+/** And for each of Discover's three. */
+const DISCOVER_TITLES: Record<DiscoverTab, string> = {
+  servers: 'Discover',
+  apps: 'Discover — Apps',
   quests: 'Quests',
 }
 
@@ -231,6 +239,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [userSettings, setUserSettings] = useState(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [homeView, setHomeView] = useState<HomeView>('friends')
+  // Discover is its own surface behind the compass, with its own sidebar
+  const [discover, setDiscover] = useState<DiscoverTab | null>(null)
   const [profileModal, setProfileModal] = useState(false)
   // Discord's user popout, anchored to whatever opened it
   const [userPopout, setUserPopout] = useState<{ x: number; y: number } | null>(null)
@@ -728,7 +738,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     <div className="app">
       <span style={{ display: 'none' }} dangerouslySetInnerHTML={{ __html: SPRITE }} />
       <TitleBar
-        title={activeServer === null ? HOME_TITLES[homeView] : (server?.name ?? 'Discord')}
+        title={
+          discover !== null
+            ? DISCOVER_TITLES[discover]
+            : activeServer === null
+              ? HOME_TITLES[homeView]
+              : (server?.name ?? 'Discord')
+        }
         initials={activeServer === null ? '' : (server?.initials ?? 'D')}
         onInbox={() => setInboxOpen((v) => !v)}
       />
@@ -753,14 +769,29 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             servers={servers}
             activeId={activeServer}
             onSelect={(id) => {
+              setDiscover(null)
               setActiveServer(id)
               const s = servers.find((x) => x.id === id)
               setActiveChannel(s?.channels.find((c) => c.kind !== 'voice')?.id ?? '')
             }}
-            onHome={() => setActiveServer(null)}
+            onHome={() => {
+              setDiscover(null)
+              setActiveServer(null)
+            }}
+            discover={discover !== null}
+            onDiscover={() => {
+              setActiveServer(null)
+              setDiscover('servers')
+            }}
             onCreate={() => setCreatingServer(true)}
           />
-          {activeServer === null ? (
+          {discover !== null ? (
+            <DiscoverSidebar
+              tab={discover}
+              questsDone={questsReady}
+              onTab={(t) => setDiscover(t)}
+            />
+          ) : activeServer === null ? (
             <HomeSidebar
               view={homeView}
               tab={friendsTab}
@@ -908,7 +939,27 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           ) : null}
         </div>
 
-        {activeServer === null ? (
+        {discover !== null ? (
+          discover === 'quests' ? (
+            <QuestsPage
+              status={questStatus}
+              orbs={orbs}
+              multiplier={premiumType === PremiumType.TIER_2}
+              account={account}
+              owned={account.collectibles ?? []}
+              onBuy={(id, price) => {
+                setOrbs((n) => n - price)
+                setAccount((a) => ({ ...a, collectibles: [...(a.collectibles ?? []), id] }))
+              }}
+              onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
+              onEnroll={enrollQuest}
+              onBeat={beatQuest}
+              onClaim={(q, payout) => claimQuest(q.id, payout)}
+            />
+          ) : (
+            <DiscoverPage tab={discover} />
+          )
+        ) : activeServer === null ? (
           homeView === 'nitro' ? (
             <NitroPage
               subscription={subscription}
