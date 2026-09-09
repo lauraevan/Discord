@@ -232,18 +232,22 @@ textarea {
 }
 
 .rail-sep {
-  width: 22px;
+  /* 32 real px across, off the 1:1 capture */
+  width: calc(32px * var(--u));
   height: 2px;
   border-radius: 1px;
   background: var(--selected);
   margin: 5px auto;
 }
 
+/* The rail runs on Discord's own numbers: a 40px tile on a 48px pitch, which
+   the 1:1 capture measures as 80 device px of tile every 96. This was a 41.25
+   tile on a 48.75 pitch, so by the fifth tile it had drifted five pixels. */
 .server {
   position: relative;
-  height: 33px;
+  height: calc(40px * var(--u));
   width: 58px;
-  margin-bottom: 6px;
+  margin-bottom: calc(8px * var(--u));
   display: flex;
   justify-content: center;
 }
@@ -253,7 +257,7 @@ textarea {
   left: 0;
   top: 50%;
   width: 3px;
-  height: 33px;
+  height: calc(40px * var(--u));
   border-radius: 0 3px 3px 0;
   background: var(--strong);
   transform: translateY(-50%) scaleY(0.2);
@@ -269,14 +273,15 @@ textarea {
 .server.active .server-pill,
 .server.active:hover .server-pill {
   opacity: 1;
-  /* 32px of a 33px track, matching the reference's selected pill */
+  /* 39 of the tile's 40, matching the capture's selected pill */
   transform: translateY(-50%) scaleY(0.97);
 }
 
 .server-tile {
-  width: 33px;
-  height: 33px;
-  border-radius: 11px;
+  width: calc(40px * var(--u));
+  height: calc(40px * var(--u));
+  /* the capture's corner turns over 7 real px, not 13.75 */
+  border-radius: calc(8px * var(--u));
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -287,7 +292,7 @@ textarea {
 
 .server:hover .server-tile,
 .server.active .server-tile {
-  border-radius: 11px;
+  border-radius: calc(8px * var(--u));
 }
 
 .server-tile.home {
@@ -416,7 +421,7 @@ body.resizing .side-grip {
   cursor: pointer;
   /* drawn outside the box, so the divider lands on the reference's y63
      without pushing the channel list down a pixel */
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.045);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 7.6%, transparent);
   text-align: left;
 }
 
@@ -1076,7 +1081,7 @@ body.resizing .side-grip {
   display: flex;
   align-items: center;
   padding: 0 10px 0 12px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.045);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--text) 7.6%, transparent);
 }
 
 .chat-header > svg {
