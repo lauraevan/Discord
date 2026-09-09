@@ -1410,15 +1410,24 @@ body.resizing .side-grip {
 
 /* composer ------------------------------------------------------------- */
 
+/* The gap under the composer is 7.75 real px — the 1:1 capture puts the box's
+   outer bottom on device row 1748.5 of an 1764-row frame — which is 6.2 in the
+   frame's own units. It was 5, and the pixel and a bit that bought moved the
+   whole feed with it. */
 .composer-wrap {
   flex: 0 0 auto;
-  padding: 0 6px 6px;
+  padding: 0 6px 6.2px;
 }
 
 .composer {
-  min-height: 47px;
+  /* Discord's box is 58 real px tall — the 1:1 capture measures 116 device
+     rows — inside a 1px rim two per cent lighter than its own fill, which the
+     capture reads as rgb(39,38,43) over rgb(35,34,39). The rim is a ring
+     rather than a border so it costs the box no height. */
+  min-height: calc(58px * var(--u));
   border-radius: 8px;
   background: var(--composer);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 2%, transparent);
   display: flex;
   /* the buttons ride the last line as the box grows, as they do in the client */
   align-items: flex-end;
@@ -1491,10 +1500,12 @@ body.resizing .side-grip {
 }
 
 /* two of the five glyphs sit differently inside their 24-grid, so they need
-   their own box to land on the reference's ink */
+   their own box to land on the reference's ink. Discord draws all five to the
+   same 17px of ink on an exact 40px pitch — the 1:1 capture measures 34 image
+   px for every one of them — and the sticker was the only one out, at 19. */
 .composer-acts .sticker svg {
-  width: 19.8px;
-  height: 19.8px;
+  width: 17.7px;
+  height: 17.7px;
 }
 
 .composer-acts .emoji svg {
@@ -2238,7 +2249,7 @@ h3.md-h {
   font-family: inherit;
   resize: none;
   line-height: 20px;
-  padding: 13.5px 0;
+  padding: 13.2px 0;
   max-height: 260px;
   overflow-y: auto;
 }
