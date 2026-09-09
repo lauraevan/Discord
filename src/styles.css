@@ -1074,19 +1074,6 @@ textarea {
      No horizontal padding either: Discord's hover band runs the full width of
      the scroller, so the 16px inset is carried by the rows themselves. */
   padding: 0 0 18px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--selected) transparent;
-}
-
-.feed::-webkit-scrollbar {
-  width: 8px;
-}
-
-.feed::-webkit-scrollbar-thumb {
-  background: var(--selected);
-  border-radius: 4px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
 }
 
 /* ------------------------------------------------- new-server checklist */
@@ -2165,7 +2152,6 @@ h3.md-h {
   padding: 14px 0;
   max-height: 260px;
   overflow-y: auto;
-  scrollbar-width: thin;
 }
 
 .reply-bar {
@@ -2256,8 +2242,6 @@ h3.md-h {
   flex: 0 0 calc(240px * var(--u));
   background: var(--side);
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--selected) transparent;
 }
 
 .members-head,
@@ -2446,7 +2430,6 @@ h3.md-h {
 .pins-body {
   overflow-y: auto;
   padding: 10px;
-  scrollbar-width: thin;
 }
 
 .pin-card {
@@ -2563,8 +2546,6 @@ h3.md-h {
   flex: 1;
   overflow-y: auto;
   padding: 0 6px 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--selected) transparent;
 }
 
 .picker-cat {
@@ -2658,7 +2639,6 @@ h3.md-h {
   max-height: 340px;
   overflow-y: auto;
   padding: 0 8px 8px;
-  scrollbar-width: thin;
 }
 
 .switcher-row {
@@ -2837,8 +2817,6 @@ h3.md-h {
   justify-content: flex-end;
   background: var(--side);
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--selected) transparent;
 }
 
 .settings-nav-inner {
@@ -2898,8 +2876,6 @@ h3.md-h {
   flex: 1 1 800px;
   display: flex;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--selected) transparent;
 }
 
 .settings-content {
@@ -5103,7 +5079,6 @@ body.streamer .invite-row code {
 .inbox-body {
   overflow-y: auto;
   padding: 8px;
-  scrollbar-width: thin;
 }
 
 .inbox-where {
@@ -9290,17 +9265,21 @@ body.reduced-motion img.decoration.still {
 
 /* --- the message hover toolbar, and jumping to a reply's parent ----------- */
 
+/* Discord's toolbar straddles the top edge of the message it belongs to: a
+   32px bar of 32px buttons, padded 2px so each button's own 4px corner clears
+   the bar's 8px one, and sat 16px in from the scroller's edge. */
 .msg-acts {
   position: absolute;
-  right: 16px;
-  top: -16px;
+  right: calc(16px * var(--u));
+  top: calc(-16px * var(--u));
   z-index: 2;
   display: none;
   align-items: center;
-  border-radius: 8px;
+  height: calc(32px * var(--u));
+  padding: 0 calc(2px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--card);
   box-shadow: 0 0 0 1px var(--border), 0 2px 8px rgba(0, 0, 0, 0.18);
-  overflow: hidden;
 }
 
 .group:hover .msg-acts,
@@ -9311,8 +9290,9 @@ body.reduced-motion img.decoration.still {
 .msg-acts button {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: calc(32px * var(--u));
+  height: calc(28px * var(--u));
+  border-radius: calc(4px * var(--u));
   color: var(--muted);
   transition: background 70ms ease, color 70ms ease;
 }
@@ -10884,4 +10864,72 @@ button.group-avatar:hover {
 .divider {
   margin-left: 12px;
   margin-right: 12px;
+}
+
+
+/* --- scrollbars ----------------------------------------------------------
+ *
+ * Discord draws its own rather than taking the platform's, and it is one of
+ * the more recognisable things about the client: an 8px gutter whose thumb is
+ * a 4px capsule, painted by giving the thumb a transparent border and clipping
+ * its background to the padding box, so the track shows through the gap.
+ * Settings and modals take the wider 16px version of the same.
+ *
+ * `scrollbar-width` cannot be set alongside these: the standard property wins
+ * in Chromium and reverts the lot to the platform bar. The two places that
+ * hide their scrollbar outright keep `scrollbar-width: none`, which is what
+ * they want.
+ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox has no ::-webkit-scrollbar, and its standard properties are the only
+   way to reach the bar there — but setting them in Chromium beats everything
+   above, so they are scoped to browsers that cannot see the pseudo-element */
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--chat) 62%, #000) transparent;
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 40px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, var(--chat) 62%, #000);
+  background-clip: padding-box;
+}
+
+/* the wide one, on the panes Discord gives it to */
+.settings-pane::-webkit-scrollbar,
+.settings-nav::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-pane::-webkit-scrollbar-thumb,
+.settings-nav::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb {
+  border-width: 4px;
+  border-radius: 8px;
+}
+
+.settings-pane::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track {
+  border: 4px solid transparent;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--chat) 88%, #fff);
+  background-clip: padding-box;
 }

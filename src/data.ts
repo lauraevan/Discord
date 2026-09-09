@@ -518,6 +518,10 @@ export const GROUP_WINDOW = 7 * 60 * 1000
 export const groupsWith = (prev: Message | undefined, m: Message) =>
   !!prev &&
   prev.author === m.author &&
+  // a system row — someone pinned, someone joined — is not a message anyone
+  // can be grouped under: Discord starts the next one fresh, with its avatar
+  (!prev.type || prev.type === 'DEFAULT') &&
+  (!m.type || m.type === 'DEFAULT') &&
   !m.replyTo &&
   m.time - prev.time < GROUP_WINDOW
 
