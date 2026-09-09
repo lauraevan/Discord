@@ -26,7 +26,6 @@ localStorage.setItem(
     status: 'online',
     color: '#5865f2',
     profileTheme: ['#e3e1e7', '#bad7b4'],
-    customStatus: 'wow',
     badges: [
       'staff', 'partner', 'hypesquad', 'bug_hunter', 'bravery', 'early_supporter',
       'bug_hunter_gold', 'verified_developer', 'mod_alumni', 'active_developer',

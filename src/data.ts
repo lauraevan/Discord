@@ -128,7 +128,6 @@ export const defaultAccount: Account = {
   status: 'online',
   color: '#5865f2',
   profileTheme: ['#e3e1e7', '#bad7b4'],
-  customStatus: 'wow',
   badges: [
     'staff',
     'partner',
