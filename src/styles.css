@@ -1467,7 +1467,10 @@ body.resizing .side-grip {
   align-items: flex-end;
   /* and staged uploads take a whole line above them, inside the same box */
   flex-wrap: wrap;
-  padding: 0 16px 0 14.7px;
+  /* All four 1:1 captures put the rightmost composer glyph 8 real px in from
+     the box's edge; reference.png says 21, the same right-hand disagreement
+     the channel list has, and the captures win it for the same reason. */
+  padding: 0 6.4px 0 14.7px;
 }
 
 .composer .plus {
