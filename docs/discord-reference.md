@@ -194,6 +194,55 @@ rail tile are photographs of an account that does not exist here, so they are a
 fixed floor that hides real movement elsewhere. `--blocks N` prints the worst
 16x16 cells, which is what says where to look next.
 
+`tools/capscore.py` is the same metric against `docs/refs/febf1f6c.jpg`, and
+`tools/cap.mjs` puts the app into that capture's own frame at its 2x device
+scale. Two scorers, because the two references are not the same kind of
+evidence and neither settles everything on its own.
+
+### The two references, and which one wins
+
+`docs/reference.png` is Discord captured at 80% — a downscale. `docs/refs/*.jpg`
+are native screenshots at 1:1. That difference decides which to believe:
+
+- **Sub-pixel edges: the captures.** A downscale kernel spreads an edge past
+  where it geometrically is, so the frame reads the composer and the account
+  card about 1.4 real px taller than they are. The composer is 58 real px, not
+  58.75, because 116 device rows of an unresampled screenshot say so.
+- **Layout at whole-pixel scale: either.** They agree on the rail, the row
+  pitch, the icon sizes, the type, the message row and the header.
+- **Three things they genuinely disagree on**, all on the right-hand side and
+  all resolved for the captures, which outnumber the frame four to one and are
+  the client as it ships today:
+  - the channel list's right edge — the selected plate 1.25 real px short of
+    the pane in the captures against 9.75 in the frame, a uniform 9.5 across
+    the plate, the heading and its plus, which is what a reserved scrollbar
+    gutter looks like and nothing else does;
+  - the composer's right-hand glyphs — 8 real px in from the box's edge in all
+    four captures against 21 in the frame, with the group's own pitch and glyph
+    sizes agreeing everywhere else;
+  - the title bar's third button — the frame's account carries a Support Tools
+    button and the captures' does not, which is an account difference rather
+    than a version one, so the app keeps it.
+
+The frame charges about 0.13 for the first two. That is the cost of matching
+the client the user is looking at rather than the one that took the older
+screenshot, and it is worth paying.
+
+### The rim
+
+Discord draws a 1px rim, one to eight per cent of the text colour over
+whatever is under it, on nearly every raised or floating surface. It is small
+enough to miss and structural enough that missing it is what makes a copy read
+as a theme. Measured so far, all off the 1:1 captures:
+
+| surface | fill | rim |
+| --- | --- | --- |
+| panes right of the rail | — | rgb(34,33,38), top and rail seam, 11px round on the corner |
+| composer | rgb(35,34,39) | rgb(39,38,43) — 2% |
+| onboarding checklist card | rgb(36,35,40) | rgb(50,49,54) — 8% |
+| plus menu, context menus | rgb(40,39,44) | rgb(55,54,60) — 8% |
+| staged upload card | rgb(36,35,40) | 12% |
+
 ## Accounts
 
 Registration and login are local — there is no account server behind a page —
