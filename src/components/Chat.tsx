@@ -40,6 +40,7 @@ import { springScrollIntoView } from '../motion'
 import { DisplayName } from '../ui/DisplayName'
 import { Tooltip } from '../ui/Tooltip'
 import { box, point } from '../zoom'
+import { InfoModal } from './Modals'
 import { PollView } from './Poll'
 import { Avatar } from './UserArea'
 
@@ -74,10 +75,22 @@ export function ChatHeader({
   onThreads: () => void
   threadsOpen: boolean
 }) {
+  const [topicOpen, setTopicOpen] = useState(false)
+
   return (
     <header className="chat-header">
       <Glyph kind={channel.kind} />
       <h2>{channel.name}</h2>
+      {/* Discord hangs the topic off the name behind a divider, on one line;
+          the whole of it opens in a dialog, because most topics do not fit */}
+      {channel.topic?.trim() ? (
+        <>
+          <span className="header-sep" />
+          <button className="header-topic" onClick={() => setTopicOpen(true)}>
+            {channel.topic}
+          </button>
+        </>
+      ) : null}
       <div className="chat-tools">
         <Tooltip label="Threads" side="below">
           <button aria-label="Threads" className={threadsOpen ? 'on' : undefined} onClick={onThreads}>
@@ -105,6 +118,11 @@ export function ChatHeader({
         </Tooltip>
         <SearchBox serverName={serverName} query={query} onQuery={onQuery} />
       </div>
+      {topicOpen && channel.topic ? (
+        <InfoModal title={`#${channel.name}`} onClose={() => setTopicOpen(false)}>
+          <p className="topic-full">{channel.topic}</p>
+        </InfoModal>
+      ) : null}
     </header>
   )
 }

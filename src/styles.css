@@ -1340,6 +1340,8 @@ textarea {
   display: flex;
   /* the buttons ride the last line as the box grows, as they do in the client */
   align-items: flex-end;
+  /* and staged uploads take a whole line above them, inside the same box */
+  flex-wrap: wrap;
   padding: 0 16px 0 14.7px;
 }
 
@@ -8444,14 +8446,17 @@ body.streamer .invite-row code {
 /* Discord holds a picked file in the composer until you send it: a card with
    the preview, the file name under it, and a toolbar that appears on hover. */
 
+/* Discord stacks what you have staged on top of the input, inside the same
+   rounded box, with a rule between the two */
 .upload-tray {
+  order: -1;
+  flex: 0 0 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 0 0 10px;
-  padding: 10px;
-  border-radius: 8px;
-  background: var(--hover);
+  gap: calc(8px * var(--u));
+  margin: 0 calc(-16px * var(--u)) 0 calc(-14.7px * var(--u));
+  padding: calc(16px * var(--u));
+  border-bottom: 1px solid var(--border);
 }
 
 .upload-card {
@@ -11558,4 +11563,39 @@ img.wumpus {
 .device-body span {
   font-size: calc(13px * var(--u));
   color: var(--muted);
+}
+
+
+/* --- the channel topic in the header ------------------------------------- */
+.chat-header .header-sep {
+  width: 1px;
+  height: calc(24px * var(--u));
+  flex: 0 0 1px;
+  margin: 0 calc(16px * var(--u));
+  background: var(--border);
+}
+
+.chat-header .header-topic {
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: calc(14px * var(--u));
+  line-height: calc(20px * var(--u));
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-header .header-topic:hover {
+  color: var(--text);
+}
+
+.topic-full {
+  font-size: calc(16px * var(--u));
+  line-height: 1.375;
+  color: var(--text);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

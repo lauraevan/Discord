@@ -496,6 +496,35 @@ await step('presence is on the member list but never on a message', async () => 
   expect(member === 1, `the member row drew ${member} status indicators`)
 })
 
+await step('a staged upload sits above the input, inside the same box', async () => {
+  const png =
+    'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVR42mNk+M9QzzCKRsEoGgWjAAA6TQP9lRe0KgAAAABJRU5ErkJggg=='
+  await p.setInputFiles('input[type=file]', {
+    name: 'shot.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(png, 'base64'),
+  })
+  await p.waitForSelector('.upload-card')
+  expect(
+    (await p.locator('.upload-card figcaption').innerText()) === 'shot.png',
+    'the card is not named after the file',
+  )
+  // Discord puts the tray above the input, not under the composer
+  const order = await p.evaluate(() => {
+    const tray = document.querySelector('.upload-tray')
+    const input = document.querySelector('.composer-input')
+    if (!tray || !input) return 'missing'
+    return tray.getBoundingClientRect().bottom <= input.getBoundingClientRect().top + 1
+      ? 'above'
+      : 'below'
+  })
+  expect(order === 'above', `the upload tray sits ${order} the input`)
+  // the card's controls come up on hover, as Discord's do
+  await p.hover('.upload-card')
+  await p.locator('.upload-card [aria-label="Remove attachment"]').click()
+  expect((await p.locator('.upload-card').count()) === 0, 'the card did not go')
+})
+
 await step('the compass opens Discover, with Discord\'s own three tabs', async () => {
   await p.click('[aria-label="Discover"]')
   await p.waitForSelector('.discover-hero')

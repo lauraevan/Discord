@@ -176,8 +176,19 @@ await step('channel settings: slowmode + topic', async () => {
   await p.locator('.sidebar-scroll .row:not(.nav)').first().hover()
   await p.locator('.sidebar-scroll .row:not(.nav)').first().locator('[aria-label="Edit channel"]').click()
   await p.waitForSelector('.settings-layer')
+  await p.getByLabel('CHANNEL TOPIC').fill('a topic worth reading twice')
   await p.locator('[aria-label="Slowmode"]').fill('5')
   if ((await p.locator('.slowmode span').innerText()) !== '1 min') throw new Error('slowmode label wrong')
+})
+await step('a channel topic reaches the header, and opens in full', async () => {
+  // the topic was set by the step above
+  await p.waitForSelector('.header-topic')
+  const t = await p.locator('.header-topic').innerText()
+  if (!t.startsWith('a topic')) throw new Error('the header shows: ' + t)
+  await p.click('.header-topic')
+  await p.waitForSelector('.topic-full')
+  await p.keyboard.press('Escape')
+  if (await p.locator('.topic-full').count()) throw new Error('the dialog did not close')
 })
 await step('channel context menu has mute submenu', async () => {
   await p.locator('.sidebar-scroll .row:not(.nav)').first().click({ button: 'right' })

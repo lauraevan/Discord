@@ -32,6 +32,26 @@ function useEscape(onClose: () => void) {
   }, [onClose])
 }
 
+/**
+ * A dialog with nothing to do but be read and closed — Discord uses this shape
+ * for the channel topic, where the header only has room for one line of it.
+ */
+export function InfoModal({
+  title,
+  onClose,
+  children,
+}: {
+  title: string
+  onClose: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <Shell title={title} onClose={onClose} footer={<button className="btn-primary" onClick={onClose}>Close</button>}>
+      {children}
+    </Shell>
+  )
+}
+
 function Shell({
   title,
   sub,
