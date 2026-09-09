@@ -37,6 +37,13 @@ GROUPS: dict[str, dict[str, tuple[str, int]]] = {
     'avatars': {
         f'default-{i}': (f'images_native_avatars_default_avatar_{i}', 160) for i in range(6)
     },
+    # Wumpus himself. The client draws him flat, in two blurples, with no
+    # outline at all — every "here's Wumpus for now" empty state is this
+    # character and not a lookalike.
+    'wumpus': {
+        'wump': ('images_native_wumpus_wumpuswump', 84),
+        'rocket': ('images_native_premium_plan_selection_yearly_upsell_wumpus', 200),
+    },
     # the illustrations Discord runs where a list has nothing in it
     'empties': {
         'no-text-channels': ('images_native_empties_empty_channel_no_text_channels_dark', 320),

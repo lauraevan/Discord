@@ -30,7 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
     return (
       <div className="crash">
         <div className="crash-card">
-          <WumpusMark pose="despair" />
+          <WumpusMark />
           <h1>Something went wrong</h1>
           <p>
             This usually means saved data from an older version of the page is no longer

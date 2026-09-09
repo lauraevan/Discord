@@ -92,7 +92,7 @@ export function Inbox({
         })}
         {!groups.length ? (
           <div className="inbox-empty">
-            <WumpusMark pose={tab === 'unreads' ? 'thumbsup' : 'sleep'} />
+            <WumpusMark />
             {tab === 'unreads' ? (
               <>
                 <b>You're all caught up!</b>

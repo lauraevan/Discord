@@ -372,6 +372,11 @@ textarea {
   color: var(--strong);
 }
 
+.server-header .badge-mark.guild-badge {
+  /* the sidebar is what shows through the knocked-out mark */
+  --badge-behind: var(--side);
+}
+
 .server-header h1 {
   position: relative;
   top: 0;
@@ -3955,9 +3960,11 @@ body.streamer .invite-row code {
   color: var(--muted);
 }
 
+/* Discord's Wumpus ships at 84x66 and the client draws him small; blowing him
+   up to 200px only makes him soft */
 .friends-empty img.wumpus {
-  width: 200px;
-  height: 200px;
+  width: 126px;
+  height: auto;
   image-rendering: auto;
 }
 
@@ -4014,8 +4021,8 @@ body.streamer .invite-row code {
 }
 
 .add-friend-art img.wumpus {
-  width: 190px;
-  height: 190px;
+  width: 126px;
+  height: auto;
 }
 
 .add-friend-art svg {
@@ -8578,13 +8585,13 @@ body.reduced-motion img.decoration.still {
 .active-empty img.wumpus,
 .inbox-empty img.wumpus,
 .results-empty img.wumpus {
-  width: 132px;
+  width: 104px;
   margin: 0 auto 10px;
   display: block;
 }
 
 .crash-card img.wumpus {
-  width: 128px;
+  width: 104px;
   margin-bottom: 10px;
 }
 
@@ -11176,4 +11183,42 @@ button.group-avatar:hover {
 
 .role-members .btn-secondary {
   margin-left: auto;
+}
+
+
+/* every Wumpus keeps his own proportions — he is 84x66, not a square */
+img.wumpus {
+  height: auto;
+}
+
+
+/* --- the guild badge -----------------------------------------------------
+ *
+ * Discord sets the mark into the middle of the rosette rather than drawing one
+ * glyph: the star takes the badge colour, the mark takes the colour of
+ * whatever is behind it, so it reads as knocked out of the disc.
+ */
+.guild-badge {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--strong);
+}
+
+.guild-badge-star,
+.guild-badge-mark {
+  grid-area: 1 / 1;
+}
+
+.guild-badge-star {
+  width: 100%;
+  height: 100%;
+}
+
+/* Discord insets the mark to two thirds of the disc; fitted on the frame */
+.guild-badge-mark {
+  width: 66%;
+  height: 66%;
+  color: var(--side);
 }

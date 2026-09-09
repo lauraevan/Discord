@@ -256,7 +256,6 @@ export function ShopPage({
             </div>
             {items.length === 0 && plates.length === 0 ? (
               <Empty
-                pose="shrug"
                 line="Wumpus looked everywhere and found nothing."
               />
             ) : null}
@@ -303,12 +302,11 @@ export function ShopPage({
               </button>
             ) : null}
             {plates.length === 0 ? (
-              <Empty pose="shrug" line="Wumpus looked everywhere and found nothing." />
+              <Empty line="Wumpus looked everywhere and found nothing." />
             ) : null}
           </>
         ) : tab === 'games' ? (
           <Empty
-            pose="waiting"
             line="No game shops yet — they show up here once you play a game with one."
           />
         ) : tab === 'browse' ? (
@@ -798,10 +796,10 @@ function PlateCard({
   )
 }
 
-function Empty({ pose, line }: { pose: 'shrug' | 'waiting'; line: string }) {
+function Empty({ line }: { line: string }) {
   return (
     <div className="shop-emptystate">
-      <WumpusMark pose={pose} />
+      <WumpusMark />
       <p>{line}</p>
     </div>
   )

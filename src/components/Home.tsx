@@ -3,7 +3,7 @@ import { bannerColorOf, type Account } from '../data'
 import { logoOf, serviceOf } from '../connections'
 import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
-import { WumpusMark, type WumpusPose } from '../ui/Art'
+import { WumpusMark } from '../ui/Art'
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -102,13 +102,13 @@ export function HomeSidebar({
   )
 }
 
-/** Discord's own empty-state copy, and the Wumpus pose it prints under. */
-const EMPTY: Record<Tab, [string, WumpusPose]> = {
-  online: ["No one's around to play with Wumpus.", 'shrug'],
-  all: ['Wumpus is waiting on friends. You don’t have to though!', 'waiting'],
-  pending: ['There are no pending friend requests. Here’s Wumpus for now.', 'idle'],
-  blocked: ['You can’t unblock the Wumpus.', 'lurking'],
-  add: ['', 'shrug'],
+/** Discord's own empty-state copy, one line per tab. */
+const EMPTY: Record<Tab, string> = {
+  online: "No one's around to play with Wumpus.",
+  all: 'Wumpus is waiting on friends. You don’t have to though!',
+  pending: 'There are no pending friend requests. Here’s Wumpus for now.',
+  blocked: 'You can’t unblock the Wumpus.',
+  add: '',
 }
 
 export function FriendsPage({
@@ -191,7 +191,7 @@ export function FriendsPage({
                 </p>
               ) : null}
               <div className="add-friend-art">
-                <WumpusMark pose="waiting" />
+                <WumpusMark />
               </div>
             </div>
           ) : (
@@ -204,8 +204,8 @@ export function FriendsPage({
                 {tab.toUpperCase()} — 0
               </div>
               <div className="friends-empty">
-                <WumpusMark pose={EMPTY[tab][1]} />
-                <p>{EMPTY[tab][0]}</p>
+                <WumpusMark />
+                <p>{EMPTY[tab]}</p>
               </div>
             </>
           )}
@@ -213,7 +213,7 @@ export function FriendsPage({
         <aside className="active-now">
           <h3>Active Now</h3>
           <div className="active-empty">
-            <WumpusMark pose="sleep" />
+            <WumpusMark />
             <b>It’s quiet for now...</b>
             <span>
               When a friend starts an activity—like playing a game or hanging out on voice—we’ll

@@ -108,33 +108,30 @@ export function EmptyArt({ kind }: { kind: EmptyKind }) {
 /* -------------------------------------------------------------- Wumpus */
 
 /**
- * The empty-state character.
+ * Wumpus.
  *
- * Discord's friends screens are illustrated with Wumpus and Discord's own copy
- * on those screens names him, so this is the real thing rather than a drawing
- * of one: tools/fetch-wumpus.py vendors his art from taiten312/wumpus, which
- * carries it committed to a public repo — Discord's own CDN is unreachable
- * from this page. One pose per empty state, matched to the line under it.
+ * The real one, out of Discord's own APK: flat, two blurples, no outline,
+ * two dots for eyes. He was a set of nine outlined fan drawings before, which
+ * is not the character Discord's copy is naming when it says "here's Wumpus
+ * for now", so there are no poses any more — there is one Wumpus, and it is
+ * his.
  */
-const wumpus = import.meta.glob('../assets/wumpus/*.png', {
+const wumpus = import.meta.glob('../assets/wumpus/*.webp', {
   eager: true,
   query: '?url',
   import: 'default',
 }) as Record<string, string>
 
-export type WumpusPose =
-  | 'shrug'
-  | 'waiting'
-  | 'idle'
-  | 'lurking'
-  | 'sleep'
-  | 'thinking'
-  | 'waving'
-  | 'despair'
-  | 'thumbsup'
-
-export function WumpusMark({ pose = 'shrug' }: { pose?: WumpusPose }) {
-  const src = wumpus[`../assets/wumpus/${pose}.png`]
+export function WumpusMark({ art = 'wump' }: { art?: 'wump' | 'rocket' }) {
+  const src = wumpus[`../assets/wumpus/${art}.webp`]
   if (!src) return null
-  return <img className="wumpus" src={src} alt="" draggable={false} aria-hidden="true" />
+  return (
+    <img
+      className={'wumpus wumpus-' + art}
+      src={src}
+      alt=""
+      draggable={false}
+      aria-hidden="true"
+    />
+  )
 }

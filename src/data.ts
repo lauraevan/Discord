@@ -31,6 +31,7 @@ export const emojiByChar: Record<string, string> = {
 
 import type { Connection } from './connections'
 import type { NameStyle } from './namestyles'
+import type { GuildFeature } from './ui/GuildBadge'
 
 /* --------------------------------------------------------------- account */
 
@@ -361,6 +362,8 @@ export type Server = {
   categories: Category[]
   channels: Channel[]
   roles: Role[]
+  /** what Discord has granted the guild; drives the badge on its name */
+  features?: GuildFeature[]
   /** the role ids the one account here holds in this server */
   memberRoles?: string[]
   emojis: GuildEmoji[]

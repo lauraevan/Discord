@@ -27,6 +27,8 @@ await p.addInitScript(() => {
           { id: 'c2', name: 'general', kind: 'text', categoryId: 'text' },
           { id: 'c3', name: 'General', kind: 'voice', categoryId: 'voice' },
         ],
+        // the frame's own server carries a badge on its name, so the seed does
+        features: ['VERIFIED'],
         roles: [], emojis: [], invites: [], bans: [], audit: [], notifyLevel: 1, boostTier: 0 },
     ]),
   )

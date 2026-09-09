@@ -4,7 +4,6 @@ import {
   AddMemberIcon,
   BoostIcon,
   BrowseChannelsIcon,
-  VerifiedIcon,
   CalendarIcon,
   ChevronDownIcon,
   ForumIcon,
@@ -21,6 +20,7 @@ import {
   ThreadsIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
+import { GuildBadge } from '../ui/GuildBadge'
 import { box, point } from '../zoom'
 
 /** The client's own channel-type switch, glyph for glyph. */
@@ -159,7 +159,7 @@ export function ChannelSidebar({
           onHeader({ x: r.left + 8, y: r.bottom + 4 })
         }}
       >
-        <VerifiedIcon className="badge-mark" />
+        <GuildBadge features={server.features} className="badge-mark" />
         <h1>{server.name}</h1>
         <ChevronDownIcon className="chevron" />
         <Tooltip label="Create Invite" side="below">
