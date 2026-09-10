@@ -19,6 +19,7 @@ import {
   ChannelModal,
   ConfirmModal,
   ForwardModal,
+  SelectFriends,
   EditProfileModal,
   InfoModal,
   StatusMenu,
@@ -59,7 +60,7 @@ import {
 } from './data'
 import { SPRITE } from './emoji'
 import { defaultPrefs, type Prefs } from './prefs'
-import { ageOn } from './auth'
+import { ageOn, hashPassword, makeSalt } from './auth'
 import type { MdContext } from './markdown'
 import { matches, parseQuery } from './search'
 import {
@@ -206,11 +207,40 @@ export default function App() {
         setSession(null)
         setScreen('login')
       }}
+      onChangePassword={async (current, next) => {
+        // the stored credential is a salt and a SHA-256 of `salt:password`, so
+        // the current one has to be re-hashed to be checked
+        const check = await hashPassword(current, me.salt)
+        if (check !== me.hash) return 'Password does not match.'
+        const salt = makeSalt()
+        const hash = await hashPassword(next, salt)
+        setCredentials((all) =>
+          all.map((c) => (c.username === me.username ? { ...c, salt, hash } : c)),
+        )
+        return null
+      }}
+      onDeleteAccount={(wipe) => {
+        // Disable keeps the credential so it can be recovered by signing in
+        // again; Delete removes it, as Discord's own copy promises
+        if (wipe) setCredentials((all) => all.filter((c) => c.username !== me.username))
+        setSession(null)
+        setScreen('login')
+      }}
     />
   )
 }
 
-function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
+function Client({
+  me,
+  onSignOut,
+  onChangePassword,
+  onDeleteAccount,
+}: {
+  me: Credential
+  onSignOut: () => void
+  onChangePassword: (current: string, next: string) => Promise<string | null>
+  onDeleteAccount: (wipe: boolean) => void
+}) {
   /* Discord caps 13-to-17-year-olds at three Quests a day; the date of birth
      the account registered with is what decides it. */
   const teen = (() => {
@@ -343,6 +373,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [hideMuted, setHideMuted] = useState(false)
   /** the sidebar's Events and Browse Channels rows open over the chat */
   const [serverView, setServerView] = useState<'events' | 'browse' | null>(null)
+  /** Discord's Select Friends, behind the DM list's + and New Group DM */
+  const [selectFriends, setSelectFriends] = useState(false)
   /** false when closed, otherwise the section to open Server Settings on */
   const [serverSettings, setServerSettings] = useState<false | string>(false)
   const [query, setQuery] = useState('')
@@ -987,6 +1019,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 setHomeView('friends')
                 setFriendsTab(t)
               }}
+              onSearch={() => setSwitcher(true)}
+              onNewDm={() => setSelectFriends(true)}
             />
           ) : server ? (
             <ChannelSidebar
@@ -1232,7 +1266,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               }
             />
           ) : (
-            <FriendsPage tab={friendsTab} onTab={setFriendsTab} />
+            <FriendsPage
+              tab={friendsTab}
+              onTab={setFriendsTab}
+              onNewDm={() => setSelectFriends(true)}
+              onInbox={() => setInboxOpen((v) => !v)}
+            />
           )
         ) : (
         <main className="chat">
@@ -1538,6 +1577,8 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           onPrefs={(p) => setPrefs((old) => ({ ...old, ...p }))}
           onTheme={(t) => setThemeId(t.id)}
           onSignOut={onSignOut}
+          onChangePassword={onChangePassword}
+          onDeleteAccount={onDeleteAccount}
           onClose={() => setUserSettings(false)}
         />
       ) : null}
@@ -1631,6 +1672,16 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           onSave={(a) => {
             setAccount(a)
             setEditingProfile(false)
+          }}
+        />
+      ) : null}
+      {selectFriends ? (
+        <SelectFriends
+          friends={[]}
+          onClose={() => setSelectFriends(false)}
+          onAddFriend={() => {
+            setHomeView('friends')
+            setFriendsTab('add')
           }}
         />
       ) : null}

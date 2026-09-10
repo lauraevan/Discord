@@ -8,6 +8,8 @@ import {
   type Status,
 } from '../data'
 import { KEYBINDS, LOCALES, type Prefs } from '../prefs'
+import { passwordError } from '../auth'
+import { ConfirmModal } from './Modals'
 import { GRADIENTS, allThemes, colorThemes, defaultThemes, type Theme } from '../themes'
 import { BrowserIcon, CheckIcon, CloseIcon, LockIcon, MobilePhoneIcon } from '../ui/Icons'
 import { BADGES } from '../badges'
@@ -73,8 +75,15 @@ export function UserSettings({
   onTheme,
   onClose,
   onSignOut,
+  onChangePassword,
+  onDeleteAccount,
 }: {
   account: Account
+  /** verifies the current password and stores the new hash; returns an error
+      string when the current one is wrong, or null on success */
+  onChangePassword: (current: string, next: string) => Promise<string | null>
+  /** Discord's Disable and Delete both end the session; delete also wipes */
+  onDeleteAccount: (wipe: boolean) => void
   /** the servers the account is in, for its per-server profiles */
   servers: Server[]
   prefs: Prefs
@@ -95,6 +104,9 @@ export function UserSettings({
   onSignOut: () => void
 }) {
   const [section, setSection] = useState('account')
+  const [changingPw, setChangingPw] = useState(false)
+  /** Discord's two account-removal flows, which differ only in what they warn */
+  const [removing, setRemoving] = useState<'disable' | 'delete' | null>(null)
   // the gradients follow the base appearance, the way the client's do
   const scheme = allThemes.find((t) => t.id === themeId)?.tokens.scheme ?? 'dark'
   const gradients = colorThemes.filter((t) => t.tokens.scheme === scheme)
@@ -180,7 +192,9 @@ export function UserSettings({
           </div>
           <Divider />
           <Sub>Password and Authentication</Sub>
-          <button className="btn-primary">Change Password</button>
+          <button className="btn-primary" onClick={() => setChangingPw(true)}>
+            Change Password
+          </button>
           <Note>
             Two-factor authentication, backup codes and security keys need an account server, so
             they are not wired up here.
@@ -189,8 +203,12 @@ export function UserSettings({
           <Sub>Account Removal</Sub>
           <Note>Disabling your account means you can recover it at any time after taking this action.</Note>
           <div className="btn-row">
-            <button className="btn-danger">Disable Account</button>
-            <button className="btn-danger-outline">Delete Account</button>
+            <button className="btn-danger" onClick={() => setRemoving('disable')}>
+              Disable Account
+            </button>
+            <button className="btn-danger-outline" onClick={() => setRemoving('delete')}>
+              Delete Account
+            </button>
           </div>
         </>
       ) : null}
@@ -804,7 +822,112 @@ export function UserSettings({
           </button>
         </>
       ) : null}
+
+      {changingPw ? (
+        <ChangePassword onClose={() => setChangingPw(false)} onSave={onChangePassword} />
+      ) : null}
+      {removing ? (
+        <ConfirmModal
+          title={removing === 'delete' ? 'Delete Account' : 'Disable Account'}
+          body={
+            removing === 'delete'
+              ? 'Are you sure that you want to delete your account? This will immediately log you out of your account and you will not be able to log in again.'
+              : 'Are you sure that you want to disable your account? You can recover it at any time after taking this action.'
+          }
+          confirmLabel={removing === 'delete' ? 'Delete Account' : 'Disable Account'}
+          danger
+          onConfirm={() => onDeleteAccount(removing === 'delete')}
+          onClose={() => setRemoving(null)}
+        />
+      ) : null}
     </SettingsLayer>
+  )
+}
+
+/**
+ * Change Password. Real: it verifies the current password against the stored
+ * salt-and-hash before writing a new one, so a wrong current password is
+ * refused. Discord's own field labels — "Current Password", "New Password",
+ * "Confirm New Password".
+ */
+function ChangePassword({
+  onClose,
+  onSave,
+}: {
+  onClose: () => void
+  onSave: (current: string, next: string) => Promise<string | null>
+}) {
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [again, setAgain] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const submit = async () => {
+    const bad = passwordError(next)
+    if (bad) return setError(bad)
+    if (next !== again) return setError('Passwords do not match.')
+    setBusy(true)
+    const err = await onSave(current, next)
+    setBusy(false)
+    if (err) setError(err)
+    else onClose()
+  }
+
+  return (
+    <div className="overlay" onMouseDown={onClose}>
+      <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h3>Change Password</h3>
+          <p>Enter your current password and a new password.</p>
+        </div>
+        <div className="modal-body">
+          <div className="set-field">
+            <label>CURRENT PASSWORD</label>
+            <input
+              type="password"
+              value={current}
+              autoFocus
+              onChange={(e) => {
+                setCurrent(e.target.value)
+                setError(null)
+              }}
+            />
+          </div>
+          <div className="set-field">
+            <label>NEW PASSWORD</label>
+            <input
+              type="password"
+              value={next}
+              onChange={(e) => {
+                setNext(e.target.value)
+                setError(null)
+              }}
+            />
+          </div>
+          <div className="set-field">
+            <label>CONFIRM NEW PASSWORD</label>
+            <input
+              type="password"
+              value={again}
+              onChange={(e) => {
+                setAgain(e.target.value)
+                setError(null)
+              }}
+            />
+          </div>
+          {error ? <p className="form-error">{error}</p> : null}
+        </div>
+        <div className="modal-foot">
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn-primary" disabled={busy || !current || !next} onClick={submit}>
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 

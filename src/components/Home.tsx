@@ -5,6 +5,7 @@ import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
 import { WumpusMark } from '../ui/Art'
 import {
+  ChatPlusIcon,
   CheckIcon,
   ChevronDownIcon,
   CloseIcon,
@@ -17,7 +18,6 @@ import {
   QuestsIcon,
   SearchIcon,
   ShopIcon,
-  VideoIcon,
 } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 import { Avatar } from './UserArea'
@@ -41,16 +41,23 @@ export function HomeSidebar({
   questsDone,
   onView,
   onTab,
+  onSearch,
+  onNewDm,
 }: {
   view: HomeView
   tab: Tab
   questsDone: number
   onView: (v: HomeView) => void
   onTab: (t: Tab) => void
+  /** Discord's search box opens the Quick Switcher rather than a field */
+  onSearch: () => void
+  onNewDm: () => void
 }) {
   return (
     <div className="dm-sidebar">
-      <button className="dm-search">Find or start a conversation</button>
+      <button className="dm-search" onClick={onSearch}>
+        Find or start a conversation
+      </button>
       <div className="dm-nav">
         <button
           className={'row nav' + (view === 'friends' && tab !== 'add' ? ' active' : '')}
@@ -86,7 +93,7 @@ export function HomeSidebar({
       <div className="dm-head">
         <span>DIRECT MESSAGES</span>
         <Tooltip label="Create DM" side="below">
-          <button aria-label="Create DM">
+          <button aria-label="Create DM" onClick={onNewDm}>
             <PlusIcon />
           </button>
         </Tooltip>
@@ -114,9 +121,13 @@ const EMPTY: Record<Tab, string> = {
 export function FriendsPage({
   tab,
   onTab,
+  onNewDm,
+  onInbox,
 }: {
   tab: Tab
   onTab: (t: Tab) => void
+  onNewDm: () => void
+  onInbox: () => void
 }) {
   const [handle, setHandle] = useState('')
   const [sent, setSent] = useState<string | null>(null)
@@ -145,12 +156,12 @@ export function FriendsPage({
         </div>
         <div className="chat-tools">
           <Tooltip label="New Group DM" side="below">
-            <button aria-label="New group DM">
-              <VideoIcon />
+            <button aria-label="New group DM" onClick={onNewDm}>
+              <ChatPlusIcon />
             </button>
           </Tooltip>
           <Tooltip label="Inbox" side="below">
-            <button aria-label="Inbox">
+            <button aria-label="Inbox" onClick={onInbox}>
               <InboxIcon />
             </button>
           </Tooltip>

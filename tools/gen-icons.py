@@ -70,6 +70,8 @@ MAP = {
     # Forward is Reply's mirror, and Discord names it that way too
     'ForwardIcon': 'ArrowAngleRightUpIcon',
     'SpeakIcon': 'ChatSpeakIcon',
+    # the friends header's New Group DM button
+    'ChatPlusIcon': 'ChatPlusIcon',
     'SuperReactionIcon': 'SuperReactionIcon',
     'ReactIcon': 'ReactionPlusIcon',
     'MarkReadIcon': 'DoubleCheckmarkIcon',

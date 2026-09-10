@@ -515,3 +515,88 @@ export function ForwardModal({
     </Shell>
   )
 }
+
+
+/**
+ * Discord's Select Friends — the modal behind the DM list's + and the friends
+ * header's New Group DM. Both open the same picker; Discord differs only in
+ * whether it starts a one-to-one DM or a group.
+ *
+ * With no friends there is nothing to pick, and Discord has its own line for
+ * exactly that: "You don't have any friends to add!". Rather than invent
+ * people to fill it, this shows Discord's empty state and points at Add
+ * Friend, which is the real route.
+ */
+export function SelectFriends({
+  friends,
+  onClose,
+  onAddFriend,
+}: {
+  friends: { handle: string; name: string }[]
+  onClose: () => void
+  onAddFriend: () => void
+}) {
+  const [q, setQ] = useState('')
+  const [picked, setPicked] = useState<string[]>([])
+  const shown = friends.filter(
+    (f) =>
+      !q.trim() ||
+      f.name.toLowerCase().includes(q.trim().toLowerCase()) ||
+      f.handle.toLowerCase().includes(q.trim().toLowerCase()),
+  )
+
+  return (
+    <Shell
+      title="Select Friends"
+      onClose={onClose}
+      footer={
+        friends.length ? (
+          <button className="btn-primary" disabled={!picked.length} onClick={onClose}>
+            {picked.length > 1 ? 'Create Group DM' : 'Create DM'}
+          </button>
+        ) : (
+          <button
+            className="btn-primary"
+            onClick={() => {
+              onAddFriend()
+              onClose()
+            }}
+          >
+            Add Friend
+          </button>
+        )
+      }
+    >
+      {friends.length ? (
+        <>
+          <input
+            className="fwd-search"
+            value={q}
+            autoFocus
+            placeholder="Type the username of a friend"
+            aria-label="Type the username of a friend"
+            onChange={(e) => setQ(e.target.value)}
+          />
+          <div className="fwd-list">
+            {shown.map((f) => (
+              <button
+                key={f.handle}
+                className={'fwd-row' + (picked.includes(f.handle) ? ' on' : '')}
+                onClick={() =>
+                  setPicked((p) =>
+                    p.includes(f.handle) ? p.filter((h) => h !== f.handle) : [...p, f.handle],
+                  )
+                }
+              >
+                <span className="fwd-name">{f.name}</span>
+                <span className="fwd-where">{f.handle}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="fwd-empty">You don&rsquo;t have any friends to add!</p>
+      )}
+    </Shell>
+  )
+}
