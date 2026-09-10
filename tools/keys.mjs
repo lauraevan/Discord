@@ -74,40 +74,33 @@ await p.waitForTimeout(300)
 check('Ctrl+F focuses the search box', await p.evaluate(() => document.activeElement?.getAttribute('aria-label') === 'Search'))
 await p.evaluate(() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur())
 
-// Shift+PageUp — Jump to First Unread Message. jumpTo flashes the row it
-// lands on, so that class is the proof it actually jumped.
+// Shift+PageUp — Jump to First Unread Message.
 //
-// Opening a channel marks it read 900ms later, the way the client does, so an
-// unread seeded in the past is a race. A message dated in the *future* stays
-// unread past that mark, which makes this deterministic.
-await p.evaluate(() => {
-  const sv = JSON.parse(localStorage.getItem('discord-ui:v4:servers'))[0]
-  const ch = sv.channels.find((c) => c.kind === 'text')
-  const key = `${sv.id}/${ch.id}`
-  const all = JSON.parse(localStorage.getItem('discord-ui:v4:messages') ?? '{}')
-  all[key] = [
-    ...(all[key] ?? []),
-    {
-      id: 'm-future',
-      author: 'someone-else',
-      time: Date.now() + 3600e3,
-      text: 'the one to land on',
-    },
-  ]
-  localStorage.setItem('discord-ui:v4:messages', JSON.stringify(all))
-})
-await p.reload()
-// attached, not visible: the row may be below the fold until the jump scrolls
-// to it, which is the whole point of the shortcut
-await p.waitForSelector('[data-msg="m-future"]', { state: 'attached', timeout: 15000 })
-await p.waitForSelector('.composer-input', { timeout: 15000 })
-await p.waitForTimeout(1200) // let the auto-mark-read fire, to prove it survives it
+// Rather than seeding storage (the app saves its in-memory messages back on
+// every change, so a post-mount write is a race with its own save effect),
+// this uses the app's own Mark Unread: send two messages, mark the first
+// unread, then jump. jumpTo flashes the row it lands on, which is the proof.
+await p.click('.composer-input')
+await p.fill('.composer-input', 'the one to land on')
+await p.press('.composer-input', 'Enter')
+await p.waitForTimeout(300)
+await p.fill('.composer-input', 'and one after it')
+await p.press('.composer-input', 'Enter')
+await p.waitForTimeout(300)
+
+const target = p.locator('.group').nth(-2)
+const targetId = await target.evaluate((el) => el.closest('[data-msg]')?.getAttribute('data-msg'))
+await target.click({ button: 'right' })
+await p.waitForSelector('.ctx', { timeout: 10000 })
+await p.locator('.ctx-item:has-text("Mark Unread")').click()
+await p.waitForTimeout(400)
+
 await p.evaluate(() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur())
 await p.keyboard.press('Shift+PageUp')
 await p.waitForTimeout(500)
 check(
   'Shift+Page Up jumps to the first unread',
-  (await p.locator('[data-msg="m-future"].flash').count()) === 1,
+  (await p.locator(`[data-msg="${targetId}"].flash`).count()) === 1,
   await p.locator('[data-msg].flash').count(),
 )
 

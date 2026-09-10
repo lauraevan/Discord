@@ -19,6 +19,12 @@ export type MdContext = {
   /** highlights the message when the reader is mentioned */
   self?: string
   onChannel?: (id: string) => void
+  /**
+   * "Show spoiler content" — Discord's three-way setting. `always` reveals
+   * every spoiler on sight, `owned` reveals them only in servers you moderate,
+   * and `on_click` (the default) keeps them covered until clicked.
+   */
+  spoilers?: 'always' | 'on_click' | 'owned'
 }
 
 /* ----------------------------------------------------------------- emoji */
@@ -83,8 +89,8 @@ export function isJumbo(text: string) {
 
 /* ---------------------------------------------------------------- inline */
 
-function Spoiler({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false)
+function Spoiler({ children, reveal }: { children: ReactNode; reveal?: boolean }) {
+  const [open, setOpen] = useState(!!reveal)
   return (
     <span
       className={'spoiler' + (open ? ' revealed' : '')}
@@ -246,7 +252,13 @@ function inline(src: string, ctx: MdContext, jumbo = false): ReactNode[] {
       const close = src.indexOf(w[0], i + w[0].length)
       if (close > i) {
         flush()
-        out.push(w[1](key++, inline(src.slice(i + w[0].length, close), ctx, jumbo)))
+        const kids = inline(src.slice(i + w[0].length, close), ctx, jumbo)
+        // "Show spoiler content" on `always` reveals every spoiler on sight
+        out.push(
+          w[0] === '||'
+            ? <Spoiler key={key++} reveal={ctx.spoilers === 'always'}>{kids}</Spoiler>
+            : w[1](key++, kids),
+        )
         i = close + w[0].length
         continue
       }

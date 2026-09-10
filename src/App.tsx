@@ -376,8 +376,6 @@ function Client({
    * inherits the server default, which is what "Use Server Default" means.
    */
   const [notify, setNotify] = useState<Record<string, 0 | 1 | 2>>({})
-  /** Discord's "Hide Muted Channels" toggle, off the server menu */
-  const [hideMuted, setHideMuted] = useState(false)
   /** the sidebar's Events and Browse Channels rows open over the chat */
   const [serverView, setServerView] = useState<'events' | 'browse' | null>(null)
   /** Discord's Select Friends, behind the DM list's + and New Group DM */
@@ -938,6 +936,7 @@ function Client({
       : ''
 
   const md: MdContext = {
+    spoilers: prefs.renderSpoilers,
     channels: server?.channels ?? [],
     members: [{ id: 'self', name: account.name, color: account.color }],
     self: account.name,
@@ -1100,7 +1099,7 @@ function Client({
               server={server}
               activeChannel={channel?.id ?? ''}
               mutes={mutes}
-              hideMuted={hideMuted}
+              hideMuted={prefs.hideMutedChannels}
               onNav={(to) => {
                 if (to === 'members') setServerSettings('members')
                 else if (to === 'boosts') setServerSettings('boost_status')
@@ -1158,9 +1157,12 @@ function Client({
                     { sep: true },
                     {
                       label: 'Hide Muted Channels',
-                      icon: hideMuted ? <EyeSlashIcon /> : <EyeIcon />,
-                      check: hideMuted,
-                      onPick: () => setHideMuted((v) => !v),
+                      /* Discord's own setting, so it persists rather than
+                         living in a component's state */
+                      icon: prefs.hideMutedChannels ? <EyeSlashIcon /> : <EyeIcon />,
+                      check: prefs.hideMutedChannels,
+                      onPick: () =>
+                        setPrefs((p) => ({ ...p, hideMutedChannels: !p.hideMutedChannels })),
                     },
                     { label: 'Report Raid', icon: <ShieldIcon />, onPick: () => setServerSettings('safety') },
                     { sep: true },
@@ -1443,6 +1445,7 @@ function Client({
                   ) : (
                   <>
                   <ChatFeed
+                    prefs={prefs}
                     channel={channel}
                     server={server ?? null}
                     messages={thread}
@@ -1478,6 +1481,7 @@ function Client({
                     onContext={(m, at) => setCtx({ at, items: messageMenu(m) })}
                   />
                   <Composer
+                    prefs={prefs}
                     channel={channel}
                     channels={server.channels}
                     account={account}

@@ -72,6 +72,8 @@ MAP = {
     'SpeakIcon': 'ChatSpeakIcon',
     # the friends header's New Group DM button
     'ChatPlusIcon': 'ChatPlusIcon',
+    # the composer's send button, when Show Send Button is on
+    'SendMessageIcon': 'SendMessageIcon',
     'SuperReactionIcon': 'SuperReactionIcon',
     'ReactIcon': 'ReactionPlusIcon',
     'MarkReadIcon': 'DoubleCheckmarkIcon',

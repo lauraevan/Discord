@@ -8,9 +8,11 @@ import {
   type AutoModRule,
   type Channel,
   type Message,
+  convertEmoticons,
 } from "../data";
 import { autoModHit } from "./ServerSettings";
 import type { PickerView } from "./EmojiPicker";
+import type { Prefs } from "../prefs";
 import { fileIcon, fileSize, isImage } from "../files";
 import { messageLimit, uploadLimitMb, type PremiumTypeValue } from "../nitro";
 import { EMOJI } from "../emoji";
@@ -20,6 +22,7 @@ import {
   ChevronRightIcon,
   CircleInformationIcon,
   CloseIcon,
+  SendMessageIcon,
   CloseSmallIcon,
   EyeIcon,
   GifIcon,
@@ -131,6 +134,7 @@ function nextMonday(hour: number) {
 }
 
 export function Composer({
+  prefs,
   channel,
   channels,
   account,
@@ -147,6 +151,8 @@ export function Composer({
   onGiftNitro,
   automod,
 }: {
+  /** the composer's own display settings */
+  prefs: Prefs
   channel: Channel;
   channels: Channel[];
   account: Account;
@@ -249,7 +255,8 @@ export function Composer({
     setBlocked(null);
     const slash = /^\/(\w+)\s*([\s\S]*)$/.exec(raw);
     const run = slash && SLASH[slash[1]];
-    onSend(run ? run(slash[2]) : raw, pending);
+    const text = run ? run(slash[2]) : raw;
+    onSend(prefs.convertEmoticons ? convertEmoticons(text) : text, pending);
     setValue("");
     setPending([]);
     setCaret(0);
@@ -597,6 +604,19 @@ export function Composer({
               </button>
             </Tooltip>
           ))}
+          {/* "Show send message button" — off by default, as it is in Discord */}
+          {prefs.showSendButton ? (
+            <Tooltip label="Send Message" side="above">
+              <button
+                aria-label="Send Message"
+                className="send-message"
+                disabled={!value.trim() && !pending.length}
+                onClick={submit}
+              >
+                <SendMessageIcon />
+              </button>
+            </Tooltip>
+          ) : null}
         </div>
       </div>
 

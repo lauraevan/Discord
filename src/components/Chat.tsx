@@ -14,6 +14,7 @@ import {
 import { byName } from '../emoji'
 import { ServerOnboarding } from './Onboarding'
 import { EmojiByName, EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
+import type { Prefs } from '../prefs'
 import {
   BellIcon,
   DownloadIcon,
@@ -364,6 +365,7 @@ export function ChatFeed({
   onContext,
   onVote,
   onOnboard,
+  prefs,
 }: {
   channel: Channel
   server: Server | null
@@ -385,6 +387,8 @@ export function ChatFeed({
   onContext: (m: Message, at: { x: number; y: number }) => void
   onVote: (id: string, answer: number) => void
   onOnboard: (what: 'invite' | 'icon' | 'boosts' | 'apps') => void
+  /** the display settings that change how a message renders */
+  prefs: Prefs
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
@@ -666,13 +670,24 @@ export function ChatFeed({
               {m.attachments?.length ? (
                 <div className="attachments">
                   {m.attachments.map((a) =>
-                    isImage(a.name, a.contentType) ? (
+                    /* "Show images, videos, and lolcats when posted as links to
+                       chat" — off, Discord lists the file instead of showing it */
+                    isImage(a.name, a.contentType) && prefs.inlineMedia ? (
                       <span
                         key={a.id}
                         className={'attachment' + (a.spoiler ? ' spoiler-file' : '')}
                       >
                         <a href={a.url} target="_blank" rel="noreferrer noopener">
-                          <img src={a.url} alt={a.name} />
+                          {/* "Play GIFs when possible" — off, a GIF holds on its
+                              first frame until you hover it, which is Discord's
+                              own behaviour rather than a still image */}
+                          <img
+                            className={
+                              isGif(a.name, a.contentType) && !prefs.playGifs ? 'gif-paused' : undefined
+                            }
+                            src={a.url}
+                            alt={a.name}
+                          />
                         </a>
                         {/* Discord marks a GIF and lets you star it from the
                             message, which is where a favourite comes from */}
@@ -729,7 +744,7 @@ export function ChatFeed({
               ) : null}
 
               <Reactions
-                reactions={m.reactions ?? []}
+                reactions={prefs.showEmojiReactions ? (m.reactions ?? []) : []}
                 self={account.handle}
                 onToggle={(name) => onReact(m.id, name)}
                 onAdd={() => {

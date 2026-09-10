@@ -648,6 +648,54 @@ export const groupsWith = (prev: Message | undefined, m: Message) =>
   !m.replyTo &&
   m.time - prev.time < GROUP_WINDOW
 
+/**
+ * "Automatically convert emoticons in your messages to emoji" — Discord's
+ * setting, and the conversions its client makes.
+ */
+export const EMOTICONS: [string, string][] = [
+  [':)', '\u{1F642}'],
+  [':-)', '\u{1F642}'],
+  [':(', '\u{1F641}'],
+  [':-(', '\u{1F641}'],
+  [':D', '\u{1F603}'],
+  [':-D', '\u{1F603}'],
+  [';)', '\u{1F609}'],
+  [';-)', '\u{1F609}'],
+  [':P', '\u{1F61B}'],
+  [':-P', '\u{1F61B}'],
+  [':p', '\u{1F61B}'],
+  [":'(", '\u{1F622}'],
+  [':o', '\u{1F62E}'],
+  [':O', '\u{1F62E}'],
+  [':|', '\u{1F610}'],
+  [':/', '\u{1F615}'],
+  ['<3', '\u{2764}\u{FE0F}'],
+  ['</3', '\u{1F494}'],
+  [':*', '\u{1F617}'],
+  ['XD', '\u{1F606}'],
+  ['xD', '\u{1F606}'],
+  ['B)', '\u{1F60E}'],
+  ['o/', '\u{1F44B}'],
+]
+
+/** Applies EMOTICONS to a message, leaving anything inside a code span alone. */
+export const convertEmoticons = (text: string) =>
+  text
+    .split(/(`[^`]*`|```[\s\S]*?```)/)
+    .map((part, i) => {
+      if (i % 2) return part
+      let out = part
+      for (const [from, to] of EMOTICONS) {
+        // only when the emoticon stands on its own, never mid-word
+        out = out.replace(
+          new RegExp(`(^|\\s)${from.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}(?=\\s|$)`, 'g'),
+          `$1${to}`,
+        )
+      }
+      return out
+    })
+    .join('')
+
 /** Discord's own slash commands that need no server round-trip. */
 export const SLASH: Record<string, (arg: string) => string> = {
   shrug: (a) => `${a} ¯\\_(ツ)_/¯`.trim(),

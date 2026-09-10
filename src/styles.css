@@ -12609,3 +12609,23 @@ img.wumpus {
 .role-add-menu .ctx-item {
   gap: calc(8px * var(--u));
 }
+
+/* the composer's send button, shown only when Show Send Button is on */
+.composer-acts .send-message {
+  color: var(--blurple);
+}
+
+.composer-acts .send-message:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* a GIF held on its first frame, when Play GIFs is off — it animates on hover,
+   which is what the client does rather than showing a still */
+.attachment img.gif-paused {
+  animation-play-state: paused;
+}
+
+.attachment:hover img.gif-paused {
+  animation-play-state: running;
+}

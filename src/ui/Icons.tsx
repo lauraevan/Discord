@@ -870,6 +870,14 @@ export const SendIcon = glyph({
   ],
 })
 
+/** Discord's SendMessageIcon */
+export const SendMessageIcon = glyph({
+  box: 24,
+  paths: [
+    ['M6.6 10.02 14 11.4a.6.6 0 0 1 0 1.18L6.6 14l-2.94 5.87a1.48 1.48 0 0 0 1.99 1.98l17.03-8.52a1.48 1.48 0 0 0 0-2.64L5.65 2.16a1.48 1.48 0 0 0-1.99 1.98l2.94 5.88Z'],
+  ],
+})
+
 /** Discord's SignPostIcon */
 export const ServerHomeIcon = glyph({
   box: 24,
