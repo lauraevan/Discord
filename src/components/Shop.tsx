@@ -97,6 +97,8 @@ export function ShopPage({
   const [sortOpen, setSortOpen] = useState(false)
   const [shuffled, setShuffled] = useState(0)
   const [wishlist, setWishlist] = useState<string[]>([])
+  /* Discord's heart narrows the shop to what you have wishlisted */
+  const [wishOnly, setWishOnly] = useState(false)
   const [plateQuery, setPlateQuery] = useState('')
   const [platePage, setPlatePage] = useState(1)
   // which three the tab's header wears, rotated so it is not always the same
@@ -112,7 +114,9 @@ export function ShopPage({
   const items = useMemo(() => {
     const q = query.trim().toLowerCase()
     const list = DECORATIONS.filter(
-      (d) => !q || d.name.toLowerCase().includes(q) || d.collection.toLowerCase().includes(q),
+      (d) =>
+        (!q || d.name.toLowerCase().includes(q) || d.collection.toLowerCase().includes(q)) &&
+        (!wishOnly || wishlist.includes(d.id)),
     )
     if (sort === 'price') return [...list].sort((a, b) => a.orbs - b.orbs)
     if (sort === 'newest') return [...list].reverse()
@@ -123,7 +127,7 @@ export function ShopPage({
       )
     }
     return list
-  }, [query, sort, shuffled])
+  }, [query, sort, shuffled, wishOnly, wishlist])
 
   const card = (d: (typeof DECORATIONS)[number]) => (
     <ItemCard
@@ -224,10 +228,13 @@ export function ShopPage({
             <SearchIcon size={16} />
           </label>
           <button
-            className={'shop-heart' + (wishlist.length ? ' on' : '')}
+            className={'shop-heart' + (wishOnly ? ' on' : '')}
             aria-label="Wishlist"
+            aria-pressed={wishOnly}
+            disabled={!wishlist.length}
+            onClick={() => setWishOnly((v) => !v)}
           >
-            {wishlist.length ? <HeartIcon size={20} /> : <HeartOutlineIcon size={20} />}
+            {wishOnly || wishlist.length ? <HeartIcon size={20} /> : <HeartOutlineIcon size={20} />}
           </button>
           <span className="shop-orbs">
             <OrbsIcon size={18} />

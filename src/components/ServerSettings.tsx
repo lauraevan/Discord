@@ -79,6 +79,7 @@ export function ServerSettings({
   const [roleQuery, setRoleQuery] = useState('')
   const [permQuery, setPermQuery] = useState('')
   const [emojiQuery, setEmojiQuery] = useState('')
+  const [addRoleOpen, setAddRoleOpen] = useState(false)
 
   const nav: NavItem[] = [
     { head: server.name },
@@ -666,18 +667,66 @@ export function ServerSettings({
               </span>
               <span>Today</span>
               <span>Today</span>
+              {/* Discord lists the roles the member actually holds — @everyone
+                  and whatever has been given — each with an x, and a + that
+                  opens the rest. Listing every role in the server was wrong. */}
               <span className="mt-roles">
                 {server.roles
-                  .filter((r) => r.id === 'everyone' || r.permissions.length)
+                  .filter((r) => r.id === 'everyone' || memberHas(r.id))
                   .map((r) => (
                     <span className="role-pill" key={r.id}>
                       <span className="role-dot" style={{ background: r.color ?? '#99aab5' }} />
                       {r.name}
+                      {r.id === 'everyone' ? null : (
+                        <button
+                          className="role-pill-x"
+                          aria-label={`Remove ${r.name}`}
+                          onClick={() => toggleMember(r.id)}
+                        >
+                          <CloseIcon />
+                        </button>
+                      )}
                     </span>
                   ))}
-                <button className="role-pill add" aria-label="Add role">
-                  <PlusIcon />
-                </button>
+                <span className="role-add-wrap">
+                  <button
+                    className="role-pill add"
+                    aria-label="Add role"
+                    aria-expanded={addRoleOpen}
+                    onClick={() => setAddRoleOpen((v) => !v)}
+                  >
+                    <PlusIcon />
+                  </button>
+                  {addRoleOpen ? (
+                    <div className="ctx role-add-menu" role="menu">
+                      {server.roles.filter((r) => r.id !== 'everyone' && !memberHas(r.id))
+                        .length ? (
+                        server.roles
+                          .filter((r) => r.id !== 'everyone' && !memberHas(r.id))
+                          .map((r) => (
+                            <button
+                              key={r.id}
+                              className="ctx-item"
+                              onClick={() => {
+                                toggleMember(r.id)
+                                setAddRoleOpen(false)
+                              }}
+                            >
+                              <span
+                                className="role-dot"
+                                style={{ background: r.color ?? '#99aab5' }}
+                              />
+                              {r.name}
+                            </button>
+                          ))
+                      ) : (
+                        <span className="ctx-item" aria-disabled>
+                          No roles to add
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
+                </span>
               </span>
             </div>
           </div>

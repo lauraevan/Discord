@@ -23,7 +23,16 @@ export function TitleBar({
           <button aria-label="Inbox" onClick={onInbox}><InboxIcon size={15} /></button>
         </Tooltip>
         <Tooltip label="Help" side="below">
-          <button aria-label="Help" className="help"><HelpIcon size={15} /></button>
+          {/* Discord's help button opens its help centre; this is the real one */}
+          <a
+            aria-label="Help"
+            className="help"
+            href="https://support.discord.com/"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            <HelpIcon size={15} />
+          </a>
         </Tooltip>
         <Tooltip label="Support Tools" side="below">
           <button aria-label="Support tools"><ToolsIcon size={15.5} /></button>

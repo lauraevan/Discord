@@ -124,6 +124,7 @@ export function LoginScreen({
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [forgot, setForgot] = useState(false)
 
   async function submit() {
     setError(null)
@@ -175,9 +176,20 @@ export function LoginScreen({
             autoComplete="current-password"
             onEnter={submit}
           />
-          <button className="auth-link auth-forgot" type="button">
+          <button
+            className="auth-link auth-forgot"
+            type="button"
+            onClick={() => setForgot(true)}
+          >
             Forgot your password?
           </button>
+          {forgot ? (
+            <p className="auth-note">
+              Resetting a password takes an email out to your inbox, which needs a mail server —
+              so there is nothing here to send it. Accounts live in this browser: clearing site
+              data removes them, and registering again makes a new one.
+            </p>
+          ) : null}
           <button className="auth-submit" onClick={submit} disabled={busy}>
             Log In
           </button>

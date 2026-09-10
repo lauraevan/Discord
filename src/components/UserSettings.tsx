@@ -61,6 +61,7 @@ import { StatusGlyph } from '../ui/Status'
  */
 export function UserSettings({
   account,
+  open = 'account',
   servers,
   prefs,
   themeId,
@@ -79,6 +80,8 @@ export function UserSettings({
   onDeleteAccount,
 }: {
   account: Account
+  /** the section to land on — the user card's audio carets open Voice & Video */
+  open?: string
   /** verifies the current password and stores the new hash; returns an error
       string when the current one is wrong, or null on success */
   onChangePassword: (current: string, next: string) => Promise<string | null>
@@ -103,7 +106,7 @@ export function UserSettings({
   onClose: () => void
   onSignOut: () => void
 }) {
-  const [section, setSection] = useState('account')
+  const [section, setSection] = useState(open)
   const [changingPw, setChangingPw] = useState(false)
   /** Discord's two account-removal flows, which differ only in what they warn */
   const [removing, setRemoving] = useState<'disable' | 'delete' | null>(null)

@@ -79,6 +79,7 @@ export function QuestsPage({
   onBeat,
   onClaim,
   teen,
+  onShop,
 }: {
   status: Record<string, QuestUserStatus>
   orbs: number
@@ -93,11 +94,16 @@ export function QuestsPage({
   onEnroll: (q: Quest) => void
   onBeat: (questId: string, seconds: number, terminal?: boolean) => void
   onClaim: (q: Quest, orbs: number) => void
+  /** the Orbs hero's first CTA takes you to the Shop, as Discord's does */
+  onShop?: () => void
 }) {
   const [sort, setSort] = useState<SortOrderValue>(SortOrder.SUGGESTED)
   const [query, setQuery] = useState('')
   const [sortOpen, setSortOpen] = useState(false)
   const [tab, setTab] = useState<'all' | 'claimed'>('all')
+  /* Discord's Filters button narrows the list by where each Quest stands. */
+  const [filter, setFilter] = useState<'all' | 'available' | 'progress' | 'complete'>('all')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [openId, setOpenId] = useState<string | null>(null)
   const [why, setWhy] = useState(false)
   /* "press the ellipsis on the Quest in-app promotion ... and then select Hide
@@ -130,7 +136,15 @@ export function QuestsPage({
           .includes(hit),
       )
     : []
-  const shown = tab === 'claimed' ? ordered.filter(isClaimed) : live
+  const byStatus = (q: Quest) =>
+    filter === 'all'
+      ? true
+      : filter === 'available'
+        ? !isEnrolled(q)
+        : filter === 'progress'
+          ? isEnrolled(q) && !isComplete(q)
+          : isComplete(q)
+  const shown = (tab === 'claimed' ? ordered.filter(isClaimed) : live).filter(byStatus)
   /* The cap is Discord's: three a day for 13 to 17, lifting 24 hours after the
      third completion. Rewards already earned can still be claimed. */
   const capAt = teen ? capLiftsAt(quests) : null
@@ -247,7 +261,7 @@ export function QuestsPage({
           </>
         ) : (
           <>
-            <OrbsHero />
+            <OrbsHero onShop={onShop} />
 
             {inProgress.length ? (
               <Shelf title="In progress" quests={inProgress} onOpen={setOpenId} />
@@ -296,10 +310,42 @@ export function QuestsPage({
                     </>
                   ) : null}
                 </div>
-                <button className="quests-filters">
-                  Filters
-                  <FiltersIcon size={16} />
-                </button>
+                <div className="quests-filters-wrap">
+                  <button
+                    className={'quests-filters' + (filter === 'all' ? '' : ' on')}
+                    aria-haspopup="menu"
+                    aria-expanded={filtersOpen}
+                    onClick={() => setFiltersOpen((v) => !v)}
+                  >
+                    Filters
+                    <FiltersIcon size={16} />
+                  </button>
+                  {filtersOpen ? (
+                    <div className="quests-select-menu" role="menu">
+                      {(
+                        [
+                          ['all', 'All Quests'],
+                          ['available', 'Available'],
+                          ['progress', 'In Progress'],
+                          ['complete', 'Completed'],
+                        ] as const
+                      ).map(([id, label]) => (
+                        <button
+                          key={id}
+                          role="menuitemradio"
+                          aria-checked={filter === id}
+                          className={filter === id ? 'on' : undefined}
+                          onClick={() => {
+                            setFilter(id)
+                            setFiltersOpen(false)
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
 
@@ -573,7 +619,7 @@ function QuestCard({
  * — a white primary to the Orbs Exclusives shelf and a dark secondary to the
  * terms.
  */
-function OrbsHero() {
+function OrbsHero({ onShop }: { onShop?: () => void }) {
   return (
     <section className="orbs-hero">
       <img className="orbs-hero-art" src={orbsHero} alt="" aria-hidden="true" />
@@ -585,8 +631,17 @@ function OrbsHero() {
         </h1>
         <p>Reward Your Play. Earn through Quests. Spend in the Shop.</p>
         <div className="orbs-hero-actions">
-          <button className="orbs-cta">Explore Orbs Exclusives</button>
-          <button className="orbs-cta secondary">Discord Orbs Terms</button>
+          <button className="orbs-cta" onClick={onShop}>
+            Explore Orbs Exclusives
+          </button>
+          <a
+            className="orbs-cta secondary"
+            href="https://support.discord.com/hc/en-us/articles/30916404086935"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            Discord Orbs Terms
+          </a>
         </div>
       </div>
     </section>
@@ -621,6 +676,8 @@ function QuestSheet({
   onEnroll: (q: Quest) => void
   onBeat: (questId: string, seconds: number, terminal?: boolean) => void
   onClaim: (q: Quest, orbs: number) => void
+  /** the Orbs hero's first CTA takes you to the Shop, as Discord's does */
+  onShop?: () => void
 }) {
   const task = taskOf(quest)
   const questId = quest.id

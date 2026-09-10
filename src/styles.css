@@ -12548,3 +12548,59 @@ img.wumpus {
   font-size: calc(14px * var(--u));
   color: var(--muted);
 }
+
+/* the note under Forgot your password?, and the Quests filter menu */
+.auth-note {
+  margin-top: calc(8px * var(--u));
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--muted);
+}
+
+.quests-filters-wrap {
+  position: relative;
+}
+
+.quests-filters.on {
+  color: var(--strong);
+}
+
+/* a member's role pills: an x on each held role, and a + that opens the rest */
+.role-pill-x {
+  display: inline-grid;
+  place-items: center;
+  width: calc(14px * var(--u));
+  height: calc(14px * var(--u));
+  margin-inline-start: calc(2px * var(--u));
+  border-radius: 50%;
+  color: var(--muted);
+}
+
+.role-pill-x:hover {
+  color: var(--strong);
+  background: var(--hover);
+}
+
+.role-pill-x svg {
+  width: calc(10px * var(--u));
+  height: calc(10px * var(--u));
+}
+
+.role-add-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.role-add-menu {
+  position: absolute;
+  top: 100%;
+  inset-inline-start: 0;
+  margin-top: calc(4px * var(--u));
+  max-height: calc(240px * var(--u));
+  overflow-y: auto;
+  z-index: 5;
+}
+
+.role-add-menu .ctx-item {
+  gap: calc(8px * var(--u));
+}

@@ -348,6 +348,7 @@ export function UserArea({
   onMute,
   onDeafen,
   onSettings,
+  onVoiceSettings,
   onOpenProfile,
   profileOpen,
 }: {
@@ -359,6 +360,8 @@ export function UserArea({
   onMute: () => void
   onDeafen: () => void
   onSettings: () => void
+  /** the two carets beside mute and deafen open Voice & Video */
+  onVoiceSettings: () => void
   onOpenProfile: () => void
   /** the popout is open, which is when Discord swaps the line for the username */
   profileOpen: boolean
@@ -402,7 +405,8 @@ export function UserArea({
               </span>
             </button>
           </Tooltip>
-          <button className="caret" aria-label="Audio settings">
+          {/* Discord's caret opens Voice & Video in settings */}
+          <button className="caret" aria-label="Audio settings" onClick={onVoiceSettings}>
             <ChevronDownIcon />
           </button>
         </span>
@@ -414,7 +418,7 @@ export function UserArea({
               </span>
             </button>
           </Tooltip>
-          <button className="caret" aria-label="Output settings">
+          <button className="caret" aria-label="Output settings" onClick={onVoiceSettings}>
             <ChevronDownIcon />
           </button>
         </span>

@@ -318,7 +318,8 @@ function Client({
   const [unpinAsk, setUnpinAsk] = useState<Message | null>(null)
   const [pinError, setPinError] = useState<string | null>(null)
   const [threadsOpen, setThreadsOpen] = useState(false)
-  const [userSettings, setUserSettings] = useState(false)
+  /** false when closed, otherwise the section to open User Settings on */
+  const [userSettings, setUserSettings] = useState<false | string>(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
   const [homeView, setHomeView] = useState<HomeView>('friends')
   // Discover is its own surface behind the compass, with its own sidebar
@@ -1114,8 +1115,8 @@ function Client({
                           })),
                         },
                     { label: 'Notification Settings', icon: <BellIcon />, onPick: () => setServerSettings('overview') },
-                    { label: 'Privacy Settings', icon: <ShieldIcon />, onPick: () => setUserSettings(true) },
-                    { label: 'Edit Server Profile', icon: <PencilIcon />, onPick: () => setUserSettings(true) },
+                    { label: 'Privacy Settings', icon: <ShieldIcon />, onPick: () => setUserSettings('account') },
+                    { label: 'Edit Server Profile', icon: <PencilIcon />, onPick: () => setUserSettings('account') },
                     { sep: true },
                     {
                       label: 'Hide Muted Channels',
@@ -1206,7 +1207,8 @@ function Client({
             onLeaveVoice={() => setVoice(null)}
             onMute={() => setMuted((m) => !m)}
             onDeafen={() => setDeafened((d) => !d)}
-            onSettings={() => setUserSettings(true)}
+            onSettings={() => setUserSettings('account')}
+            onVoiceSettings={() => setUserSettings('voice')}
             profileOpen={popout}
             onOpenProfile={() => setPopout((v) => !v)}
           />
@@ -1244,6 +1246,7 @@ function Client({
               onEnroll={enrollQuest}
               onBeat={beatQuest}
               teen={teen}
+              onShop={() => setHomeView('shop')}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
             />
           ) : (
@@ -1275,6 +1278,7 @@ function Client({
               onEnroll={enrollQuest}
               onBeat={beatQuest}
               teen={teen}
+              onShop={() => setHomeView('shop')}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
             />
           ) : homeView === 'shop' ? (
@@ -1412,7 +1416,7 @@ function Client({
                     onStartEdit={setEditingId}
                     onEditChannel={() => setChannelModal({ mode: 'edit', id: channel.id })}
                     onOnboard={(what) => {
-                      if (what === 'apps') setUserSettings(true)
+                      if (what === 'apps') setUserSettings('account')
                       else setServerSettings('overview')
                     }}
                     onEdit={editMessage}
@@ -1587,6 +1591,7 @@ function Client({
 
       {userSettings ? (
         <UserSettings
+          open={typeof userSettings === 'string' ? userSettings : 'account'}
           account={account}
           servers={servers}
           prefs={prefs}
