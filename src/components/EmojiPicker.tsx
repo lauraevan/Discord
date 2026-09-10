@@ -125,8 +125,8 @@ export function EmojiPicker({
           <div className="picker-rail">
             {favourites.length ? (
               <button
-                aria-label="Favourites"
-                title="Favourites"
+                aria-label="Favorites"
+                title="Favorites"
                 onClick={() => jumpTo('favourites')}
               >
                 <StarIcon size={18} />
@@ -157,7 +157,7 @@ export function EmojiPicker({
             {favourites.length ? (
               <div data-cat="favourites">
                 <div className="picker-cat">
-                  Favourites
+                  Favorites
                   <button className="picker-add" onClick={() => gifFile.current?.click()}>
                     Add
                   </button>

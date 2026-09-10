@@ -17,7 +17,9 @@ import { Inbox } from './components/Inbox'
 import { MemberList } from './components/MemberList'
 import {
   ChannelModal,
+  ConfirmModal,
   EditProfileModal,
+  InfoModal,
   StatusMenu,
   SwitchAccounts,
   AppsPanel,
@@ -38,6 +40,8 @@ import { TitleBar } from './components/TitleBar'
 import { UserSettings } from './components/UserSettings'
 import { ProfilePopout, UserArea } from './components/UserArea'
 import {
+  ACCOUNT_CAPS,
+  CAPS,
   MUTE_DURATIONS,
   accountFor,
   initialsOf,
@@ -265,6 +269,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   // last state per user, so start where the reference does
   const [membersOpen, setMembersOpen] = useState(false)
   const [pinsOpen, setPinsOpen] = useState(false)
+  // Discord confirms every pin and every unpin, and holding shift skips the
+  // unpin prompt ("To skip the confirmation prompt when removing a pin, hold
+  // Shift and select the X icon" — Pin Messages FAQ)
+  const [pinAsk, setPinAsk] = useState<Message | null>(null)
+  const [unpinAsk, setUnpinAsk] = useState<Message | null>(null)
+  const [pinError, setPinError] = useState<string | null>(null)
   const [threadsOpen, setThreadsOpen] = useState(false)
   const [userSettings, setUserSettings] = useState(false)
   const [friendsTab, setFriendsTab] = useState<'online' | 'all' | 'pending' | 'blocked' | 'add'>('online')
@@ -430,6 +440,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     setMessages((all) => ({ ...all, [key]: fn(all[key] ?? []) }))
 
   const createServer = ({ name, color, icon, template }: NewServer) => {
+    /* "Number of servers 100 Same 200" — Discord's caps table, by Nitro tier */
+    const cap = ACCOUNT_CAPS.servers[premiumType === PremiumType.TIER_2 ? 2 : premiumType === PremiumType.TIER_0 ? 1 : 0]
+    if (servers.length >= cap) {
+      setCreatingServer(false)
+      return
+    }
     const { categories, channels } = applyTemplate(template)
     const s: Server = {
       ...makeServer(name, color),
@@ -517,6 +533,15 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     if (!server || !channelModal) return
     if (channelModal.mode === 'create') {
       const c: Channel = { id: uid('ch'), name, kind, categoryId: channelModal.categoryId }
+      /* Discord's caps table: 500 channels a server, and 50 in one category */
+      const inCategory = server.channels.filter((x) => x.categoryId === c.categoryId).length
+      if (
+        server.channels.length >= CAPS.channels ||
+        (c.categoryId != null && inCategory >= CAPS.channelsPerCategory)
+      ) {
+        setChannelModal(null)
+        return
+      }
       patchServer(server.id, (s) => ({ ...s, channels: [...s.channels, c] }))
       if (kind !== 'voice') setActiveChannel(c.id)
     } else {
@@ -626,24 +651,53 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
       }),
     )
 
-  const togglePin = (id: string) =>
+  const doPin = (id: string) =>
     patchThread((list) => {
-      const target = list.find((m) => m.id === id)
-      const next = list.map((m) => (m.id === id ? { ...m, pinned: !m.pinned } : m))
+      const next = list.map((m) => (m.id === id ? { ...m, pinned: true, pinnedAt: Date.now() } : m))
       // Discord posts a system message when something is pinned
-      return target?.pinned
-        ? next
-        : [
-            ...next,
-            {
-              id: uid('m'),
-              author: account.handle,
-              time: Date.now(),
-              text: '',
-              type: 'CHANNEL_PINNED_MESSAGE' as const,
-            },
-          ]
+      return [
+        ...next,
+        {
+          id: uid('m'),
+          author: account.handle,
+          time: Date.now(),
+          text: '',
+          type: 'CHANNEL_PINNED_MESSAGE' as const,
+        },
+      ]
     })
+
+  const doUnpin = (id: string) =>
+    patchThread((list) =>
+      list.map((m) => (m.id === id ? { ...m, pinned: false, pinnedAt: undefined } : m)),
+    )
+
+  /**
+   * Discord refuses two kinds of pin outright — a system row and a full
+   * channel — and asks before every other one. The refusals and the prompt
+   * all use Discord's own copy.
+   */
+  const askPin = (m: Message) => {
+    if (m.type && m.type !== 'DEFAULT') {
+      setPinError('This message is a system message and cannot be pinned.')
+      return
+    }
+    if (thread.filter((x) => x.pinned).length >= CAPS.pins) {
+      setPinError(
+        `Discord is unable to pin that message. You may have hit the limit of ${CAPS.pins} pins in this channel.`,
+      )
+      return
+    }
+    setPinAsk(m)
+  }
+
+  /** Unpin, asking first unless shift is held. */
+  const askUnpin = (id: string, skip: boolean) => {
+    const m = thread.find((x) => x.id === id)
+    if (!m) return
+    if (skip) doUnpin(id)
+    else setUnpinAsk(m)
+  }
 
   const vote = (id: string, answer: number) =>
     patchThread((list) =>
@@ -763,7 +817,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     {
       label: m.pinned ? 'Unpin Message' : 'Pin Message',
       icon: m.pinned ? <PinSlashIcon /> : <PinIcon />,
-      onPick: () => togglePin(m.id),
+      onPick: () => (m.pinned ? askUnpin(m.id, false) : askPin(m)),
     },
     { sep: true },
     { label: 'Copy Text', icon: <CopyIcon />, onPick: () => navigator.clipboard?.writeText(m.text) },
@@ -1104,11 +1158,16 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               ) : null}
               {pinsOpen ? (
                 <Pins
-                  pinned={thread.filter((m) => m.pinned)}
+                  pinned={thread
+                    .filter((m) => m.pinned)
+                    .slice()
+                    // "listed from most recently pinned to oldest"
+                    .sort((a, b) => (b.pinnedAt ?? b.time) - (a.pinnedAt ?? a.time))}
                   account={account}
                   md={md}
+                  dm={!server}
                   onJump={jumpTo}
-                  onUnpin={togglePin}
+                  onUnpin={askUnpin}
                   onClose={() => setPinsOpen(false)}
                 />
               ) : null}
@@ -1448,6 +1507,34 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             setEditingProfile(false)
           }}
         />
+      ) : null}
+      {pinAsk ? (
+        <ConfirmModal
+          title="Pin It. Pin It Good."
+          body={
+            channel
+              ? `Hey, just double checking that you want to pin this message to #${channel.name} for posterity and greatness?`
+              : 'Hey, just double checking that you want to pin this message to the current channel for posterity and greatness?'
+          }
+          confirmLabel="Oh yeah. Pin it"
+          onConfirm={() => doPin(pinAsk.id)}
+          onClose={() => setPinAsk(null)}
+        />
+      ) : null}
+      {unpinAsk ? (
+        <ConfirmModal
+          title="The Pin Is Stuck!"
+          body="You sure you want to remove this pinned message?"
+          confirmLabel="Remove"
+          danger
+          onConfirm={() => doUnpin(unpinAsk.id)}
+          onClose={() => setUnpinAsk(null)}
+        />
+      ) : null}
+      {pinError ? (
+        <InfoModal title="The Pin Broke" onClose={() => setPinError(null)}>
+          <p>{pinError}</p>
+        </InfoModal>
       ) : null}
       {appsPanel ? <AppsPanel onClose={() => setAppsPanel(false)} /> : null}
       {switchAccounts ? (

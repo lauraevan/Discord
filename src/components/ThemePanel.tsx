@@ -37,7 +37,7 @@ export function ThemePanel({
       </h3>
       <div className="theme-section">Default themes</div>
       <div className="theme-grid">{defaultThemes.map(swatch)}</div>
-      <div className="theme-section">Colour themes</div>
+      <div className="theme-section">Color Themes</div>
       <div className="theme-grid">{colorThemes.map(swatch)}</div>
     </aside>
   )

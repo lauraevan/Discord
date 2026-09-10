@@ -718,7 +718,7 @@ function QuestSheet({
         </div>
 
         <div className="quest-sheet-body">
-          <h3>Requirement</h3>
+          <h3>Requirements</h3>
           <p className="quest-task">{taskLabel(task)}</p>
 
           <div className="quest-progress">

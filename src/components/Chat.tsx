@@ -656,12 +656,12 @@ export function ChatFeed({
                           <>
                             <span className="attachment-gif">GIF</span>
                             <Tooltip
-                              label={favourited(a.url) ? 'Favourited' : 'Add to Favourites'}
+                              label={favourited(a.url) ? 'Favorited' : 'Add to Favorites'}
                               side="above"
                             >
                               <button
                                 className={'attachment-fav' + (favourited(a.url) ? ' on' : '')}
-                                aria-label="Add to favourites"
+                                aria-label="Add to Favorites"
                                 onClick={() => onFavouriteGif(a)}
                               >
                                 <StarIcon size={16} />

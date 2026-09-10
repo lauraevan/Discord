@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { bannerColorOf, type Account } from '../data'
+import { ACCOUNT_CAPS, bannerColorOf, type Account } from '../data'
 import { logoOf, serviceOf } from '../connections'
 import { Nameplate } from '../ui/Nameplate'
 import { DisplayName } from '../ui/DisplayName'
@@ -300,7 +300,12 @@ export function ProfileModal({
           </div>
           <div className="profile-section">
             <h4>Note</h4>
-            <input className="profile-note" placeholder="Click to add a note" aria-label="Note" />
+            <input
+              className="profile-note"
+              placeholder="Click to add a note"
+              aria-label="Note"
+              maxLength={ACCOUNT_CAPS.noteChars[0]}
+            />
           </div>
           <div className="profile-msg">
             <input placeholder={`Message @${account.name}`} aria-label="Message" />

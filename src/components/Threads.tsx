@@ -71,7 +71,7 @@ export function Threads({
       <div className="pins-body">
         {threads.length === 0 ? (
           <div className="pins-empty">
-            <p>There are no threads yet.</p>
+            <p>There are no threads.</p>
             <span>
               Start one from a message&rsquo;s menu, or from the composer&rsquo;s plus, and it
               shows up here.

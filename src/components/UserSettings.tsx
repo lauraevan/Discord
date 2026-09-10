@@ -226,7 +226,7 @@ export function UserSettings({
               </button>
             ))}
           </div>
-          <Sub>Colours</Sub>
+          <Sub>Colors</Sub>
           <div className="theme-grid">
             {gradients.map((t) => (
               <button
@@ -1123,7 +1123,7 @@ function Profiles({
 
           {tab === 'user' ? (
             <div className="set-field">
-              <label>BANNER COLOUR</label>
+              <label>BANNER COLOR</label>
               <div className="swatch-row">
                 {[
                   '#5865f2', '#3ba55d', '#faa81a', '#ed4245', '#eb459e',
@@ -1246,7 +1246,7 @@ function Profiles({
                     </div>
                     <p className="theme-note">
                       {colorCount(styleOf.effectId) > 1
-                        ? `${NAME_EFFECTS.find((e) => e.id === styleOf.effectId)?.name} takes ${colorCount(styleOf.effectId)} colours — Discord fills the rest in from the one you pick.`
+                        ? `${NAME_EFFECTS.find((e) => e.id === styleOf.effectId)?.name} takes ${colorCount(styleOf.effectId)} colors — Discord fills the rest in from the one you pick.`
                         : 'Neo Castel and Sinistre are missing: Discord licensed those two and no public mirror carries them.'}
                     </p>
                   </>

@@ -43,7 +43,7 @@ export function CreatePoll({
               autoFocus
               value={question}
               maxLength={300}
-              placeholder="What do you want to ask?"
+              placeholder="What do you want to ask today?"
               onChange={(e) => setQuestion(e.target.value)}
             />
           </div>

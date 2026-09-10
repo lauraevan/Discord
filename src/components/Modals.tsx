@@ -52,6 +52,56 @@ export function InfoModal({
   )
 }
 
+/**
+ * Discord's confirmation modal — the one behind pinning, unpinning and
+ * deleting. Every label here is Discord's own copy; the cancel button really
+ * is a bare "Cancel" and the confirm button carries the verb.
+ */
+export function ConfirmModal({
+  title,
+  body,
+  confirmLabel,
+  danger,
+  onConfirm,
+  onClose,
+  children,
+}: {
+  title: string
+  body: string
+  confirmLabel: string
+  danger?: boolean
+  onConfirm: () => void
+  onClose: () => void
+  children?: React.ReactNode
+}) {
+  return (
+    <Shell
+      title={title}
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={danger ? 'btn-danger' : 'btn-primary'}
+            autoFocus
+            onClick={() => {
+              onConfirm()
+              onClose()
+            }}
+          >
+            {confirmLabel}
+          </button>
+        </>
+      }
+    >
+      <p className="confirm-body">{body}</p>
+      {children}
+    </Shell>
+  )
+}
+
 function Shell({
   title,
   sub,
@@ -92,7 +142,7 @@ export function CreateServerModal({
   return (
     <Shell
       title="Customize your server"
-      sub="Give your new server a name and an icon colour. You can always change it later."
+      sub="Give your new server a name and an icon color. You can always change it later."
       onClose={onClose}
       footer={
         <>
@@ -115,7 +165,7 @@ export function CreateServerModal({
         onChange={(e) => setName(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && name.trim() && onCreate(name.trim(), color)}
       />
-      <span className="field-label">Icon colour</span>
+      <span className="field-label">Icon Color</span>
       <div className="swatches">
         {serverColors.map((c) => (
           <button
@@ -248,7 +298,7 @@ export function EditProfileModal({
       <input id="pr" className="field" value={draft.pronouns} onChange={(e) => set('pronouns', e.target.value)} />
       <label className="field-label" htmlFor="bi">About me</label>
       <input id="bi" className="field" value={draft.bio} onChange={(e) => set('bio', e.target.value)} />
-      <span className="field-label">Avatar colour</span>
+      <span className="field-label">Avatar Color</span>
       <div className="swatches">
         {serverColors.map((c) => (
           <button

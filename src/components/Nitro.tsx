@@ -564,7 +564,7 @@ function Compare() {
     )
   return (
     <>
-      <h2 className="nitro-h2">Compare plans</h2>
+      <h2 className="nitro-h2">Compare Our Plans</h2>
       <table className="nitro-compare">
         <thead>
           <tr>

@@ -6,7 +6,9 @@ import {
   ExplicitFilter,
   KeywordPreset,
   PERMISSION_GROUPS,
+  CAPS,
   ROLE_COLORS,
+  SERVER_CAPS,
   VerificationLevel,
   boostTierOf,
   inviteCode,
@@ -194,7 +196,7 @@ export function ServerSettings({
                 }
               />
               <div className="set-field">
-                <label>ICON COLOUR</label>
+                <label>ICON COLOR</label>
                 <div className="swatch-row">
                   {ROLE_COLORS.slice(0, 10).map((c) => (
                     <button
@@ -289,6 +291,9 @@ export function ServerSettings({
             </div>
             <button
               className="btn-primary"
+              /* "Roles 250" — Discord's caps table, and the same at every level */
+              disabled={server.roles.length >= CAPS.roles}
+              title={server.roles.length >= CAPS.roles ? 'A server can have 250 roles' : undefined}
               onClick={() => {
                 const r: Role = {
                   id: uid('role'),
@@ -311,7 +316,9 @@ export function ServerSettings({
           </div>
 
           <div className="role-table-head">
-            <span>Roles — {ranked.length}</span>
+            <span>
+              Roles — {ranked.length} of {CAPS.roles}
+            </span>
             <span>Members</span>
           </div>
           <div className="role-list">
@@ -420,20 +427,20 @@ export function ServerSettings({
               <Field
                 label="ROLE NAME"
                 value={role.name}
-                maxLength={100}
+                maxLength={CAPS.roleNameChars}
                 onChange={(name) => patchRole(role.id, (r) => ({ ...r, name }), 'Role renamed')}
               />
               <div className="set-field">
-                <label>ROLE COLOUR</label>
+                <label>ROLE COLOR</label>
                 <Note>
                   Members use the colour of the highest role they have that is not the default.
                 </Note>
                 <div className="swatch-row wrap">
                   <button
                     className={'swatch none' + (role.color === null ? ' on' : '')}
-                    aria-label="Default colour"
+                    aria-label="Default Color"
                     onClick={() =>
-                      patchRole(role.id, (r) => ({ ...r, color: null }), 'Role colour changed')
+                      patchRole(role.id, (r) => ({ ...r, color: null }), 'Role color changed')
                     }
                   >
                     <CloseIcon />
@@ -445,7 +452,7 @@ export function ServerSettings({
                       style={{ background: c }}
                       aria-label={c}
                       onClick={() =>
-                        patchRole(role.id, (r) => ({ ...r, color: c }), 'Role colour changed')
+                        patchRole(role.id, (r) => ({ ...r, color: c }), 'Role color changed')
                       }
                     >
                       {c === role.color ? <CheckIcon /> : null}
@@ -557,9 +564,10 @@ export function ServerSettings({
         <>
           <Title>Emoji</Title>
           <Note>
-            Add up to 50 custom emoji that anyone can use in this server. Animated GIF emoji may be
-            used by members with Nitro. Upload needs a file host, so this picks from the bundled set
-            instead.
+            {server.emojis.length} of {SERVER_CAPS.emoji[server.boostTier]} slots used — a server
+            starts with 50 and boosts take it to 100, 150 and 250. Anyone in the server can use
+            them; animated GIF emoji may be used by members with Nitro. Upload needs a file host,
+            so this picks from the bundled set instead.
           </Note>
           <div className="emoji-add">
             <input
@@ -580,7 +588,8 @@ export function ServerSettings({
                     onClick={() => {
                       onPatch(
                         (s) =>
-                          s.emojis.some((x) => x.name === e.name)
+                          s.emojis.some((x) => x.name === e.name) ||
+                          s.emojis.length >= SERVER_CAPS.emoji[s.boostTier]
                             ? s
                             : {
                                 ...s,
@@ -739,7 +748,7 @@ export function ServerSettings({
           <Note>
             Bans by name. Since you are the only member, this list stays empty unless you add one.
           </Note>
-          {!server.bans.length ? <div className="table-empty">No bans.</div> : null}
+          {!server.bans.length ? <div className="table-empty">No Bans</div> : null}
         </>
       ) : null}
 
@@ -941,13 +950,14 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const [url, setUrl] = useState<string | undefined>(undefined)
   const file = useRef<HTMLInputElement>(null)
   const stickers = server.stickers ?? []
-  const slots = 5 + server.boostTier * 10
+  const slots = SERVER_CAPS.stickers[server.boostTier]
   return (
     <>
       <Title>Stickers</Title>
       <Note>
         {stickers.length} of {slots} slots used. A server starts with five and each boost level
-        adds ten. Every sticker is filed under an emoji, which is what people search it by.
+        adds ten more, to sixty. Every sticker is filed under an emoji, which is what people
+        search it by.
       </Note>
       <div className="set-row-add">
         <input
@@ -1048,7 +1058,7 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
 function Soundboard({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const [name, setName] = useState('')
   const sounds = server.sounds ?? []
-  const slots = 8 + server.boostTier * 8
+  const slots = SERVER_CAPS.soundboard[server.boostTier]
   return (
     <>
       <Title>Soundboard</Title>
@@ -1315,11 +1325,16 @@ function Vanity({ server, onPatch }: { server: Server; onPatch: Patch }) {
 }
 
 /** SERVER BOOST STATUS — the tier ladder and what each level unlocks. */
+/*
+ * What each level unlocks, from Discord's own caps table: the uploads it lists
+ * as "10MB | Same | 50MB for all members | 100MB for all members", which this
+ * had a tier early, and the slot counts in SERVER_CAPS.
+ */
 const BOOST_PERKS: string[][] = [
-  ['50 emoji slots', '5 sticker slots', '25MB uploads'],
-  ['100 emoji slots', '15 sticker slots', '50MB uploads', 'Animated server icon', '128kbps audio'],
-  ['150 emoji slots', '30 sticker slots', '100MB uploads', 'Server banner', '256kbps audio'],
-  ['250 emoji slots', '60 sticker slots', '100MB uploads', 'Custom invite link', '384kbps audio'],
+  ['50 emoji slots', '5 sticker slots', '8 soundboard slots', '10MB uploads', '96kbps audio'],
+  ['100 emoji slots', '15 sticker slots', '24 soundboard slots', 'Animated server icon', '128kbps audio'],
+  ['150 emoji slots', '30 sticker slots', '36 soundboard slots', '50MB uploads', 'Server banner', '256kbps audio'],
+  ['250 emoji slots', '60 sticker slots', '48 soundboard slots', '100MB uploads', 'Vanity URL', '384kbps audio'],
 ]
 
 /** The two perks Discord puts artwork behind, and the level each arrives at. */
@@ -1446,7 +1461,7 @@ function Webhooks({ server, onPatch }: { server: Server; onPatch: Patch }) {
         </button>
       </div>
       {hooks.length === 0 ? (
-        <div className="table-empty">No webhooks.</div>
+        <div className="table-empty">No Webhooks</div>
       ) : (
         <ul className="srv-hooks">
           {hooks.map((h) => (
@@ -2050,7 +2065,7 @@ function ServerGuide({ server }: { server: Server }) {
             <li key={c.id}>#{c.name}</li>
           ))}
         </ul>
-        <h4>New member todos</h4>
+        <h4>New Member To Do's</h4>
         <ul>
           {text.slice(0, 2).map((c) => (
             <li key={c.id}>Say hello in #{c.name}</li>

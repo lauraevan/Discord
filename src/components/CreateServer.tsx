@@ -342,7 +342,7 @@ function Customize({
               className={'cs-swatch' + (c === color ? ' on' : '')}
               style={{ background: c }}
               onClick={() => onColor(c)}
-              aria-label={`Icon colour ${c}`}
+              aria-label={`Icon Color ${c}`}
             />
           ))}
         </div>

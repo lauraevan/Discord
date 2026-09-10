@@ -1,6 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { Decoration } from '../ui/Decorations'
-import { bannerColorOf, statusColor, statusLabel, type Account, type Server } from '../data'
+import {
+  ACCOUNT_CAPS,
+  bannerColorOf,
+  statusColor,
+  statusLabel,
+  type Account,
+  type Server,
+} from '../data'
 import { DefaultAvatar, ProfileBanner } from '../ui/Art'
 import {
   ChevronDownIcon,
@@ -292,6 +299,8 @@ export function ProfilePopout({
                 value={note ?? ''}
                 placeholder="Click to add a note"
                 aria-label="Note"
+                /* "Max Characters user notes 500" — Discord's caps table */
+                maxLength={ACCOUNT_CAPS.noteChars[0]}
                 onChange={(e) => onNote?.(e.target.value)}
               />
             </div>

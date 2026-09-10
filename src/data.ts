@@ -171,7 +171,7 @@ export const CHANNEL_TYPES: [ChannelKind, string, string][] = [
   ['voice', 'Voice', 'Hang out together with voice, video, and screen share'],
   ['announcement', 'Announcement', 'Important updates for people in and out of the server'],
   ['stage', 'Stage', 'Host events with an audience of listeners'],
-  ['forum', 'Forum', 'Create a space for organised discussions'],
+  ['forum', 'Forum', 'Create a space for organized discussions'],
   ['media', 'Media', 'A gallery-style space for images and video'],
 ]
 
@@ -207,6 +207,58 @@ export type ForumLayout = (typeof ForumLayout)[keyof typeof ForumLayout]
 /** Discord's default_sort_order for a forum. */
 export const ForumSort = { LATEST_ACTIVITY: 0, CREATION_DATE: 1 } as const
 export type ForumSort = (typeof ForumSort)[keyof typeof ForumSort]
+
+/**
+ * Discord's caps, from its own "Discord Account Caps, Server Caps, and More"
+ * (support article 33694251638295, mirrored in Wumpus-Central/blog-tracker).
+ * Indexed by boost level, so [base, 1, 2, 3].
+ */
+export const SERVER_CAPS = {
+  /** "Emotes/Emojis 50 100 150 250" */
+  emoji: [50, 100, 150, 250],
+  /** "Sticker Slots 5 15 30 60" */
+  stickers: [5, 15, 30, 60],
+  /** "Soundboard Slots 8 24 36 48" */
+  soundboard: [8, 24, 36, 48],
+  /** "Upload 10MB Same 50MB for all members 100MB for all members" */
+  uploadMb: [10, 10, 50, 100],
+  /** "Audio Quality 96kbps 128kbps 256kbps 384kbps" */
+  audioKbps: [96, 128, 256, 384],
+} as const
+
+/** The caps that do not move with boosts, from the same table. */
+export const CAPS = {
+  roles: 250,
+  /** voice, text and categories together */
+  channels: 500,
+  channelsPerCategory: 50,
+  categories: 50,
+  roleNameChars: 100,
+  /** "Each channel and DM supports up to 250 pinned messages." — Pin Messages FAQ */
+  pins: 250,
+  inviteCodes: 999,
+  auditLogDays: 45,
+  followedAnnouncementChannels: 10,
+  /** a thread's member ceiling, public or private */
+  threadMembers: 1000,
+  /** the offline list hides at this many members, and comes back under 800 */
+  offlineListHidesAt: 1000,
+  offlineListReturnsAt: 800,
+} as const
+
+/** Account caps: [base, Nitro Basic, Nitro]. */
+export const ACCOUNT_CAPS = {
+  servers: [100, 100, 200],
+  friends: [1000, 1000, 1000],
+  uploadMb: [10, 50, 500],
+  messageChars: [2000, 2000, 4000],
+  dmsInSidebar: [100, 100, 100],
+  blockedUsers: [5000, 5000, 5000],
+  /** "Max Characters user notes 500" and 1,500 notes per account */
+  noteChars: [500, 500, 500],
+  notes: [1500, 1500, 1500],
+  dmUsers: [10, 10, 10],
+} as const
 
 /** Discord's slowmode steps, as the channel settings slider offers them. */
 export const SLOWMODE_STEPS = [0, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 21600]
@@ -523,6 +575,12 @@ export type Message = {
   replyTo?: string
   reactions?: Reaction[]
   pinned?: boolean
+  /**
+   * When the message was pinned. Discord's pins panel lists them "from most
+   * recently pinned to oldest" (Pin Messages FAQ), which is not the order
+   * they were sent in, so the pin needs its own clock.
+   */
+  pinnedAt?: number
 }
 
 /**
@@ -594,7 +652,8 @@ export const PERMISSION_GROUPS: [string, [string, string, string][]][] = [
     ['ADD_REACTIONS', 'Add Reactions', 'Allows members to add new emoji reactions to a message.'],
     ['USE_EXTERNAL_EMOJIS', 'Use External Emoji', 'Allows members to use emoji from other servers.'],
     ['MENTION_EVERYONE', 'Mention @everyone, @here, and All Roles', 'Allows members to ping every member.'],
-    ['MANAGE_MESSAGES', 'Manage Messages', 'Allows members to delete and pin any message.'],
+    ['MANAGE_MESSAGES', 'Manage Messages', 'Allows members to delete or remove embeds from messages by other members.'],
+    ['PIN_MESSAGES', 'Pin Messages', 'Allows members to pin or unpin any message.'],
     ['MANAGE_THREADS', 'Manage Threads', 'Allows members to rename, delete, archive and turn on slow mode for threads.'],
     ['READ_MESSAGE_HISTORY', 'Read Message History', 'Allows members to read previous messages.'],
     ['SEND_TTS_MESSAGES', 'Send Text-to-Speech Messages', 'Allows members to send text-to-speech messages.'],
