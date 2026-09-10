@@ -65,6 +65,7 @@ export function ChatHeader({
   onPins,
   onThreads,
   threadsOpen,
+  onNotifications,
 }: {
   channel: Channel
   serverName: string
@@ -75,6 +76,8 @@ export function ChatHeader({
   onPins: () => void
   onThreads: () => void
   threadsOpen: boolean
+  /** the bell opens the same notification menu the channel's own menu has */
+  onNotifications: (at: { x: number; y: number }) => void
 }) {
   const [topicOpen, setTopicOpen] = useState(false)
 
@@ -99,7 +102,10 @@ export function ChatHeader({
           </button>
         </Tooltip>
         <Tooltip label="Notification Settings" side="below">
-          <button aria-label="Notification settings">
+          <button
+            aria-label="Notification settings"
+            onClick={(e) => onNotifications(point(e))}
+          >
             <BellIcon />
           </button>
         </Tooltip>

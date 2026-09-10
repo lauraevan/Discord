@@ -369,6 +369,12 @@ function Client({
   const [inboxOpen, setInboxOpen] = useState(false)
   /** channelId -> mute expiry (null = until turned back on) */
   const [mutes, setMutes] = useState<Record<string, number | null>>({})
+  /**
+   * Per-channel notification level, Discord's own enum:
+   * 0 all messages, 1 only mentions, 2 nothing. A channel with no entry
+   * inherits the server default, which is what "Use Server Default" means.
+   */
+  const [notify, setNotify] = useState<Record<string, 0 | 1 | 2>>({})
   /** Discord's "Hide Muted Channels" toggle, off the server menu */
   const [hideMuted, setHideMuted] = useState(false)
   /** the sidebar's Events and Browse Channels rows open over the chat */
@@ -422,13 +428,19 @@ function Client({
   const unread = useMemo(() => {
     const out: Record<string, boolean> = {}
     if (!server) return out
+    const now = Date.now()
     for (const c of server.channels) {
       const k = keyOf(server, c)
       const last = messages[k]?.at(-1)
-      out[c.id] = !!last && last.time > (lastRead[k] ?? 0)
+      const fresh = !!last && last.time > (lastRead[k] ?? 0)
+      // a muted channel shows no unread dot until its mute expires, and
+      // "Nothing" is Discord's per-channel level that suppresses it outright
+      const mutedUntil = c.id in mutes ? mutes[c.id] : undefined
+      const isMuted = c.id in mutes && (mutedUntil === null || (mutedUntil ?? 0) > now)
+      out[c.id] = fresh && !isMuted && notify[c.id] !== 2
     }
     return out
-  }, [server, messages, lastRead, keyOf])
+  }, [server, messages, lastRead, keyOf, mutes, notify])
 
   // Discord's unread bar counts what other people said, never what you said:
   // sending is itself a read, so your own message never sits under a NEW line
@@ -893,6 +905,28 @@ function Client({
     onChannel: (id) => setActiveChannel(id),
   }
 
+  /**
+   * Discord's per-channel notification menu: the server default, then its
+   * three levels. The tick sits on whichever is in force.
+   */
+  const notifyOptions = (id: string): MenuItem[] => [
+    { head: 'Notification Settings' },
+    {
+      label: 'Use Server Default',
+      check: !(id in notify),
+      onPick: () => setNotify(({ [id]: _drop, ...rest }) => rest),
+    },
+    ...([
+      ['All Messages', 0],
+      ['Only @mentions', 1],
+      ['Nothing', 2],
+    ] as const).map(([label, level]) => ({
+      label,
+      check: notify[id] === level,
+      onPick: () => setNotify((n) => ({ ...n, [id]: level })),
+    })),
+  ]
+
   const messageMenu = (m: Message): MenuItem[] => [
     { label: 'Add Reaction', icon: <ReactIcon />, onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 } }) },
     {
@@ -1137,13 +1171,7 @@ function Client({
                     {
                       label: 'Notification Settings',
                       icon: <BellIcon />,
-                      sub: [
-                        { head: 'Notification Settings' },
-                        { label: 'Use Server Default', check: true },
-                        { label: 'All Messages' },
-                        { label: 'Only @mentions' },
-                        { label: 'Nothing' },
-                      ],
+                      sub: notifyOptions(id),
                     },
                     { sep: true },
                     { label: 'Edit Channel', icon: <GearIcon />, onPick: () => setChannelSettings(id) },
@@ -1284,6 +1312,7 @@ function Client({
                 onQuery={setQuery}
                 membersOpen={membersOpen}
                 onToggleMembers={() => setMembersOpen((v) => !v)}
+                onNotifications={(at) => setCtx({ at, items: notifyOptions(channel.id) })}
                 onPins={() => setPinsOpen((v) => !v)}
                 onThreads={() => setThreadsOpen((v) => !v)}
                 threadsOpen={threadsOpen}

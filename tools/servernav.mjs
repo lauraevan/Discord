@@ -99,6 +99,32 @@ await p.keyboard.press('Escape')
 await p.waitForTimeout(200)
 check('the channel list is intact', (await p.locator('.sidebar-scroll .row:not(.nav)').count()) === before)
 
+// --- Notification settings, which used to be four dead menu rows -----------
+await p.locator('.chat-tools [aria-label="Notification settings"]').click()
+await p.waitForSelector('.ctx', { timeout: 10000 })
+const levels = (await p.locator('.ctx').innerText()).split('\n').map((s) => s.trim())
+check(
+  "the bell opens Discord's four levels",
+  ['Use Server Default', 'All Messages', 'Only @mentions', 'Nothing'].every((x) => levels.includes(x)),
+  levels,
+)
+check(
+  'with the server default ticked',
+  (await p.locator('.ctx-item.checked:has-text("Use Server Default")').count()) === 1,
+)
+await p.locator('.ctx-item:has-text("Nothing")').click()
+await p.waitForTimeout(300)
+await p.locator('.chat-tools [aria-label="Notification settings"]').click()
+await p.waitForSelector('.ctx', { timeout: 10000 })
+check(
+  'picking a level moves the tick onto it',
+  (await p.locator('.ctx-item.checked:has-text("Nothing")').count()) === 1 &&
+    (await p.locator('.ctx-item.checked:has-text("Use Server Default")').count()) === 0,
+  await p.locator('.ctx-item.checked').allInnerTexts(),
+)
+await p.keyboard.press('Escape')
+await p.waitForTimeout(200)
+
 await b.close()
 console.log(fails ? `\n${fails} failure(s)` : '\nall server-nav checks pass')
 process.exit(fails ? 1 : 0)
