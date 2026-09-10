@@ -1817,30 +1817,48 @@ body.resizing .side-grip {
   color: var(--text);
 }
 
+/* Buttons, off Discord's own stylesheet. Its medium button — the one in every
+ * modal footer — is 40px tall with a 100px floor, 16px text over an 18px line,
+ * an 8px radius and padding of calc(space-8 - 1px) calc(space-16 - 1px), the
+ * 1px being the border it carries. The fills are --control-primary-* and
+ * --control-critical-primary-*; note that Discord's hover *darkens* the
+ * blurple to #4452bb rather than brightening it, and pressing goes darker
+ * still. */
+.btn-primary,
+.btn-ghost,
+.btn-danger,
+.btn-danger-outline {
+  height: calc(40px * var(--u));
+  min-width: calc(100px * var(--u));
+  padding: calc(7px * var(--u)) calc(15px * var(--u));
+  border-radius: calc(8px * var(--u));
+  font-size: calc(16px * var(--u));
+  line-height: calc(18px * var(--u));
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
 .btn-primary {
-  height: 34px;
-  padding: 0 16px;
-  border-radius: 3px;
   background: var(--blurple);
   color: #fff;
-  font-size: 13.05px;
-  font-weight: 500;
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
+  background: #4452bb;
+}
+
+.btn-primary:active {
+  background: #3a48a3;
 }
 
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: var(--blurple);
 }
 
+/* the modal's Cancel: Discord's link-look button, transparent until hovered */
 .btn-ghost {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 3px;
-  font-size: 13.05px;
   color: var(--text);
 }
 
@@ -3395,23 +3413,23 @@ h3.md-h {
 }
 
 .btn-danger {
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 3px;
-  background: #d83a41;
+  background: #d22d39;
   color: #fff;
-  font-size: 13.05px;
-  font-weight: 500;
 }
 
+.btn-danger:hover {
+  background: #a9232e;
+}
+
+/* Discord's outline look: the fill colour on the border and the label */
 .btn-danger-outline {
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 3px;
-  border: 1px solid #d83a41;
-  color: #d83a41;
-  font-size: 13.05px;
-  font-weight: 500;
+  border: 1px solid #d22d39;
+  color: #d22d39;
+}
+
+.btn-danger-outline:hover {
+  background: #d22d39;
+  color: #fff;
 }
 
 .back-link {
