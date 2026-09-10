@@ -104,12 +104,20 @@ export function ChannelSidebar({
   onEditChannel,
   onContext,
   onHeader,
+  onNav,
+  mutes,
+  hideMuted,
 }: {
   server: Server
   activeChannel: string
   unread: Record<string, boolean>
   voice: string | null
   collapsed: string[]
+  /** the four rows above the channel list, which Discord makes real surfaces */
+  onNav: (to: 'events' | 'browse' | 'members' | 'boosts') => void
+  mutes: Record<string, number | null>
+  /** Discord's "Hide Muted Channels", off the server menu */
+  hideMuted: boolean
   onToggle: (id: string) => void
   onSelect: (id: string) => void
   onAddChannel: (categoryId: string | null) => void
@@ -119,7 +127,11 @@ export function ChannelSidebar({
 }) {
   // threads hang off their parent channel rather than sitting in the list
   const grown = server.channels.length > 2
-  const top = server.channels.filter((c) => !c.parentId)
+  // "Hide Muted Channels" drops every muted channel from the list, except the
+  // one you are reading — Discord keeps that visible so you are not stranded
+  const top = server.channels.filter(
+    (c) => !c.parentId && !(hideMuted && c.id in mutes && c.id !== activeChannel),
+  )
   const loose = top.filter((c) => c.categoryId === null)
   const inCat = (cat: Category) => top.filter((c) => c.categoryId === cat.id)
   const threadsOf = (id: string) => server.channels.filter((c) => c.parentId === id)
@@ -176,26 +188,26 @@ export function ChannelSidebar({
             server still showing the welcome checklist shows two rows, the one
             with a third channel shows four. */}
         <div className="nav-block">
-          <div className="row nav">
+          <button className="row nav" onClick={() => onNav('events')}>
             <CalendarIcon />
             <span className="row-name">Events</span>
-          </div>
+          </button>
           {grown ? (
             <>
-              <div className="row nav">
+              <button className="row nav" onClick={() => onNav('browse')}>
                 <BrowseChannelsIcon />
                 <span className="row-name">Browse Channels</span>
-              </div>
-              <div className="row nav">
+              </button>
+              <button className="row nav" onClick={() => onNav('members')}>
                 <MembersIcon />
                 <span className="row-name">Members</span>
-              </div>
+              </button>
             </>
           ) : null}
-          <div className="row nav">
+          <button className="row nav" onClick={() => onNav('boosts')}>
             <BoostIcon />
             <span className="row-name">Server Boosts</span>
-          </div>
+          </button>
         </div>
 
         <div className="side-rule" />

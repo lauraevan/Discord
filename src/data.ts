@@ -321,6 +321,24 @@ export type GuildSound = {
  */
 export type ServerTag = { text: string; badge: number }
 
+/**
+ * A scheduled server event, shaped the way Discord's guild_scheduled_event is:
+ * a name, a topic, a start (and optional end), and somewhere it happens — a
+ * voice or stage channel by id, or a free-text location for "Somewhere Else".
+ * `interested` is the RSVP list; Discord labels the button "Interested".
+ */
+export type ServerEvent = {
+  id: string
+  name: string
+  description: string
+  start: number
+  end?: number
+  /** a channel id, or null when the event is somewhere else */
+  channelId: string | null
+  location: string
+  interested: string[]
+}
+
 /** `AutoModerationTriggerType` */
 export const AutoModTrigger = {
   KEYWORD: 1,
@@ -432,6 +450,8 @@ export type Server = {
   boosts?: number
   /** the tag members can wear, four characters and a badge */
   tag?: ServerTag
+  /** scheduled events, newest start first when shown */
+  events?: ServerEvent[]
   /** the vanity invite, which Discord gates behind Level 3 */
   vanity?: string
   widget?: { enabled: boolean; channelId: string | null }

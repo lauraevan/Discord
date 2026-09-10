@@ -59,17 +59,21 @@ import { LOCALES } from '../prefs'
 export function ServerSettings({
   server,
   account,
+  open = 'overview',
   onPatch,
   onDelete,
   onClose,
 }: {
   server: Server
   account: Account
+  /** the section to land on — the sidebar's Members and Server Boosts rows
+      open Server Settings straight onto their own pane, as Discord does */
+  open?: string
   onPatch: (fn: (s: Server) => Server, audit?: { action: string; target: string }) => void
   onDelete: () => void
   onClose: () => void
 }) {
-  const [section, setSection] = useState('overview')
+  const [section, setSection] = useState(open)
   const [roleId, setRoleId] = useState<string | null>(null)
   const [roleTab, setRoleTab] = useState<'display' | 'permissions' | 'members'>('display')
   const [roleQuery, setRoleQuery] = useState('')

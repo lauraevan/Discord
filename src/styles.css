@@ -12342,3 +12342,209 @@ img.wumpus {
   font-size: calc(12px * var(--u));
   color: var(--muted);
 }
+
+/* --- Events, and Browse Channels ------------------------------------------
+ *
+ * The two surfaces behind the sidebar rows of those names. Discord opens both
+ * over the message list, keeping the channel header and the rail in place, so
+ * they are laid out as a scrolling pane inside .chat-main rather than a modal.
+ */
+.events,
+.browse {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: calc(24px * var(--u)) calc(32px * var(--u));
+}
+
+.events-head,
+.browse-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(12px * var(--u));
+  margin-bottom: calc(16px * var(--u));
+}
+
+.events-head h2,
+.browse-head h2 {
+  font-size: calc(20px * var(--u));
+  font-weight: 700;
+  color: var(--strong);
+}
+
+.events-head-acts {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+}
+
+.events-close {
+  width: calc(32px * var(--u));
+  height: calc(32px * var(--u));
+  display: grid;
+  place-items: center;
+  border-radius: calc(4px * var(--u));
+  color: var(--interactive);
+}
+
+.events-close:hover {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+.events-close svg {
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(12px * var(--u));
+}
+
+.event-card {
+  padding: calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.event-when {
+  font-size: calc(12px * var(--u));
+  font-weight: 600;
+  color: var(--critical);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.event-card h3 {
+  margin-top: calc(4px * var(--u));
+  font-size: calc(16px * var(--u));
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.event-topic {
+  margin-top: calc(4px * var(--u));
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--text);
+}
+
+.event-where {
+  display: flex;
+  align-items: center;
+  gap: calc(6px * var(--u));
+  margin-top: calc(8px * var(--u));
+  font-size: calc(14px * var(--u));
+  color: var(--muted);
+}
+
+.event-where svg {
+  width: calc(16px * var(--u));
+  height: calc(16px * var(--u));
+}
+
+.event-acts {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--u));
+  margin-top: calc(12px * var(--u));
+}
+
+.event-acts .btn-ghost.on {
+  color: var(--blurple);
+}
+
+.event-count {
+  flex: 1;
+  font-size: calc(12px * var(--u));
+  color: var(--muted);
+}
+
+.events-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12px * var(--u));
+  color: var(--muted);
+  font-size: calc(16px * var(--u));
+}
+
+.events-empty svg {
+  width: calc(48px * var(--u));
+  height: calc(48px * var(--u));
+  opacity: 0.4;
+}
+
+.browse-search {
+  width: 100%;
+  margin-bottom: calc(16px * var(--u));
+  padding: calc(12px * var(--u)) calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  font-size: calc(16px * var(--u));
+}
+
+.browse-search::placeholder {
+  color: var(--placeholder);
+}
+
+.browse-group {
+  margin-bottom: calc(16px * var(--u));
+}
+
+.browse-cat {
+  margin-bottom: calc(4px * var(--u));
+  font-size: calc(12px * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.browse-row {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  width: 100%;
+  min-height: calc(40px * var(--u));
+  padding: calc(6px * var(--u)) calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  color: var(--interactive);
+  font-size: calc(16px * var(--u));
+  text-align: left;
+}
+
+.browse-row:hover {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+.browse-row svg {
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.browse-name {
+  font-weight: 500;
+}
+
+.browse-topic {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(14px * var(--u));
+  color: var(--muted);
+}

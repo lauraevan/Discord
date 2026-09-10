@@ -33,6 +33,8 @@ import { QuickSwitcher } from './components/QuickSwitcher'
 import { SearchResults } from './components/SearchResults'
 import { ServerSettings } from './components/ServerSettings'
 import { ServerRail } from './components/ServerRail'
+import { EventsPage } from './components/Events'
+import { BrowseChannels } from './components/BrowseChannels'
 import { ThemePanel } from './components/ThemePanel'
 import { EmptyArt } from './ui/Art'
 import { AgeGate } from './components/AgeGate'
@@ -101,6 +103,8 @@ import {
   ChannelCreateIcon,
   AppsIcon,
   CopyIcon,
+  EyeIcon,
+  EyeSlashIcon,
   ForwardIcon,
   SpeakIcon,
   SuperReactionIcon,
@@ -335,7 +339,12 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   const [inboxOpen, setInboxOpen] = useState(false)
   /** channelId -> mute expiry (null = until turned back on) */
   const [mutes, setMutes] = useState<Record<string, number | null>>({})
-  const [serverSettings, setServerSettings] = useState(false)
+  /** Discord's "Hide Muted Channels" toggle, off the server menu */
+  const [hideMuted, setHideMuted] = useState(false)
+  /** the sidebar's Events and Browse Channels rows open over the chat */
+  const [serverView, setServerView] = useState<'events' | 'browse' | null>(null)
+  /** false when closed, otherwise the section to open Server Settings on */
+  const [serverSettings, setServerSettings] = useState<false | string>(false)
   const [query, setQuery] = useState('')
 
   const theme = allThemes.find((t) => t.id === themeId) ?? defaultThemes[2]
@@ -983,6 +992,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             <ChannelSidebar
               server={server}
               activeChannel={channel?.id ?? ''}
+              mutes={mutes}
+              hideMuted={hideMuted}
+              onNav={(to) => {
+                if (to === 'members') setServerSettings('members')
+                else if (to === 'boosts') setServerSettings('boost_status')
+                else setServerView(to)
+              }}
               unread={unread}
               voice={voice}
               collapsed={collapsed}
@@ -1002,22 +1018,51 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                 setCtx({
                   at,
                   items: [
-                    { label: 'Server Boost', icon: <BoostIcon />, onPick: () => setServerSettings(true) },
-                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings(true) },
-                    { label: 'Server Settings', icon: <GearIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Server Boost', icon: <BoostIcon />, onPick: () => setServerSettings('boost_status') },
+                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings('invites') },
+                    { label: 'App Directory', icon: <AppsIcon />, onPick: () => setServerSettings('app_directory') },
+                    { label: 'Server Settings', icon: <GearIcon />, onPick: () => setServerSettings('overview') },
                     { label: 'Create Channel', icon: <ChannelCreateIcon />, onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
                     { label: 'Create Category', icon: <FolderIcon />, onPick: () => setChannelModal({ mode: 'create', categoryId: null }) },
                     { sep: true },
-                    { label: 'Notification Settings', icon: <BellIcon />, onPick: () => setServerSettings(true) },
+                    /* Discord's server menu mutes the whole server on the same
+                       duration list a channel takes */
+                    server.id in mutes
+                      ? {
+                          label: 'Unmute Server',
+                          icon: <BellIcon />,
+                          onPick: () => setMutes(({ [server.id]: _drop, ...rest }) => rest),
+                        }
+                      : {
+                          label: 'Mute Server',
+                          icon: <BellOffIcon />,
+                          sub: MUTE_DURATIONS.map(([label, ms]) => ({
+                            label,
+                            onPick: () =>
+                              setMutes((m) => ({
+                                ...m,
+                                [server.id]: ms === null ? null : Date.now() + ms,
+                              })),
+                          })),
+                        },
+                    { label: 'Notification Settings', icon: <BellIcon />, onPick: () => setServerSettings('overview') },
                     { label: 'Privacy Settings', icon: <ShieldIcon />, onPick: () => setUserSettings(true) },
                     { label: 'Edit Server Profile', icon: <PencilIcon />, onPick: () => setUserSettings(true) },
+                    { sep: true },
+                    {
+                      label: 'Hide Muted Channels',
+                      icon: hideMuted ? <EyeSlashIcon /> : <EyeIcon />,
+                      check: hideMuted,
+                      onPick: () => setHideMuted((v) => !v),
+                    },
+                    { label: 'Report Raid', icon: <ShieldIcon />, onPick: () => setServerSettings('safety') },
                     { sep: true },
                     { label: 'Mark As Read', icon: <MarkReadIcon />, onPick: markServerRead },
                     ...(prefs.developerMode
                       ? [{ label: 'Copy Server ID', icon: <IdIcon />, onPick: () => navigator.clipboard?.writeText(server.id) }]
                       : []),
                     { sep: true },
-                    { label: 'Delete Server', danger: true, icon: <TrashIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Delete Server', danger: true, icon: <TrashIcon />, onPick: () => setServerSettings('overview') },
                   ],
                 })
               }
@@ -1029,7 +1074,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                   items: [
                     { label: 'Mark As Read', icon: <MarkReadIcon />, onPick: markRead },
                     { sep: true },
-                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings(true) },
+                    { label: 'Invite People', icon: <InvitePersonIcon />, onPick: () => setServerSettings('overview') },
                     {
                       label: 'Copy Link',
                       icon: <LinkIcon />,
@@ -1237,7 +1282,23 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               ) : null}
               <div className="chat-body">
                 <div className="chat-main">
-                  {channel.nsfw && !nsfwOk.includes(channel.id) ? (
+                  {serverView === 'events' ? (
+                    <EventsPage
+                      server={server}
+                      self={account.handle}
+                      onPatch={patchActiveServer}
+                      onClose={() => setServerView(null)}
+                    />
+                  ) : serverView === 'browse' ? (
+                    <BrowseChannels
+                      server={server}
+                      onOpen={(id) => {
+                        setActiveChannel(id)
+                        setServerView(null)
+                      }}
+                      onClose={() => setServerView(null)}
+                    />
+                  ) : channel.nsfw && !nsfwOk.includes(channel.id) ? (
                     <AgeGate
                       channel={channel}
                       onEnter={() => setNsfwOk((all) => [...all, channel.id])}
@@ -1284,7 +1345,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
                     onEditChannel={() => setChannelModal({ mode: 'edit', id: channel.id })}
                     onOnboard={(what) => {
                       if (what === 'apps') setUserSettings(true)
-                      else setServerSettings(true)
+                      else setServerSettings('overview')
                     }}
                     onEdit={editMessage}
                     onReply={setReplyTo}
@@ -1485,6 +1546,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
         <ServerSettings
           server={server}
           account={account}
+          open={typeof serverSettings === 'string' ? serverSettings : 'overview'}
           onPatch={patchActiveServer}
           onDelete={() => {
             const rest = servers.filter((s) => s.id !== server.id)
