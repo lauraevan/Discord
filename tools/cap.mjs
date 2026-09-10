@@ -15,6 +15,22 @@ const H = { b251: 884, febf: 882, '1aa6': 882 }[which] ?? 882
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: 1366, height: H }, deviceScaleFactor: 2 })
 await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+// The capture's account is "bullet", not the fixture's "Nebula". The two
+// names render at different widths in the user card and the message row, so
+// leaving the fixture as Nebula makes the scorer partly measure a name
+// mismatch instead of the layout — the user-card block alone was 50.5.
+await p.addInitScript(() => {
+  // the display name comes from the credential, so both have to be patched
+  const ak = 'discord-ui:v4:account'
+  localStorage.setItem(
+    ak,
+    JSON.stringify({ ...JSON.parse(localStorage.getItem(ak) ?? '{}'), name: 'bullet' }),
+  )
+  const ck = 'discord-ui:v4:credentials'
+  const creds = JSON.parse(localStorage.getItem(ck) ?? '[]')
+  localStorage.setItem(ck, JSON.stringify(creds.map((c) => ({ ...c, displayName: 'bullet' }))))
+})
+
 await p.addInitScript(() => {
   localStorage.setItem('discord-ui:v4:sidebar', '303')
   localStorage.setItem(

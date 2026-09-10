@@ -489,6 +489,12 @@ body.resizing .side-grip {
   /* the frame puts the caret's ink on 188..194 against the name's 182; this
      was opening 2 further out */
   margin-left: 2px;
+  /* and it sat 2px low: the capture puts the caret's ink at y 51.5..56.5
+     against the title's 48.5..60, where ours started at 53.5. The score
+     cannot see a 8x5px glyph — every offset scores 2.759 — so this one is
+     measured directly rather than swept. */
+  position: relative;
+  top: -1.2px;
   color: var(--text);
 }
 
@@ -1237,10 +1243,22 @@ body.resizing .side-grip {
 }
 
 .onboard h2 {
+  /*
+   * Discord's own value here is 32/40, which would be 25.6/32 in the frame's
+   * units — and it measurably does not belong. A 3x3 sweep of font-size
+   * against line-height puts this pair at 2.788 on the capture and every
+   * other cell worse, 25.6/32 among the worst at 2.975.
+   *
+   * The reason is the font. gg sans is proprietary, so src/fonts.css ships
+   * Figtree in its place, and Figtree runs a few per cent wider and shorter
+   * per em: at Discord's nominal size the ink comes out 196px wide against
+   * the capture's 191 while still a pixel short in height, and the body below
+   * spills onto a third line the capture does not have. These numbers are
+   * fitted to the substitute on purpose — do not "correct" them to the
+   * declared ones without re-running the sweep.
+   */
   font-size: 24.3px;
   font-weight: 400;
-  /* 39 real px between the two lines' cap tops, which the capture measures as
-     77 device rows */
   line-height: 31.2px;
   color: var(--strong);
   letter-spacing: 0.1px;
