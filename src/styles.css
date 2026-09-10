@@ -3359,15 +3359,40 @@ h3.md-h {
   text-transform: uppercase;
 }
 
+/* Discord's text input, off its stylesheet: --input-background-default over
+ * whatever is behind it (a black wash, not a fill), a 1px
+ * --input-border-default edge — heavier than --border-subtle — an 8px radius,
+ * 16px text, 44px tall, 12px/10px of padding. Every text box in the app runs
+ * through this. */
 .set-field input,
-.set-field textarea {
+.set-field textarea,
+.emoji-add input,
+.poll-answer-row input,
+.forum-composer input,
+.forum-composer textarea,
+.conn-add-row input,
+.profile-note,
+.profile-msg input {
   width: 100%;
-  padding: 10px 10px;
-  border-radius: 4px;
-  background: var(--rail);
+  padding: calc(12px * var(--u)) calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--input-bg);
   color: var(--text);
-  font-size: 13.98px;
-  border: 1px solid var(--border);
+  font-size: calc(16px * var(--u));
+  border: 1px solid var(--input-border);
+  transition: border-color 0.2s ease-in-out;
+}
+
+.set-field input::placeholder,
+.set-field textarea::placeholder,
+.emoji-add input::placeholder,
+.poll-answer-row input::placeholder,
+.forum-composer input::placeholder,
+.forum-composer textarea::placeholder,
+.conn-add-row input::placeholder,
+.profile-note::placeholder,
+.profile-msg input::placeholder {
+  color: var(--placeholder);
 }
 
 .set-field textarea {
@@ -3875,13 +3900,6 @@ h3.md-h {
 
 .emoji-add input {
   width: 100%;
-  height: 38px;
-  padding: 0 12px;
-  border-radius: 4px;
-  background: var(--rail);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 13.05px;
   margin-bottom: 10px;
 }
 
@@ -4420,12 +4438,6 @@ body.streamer .invite-row code {
 .profile-note,
 .profile-msg input {
   width: 100%;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 4px;
-  background: var(--rail);
-  color: var(--text);
-  font-size: 13.05px;
 }
 
 .profile-msg {
@@ -4598,13 +4610,6 @@ body.streamer .invite-row code {
 
 .poll-answer-row input {
   flex: 1;
-  height: 38px;
-  padding: 0 10px;
-  border-radius: 4px;
-  background: var(--rail);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 13.05px;
 }
 
 .poll-answer-row button {
@@ -5204,13 +5209,7 @@ body.streamer .invite-row code {
 .forum-composer input,
 .forum-composer textarea {
   width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  background: var(--rail);
-  border: 1px solid var(--border);
-  color: var(--text);
   font: inherit;
-  font-size: 13.98px;
   margin-bottom: 10px;
 }
 
@@ -10128,13 +10127,6 @@ body.reduced-motion img.decoration.still {
 
 .conn-add-row input {
   flex: 1;
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 4px;
-  background: var(--rail);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 13.98px;
 }
 
 .btn-quiet {
