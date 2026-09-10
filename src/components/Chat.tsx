@@ -21,6 +21,7 @@ import {
   HashIcon,
   MegaphoneIcon,
   MemberListIcon,
+  ForwardIcon,
   MoreIcon,
   PencilIcon,
   PinIcon,
@@ -263,7 +264,10 @@ function Reactions({
           <Tooltip key={r.name} label={`:${r.name}:`} side="above">
             <button
               className={
-                'reaction' + (mine ? ' mine' : '') + (popped === r.name ? ' popped' : '')
+                'reaction' +
+                (mine ? ' mine' : '') +
+                (r.burst ? ' burst' : '') +
+                (popped === r.name ? ' popped' : '')
               }
               onAnimationEnd={() => popped === r.name && setPopped(null)}
               onClick={() => onToggle(r.name)}
@@ -612,6 +616,20 @@ export function ChatFeed({
                   ) : null}
                 </div>
               )}
+
+              {/* A forwarded message. Discord draws the snapshot as a quoted
+                  block under a "Forwarded" label, with the source underneath —
+                  the comment, when there is one, sits above it as the body. */}
+              {m.forwarded ? (
+                <div className="forwarded">
+                  <div className="forwarded-label">
+                    <ForwardIcon />
+                    Forwarded
+                  </div>
+                  <div className="forwarded-body">{renderMarkdown(m.forwarded.text, md)}</div>
+                  <div className="forwarded-from">{m.forwarded.from}</div>
+                </div>
+              ) : null}
 
               {m.poll ? (
                 <PollView

@@ -2327,8 +2327,9 @@ h3.md-h {
   height: 24px;
   padding: 0 6px;
   border-radius: 6px;
-  background: color-mix(in srgb, var(--text) 6%, transparent);
-  border: 1px solid transparent;
+  /* --reaction-background-default / --reaction-border-default */
+  background: #97979f1f;
+  border: 1px solid var(--border);
   font-size: 12.12px;
   font-weight: 600;
   color: var(--muted);
@@ -2344,10 +2345,21 @@ h3.md-h {
   border-color: var(--selected);
 }
 
+/* --reaction-background-reacted-default #5865f23d over
+   --reaction-border-reacted-default #5865f2, count at
+   --reaction-text-reacted-default */
 .reaction.mine {
-  background: color-mix(in srgb, var(--blurple) 22%, transparent);
+  background: #5865f23d;
   border-color: var(--blurple);
-  color: #c9cdfb;
+  color: #b9c8ff;
+}
+
+/* A Super Reaction. Discord paints the burst pill in the burst colours rather
+   than the blurple, and throws particles from it. */
+.reaction.burst.mine {
+  background: #eb459e3d;
+  border-color: #eb459e;
+  color: #ffc9e6;
 }
 
 .reaction.add {
@@ -12202,4 +12214,131 @@ img.wumpus {
 
 .bill-row .btn-secondary {
   margin-left: auto;
+}
+
+
+/* --- Forward -------------------------------------------------------------
+ *
+ * Discord's Forward To modal: a search over every channel you can post in, an
+ * optional comment, and Send. And the forwarded message itself, which Discord
+ * draws as a quoted block under a "Forwarded" label with the source beneath —
+ * a snapshot, not a reference, so it stands alone.
+ */
+.fwd-search,
+.fwd-comment {
+  width: 100%;
+  padding: calc(12px * var(--u)) calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  font-size: calc(16px * var(--u));
+}
+
+.fwd-search::placeholder,
+.fwd-comment::placeholder {
+  color: var(--placeholder);
+}
+
+.fwd-comment {
+  margin-top: calc(12px * var(--u));
+}
+
+.fwd-list {
+  margin-top: calc(8px * var(--u));
+  max-height: calc(280px * var(--u));
+  overflow-y: auto;
+}
+
+.fwd-row {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  width: 100%;
+  min-height: calc(40px * var(--u));
+  padding: calc(6px * var(--u)) calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  color: var(--interactive);
+  font-size: calc(16px * var(--u));
+  text-align: left;
+}
+
+.fwd-row:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.fwd-row.on {
+  background: var(--selected);
+  color: var(--strong);
+}
+
+.fwd-row:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fwd-row svg {
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.fwd-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fwd-where {
+  font-size: calc(12px * var(--u));
+  color: var(--muted);
+}
+
+.fwd-empty,
+.fwd-warn {
+  padding: calc(12px * var(--u)) 0;
+  font-size: calc(14px * var(--u));
+  color: var(--muted);
+  text-align: center;
+}
+
+.fwd-warn {
+  color: var(--critical);
+  text-align: left;
+}
+
+.forwarded {
+  margin-top: calc(4px * var(--u));
+  padding-inline-start: calc(12px * var(--u));
+  border-inline-start: calc(4px * var(--u)) solid var(--border-normal);
+  border-radius: calc(4px * var(--u));
+}
+
+.forwarded-label {
+  display: flex;
+  align-items: center;
+  gap: calc(4px * var(--u));
+  font-size: calc(12px * var(--u));
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.forwarded-label svg {
+  width: calc(12px * var(--u));
+  height: calc(12px * var(--u));
+}
+
+.forwarded-body {
+  font-size: calc(16px * var(--u));
+  line-height: calc(22px * var(--u));
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.forwarded-from {
+  margin-top: calc(2px * var(--u));
+  font-size: calc(12px * var(--u));
+  color: var(--muted);
 }

@@ -8,6 +8,7 @@ import {
   type Status,
 } from '../data'
 import { StatusGlyph } from '../ui/Status'
+import { Glyph } from './ChannelSidebar'
 import {
   ForumIcon,
   HashIcon,
@@ -411,5 +412,106 @@ export function AppsPanel({ onClose }: { onClose: () => void }) {
         </p>
       </div>
     </div>
+  )
+}
+
+/**
+ * Forward.
+ *
+ * Discord does not reference the original message when you forward it — it
+ * takes a snapshot, which is why a forward survives the source being edited or
+ * deleted and can cross servers. The modal is "Forward To": a search over
+ * every channel and DM you can post in, an optional comment, and Send. All
+ * four strings are Discord's own, out of docs/sources/discord-strings.json.
+ *
+ * The one rule Discord enforces here is worth keeping: "Messages cannot be
+ * forwarded from age-restricted to unrestricted channels."
+ */
+export function ForwardModal({
+  nsfwSource,
+  targets,
+  onClose,
+  onForward,
+}: {
+  /** whether the message came from an age-restricted channel */
+  nsfwSource: boolean
+  targets: { id: string; name: string; kind: Channel['kind']; server?: string; nsfw?: boolean }[]
+  onClose: () => void
+  onForward: (channelId: string, comment: string) => void
+}) {
+  const [q, setQ] = useState('')
+  const [pick, setPick] = useState<string | null>(null)
+  const [comment, setComment] = useState('')
+
+  const blocked = (t: (typeof targets)[number]) => nsfwSource && !t.nsfw
+  const shown = targets.filter((t) => t.name.toLowerCase().includes(q.trim().toLowerCase()))
+  const chosen = targets.find((t) => t.id === pick)
+
+  return (
+    <Shell
+      title="Forward To"
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn-primary"
+            disabled={!pick}
+            onClick={() => {
+              if (pick) onForward(pick, comment.trim())
+              onClose()
+            }}
+          >
+            Send
+          </button>
+        </>
+      }
+    >
+      <input
+        className="fwd-search"
+        value={q}
+        autoFocus
+        placeholder="Search"
+        aria-label="Search"
+        onChange={(e) => setQ(e.target.value)}
+      />
+      <div className="fwd-list">
+        {shown.length ? (
+          shown.map((t) => (
+            <button
+              key={t.id}
+              className={'fwd-row' + (pick === t.id ? ' on' : '')}
+              disabled={blocked(t)}
+              title={
+                blocked(t)
+                  ? 'Messages cannot be forwarded from age-restricted to unrestricted channels.'
+                  : undefined
+              }
+              onClick={() => setPick(t.id)}
+            >
+              <Glyph kind={t.kind} />
+              <span className="fwd-name">{t.name}</span>
+              {t.server ? <span className="fwd-where">{t.server}</span> : null}
+            </button>
+          ))
+        ) : (
+          <p className="fwd-empty">No results found</p>
+        )}
+      </div>
+      {chosen && blocked(chosen) ? (
+        <p className="fwd-warn">
+          Messages cannot be forwarded from age-restricted to unrestricted channels.
+        </p>
+      ) : null}
+      <input
+        className="fwd-comment"
+        value={comment}
+        placeholder="Add a comment"
+        aria-label="Add a comment"
+        onChange={(e) => setComment(e.target.value)}
+      />
+    </Shell>
   )
 }

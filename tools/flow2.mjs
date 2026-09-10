@@ -340,13 +340,22 @@ await step('Nitro letters the display name, and it follows the name around', asy
     ),
   )
   await p.reload()
-  await p.waitForTimeout(700)
+  // wait on the app rather than the clock: a fixed pause after a reload is the
+  // one thing in this file that loses when several browsers run at once
+  await p.waitForSelector('[aria-label="User settings"]', { timeout: 15000 })
   await p.click('[aria-label="User settings"]')
+  await p.waitForSelector('.settings-item:has-text("Profiles")', { timeout: 15000 })
   await p.click('.settings-item:has-text("Profiles")')
-  await p.waitForTimeout(400)
+  await p.waitForSelector('.name-font:has-text("Orbitron")', { timeout: 15000 })
   await p.locator('.name-font:has-text("Orbitron")').click()
   await p.locator('.name-effect:has-text("Neon")').click()
-  await p.waitForTimeout(250)
+  await p.waitForFunction(
+    () => {
+      const el = document.querySelector('.name-preview span')
+      return !!el && /Orbitron/.test(getComputedStyle(el).fontFamily)
+    },
+    { timeout: 15000 },
+  )
   const preview = await p.evaluate(() => {
     const el = document.querySelector('.name-preview span')
     const cs = getComputedStyle(el)

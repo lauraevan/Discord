@@ -18,6 +18,7 @@ import { MemberList } from './components/MemberList'
 import {
   ChannelModal,
   ConfirmModal,
+  ForwardModal,
   EditProfileModal,
   InfoModal,
   StatusMenu,
@@ -98,7 +99,11 @@ import {
   BellOffIcon,
   BoostIcon,
   ChannelCreateIcon,
+  AppsIcon,
   CopyIcon,
+  ForwardIcon,
+  SpeakIcon,
+  SuperReactionIcon,
   FolderIcon,
   GearIcon,
   IdIcon,
@@ -143,6 +148,8 @@ type Picker = {
   at: { x: number; y: number }
   /** which of the picker's four views to open on */
   view?: PickerView
+  /** opened from Super React, so the reaction lands as a burst */
+  sup?: boolean
 }
 type Ctx = { items: MenuItem[]; at: { x: number; y: number } }
 
@@ -272,6 +279,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
   // Discord confirms every pin and every unpin, and holding shift skips the
   // unpin prompt ("To skip the confirmation prompt when removing a pin, hold
   // Shift and select the X icon" — Pin Messages FAQ)
+  const [forwarding, setForwarding] = useState<Message | null>(null)
   const [pinAsk, setPinAsk] = useState<Message | null>(null)
   const [unpinAsk, setUnpinAsk] = useState<Message | null>(null)
   const [pinError, setPinError] = useState<string | null>(null)
@@ -633,13 +641,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
 
   const deleteMessage = (id: string) => patchThread((list) => list.filter((m) => m.id !== id))
 
-  const react = (id: string, name: string) =>
+  const react = (id: string, name: string, burst?: boolean) =>
     patchThread((list) =>
       list.map((m) => {
         if (m.id !== id) return m
         const rs = m.reactions ?? []
         const hit = rs.find((r) => r.name === name)
-        if (!hit) return { ...m, reactions: [...rs, { name, by: [account.handle] }] }
+        if (!hit) return { ...m, reactions: [...rs, { name, by: [account.handle], burst }] }
         const mine = hit.by.includes(account.handle)
         const by = mine ? hit.by.filter((h) => h !== account.handle) : [...hit.by, account.handle]
         return {
@@ -671,6 +679,46 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     patchThread((list) =>
       list.map((m) => (m.id === id ? { ...m, pinned: false, pinnedAt: undefined } : m)),
     )
+
+  /**
+   * Forward. Discord snapshots the message rather than referencing it, so the
+   * copy survives the original being edited or deleted and can cross servers.
+   */
+  const forward = (m: Message, toChannel: string, comment: string) => {
+    const dest = servers.flatMap((sv) =>
+      sv.channels.filter((c) => c.id === toChannel).map((c) => ({ sv, c })),
+    )[0]
+    if (!dest) return
+    const now = Date.now()
+    setMessages((all) => {
+      const k = keyOf(dest.sv, dest.c)
+      const snapshot: Message = {
+        id: uid('m'),
+        author: account.handle,
+        time: now,
+        text: comment,
+        forwarded: {
+          author: m.author,
+          text: m.text,
+          time: m.time,
+          from: `#${channel?.name ?? ''}`,
+          attachments: m.attachments,
+        },
+      }
+      return { ...all, [k]: [...(all[k] ?? []), snapshot] }
+    })
+  }
+
+  /** Every channel this account can post a forward into. */
+  const forwardTargets = useMemo(
+    () =>
+      servers.flatMap((sv) =>
+        sv.channels
+          .filter((c) => c.kind === 'text' || c.kind === 'announcement')
+          .map((c) => ({ id: c.id, name: c.name, kind: c.kind, server: sv.name, nsfw: c.nsfw })),
+      ),
+    [servers],
+  )
 
   /**
    * Discord refuses two kinds of pin outright — a system row and a full
@@ -806,7 +854,13 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
 
   const messageMenu = (m: Message): MenuItem[] => [
     { label: 'Add Reaction', icon: <ReactIcon />, onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 } }) },
+    {
+      label: 'Super React',
+      icon: <SuperReactionIcon />,
+      onPick: () => setPicker({ target: m.id, at: { x: 400, y: 300 }, sup: true }),
+    },
     { label: 'Edit Message', icon: <PencilIcon />, onPick: () => setEditingId(m.id) },
+    { label: 'Forward', icon: <ForwardIcon />, onPick: () => setForwarding(m) },
     { label: 'Reply', icon: <ReplyIcon />, onPick: () => setReplyTo(m) },
     {
       label: 'Create Thread',
@@ -821,6 +875,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
     },
     { sep: true },
     { label: 'Copy Text', icon: <CopyIcon />, onPick: () => navigator.clipboard?.writeText(m.text) },
+    { label: 'Apps', icon: <AppsIcon />, onPick: () => setAppsPanel(true) },
     {
       label: 'Copy Message Link',
       icon: <LinkIcon />,
@@ -828,6 +883,15 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
         navigator.clipboard?.writeText(`${location.origin}/channels/${server?.id}/${channel?.id}/${m.id}`),
     },
     { label: 'Mark Unread', icon: <MarkUnreadIcon />, onPick: () => setLastRead((r) => ({ ...r, [key]: m.time - 1 })) },
+    {
+      label: 'Speak Message',
+      icon: <SpeakIcon />,
+      onPick: () => {
+        // Discord reads the message out with the platform voice
+        const u = new SpeechSynthesisUtterance(`${account.name} said ${m.text}`)
+        window.speechSynthesis?.speak(u)
+      },
+    },
     { sep: true },
     { label: 'Delete Message', danger: true, icon: <TrashIcon />, onPick: () => deleteMessage(m.id) },
     ...(prefs.developerMode
@@ -1452,7 +1516,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
           server={server}
           onPick={(name) => {
             if (picker.target === 'composer') send(`:${name}:`)
-            else react(picker.target, name)
+            else react(picker.target, name, picker.sup)
           }}
           onSticker={(id) => sendSticker(id)}
           gifs={account.gifs ?? []}
@@ -1506,6 +1570,14 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
             setAccount(a)
             setEditingProfile(false)
           }}
+        />
+      ) : null}
+      {forwarding ? (
+        <ForwardModal
+          nsfwSource={!!channel?.nsfw}
+          targets={forwardTargets}
+          onClose={() => setForwarding(null)}
+          onForward={(to, comment) => forward(forwarding, to, comment)}
         />
       ) : null}
       {pinAsk ? (

@@ -24,7 +24,7 @@ import { GuildBadge } from '../ui/GuildBadge'
 import { box, point } from '../zoom'
 
 /** The client's own channel-type switch, glyph for glyph. */
-function Glyph({ kind, thread }: { kind: Channel['kind']; thread?: boolean }) {
+export function Glyph({ kind, thread }: { kind: Channel['kind']; thread?: boolean }) {
   if (thread) return <ThreadsIcon />
   if (kind === 'announcement') return <MegaphoneIcon />
   if (kind === 'forum') return <ForumIcon />

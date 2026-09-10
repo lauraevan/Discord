@@ -67,6 +67,10 @@ MAP = {
     'HelpIcon': 'CircleQuestionIcon',
     'ToolsIcon': 'StaffBadgeIcon',
     'ReplyIcon': 'ArrowAngleLeftUpIcon',
+    # Forward is Reply's mirror, and Discord names it that way too
+    'ForwardIcon': 'ArrowAngleRightUpIcon',
+    'SpeakIcon': 'ChatSpeakIcon',
+    'SuperReactionIcon': 'SuperReactionIcon',
     'ReactIcon': 'ReactionPlusIcon',
     'MarkReadIcon': 'DoubleCheckmarkIcon',
     'JumpIcon': 'UploadIcon',

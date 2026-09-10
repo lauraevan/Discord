@@ -519,7 +519,12 @@ export const inviteCode = () => {
 }
 
 /** A reaction is a shortcode plus the people who added it. */
-export type Reaction = { name: string; by: string[] }
+/**
+ * A reaction. `burst` marks a Super Reaction — Discord's Nitro reaction that
+ * throws particles and paints the pill in the burst colours rather than the
+ * ordinary blurple.
+ */
+export type Reaction = { name: string; by: string[]; burst?: boolean }
 
 /** A poll, shaped the way Discord's poll object is. */
 export type Poll = {
@@ -581,6 +586,19 @@ export type Message = {
    * they were sent in, so the pin needs its own clock.
    */
   pinnedAt?: number
+  /**
+   * A forwarded message. Discord does not reference the original — it carries
+   * a *snapshot* of it, so the forward survives the source being edited or
+   * deleted and can cross servers. `from` is where it came from, which the
+   * client prints under the quoted body.
+   */
+  forwarded?: {
+    author: string
+    text: string
+    time: number
+    from: string
+    attachments?: Attachment[]
+  }
 }
 
 /**
