@@ -21,6 +21,8 @@ export type Tokens = {
   muted: string
   strong: string
   border: string
+  /** --border-strong, the heavier of Discord's two border tokens */
+  borderStrong: string
   titlebar: string
   /** optional decorative wash painted behind the sidebar + chat */
   wash?: string
@@ -66,6 +68,7 @@ const dark: Tokens = {
   muted: '#81828a', // --channels-default
   strong: '#fbfbfb', // --text-strong
   border: '#97979f1f', // --border-subtle
+  borderStrong: '#97979f70', // --border-strong
   titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
@@ -84,6 +87,7 @@ const ash: Tokens = {
   muted: '#999aa1',
   strong: '#ffffff',
   border: '#97979f1f',
+  borderStrong: '#97979f70', // --border-strong
   titlebar: '#2c2d32',
   scheme: 'dark',
 }
@@ -102,6 +106,7 @@ const onyx: Tokens = {
   muted: '#7a7b83',
   strong: '#dcdcdf',
   border: '#97979f33',
+  borderStrong: '#97979f70', // --border-strong
   titlebar: '#000000',
   scheme: 'dark',
 }
@@ -124,6 +129,7 @@ const light: Tokens = {
   muted: '#666770',
   strong: '#28282d',
   border: '#97979f47',
+  borderStrong: '#97979f85', // --border-strong
   titlebar: '#f3f3f4',
   scheme: 'light',
 }
@@ -240,6 +246,7 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--muted', k.muted)
   r.style.setProperty('--strong', k.strong)
   r.style.setProperty('--border', k.border)
+  r.style.setProperty('--border-strong', k.borderStrong)
   r.style.setProperty('--titlebar', k.titlebar)
   r.style.setProperty('--wash', k.wash ?? k.rail)
   r.dataset.scheme = k.scheme

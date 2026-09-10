@@ -81,6 +81,32 @@ Taking the mean of the brightest 1% of a message-body band, past the edges:
 value and the unbiased measurement agree, so the scores were paid: frame 1.361 →
 1.376, capture 2.771 → 2.788. Do not "fix" this by chasing the score.
 
+### The elevation scale
+
+Discord has exactly three drop shadows and no others, and every floating
+surface in the client — menu, popout, modal — is `--shadow-border` plus
+`--shadow-high`:
+
+    --shadow-low:    0 1px 4px 0 rgb(0 0 0 / 0.14)
+    --shadow-medium: 0 4px 8px 0 rgb(0 0 0 / 0.16)
+    --shadow-high:   0 12px 24px 0 rgb(0 0 0 / 0.24)
+    --shadow-border: 0 0 0 1px var(--border-strong)
+
+The app had fifteen different hand-made shadows, 20–40px of blur at 0.4–0.55
+alpha — two to four times Discord's weight, and the most obvious kind of
+"themed, not exact". They are all tokens now. Note that the stylesheet is
+written in frame units, so the tokens carry `* var(--u)` like every other
+length; writing them in Discord's raw px makes every shadow 25% too large.
+
+This costs the frame 0.014 (1.376 → 1.390), and it is worth understanding why
+before anyone reverts it. `.profilePopout` is declared, verbatim,
+`box-shadow: var(--shadow-border), var(--shadow-high)`, so there is no question
+what Discord does. Diffing *only* the shadow band beside the popout against the
+frame gives 1.037 for Discord's shadow and 0.819 for the old hand-fitted one —
+a difference of 0.2 in 255, which is nothing. The score metric is amplifying a
+soft gradient it cannot resolve. The right band is the measurement; the
+aggregate is not.
+
 ## User Settings sections
 
 Extracted from the client's page-name map. Sidebar groups follow the client.

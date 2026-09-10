@@ -21,19 +21,36 @@
      plus menu as rgb(40,39,44) where the composer under it is rgb(35,34,39) */
   --menu: #28272c;
   --composer: #222327;
-  --selected: #2c2c30;
+  --selected: #97979f33;
   /* the reference uses three different raised greys, not one: the selected
      channel row is #2c2c30, secondary buttons are a shade under it, and the
      intro glyph's disc is darker again */
   --btn2: #29292d;
   --disc: #242428;
-  --hover: #1e1e22;
-  --text: #e4e4e8;
-  --muted: #85858a;
-  --strong: #fdfdfe;
-  --border: #232328;
+  --hover: #97979f1f;
+  --text: #efeff1;
+  --muted: #81828a;
+  --strong: #fbfbfb;
+  --border: #97979f1f;
   --titlebar: #121214;
   --wash: #121214;
+
+  /* the stronger of Discord's two border tokens; --border is --border-subtle */
+  --border-strong: #97979f70;
+
+  /* Discord's whole elevation scale, from its stylesheet. There are three
+     drop shadows in the client and no others, and every floating surface —
+     menu, popout, modal — is --shadow-border plus --shadow-high. */
+  --shadow-low: 0 calc(1px * var(--u)) calc(4px * var(--u)) 0 rgb(0 0 0 / 0.14);
+  --shadow-medium: 0 calc(4px * var(--u)) calc(8px * var(--u)) 0 rgb(0 0 0 / 0.16);
+  --shadow-high: 0 calc(12px * var(--u)) calc(24px * var(--u)) 0 rgb(0 0 0 / 0.24);
+  --shadow-border: 0 0 0 1px var(--border-strong);
+
+  /* --radius-xs/sm/md/lg */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
 
   --blurple: #5865f2;
   --red: #d83a41;
@@ -855,7 +872,7 @@ body.resizing .side-grip {
   color: var(--pop-label);
   /* the reference's rail beside the popout is a single unit darker than
      bare rail, so the drop shadow is far tighter than it looks */
-  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.09);
+  box-shadow: var(--shadow-high);
   z-index: 20;
   /* a server popout carries three more sections than the account one, so the
      card can outgrow a short window; Discord scrolls the body rather than
@@ -903,7 +920,7 @@ body.resizing .side-grip {
   position: absolute;
   background: var(--pop-chip);
   border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-low);
 }
 
 .chip-body.hint em {
@@ -1680,9 +1697,7 @@ body.resizing .side-grip {
   border-radius: 8px;
   background: var(--card);
   overflow: hidden;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .modal-head {
@@ -1880,9 +1895,7 @@ body.resizing .side-grip {
   border-radius: 6px;
   background: var(--menu);
   padding: 6px;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .status-opt {
@@ -1916,7 +1929,7 @@ body.resizing .side-grip {
   border-radius: 5px;
   pointer-events: none;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-medium);
   /* positioning lives on `translate` so the spring below can own `scale`
      without the two fighting over one transform */
   translate: 0 -50%;
@@ -2357,9 +2370,7 @@ h3.md-h {
   margin-bottom: 6px;
   background: var(--menu);
   border-radius: 8px;
-  box-shadow:
-    0 8px 20px rgb(0 0 0 / 0.4),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   overflow: hidden;
   z-index: 5;
 }
@@ -2570,9 +2581,7 @@ h3.md-h {
   flex-direction: column;
   background: var(--menu);
   border-radius: 8px;
-  box-shadow:
-    0 10px 30px rgb(0 0 0 / 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   z-index: 20;
 }
 
@@ -2677,9 +2686,7 @@ h3.md-h {
   flex-direction: column;
   background: var(--menu);
   border-radius: 8px;
-  box-shadow:
-    0 10px 30px rgb(0 0 0 / 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   z-index: 60;
   overflow: hidden;
 }
@@ -2814,9 +2821,7 @@ h3.md-h {
   max-width: calc(100vw - 32px);
   background: var(--menu);
   border-radius: 8px;
-  box-shadow:
-    0 12px 40px rgb(0 0 0 / 0.55),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   overflow: hidden;
 }
 
@@ -2895,9 +2900,7 @@ h3.md-h {
   padding: 6px 8px;
   background: var(--menu);
   border-radius: 6px;
-  box-shadow:
-    0 8px 20px rgb(0 0 0 / 0.45),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   z-index: 70;
 }
 
@@ -4278,9 +4281,7 @@ body.streamer .invite-row code {
   overflow-y: auto;
   border-radius: 8px;
   background: var(--card);
-  box-shadow:
-    0 12px 40px rgb(0 0 0 / 0.55),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .profile-close {
@@ -4645,9 +4646,7 @@ body.streamer .invite-row code {
   padding: calc(11.5px * var(--u));
   border-radius: calc(8px * var(--u));
   background: var(--menu);
-  box-shadow:
-    0 8px 20px rgb(0 0 0 / 0.45),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .plus-menu button {
@@ -4915,9 +4914,7 @@ body.streamer .invite-row code {
   padding: 8px;
   border-radius: 6px;
   background: var(--menu);
-  box-shadow:
-    0 8px 24px rgb(0 0 0 / 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   z-index: 40;
 }
 
@@ -5275,9 +5272,7 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 8px;
   background: var(--menu);
-  box-shadow:
-    0 12px 36px rgb(0 0 0 / 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   z-index: 75;
   overflow: hidden;
 }
@@ -5431,7 +5426,7 @@ body.streamer .invite-row code {
   position: relative;
   background: #313338;
   border-radius: 5px;
-  box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-high);
   padding: 32px;
   color: #dbdee1;
 }
@@ -5756,9 +5751,7 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 8px;
   background: var(--card);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   overflow: hidden;
 }
 
@@ -6714,7 +6707,7 @@ body.streamer .invite-row code {
   padding: 8px 8px 8px 16px;
   border-radius: 24px;
   background: rgba(20, 18, 44, 0.92);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-high), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   color: #fff;
   font-size: 13.5px;
@@ -7097,9 +7090,7 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 10px;
   background: var(--card);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   overflow: hidden;
 }
 
@@ -7435,7 +7426,7 @@ body.streamer .invite-row code {
   padding: 6px 8px;
   border-radius: 8px;
   background: var(--pop-card, var(--card));
-  box-shadow: var(--elevation-high, 0 8px 16px rgba(0, 0, 0, 0.24));
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .quests-select-menu button {
@@ -7675,9 +7666,7 @@ body.streamer .invite-row code {
   padding: calc(6px * var(--u));
   border-radius: calc(6px * var(--u));
   background: var(--menu);
-  box-shadow:
-    0 8px 20px rgb(0 0 0 / 0.45),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
 .quest-card-menu button {
@@ -7871,9 +7860,7 @@ body.streamer .invite-row code {
   flex-direction: column;
   border-radius: 10px;
   background: var(--card);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: var(--shadow-border), var(--shadow-high);
   overflow: hidden;
 }
 
@@ -8333,7 +8320,7 @@ body.streamer .invite-row code {
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.34);
   backdrop-filter: blur(6px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-medium);
 }
 
 .shop-bundle-card.c0 {
@@ -9621,7 +9608,7 @@ body.reduced-motion img.decoration.still {
   padding: 0 calc(2px * var(--u));
   border-radius: calc(8px * var(--u));
   background: var(--card);
-  box-shadow: 0 0 0 1px var(--border), 0 2px 8px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-border), var(--shadow-medium);
 }
 
 .group:hover .msg-acts,
