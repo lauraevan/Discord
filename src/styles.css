@@ -2488,11 +2488,16 @@ h3.md-h {
 
 /* Discord's member list is 240px of 42px rows — measured values, in Discord's
    own numbers, scaled by --u the way the message list is. */
+/* Discord's member list: --custom-member-list-width is 264px, and it sits on
+   --background-base-lower — the chat's own colour, not the sidebar's — with a
+   1px --border-subtle edge down its left. Neither reference frame shows it,
+   which is how it came to be 240px of sidebar grey. */
 .members,
 .results {
-  width: calc(240px * var(--u));
-  flex: 0 0 calc(240px * var(--u));
-  background: var(--side);
+  width: calc(264px * var(--u));
+  flex: 0 0 calc(264px * var(--u));
+  background: var(--chat);
+  border-inline-start: 1px solid var(--border);
   overflow-y: auto;
 }
 

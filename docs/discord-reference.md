@@ -64,6 +64,27 @@ selected states are grey overlays (`--interactive-background-hover` at 12%,
 sidebar the selected overlay computes to `#2d2d31`, and the capture reads
 `#2c2b30` — which is how the whole mapping was confirmed.
 
+### What else the stylesheet corrected
+
+Surfaces neither reference frame shows had drifted furthest, because nothing
+was holding them to anything:
+
+| | was | Discord's |
+| --- | --- | --- |
+| elevation | fifteen hand-made shadows, 20–40px blur at 0.4–0.55 | three tokens, `--shadow-high` at 24px/0.24 |
+| menu hover | blurple fill, red on destructive rows | `--background-mod-subtle`, label unchanged |
+| scrollbar | 8/16px, thumb `#101012` | 14px and 8px, thumbs `#666770` / `#5f606a` |
+| tooltip | black pill, 12px/600, 5px radius, no pointer | `--background-surface-highest` card, 14px/500, 8px radius, 5px pointer |
+| buttons | 34–38px tall, 3px radius, hover *brightens* | 40px, 8px radius, hover **darkens** to `#4452bb` |
+| inputs | `var(--rail)` fill, 4px radius | `--input-background-default` wash, 8px radius, 44px |
+| modal | 420px unscaled, no border, popout shadow | 442px, `--border-normal`, `--shadow-medium` |
+| scrim | flat 0.6 black | `#000000b8` dark / `#00000085` light |
+| member list | 240px, sidebar grey | 264px, chat colour, 1px left border |
+
+The blurple menu hover is the one worth naming: that is the pre-refresh client,
+and no amount of measuring would have caught it, because both reference frames
+are static and nothing in them is hovered.
+
 ### The one place the scorers are wrong, again
 
 `--text-default` for Dark is `#efeff1`. The app had `#e4e4e8`, and **both
