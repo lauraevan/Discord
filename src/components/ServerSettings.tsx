@@ -272,8 +272,8 @@ export function ServerSettings({
         <>
           <Title>Roles</Title>
           <Note>
-            Use roles to group your server members and assign permissions. Members use the colour of
-            the highest role they have.
+            Use roles to group your server members and assign permissions. Members use the color of
+            the highest role they have on this list. Drag roles to reorder them.
           </Note>
 
           {/* Discord leads the pane with @everyone on its own, because it is
@@ -453,7 +453,7 @@ export function ServerSettings({
               <div className="set-field">
                 <label>ROLE COLOR</label>
                 <Note>
-                  Members use the colour of the highest role they have that is not the default.
+                  Members use the color of the highest role they have that is not the default.
                 </Note>
                 <div className="swatch-row wrap">
                   <button

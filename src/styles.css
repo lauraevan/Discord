@@ -16,6 +16,8 @@
   --rail: #121214;
   --side: #121214;
   --chat: #1a1a1e;
+  /* --background-base-low: the settings layer's content region */
+  --base-low: #202024;
   --card: #222327;
   /* floating surfaces sit a shade over the card: the 1:1 capture reads the
      plus menu as rgb(40,39,44) where the composer under it is rgb(35,34,39) */
@@ -3138,154 +3140,261 @@ h3.md-h {
    Settings layer (User Settings / Server Settings)
    ========================================================================== */
 
+/*
+ * Discord calls this `standardSidebarView`, and every length in it is in the
+ * client's own stylesheet rather than anywhere we had to guess:
+ *
+ *   --custom-standard-sidebar-view-sidebar-total-width: 264px
+ *   --custom-standard-sidebar-view-standard-padding: 20px
+ *   --custom-standard-sidebar-view-sidebar-content-scrollbar-padding: 6px
+ *   .sidebarRegion  { flex: 1 0 264px; justify-content: flex-end }
+ *   .sidebar        { width: 264px; padding-block: 60px;
+ *                     padding-inline: 20px 6px }
+ *   .contentRegion  { flex: 1 1 800px; background: var(--background-base-low) }
+ *   .contentColumn  { flex: 1 1 auto; max-width: 740px; min-width: 460px }
+ *   .contentColumnDefault { padding: 60px 40px 80px }
+ *   .toolsContainer { flex: 0 0 36px; width: 60px; padding-top: 60px;
+ *                     margin-inline-end: 21px }
+ *
+ * Three things fall out of that which this file had wrong.
+ *
+ * The two regions are different colours. The sidebar side is
+ * --background-base-lowest, the same grey as the rail; the content side is
+ * --background-base-low, which is a step *lighter* than the chat pane, not
+ * the same one — #202024 against the chat's #1a1a1e.
+ *
+ * The close button is not pinned to the window's right edge. It rides in a
+ * 60px column immediately right of the content column, so on a window wider
+ * than 264 + 740 + 81 there is empty --background-base-low to the right of
+ * it, and the button sits well inside the frame.
+ *
+ * And every length is carried through `* var(--u)`. Discord's numbers written
+ * raw in this stylesheet land 25% too large, which is why the whole layer was
+ * oversized: a 264px sidebar was measuring 340, a 32px nav row 44, and the
+ * 20px page title 29.
+ */
+
 .settings-layer {
   position: fixed;
   inset: 0;
   z-index: 80;
   display: flex;
-  background: var(--chat);
+  background: var(--rail);
 }
 
+/* .sidebarRegion + .sidebarRegionScroller */
 .settings-nav {
-  flex: 1 0 auto;
+  flex: 1 0 calc(264px * var(--u));
   display: flex;
   justify-content: flex-end;
-  background: var(--side);
+  align-items: flex-start;
+  min-height: 100%;
+  background: var(--rail);
   overflow-y: auto;
 }
 
+/* .sidebar */
 .settings-nav-inner {
-  width: 218px;
-  padding: 60px 6px 60px 20px;
+  flex: 0 0 calc(264px * var(--u));
+  width: calc(264px * var(--u));
+  padding-block: calc(60px * var(--u));
+  padding-inline: calc(20px * var(--u)) calc(6px * var(--u));
 }
 
+/* .header_aa8da2 — Discord's eyebrow: 12/16 bold, .02em, uppercase */
 .settings-head {
-  padding: 6px 10px 4px;
-  font-size: 11.18px;
+  padding: calc(6px * var(--u)) calc(10px * var(--u));
+  font-size: calc(12px * var(--u));
+  line-height: calc(16px * var(--u));
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* .side .header:first-child { padding-top: 0 } */
+.settings-nav-inner > .settings-head:first-child {
+  padding-top: 0;
+}
+
+/* .separator_aa8da2 */
 .settings-sep {
   height: 1px;
-  margin: 8px 10px;
+  margin: calc(8px * var(--u)) calc(10px * var(--u));
   background: var(--border);
 }
 
+/* .item_aa8da2 — 6px 10px, radius 4, 2px apart, line-height 20 */
 .settings-item {
   display: block;
-  width: 192px;
-  padding: 6px 10px;
-  margin-bottom: 2px;
-  border-radius: 4px;
-  font-size: 13.98px;
+  width: 100%;
+  padding: calc(6px * var(--u)) calc(10px * var(--u));
+  margin-bottom: calc(2px * var(--u));
+  border-radius: calc(4px * var(--u));
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
   font-weight: 500;
-  color: var(--text);
+  color: var(--interactive);
   text-align: left;
-  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
 }
 
 .settings-item:hover {
   background: var(--hover);
-  opacity: 1;
+  color: var(--strong);
 }
 
-.settings-item.on {
+.settings-item:active {
+  background: var(--selected);
+}
+
+.settings-item.on,
+.settings-item.on:hover {
   background: var(--selected);
   color: var(--strong);
-  opacity: 1;
+  cursor: default;
 }
 
-.settings-item.danger {
-  color: #f23f43;
-  opacity: 1;
-}
-
+.settings-item.danger,
 .settings-item.danger:hover {
-  background: color-mix(in srgb, #f23f43 16%, transparent);
+  color: var(--critical);
 }
 
+/* --background-feedback-critical, the one token Discord ships identically in
+   all four themes */
+.settings-item.danger:hover {
+  background: #d22d3914;
+}
+
+/* .contentRegion + .contentRegionScroller */
 .settings-pane {
-  flex: 1 1 800px;
+  flex: 1 1 calc(800px * var(--u));
   display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100%;
+  background: var(--base-low);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
+/* .contentColumn.contentColumnDefault */
 .settings-content {
-  width: 740px;
+  flex: 1 1 auto;
+  max-width: calc(740px * var(--u));
+  min-width: calc(460px * var(--u));
   min-height: 100%;
-  padding: 60px 40px 80px;
+  padding: calc(60px * var(--u)) calc(40px * var(--u)) calc(80px * var(--u));
+  position: relative;
 }
 
-.settings-close {
-  padding: 60px 0 0 0;
+/* .toolsContainer. Discord's .tools inside it is `position: fixed` with no
+   insets, which just freezes it where it was laid out — 60px down, and never
+   scrolling. Sticking the column to the top of the scroller does the same. */
+.settings-tools {
+  flex: 0 0 calc(36px * var(--u));
+  width: calc(60px * var(--u));
+  margin-inline-end: calc(21px * var(--u));
+  padding-top: calc(60px * var(--u));
   position: sticky;
-  top: 60px;
-  align-self: flex-start;
+  top: 0;
+}
+
+/* .container_c2b141 */
+.settings-close {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
 }
 
+/* .closeButton_c2b141. No border-colour of its own: the 2px ring is
+   currentColor, so it tracks the icon from --interactive-text-default to
+   --interactive-text-hover in one move. */
 .settings-close button {
-  width: 36px;
-  height: 36px;
+  flex: 0 0 calc(36px * var(--u));
+  width: calc(36px * var(--u));
+  height: calc(36px * var(--u));
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--text) 40%, transparent);
-  display: grid;
-  place-items: center;
-  color: color-mix(in srgb, var(--text) 60%, transparent);
+  border: calc(2px * var(--u)) solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--interactive);
+  cursor: pointer;
 }
 
 .settings-close button:hover {
   background: var(--hover);
   color: var(--strong);
-  border-color: var(--strong);
+}
+
+.settings-close button:active {
+  background: var(--selected);
+  color: var(--strong);
+  transform: translateY(1px);
 }
 
 .settings-close svg {
-  width: 15px;
-  height: 15px;
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
 }
 
+/* .keybind_c2b141 */
 .settings-close span {
-  font-size: 10.25px;
-  font-weight: 700;
-  color: var(--muted);
+  margin-top: calc(6px * var(--u));
+  font-size: calc(13px * var(--u));
+  line-height: calc(16px * var(--u));
+  font-weight: 600;
+  color: var(--interactive);
+  text-align: center;
+}
+
+.settings-close button:hover + span,
+.settings-close button:active + span {
+  color: var(--strong);
 }
 
 /* --- controls ----------------------------------------------------------- */
 
 .set-title {
-  font-size: 18.64px;
+  /* Discord's heading-lg/semibold: 20px on 1.2 */
+  font-size: calc(20px * var(--u));
+  line-height: calc(24px * var(--u));
   font-weight: 600;
   color: var(--strong);
-  margin-bottom: 20px;
+  margin-bottom: calc(20px * var(--u));
 }
 
 .set-sub {
-  font-size: 11.18px;
+  /* Discord's eyebrow: 12px on 1.3333, .02em, uppercase */
+  font-size: calc(12px * var(--u));
+  line-height: calc(16px * var(--u));
   font-weight: 700;
   color: var(--muted);
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  margin: 20px 0 8px;
+  margin: calc(20px * var(--u)) 0 calc(8px * var(--u));
 }
 
 .set-note {
-  font-size: 13.05px;
-  line-height: 20px;
+  /* text-sm/normal: 14px on 1.2857 */
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
   color: var(--muted);
-  margin-bottom: 12px;
+  margin-bottom: calc(12px * var(--u));
 }
 
 .set-divider {
   height: 1px;
   background: var(--border);
-  margin: 20px 0;
+  margin: calc(20px * var(--u)) 0;
 }
 
 .set-head-row {
@@ -3297,8 +3406,8 @@ h3.md-h {
 .set-row {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 10px 0;
+  gap: calc(16px * var(--u));
+  padding: calc(10px * var(--u)) 0;
 }
 
 .set-row-main {
@@ -3310,23 +3419,26 @@ h3.md-h {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 13.98px;
+  /* text-md/medium: 16px on 1.25 */
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
   font-weight: 500;
   color: var(--text);
 }
 
 .set-row-note {
-  margin-top: 3px;
-  font-size: 12.12px;
-  line-height: 18px;
+  margin-top: calc(4px * var(--u));
+  /* text-sm/normal: 14px on 1.2857 */
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
   color: var(--muted);
 }
 
 .switch {
-  flex: 0 0 40px;
-  width: 40px;
-  height: 24px;
-  border-radius: 12px;
+  flex: 0 0 calc(40px * var(--u));
+  width: calc(40px * var(--u));
+  height: calc(24px * var(--u));
+  border-radius: calc(12px * var(--u));
   background: #80848e;
   position: relative;
   transition: background 0.12s;
@@ -3334,10 +3446,10 @@ h3.md-h {
 
 .switch span {
   position: absolute;
-  left: 3px;
-  top: 3px;
-  width: 18px;
-  height: 18px;
+  left: calc(3px * var(--u));
+  top: calc(3px * var(--u));
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
   border-radius: 50%;
   background: #fff;
   transition: transform 0.12s;
@@ -3348,36 +3460,36 @@ h3.md-h {
 }
 
 .switch.on span {
-  transform: translateX(16px);
+  transform: translateX(calc(16px * var(--u)));
 }
 
 .set-slider {
-  margin: 14px 0;
+  margin: calc(14px * var(--u)) 0;
 }
 
 .set-value {
-  font-size: 12.12px;
+  font-size: calc(13px * var(--u));
   color: var(--muted);
 }
 
 .set-slider input[type='range'] {
   width: 100%;
-  margin-top: 8px;
+  margin-top: calc(8px * var(--u));
   accent-color: var(--blurple);
 }
 
 .set-radios {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: calc(8px * var(--u));
 }
 
 .set-radio {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 4px;
+  gap: calc(10px * var(--u));
+  padding: calc(10px * var(--u)) calc(12px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--card);
   text-align: left;
   color: var(--text);
@@ -3388,41 +3500,41 @@ h3.md-h {
 }
 
 .set-dot {
-  flex: 0 0 20px;
-  width: 20px;
-  height: 20px;
+  flex: 0 0 calc(20px * var(--u));
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
   margin-top: 1px;
   border-radius: 50%;
-  border: 2px solid var(--muted);
+  border: calc(2px * var(--u)) solid var(--muted);
 }
 
 .set-radio.on .set-dot {
   border-color: var(--blurple);
-  border-width: 6px;
+  border-width: calc(6px * var(--u));
 }
 
 .set-radio b {
   display: block;
-  font-size: 13.98px;
+  font-size: calc(15px * var(--u));
   font-weight: 500;
 }
 
 .set-radio i {
   display: block;
-  margin-top: 2px;
-  font-size: 12.12px;
+  margin-top: calc(2px * var(--u));
+  font-size: calc(13px * var(--u));
   font-style: normal;
   color: var(--muted);
 }
 
 .set-field {
-  margin: 14px 0;
+  margin: calc(14px * var(--u)) 0;
 }
 
 .set-field label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 11.18px;
+  margin-bottom: calc(8px * var(--u));
+  font-size: calc(12px * var(--u));
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
@@ -3465,44 +3577,44 @@ h3.md-h {
 }
 
 .set-field textarea {
-  min-height: 84px;
+  min-height: calc(84px * var(--u));
   resize: vertical;
 }
 
 .set-unavailable {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border-radius: 8px;
+  gap: calc(4px * var(--u));
+  padding: calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--card);
-  border-left: 4px solid #f0b232;
-  margin: 12px 0;
+  border-left: calc(4px * var(--u)) solid #f0b232;
+  margin: calc(12px * var(--u)) 0;
 }
 
 .set-unavailable b {
-  font-size: 13.98px;
+  font-size: calc(15px * var(--u));
   color: var(--strong);
 }
 
 .set-unavailable span {
-  font-size: 13.05px;
-  line-height: 20px;
+  font-size: calc(14px * var(--u));
+  line-height: calc(20px * var(--u));
   color: var(--muted);
 }
 
 .btn-row {
   display: flex;
-  gap: 10px;
+  gap: calc(10px * var(--u));
 }
 
 .btn-secondary {
-  height: 32px;
-  padding: 0 14px;
-  border-radius: 3px;
+  height: calc(32px * var(--u));
+  padding: 0 calc(14px * var(--u));
+  border-radius: calc(3px * var(--u));
   background: var(--selected);
   color: var(--text);
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
   font-weight: 500;
 }
 
@@ -3527,45 +3639,45 @@ h3.md-h {
 }
 
 .back-link {
-  margin-bottom: 10px;
-  font-size: 13.05px;
+  margin-bottom: calc(10px * var(--u));
+  font-size: calc(14px * var(--u));
   color: var(--muted);
 }
 
 /* --- My Account --------------------------------------------------------- */
 
 .acct-card {
-  border-radius: 8px;
+  border-radius: calc(8px * var(--u));
   background: var(--card);
   overflow: hidden;
 }
 
 .acct-banner {
-  height: 100px;
+  height: calc(100px * var(--u));
 }
 
 .acct-body {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 16px 16px;
+  gap: calc(16px * var(--u));
+  padding: 0 calc(16px * var(--u)) calc(16px * var(--u));
   margin-top: -40px;
 }
 
 .acct-avatar {
-  border: 6px solid var(--card);
+  border: calc(6px * var(--u)) solid var(--card);
   border-radius: 50%;
   line-height: 0;
 }
 
 .acct-names b {
   display: block;
-  font-size: 18.64px;
+  font-size: calc(20px * var(--u));
   color: var(--strong);
 }
 
 .acct-names span {
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
   color: var(--muted);
 }
 
@@ -3574,17 +3686,17 @@ h3.md-h {
 }
 
 .acct-fields {
-  margin: 0 16px 16px;
-  border-radius: 8px;
+  margin: 0 calc(16px * var(--u)) calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--rail);
-  padding: 4px 16px;
+  padding: calc(4px * var(--u)) calc(16px * var(--u));
 }
 
 .acct-field {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
+  padding: calc(12px * var(--u)) 0;
 }
 
 .acct-field + .acct-field {
@@ -3593,14 +3705,14 @@ h3.md-h {
 
 .acct-field span {
   display: block;
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
 }
 
 .acct-field b {
-  font-size: 13.98px;
+  font-size: calc(15px * var(--u));
   font-weight: 400;
   color: var(--text);
 }
@@ -3609,7 +3721,7 @@ h3.md-h {
 
 .profile-edit {
   display: flex;
-  gap: 24px;
+  gap: calc(24px * var(--u));
 }
 
 .profile-edit-form {
@@ -3618,53 +3730,53 @@ h3.md-h {
 }
 
 .profile-preview {
-  flex: 0 0 300px;
+  flex: 0 0 calc(300px * var(--u));
 }
 
 .preview-card {
-  margin-top: 8px;
-  border-radius: 8px;
+  margin-top: calc(8px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--card);
   overflow: hidden;
 }
 
 .preview-banner {
-  height: 60px;
+  height: calc(60px * var(--u));
 }
 
 .preview-avatar {
   display: block;
-  margin: -36px 0 0 16px;
-  border: 6px solid var(--card);
+  margin: -36px 0 0 calc(16px * var(--u));
+  border: calc(6px * var(--u)) solid var(--card);
   border-radius: 50%;
-  width: 84px;
+  width: calc(84px * var(--u));
   line-height: 0;
 }
 
 .preview-body {
-  padding: 8px 16px 16px;
+  padding: calc(8px * var(--u)) calc(16px * var(--u)) calc(16px * var(--u));
 }
 
 .preview-body b {
   display: block;
-  font-size: 18.64px;
+  font-size: calc(20px * var(--u));
   color: var(--strong);
 }
 
 .preview-body span {
-  font-size: 12.12px;
+  font-size: calc(13px * var(--u));
   color: var(--muted);
 }
 
 .preview-body p {
-  margin-top: 8px;
-  font-size: 13.05px;
+  margin-top: calc(8px * var(--u));
+  font-size: calc(14px * var(--u));
   color: var(--text);
 }
 
 .swatch-row {
   display: flex;
-  gap: 8px;
+  gap: calc(8px * var(--u));
 }
 
 .swatch-row.wrap {
@@ -3672,17 +3784,17 @@ h3.md-h {
 }
 
 .swatch {
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
+  width: calc(30px * var(--u));
+  height: calc(30px * var(--u));
+  border-radius: calc(4px * var(--u));
   display: grid;
   place-items: center;
   color: #fff;
 }
 
 .swatch svg {
-  width: 15px;
-  height: 15px;
+  width: calc(15px * var(--u));
+  height: calc(15px * var(--u));
 }
 
 .swatch.none {
@@ -3691,19 +3803,19 @@ h3.md-h {
 }
 
 .swatch.on {
-  outline: 2px solid var(--strong);
-  outline-offset: 2px;
+  outline: calc(2px * var(--u)) solid var(--strong);
+  outline-offset: calc(2px * var(--u));
 }
 
 /* the six default avatars, picked as artwork rather than as a colour */
 .avatar-row {
   display: flex;
-  gap: 10px;
+  gap: calc(10px * var(--u));
 }
 
 .avatar-pick {
-  width: 44px;
-  height: 44px;
+  width: calc(44px * var(--u));
+  height: calc(44px * var(--u));
   border-radius: 50%;
   overflow: hidden;
   transition: transform 0.15s ease;
@@ -3714,26 +3826,26 @@ h3.md-h {
 }
 
 .avatar-pick.on {
-  outline: 2px solid var(--strong);
-  outline-offset: 2px;
+  outline: calc(2px * var(--u)) solid var(--strong);
+  outline-offset: calc(2px * var(--u));
 }
 
 .status-row {
   display: flex;
-  gap: 8px;
+  gap: calc(8px * var(--u));
   flex-wrap: wrap;
 }
 
 .status-pick {
   display: flex;
   align-items: center;
-  gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 4px;
+  gap: calc(6px * var(--u));
+  height: calc(32px * var(--u));
+  padding: 0 calc(12px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--card);
   color: var(--text);
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
 }
 
 .status-pick.on {
@@ -3745,21 +3857,21 @@ h3.md-h {
 
 .theme-grid.big {
   display: flex;
-  gap: 10px;
-  margin: 10px 0 4px;
+  gap: calc(10px * var(--u));
+  margin: calc(10px * var(--u)) 0 calc(4px * var(--u));
 }
 
 .theme-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: 8px;
+  gap: calc(8px * var(--u));
+  padding: calc(10px * var(--u)) calc(14px * var(--u));
+  border-radius: calc(8px * var(--u));
   background: var(--card);
   color: var(--text);
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
   font-weight: 500;
-  border: 2px solid transparent;
+  border: calc(2px * var(--u)) solid transparent;
 }
 
 .theme-card.on {
@@ -3767,16 +3879,16 @@ h3.md-h {
 }
 
 .theme-chip {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
+  width: calc(22px * var(--u));
+  height: calc(22px * var(--u));
+  border-radius: calc(6px * var(--u));
 }
 
 /* --- Keybinds / locales ------------------------------------------------- */
 
 .keybinds,
 .locales {
-  border-radius: 8px;
+  border-radius: calc(8px * var(--u));
   overflow: hidden;
 }
 
@@ -3784,9 +3896,9 @@ h3.md-h {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px;
+  padding: calc(12px * var(--u)) calc(14px * var(--u));
   background: var(--card);
-  font-size: 13.98px;
+  font-size: calc(15px * var(--u));
   color: var(--text);
 }
 
@@ -3795,12 +3907,12 @@ h3.md-h {
 }
 
 .keybind kbd {
-  padding: 3px 8px;
-  border-radius: 4px;
+  padding: calc(3px * var(--u)) calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--rail);
   border: 1px solid var(--border);
   font-family: inherit;
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
   font-weight: 600;
   color: var(--muted);
 }
@@ -3808,15 +3920,15 @@ h3.md-h {
 .locales {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: calc(8px * var(--u));
 }
 
 .locale {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 4px;
+  gap: calc(10px * var(--u));
+  padding: calc(10px * var(--u)) calc(12px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--card);
   color: var(--text);
   text-align: left;
@@ -3828,31 +3940,31 @@ h3.md-h {
 
 .locale svg {
   margin-left: auto;
-  width: 15px;
-  height: 15px;
+  width: calc(15px * var(--u));
+  height: calc(15px * var(--u));
   color: var(--blurple);
 }
 
 .locale-code {
-  width: 28px;
-  height: 20px;
-  border-radius: 3px;
+  width: calc(28px * var(--u));
+  height: calc(20px * var(--u));
+  border-radius: calc(3px * var(--u));
   background: var(--rail);
   display: grid;
   place-items: center;
-  font-size: 9.32px;
+  font-size: calc(10px * var(--u));
   font-weight: 700;
   color: var(--muted);
 }
 
 .locale-names b {
   display: block;
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
   font-weight: 500;
 }
 
 .locale-names i {
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
   font-style: normal;
   color: var(--muted);
 }
@@ -3861,20 +3973,20 @@ h3.md-h {
 
 .srv-overview {
   display: flex;
-  gap: 24px;
+  gap: calc(24px * var(--u));
   align-items: flex-start;
 }
 
 .srv-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 32px;
+  width: calc(100px * var(--u));
+  height: calc(100px * var(--u));
+  border-radius: calc(32px * var(--u));
   display: grid;
   place-items: center;
-  font-size: 24.23px;
+  font-size: calc(26px * var(--u));
   font-weight: 700;
   color: #fff;
-  flex: 0 0 100px;
+  flex: 0 0 calc(100px * var(--u));
 }
 
 .srv-overview-fields {
@@ -3887,7 +3999,7 @@ h3.md-h {
 .member-table,
 .invite-table,
 .audit {
-  border-radius: 8px;
+  border-radius: calc(8px * var(--u));
   overflow: hidden;
   background: var(--card);
 }
@@ -3899,9 +4011,9 @@ h3.md-h {
 .audit-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  font-size: 13.05px;
+  gap: calc(12px * var(--u));
+  padding: calc(12px * var(--u)) calc(14px * var(--u));
+  font-size: calc(14px * var(--u));
   color: var(--text);
 }
 
@@ -3913,10 +4025,10 @@ h3.md-h {
 }
 
 .role-dot {
-  width: 12px;
-  height: 12px;
+  width: calc(12px * var(--u));
+  height: calc(12px * var(--u));
   border-radius: 50%;
-  flex: 0 0 12px;
+  flex: 0 0 calc(12px * var(--u));
 }
 
 .role-name {
@@ -3928,7 +4040,7 @@ h3.md-h {
 .role-count {
   margin-left: auto;
   color: var(--muted);
-  font-size: 12.12px;
+  font-size: calc(13px * var(--u));
 }
 
 .role-del,
@@ -3940,8 +4052,8 @@ h3.md-h {
 .role-del svg,
 .emoji-row button svg,
 .invite-row button svg {
-  width: 15px;
-  height: 15px;
+  width: calc(15px * var(--u));
+  height: calc(15px * var(--u));
 }
 
 .role-del:hover,
@@ -3951,15 +4063,15 @@ h3.md-h {
 }
 
 .perm-group {
-  margin-top: 18px;
+  margin-top: calc(18px * var(--u));
 }
 
 .perm-head {
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
-  padding-bottom: 6px;
+  padding-bottom: calc(6px * var(--u));
   border-bottom: 1px solid var(--border);
 }
 
@@ -3969,25 +4081,25 @@ h3.md-h {
 
 .emoji-add input {
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: calc(10px * var(--u));
 }
 
 .emoji-results {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: calc(6px * var(--u));
+  margin-bottom: calc(14px * var(--u));
 }
 
 .emoji-result {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 8px;
-  border-radius: 4px;
+  gap: calc(6px * var(--u));
+  padding: calc(5px * var(--u)) calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--card);
   color: var(--text);
-  font-size: 12.12px;
+  font-size: calc(13px * var(--u));
 }
 
 .emoji-result:hover {
@@ -3998,9 +4110,9 @@ h3.md-h {
 .member-table-head,
 .invite-head {
   display: flex;
-  gap: 12px;
-  padding: 10px 14px;
-  font-size: 10.25px;
+  gap: calc(12px * var(--u));
+  padding: calc(10px * var(--u)) calc(14px * var(--u));
+  font-size: calc(11px * var(--u));
   font-weight: 700;
   color: var(--muted);
   border-bottom: 1px solid var(--border);
@@ -4010,20 +4122,20 @@ h3.md-h {
 .emoji-row > .emoji,
 .emoji-table-head span:nth-child(2),
 .emoji-name {
-  flex: 0 0 140px;
+  flex: 0 0 calc(140px * var(--u));
 }
 
 .emoji-row > .emoji {
-  flex: 0 0 32px;
-  width: 24px;
-  height: 24px;
+  flex: 0 0 calc(32px * var(--u));
+  width: calc(24px * var(--u));
+  height: calc(24px * var(--u));
   vertical-align: 0;
 }
 
 .emoji-by {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: calc(6px * var(--u));
   margin-left: auto;
   color: var(--muted);
 }
@@ -4031,7 +4143,7 @@ h3.md-h {
 .mt-name {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: calc(8px * var(--u));
   flex: 1;
 }
 
@@ -4042,29 +4154,29 @@ h3.md-h {
 
 .mt-roles {
   display: flex;
-  gap: 6px;
+  gap: calc(6px * var(--u));
   flex-wrap: wrap;
 }
 
 .role-pill {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 4px;
+  gap: calc(4px * var(--u));
+  padding: calc(2px * var(--u)) calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
   background: var(--rail);
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
   color: var(--text);
 }
 
 .role-pill.add svg {
-  width: 12px;
-  height: 12px;
+  width: calc(12px * var(--u));
+  height: calc(12px * var(--u));
 }
 
 .invite-row code {
   font-family: ui-monospace, Menlo, monospace;
-  font-size: 12.12px;
+  font-size: calc(13px * var(--u));
   color: var(--muted);
 }
 
@@ -4078,14 +4190,14 @@ h3.md-h {
 
 .audit-time {
   color: var(--muted);
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
 }
 
 .table-empty {
-  padding: 20px;
+  padding: calc(20px * var(--u));
   text-align: center;
   color: var(--muted);
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
 }
 
 /* --- appearance prefs applied for real ---------------------------------- */
@@ -4104,7 +4216,7 @@ h3.md-h {
 
 body.compact .group {
   padding-left: 0;
-  margin-top: 2px;
+  margin-top: calc(2px * var(--u));
   min-height: 0;
 }
 
@@ -4121,14 +4233,14 @@ body.compact .timestamp {
 
 body.compact .timestamp::after {
   content: attr(data-short);
-  font-size: 11.18px;
+  font-size: calc(12px * var(--u));
 }
 
 body.compact .msg-line::before {
   content: attr(data-author);
   font-weight: 600;
   color: var(--strong);
-  margin-right: 6px;
+  margin-right: calc(6px * var(--u));
 }
 
 body.reduced-motion * {
@@ -4138,7 +4250,7 @@ body.reduced-motion * {
 
 body.streamer .acct-field b,
 body.streamer .invite-row code {
-  filter: blur(5px);
+  filter: blur(calc(5px * var(--u)));
 }
 
 /* ==========================================================================

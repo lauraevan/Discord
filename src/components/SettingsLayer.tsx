@@ -64,11 +64,15 @@ export function SettingsLayer({
       </nav>
       <div className="settings-pane">
         <div className="settings-content">{children}</div>
-        <div className="settings-close">
-          <button onClick={onClose} aria-label="Close">
-            <CloseIcon />
-          </button>
-          <span>ESC</span>
+        {/* Discord's toolsContainer: a 60px column immediately right of the
+            content column, not a corner the button is pinned into. */}
+        <div className="settings-tools">
+          <div className="settings-close">
+            <button onClick={onClose} aria-label="Close">
+              <CloseIcon />
+            </button>
+            <span>ESC</span>
+          </div>
         </div>
       </div>
     </div>

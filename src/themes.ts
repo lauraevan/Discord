@@ -11,6 +11,12 @@ export type Tokens = {
   rail: string
   side: string
   chat: string
+  /**
+   * --background-base-low. The settings layer's content region, and the only
+   * place it is painted: it is a step *lighter* than the chat pane, not the
+   * same grey.
+   */
+  baseLow: string
   card: string
   /** floating surfaces — context menus and the composer's plus menu */
   menu: string
@@ -79,6 +85,7 @@ const dark: Tokens = {
   rail: '#121214', // --background-base-lowest
   side: '#121214', // --background-base-lowest
   chat: '#1a1a1e', // --channel-background-default
+  baseLow: '#202024', // --background-base-low
   card: '#222327', // --chat-background-default
   menu: '#28282d', // --background-surface-higher
   composer: '#222327', // --chat-background-default
@@ -108,6 +115,7 @@ const ash: Tokens = {
   rail: '#2c2d32',
   side: '#2c2d32',
   chat: '#323339',
+  baseLow: '#36373e', // --background-base-low
   card: '#393a41',
   menu: '#3c3d45',
   composer: '#393a41',
@@ -137,6 +145,7 @@ const onyx: Tokens = {
   rail: '#000000',
   side: '#000000',
   chat: '#000000',
+  baseLow: '#000000', // --background-base-low
   card: '#101013',
   menu: '#121214',
   composer: '#101013',
@@ -170,6 +179,7 @@ const light: Tokens = {
   rail: '#f3f3f4',
   side: '#f3f3f4',
   chat: '#fbfbfb',
+  baseLow: '#fbfbfb', // --background-base-low
   card: '#ffffff',
   menu: '#ffffff',
   composer: '#ffffff',
@@ -273,6 +283,7 @@ function colorTheme(g: Gradient, scheme: 'light' | 'dark'): Theme {
       rail: 'transparent',
       side: veil(scheme === 'light' ? 0.28 : 0.34),
       chat: veil(scheme === 'light' ? 0.55 : 0.22),
+      baseLow: veil(scheme === 'light' ? 0.55 : 0.22),
       card: veil(scheme === 'light' ? 0.75 : 0.32),
       menu: veil(scheme === 'light' ? 0.88 : 0.45),
       composer: veil(scheme === 'light' ? 0.62 : 0.32),
@@ -297,6 +308,7 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--rail', k.rail)
   r.style.setProperty('--side', k.side)
   r.style.setProperty('--chat', k.chat)
+  r.style.setProperty('--base-low', k.baseLow)
   r.style.setProperty('--card', k.card)
   r.style.setProperty('--menu', k.menu)
   r.style.setProperty('--composer', k.composer)
