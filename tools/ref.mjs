@@ -50,6 +50,12 @@ if (popout) {
 }
 await p.mouse.move(760, 400)
 await p.waitForTimeout(200)
+// a sweep hook: DCSS_OVERRIDE is injected as !important CSS, which beats the
+// inline custom properties applyTheme writes onto <html>
+if (process.env.DCSS_OVERRIDE) {
+  await p.addStyleTag({ content: ':root{' + process.env.DCSS_OVERRIDE + '}' })
+  await p.waitForTimeout(150)
+}
 await p.screenshot({ path: out })
 if (errs.length) console.log('ERRORS', errs)
 await b.close()

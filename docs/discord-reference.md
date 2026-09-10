@@ -9,6 +9,78 @@ names, enums and orderings here are Discord's, verbatim.
 The reference frame — the screenshot the geometry is measured from — is the
 second source of truth, for anything visual.
 
+## The vendored sources
+
+Three files under `docs/sources/` are Discord's own, mirrored verbatim, and
+between them they answer most questions that used to be answered by squinting
+at a screenshot. Each has a tool that queries it.
+
+| file | what it is | tool |
+| --- | --- | --- |
+| `discord-strings.json` | Discord's shipped client string table — 27,325 entries of the exact English the client renders, keyed by Discord's own hashes. From [Wumpus-Central/discrapper-canary](https://github.com/Wumpus-Central/discrapper-canary) `data/strings.json`. | `tools/strings.py` |
+| `discord-css.css.gz` | every CSS chunk the canary client ships, concatenated — 8.9 MB, ~8,100 class names. Discord builds with CSS modules and keeps the source name in front of the hash, so `.messageContent__abc12` is still legible. Same repo, `css/*.css`. | `tools/dcss.py`, `tools/dtheme.py` |
+| — | Discord's Zendesk help centre as Markdown, hourly, on the `data` branch of [Wumpus-Central/blog-tracker](https://github.com/Wumpus-Central/blog-tracker) at `support/{id}.md`. Not vendored; fetched when needed. `state.json` indexes 512 articles. | — |
+
+`tools/strings.py has "..."` is the one to reach for first: it answers "is this
+our wording or Discord's?" and exits non-zero when it is ours. `tools/dcss.py
+rule <name>` prints what Discord actually wrote for a component, and
+`tools/dtheme.py` resolves a theme token through Discord's `color-mix` chain to
+the hex the client paints.
+
+### What the stylesheet settled
+
+Discord's layout variables, read straight off `:root`, agree with what had been
+measured off the captures — which is the best possible check on both:
+
+    --space-md: 16px
+    --guildbar-avatar-size: 40px
+    --custom-guild-list-width: calc(40px + 16px*2)   = 72px, our rail
+    --custom-message-avatar-size: 40px
+    --custom-message-margin-horizontal: var(--space-md)          = 16px
+    --custom-message-margin-left-content-cozy: 40 + 16 + 16      = 72px
+    --custom-channel-header-height: 49px             = our 48px + its 1px rule
+    --custom-member-list-width: 264px  (268px under .density-cozy)
+
+And it settled the pane rim, which had been reverse-engineered as "1px lighter,
+1–12% of the text colour". Discord calls it `--border-subtle` and defines it as
+`hsl(240 4% 60.784% / 0.1216)` — 12%, exactly.
+
+### The themes are Discord's, hex for hex
+
+`src/themes.ts` is now generated from `tools/dtheme.py` rather than tuned. The
+CSS class names are historical, and the mapping is worth writing down because it
+is not the obvious one: Discord's `theme-dark` is the theme the UI calls **Ash**,
+`theme-darker` is **Dark**, `theme-midnight` is **Onyx**. Ash and Onyx had been
+carrying the 2023 palette (`#1e1f22`/`#2b2d31`/`#313338`) and are now the
+refresh's.
+
+Two tokens are translucent because Discord's are: a channel row's hover and
+selected states are grey overlays (`--interactive-background-hover` at 12%,
+`--interactive-background-selected` at 20%), not opaque fills. Over the Dark
+sidebar the selected overlay computes to `#2d2d31`, and the capture reads
+`#2c2b30` — which is how the whole mapping was confirmed.
+
+### The one place the scorers are wrong, again
+
+`--text-default` for Dark is `#efeff1`. The app had `#e4e4e8`, and **both
+scorers prefer `#e4e4e8`** — by 0.015 on the frame and 0.023 on the capture. They
+are both wrong, for the reason recorded under *Scoring a frame*: our headless
+render lays down ~48% more measurable ink than the JPEG, so a darker text colour
+flatters a metric that is really comparing ink.
+
+The unbiased measurement is the glyph core, where antialiasing cannot reach.
+Taking the mean of the brightest 1% of a message-body band, past the edges:
+
+| | top 1% | top 0.1% |
+| --- | --- | --- |
+| real capture | `#f0eff4` | `#f5f4f9` |
+| ours at `#e4e4e8` | `#e5e5e9` | `#f1f1f2` |
+| ours at `#efeff1` | `#f0f0f2` | `#f5f6f6` |
+
+`#efeff1` lands on the capture; `#e4e4e8` is ~11 too dark. Discord's declared
+value and the unbiased measurement agree, so the scores were paid: frame 1.361 →
+1.376, capture 2.771 → 2.788. Do not "fix" this by chasing the score.
+
 ## User Settings sections
 
 Extracted from the client's page-name map. Sidebar groups follow the client.

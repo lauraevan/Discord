@@ -29,77 +29,108 @@ export type Tokens = {
 
 export type Theme = { id: string; name: string; swatch: string; tokens: Tokens }
 
+/*
+ * The four themes, hex for hex out of Discord's own stylesheet.
+ *
+ * Discord declares each theme as a set of semantic tokens over a primitive
+ * ramp — `--background-base-lowest: color-mix(in oklab, var(--neutral-92)
+ * 100%, ...)` — so the colour the client paints is two lookups away from the
+ * theme block. tools/dtheme.py walks that chain and prints the hex; the
+ * comment on each line names the Discord token it came from, and re-running
+ * the tool reproduces every value here.
+ *
+ * The CSS class names are historical: Discord's `theme-dark` is the theme the
+ * UI now calls **Ash**, `theme-darker` is **Dark**, and `theme-midnight` is
+ * **Onyx**. The Dark set below is also confirmed against all four 1:1
+ * captures — rail and sidebar #121214, chat #1a1a1e, composer #222327 — which
+ * is how the mapping was pinned down in the first place.
+ *
+ * Two tokens are deliberately translucent, because Discord's are: a channel
+ * row's hover and selected states are a grey overlay laid over whatever is
+ * behind them (`--interactive-background-hover`, 12%, and
+ * `--interactive-background-selected`, 20%), not opaque fills. Over the Dark
+ * sidebar the selected overlay computes to #2d2d31, which is the #2c2c30 the
+ * capture shows. `--border-subtle` is the same trick, and is the pane rim.
+ */
+
 const dark: Tokens = {
-  rail: '#121214',
-  side: '#121214',
-  chat: '#1a1a1e',
-  card: '#222327',
-  menu: '#28272c',
-  composer: '#222327',
-  selected: '#2c2c30',
-  hover: '#1e1e22',
-  text: '#e4e4e8',
-  muted: '#85858a',
-  strong: '#fdfdfe',
-  border: '#232328',
-  titlebar: '#121214',
+  rail: '#121214', // --background-base-lowest
+  side: '#121214', // --background-base-lowest
+  chat: '#1a1a1e', // --channel-background-default
+  card: '#222327', // --chat-background-default
+  menu: '#28282d', // --background-surface-higher
+  composer: '#222327', // --chat-background-default
+  selected: '#97979f33', // --interactive-background-selected
+  hover: '#97979f1f', // --interactive-background-hover
+  text: '#efeff1', // --text-default
+  muted: '#81828a', // --channels-default
+  strong: '#fbfbfb', // --text-strong
+  border: '#97979f1f', // --border-subtle
+  titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
 
+/** Discord's `theme-dark` — the grey one the UI calls Ash. */
 const ash: Tokens = {
-  rail: '#1e1f22',
-  side: '#2b2d31',
-  chat: '#313338',
-  card: '#383a40',
-  menu: '#111214',
-  composer: '#383a40',
-  selected: '#404249',
-  hover: '#35373c',
-  text: '#dbdee1',
-  muted: '#949ba4',
-  strong: '#f2f3f5',
-  border: '#3f4147',
-  titlebar: '#1e1f22',
+  rail: '#2c2d32',
+  side: '#2c2d32',
+  chat: '#323339',
+  card: '#393a41',
+  menu: '#3c3d45',
+  composer: '#393a41',
+  selected: '#97979f33',
+  hover: '#97979f1f',
+  text: '#f3f3f4',
+  muted: '#999aa1',
+  strong: '#ffffff',
+  border: '#97979f1f',
+  titlebar: '#2c2d32',
   scheme: 'dark',
 }
 
+/** Discord's `theme-midnight` — every base surface is pure black. */
 const onyx: Tokens = {
   rail: '#000000',
   side: '#000000',
-  chat: '#050506',
-  card: '#131316',
-  menu: '#17171b',
-  composer: '#131316',
-  selected: '#1c1c20',
-  hover: '#111114',
-  text: '#e4e4e8',
-  muted: '#7c7c82',
-  strong: '#ffffff',
-  border: '#17171a',
+  chat: '#000000',
+  card: '#101013',
+  menu: '#121214',
+  composer: '#101013',
+  selected: '#97979f3d',
+  hover: '#97979f1f',
+  text: '#d4d5d8',
+  muted: '#7a7b83',
+  strong: '#dcdcdf',
+  border: '#97979f33',
   titlebar: '#000000',
   scheme: 'dark',
 }
 
+/**
+ * Discord's `theme-light`. Under the refresh every raised surface is plain
+ * white and the separation comes from the border and the overlays, so card,
+ * menu and composer really do all land on #ffffff.
+ */
 const light: Tokens = {
-  rail: '#e3e5e8',
-  side: '#f2f3f5',
-  chat: '#ffffff',
+  rail: '#f3f3f4',
+  side: '#f3f3f4',
+  chat: '#fbfbfb',
   card: '#ffffff',
   menu: '#ffffff',
-  composer: '#ebedef',
-  selected: '#d7d9dd',
-  hover: '#e6e8eb',
-  text: '#313338',
-  muted: '#5c5e66',
-  strong: '#060607',
-  border: '#e0e1e5',
-  titlebar: '#f2f3f5',
+  composer: '#ffffff',
+  selected: '#97979f3d',
+  hover: '#97979f1f',
+  text: '#2e2e34',
+  muted: '#666770',
+  strong: '#28282d',
+  border: '#97979f47',
+  titlebar: '#f3f3f4',
   scheme: 'light',
 }
 
 export const defaultThemes: Theme[] = [
   { id: 'light', name: 'Light', swatch: '#ffffff', tokens: light },
-  { id: 'ash', name: 'Ash', swatch: '#313338', tokens: ash },
+  { id: 'ash', name: 'Ash', swatch: '#323339', tokens: ash },
   { id: 'dark', name: 'Dark', swatch: '#1a1a1e', tokens: dark },
   { id: 'onyx', name: 'Onyx', swatch: '#000000', tokens: onyx },
 ]
