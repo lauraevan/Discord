@@ -125,6 +125,30 @@ check(
 await p.keyboard.press('Escape')
 await p.waitForTimeout(200)
 
+// --- the Audit Log, which now records channels and filters ----------------
+await p.locator('.server-header').click()
+await p.waitForSelector('.ctx', { timeout: 10000 })
+await p.locator('.ctx-item:has-text("Server Settings")').click()
+await p.waitForSelector('.settings-item, .set-item', { timeout: 10000 })
+await p.locator('.settings-item:has-text("Audit Log"), .set-item:has-text("Audit Log")').first().click()
+await p.waitForTimeout(400)
+
+const logged = (await p.locator('.audit-row').allInnerTexts()).join(' | ')
+check('creating a channel is audited', /channel created/i.test(logged), logged)
+check(
+  'and the pane names Discord\'s 45-day retention',
+  (await p.locator('.settings-pane').first().innerText()).includes('45 days'),
+)
+const actions = await p.locator('.audit-filter select').nth(1).locator('option').allInnerTexts()
+check('Filter by Action lists what happened', actions[0] === 'All Actions' && actions.length > 1, actions)
+const all = await p.locator('.audit-row').count()
+await p.locator('.audit-filter select').nth(1).selectOption({ index: 1 })
+await p.waitForTimeout(300)
+const some = await p.locator('.audit-row').count()
+check('and filtering narrows the list', some > 0 && some <= all, { all, some })
+await p.keyboard.press('Escape')
+await p.waitForTimeout(400)
+
 await b.close()
 console.log(fails ? `\n${fails} failure(s)` : '\nall server-nav checks pass')
 process.exit(fails ? 1 : 0)

@@ -22,7 +22,11 @@ p.on('pageerror', (e) => { fails += 1; console.log('FAIL  page error\n    ', Str
 
 /** Writes prefs straight into storage and reloads, so each is tested alone. */
 const withPrefs = async (patch) => {
-  await p.evaluate((patch) => {
+  // An init script rather than a post-load write. The app saves its prefs back
+  // to storage on every change, so anything written after mount races that
+  // save and can be gone by the time the reload reads it. Init scripts run in
+  // registration order, so successive merges land in the order asked for.
+  await p.addInitScript((patch) => {
     const k = 'discord-ui:v4:prefs'
     localStorage.setItem(k, JSON.stringify({ ...JSON.parse(localStorage.getItem(k) ?? '{}'), ...patch }))
   }, patch)

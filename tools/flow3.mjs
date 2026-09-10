@@ -94,6 +94,9 @@ await step('logging out returns to the login screen, and back in restores it', a
 })
 
 await step('a wrong password is refused', async () => {
+  // NB: a plain evaluate, deliberately. An init script would be the safer
+  // shape against the app's own save effect, but init scripts persist for
+  // every later navigation — this one would log the test out on each of them.
   await p.evaluate(() => localStorage.setItem('discord-ui:v4:session', 'null'))
   await p.reload()
   await p.waitForTimeout(400)
@@ -460,6 +463,8 @@ await step('an age-restricted channel opens on the gate, then lets you in', asyn
 /* --------------------------------------------------------- nameplates */
 
 await step('a nameplate can be bought, worn, and shows behind the name', async () => {
+  // likewise a plain evaluate: as an init script this would top the balance
+  // back up on every later reload, and the steps after it spend from it
   await p.evaluate(() => localStorage.setItem('discord-ui:v4:orbs', '9800'))
   await p.reload()
   await p.waitForTimeout(600)

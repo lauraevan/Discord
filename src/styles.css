@@ -12629,3 +12629,35 @@ img.wumpus {
 .attachment:hover img.gif-paused {
   animation-play-state: running;
 }
+
+/* the Audit Log's two filters */
+.audit-filters {
+  display: flex;
+  gap: calc(12px * var(--u));
+  margin-bottom: calc(12px * var(--u));
+}
+
+.audit-filter {
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--u));
+  flex: 1;
+}
+
+.audit-filter span {
+  font-size: calc(12px * var(--u));
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.audit-filter select {
+  height: calc(40px * var(--u));
+  padding: 0 calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  font-size: calc(16px * var(--u));
+}

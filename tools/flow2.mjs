@@ -333,7 +333,12 @@ await step('the GIF tab has a real library, searchable and sendable', async () =
 /* -------------------------------------------------- display name styles */
 
 await step('Nitro letters the display name, and it follows the name around', async () => {
-  await p.evaluate(() =>
+  // An init script, not a post-load write: the app saves its subscription back
+  // to storage on every change, so anything written after mount races that
+  // save and is gone by the time the reload reads it. That race was making
+  // this step fail about one run in five — with the Nitro-only display-name
+  // section simply absent, which looked like a selector problem.
+  await p.addInitScript(() =>
     localStorage.setItem(
       'discord-ui:v4:subscription',
       JSON.stringify({ premiumType: 2, until: Date.now() + 250 * 864e5, source: 'purchase', interval: 2 }),
@@ -346,7 +351,8 @@ await step('Nitro letters the display name, and it follows the name around', asy
   await p.click('[aria-label="User settings"]')
   await p.waitForSelector('.settings-item:has-text("Profiles")', { timeout: 15000 })
   await p.click('.settings-item:has-text("Profiles")')
-  await p.waitForSelector('.name-font:has-text("Orbitron")', { timeout: 15000 })
+  await p.waitForSelector('.name-font:has-text("Orbitron")', { state: 'attached', timeout: 15000 })
+  await p.locator('.name-font:has-text("Orbitron")').scrollIntoViewIfNeeded()
   await p.locator('.name-font:has-text("Orbitron")').click()
   await p.locator('.name-effect:has-text("Neon")').click()
   await p.waitForFunction(

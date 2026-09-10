@@ -602,20 +602,33 @@ function Client({
         setChannelModal(null)
         return
       }
-      patchServer(server.id, (s) => ({ ...s, channels: [...s.channels, c] }))
+      // Discord audits channel create, update and delete; these go through
+      // patchActiveServer so they land in the log like every other change
+      patchActiveServer((s) => ({ ...s, channels: [...s.channels, c] }), {
+        action: 'Channel created',
+        target: name,
+      })
       if (kind !== 'voice') setActiveChannel(c.id)
     } else {
-      patchServer(server.id, (s) => ({
-        ...s,
-        channels: s.channels.map((c) => (c.id === channelModal.id ? { ...c, name, kind } : c)),
-      }))
+      const was = server.channels.find((c) => c.id === channelModal.id)
+      patchActiveServer(
+        (s) => ({
+          ...s,
+          channels: s.channels.map((c) => (c.id === channelModal.id ? { ...c, name, kind } : c)),
+        }),
+        { action: 'Channel updated', target: was?.name ?? name },
+      )
     }
     setChannelModal(null)
   }
 
   const deleteChannel = (id: string) => {
     if (!server) return
-    patchServer(server.id, (s) => ({ ...s, channels: s.channels.filter((c) => c.id !== id) }))
+    const was = server.channels.find((c) => c.id === id)
+    patchActiveServer((s) => ({ ...s, channels: s.channels.filter((c) => c.id !== id) }), {
+      action: 'Channel deleted',
+      target: was?.name ?? id,
+    })
     setChannelModal(null)
   }
 

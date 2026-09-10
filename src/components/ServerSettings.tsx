@@ -80,6 +80,21 @@ export function ServerSettings({
   const [permQuery, setPermQuery] = useState('')
   const [emojiQuery, setEmojiQuery] = useState('')
   const [addRoleOpen, setAddRoleOpen] = useState(false)
+  const [auditWho, setAuditWho] = useState('')
+  const [auditWhat, setAuditWhat] = useState('')
+
+  /**
+   * The audit rows the pane shows. Discord keeps 45 days of audit log
+   * ("Audit log retention 45 days" — its caps table), so anything older than
+   * that is gone rather than merely hidden, and the two filters narrow what is
+   * left. Newest first, which is the order Discord lists them in.
+   */
+  const auditRows = server.audit
+    .filter((a) => Date.now() - a.time < CAPS.auditLogDays * 864e5)
+    .filter((a) => !auditWhat || a.action === auditWhat)
+    .filter(() => !auditWho || auditWho === account.handle)
+    .slice()
+    .sort((a, b) => b.time - a.time)
 
   const nav: NavItem[] = [
     { head: server.name },
@@ -808,10 +823,34 @@ export function ServerSettings({
       {section === 'audit_log' ? (
         <>
           <Title>Audit Log</Title>
-          <Note>A record of the changes made in this server. Every entry below is a real action you took here.</Note>
+          <Note>
+            A record of the changes made in this server. Every entry below is a real action you
+            took here. Discord keeps {CAPS.auditLogDays} days of it.
+          </Note>
+          {/* Discord's two filters, by member and by action type */}
+          <div className="audit-filters">
+            <label className="audit-filter">
+              <span>Filter by User</span>
+              <select value={auditWho} onChange={(e) => setAuditWho(e.target.value)}>
+                <option value="">All Users</option>
+                <option value={account.handle}>{account.name}</option>
+              </select>
+            </label>
+            <label className="audit-filter">
+              <span>Filter by Action</span>
+              <select value={auditWhat} onChange={(e) => setAuditWhat(e.target.value)}>
+                <option value="">All Actions</option>
+                {[...new Set(server.audit.map((a) => a.action))].sort().map((act) => (
+                  <option key={act} value={act}>
+                    {act}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="audit">
-            {server.audit.length ? (
-              server.audit.map((a) => (
+            {auditRows.length ? (
+              auditRows.map((a) => (
                 <div className="audit-row" key={a.id}>
                   <Avatar account={account} size={32} status={false} />
                   <span className="audit-text">
@@ -828,7 +867,11 @@ export function ServerSettings({
                 </div>
               ))
             ) : (
-              <div className="table-empty">Nothing has happened in this server yet.</div>
+              <div className="table-empty">
+                {server.audit.length
+                  ? 'No results found'
+                  : 'Nothing has happened in this server yet.'}
+              </div>
             )}
           </div>
         </>
