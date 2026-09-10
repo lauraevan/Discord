@@ -2956,13 +2956,25 @@ h3.md-h {
   color: var(--muted);
 }
 
+/* Discord's context menu, off its stylesheet: --background-surface-higher
+ * under a 1px --border-subtle edge with an 8px radius and --shadow-high — and
+ * no --shadow-border ring, unlike a popout. --custom-menu-flexible-min-width
+ * is 188px, the scroller insets 8px, and a row is min-height 32px with 8px of
+ * padding and a 2px radius.
+ *
+ * The hover is the part that dates a build. The refresh hovers rows with
+ * --background-mod-subtle, a 12% grey, and leaves the label alone; the blurple
+ * fill this had — and the red fill on a destructive row — is the pre-refresh
+ * client. Rows sit at --interactive-text-default, destructive ones at
+ * --text-feedback-critical, and neither changes on hover. */
 .ctx {
   position: fixed;
-  min-width: 188px;
-  padding: 6px 8px;
+  min-width: calc(188px * var(--u));
+  padding: calc(8px * var(--u));
   background: var(--menu);
-  border-radius: 6px;
-  box-shadow: var(--shadow-border), var(--shadow-high);
+  border: 1px solid var(--border);
+  border-radius: calc(8px * var(--u));
+  box-shadow: var(--shadow-high);
   z-index: 70;
 }
 
@@ -2970,27 +2982,21 @@ h3.md-h {
   display: flex;
   align-items: center;
   width: 100%;
-  height: 32px;
-  padding: 0 8px;
-  border-radius: 4px;
+  min-height: calc(32px * var(--u));
+  padding: calc(8px * var(--u));
+  border-radius: calc(2px * var(--u));
   font-size: 13.05px;
   font-weight: 500;
-  color: var(--text);
+  color: var(--interactive);
   text-align: left;
 }
 
 .ctx-item:hover {
-  background: var(--blurple);
-  color: #fff;
+  background: var(--hover);
 }
 
 .ctx-item.danger {
-  color: #f23f43;
-}
-
-.ctx-item.danger:hover {
-  background: #f23f43;
-  color: #fff;
+  color: var(--critical);
 }
 
 .ctx-sep {
@@ -4745,8 +4751,7 @@ body.streamer .invite-row code {
 }
 
 .plus-menu button:hover:not(:disabled) {
-  background: var(--blurple);
-  color: #fff;
+  background: var(--hover);
 }
 
 .plus-menu button:hover:not(:disabled) svg {
@@ -7504,8 +7509,7 @@ body.streamer .invite-row code {
 }
 
 .quests-select-menu button:hover {
-  background: var(--blurple);
-  color: #fff;
+  background: var(--hover);
 }
 
 .quests-select-menu button.on {
@@ -7742,8 +7746,7 @@ body.streamer .invite-row code {
 }
 
 .quest-card-menu button:hover {
-  background: var(--blurple);
-  color: #fff;
+  background: var(--hover);
 }
 
 /* the daily-Quest cap, and the Why? that opens Discord's explanation */

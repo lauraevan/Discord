@@ -39,6 +39,10 @@ export type Tokens = {
   borderNormal: string
   /** --background-scrim, the wash behind a modal */
   scrim: string
+  /** --interactive-text-default: menu items, header icons, anything clickable at rest */
+  interactive: string
+  /** --text-feedback-critical: the red on a destructive menu item */
+  critical: string
   titlebar: string
   /** optional decorative wash painted behind the sidebar + chat */
   wash?: string
@@ -93,6 +97,8 @@ const dark: Tokens = {
   placeholder: '#8f9097', // --input-placeholder-text-default
   borderNormal: '#97979f33', // --border-normal
   scrim: '#000000b8', // --background-scrim
+  interactive: '#abacb2', // --interactive-text-default
+  critical: '#f87e7a', // --text-feedback-critical
   titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
@@ -120,6 +126,8 @@ const ash: Tokens = {
   placeholder: '#a4a5ab', // --input-placeholder-text-default
   borderNormal: '#97979f33', // --border-normal
   scrim: '#000000b8', // --background-scrim
+  interactive: '#c5c6ca', // --interactive-text-default
+  critical: '#ffa09b', // --text-feedback-critical
   titlebar: '#2c2d32',
   scheme: 'dark',
 }
@@ -147,6 +155,8 @@ const onyx: Tokens = {
   placeholder: '#7d7e87', // --input-placeholder-text-default
   borderNormal: '#97979f3d', // --border-normal
   scrim: '#000000b8', // --background-scrim
+  interactive: '#96979e', // --interactive-text-default
+  critical: '#eb5f5e', // --text-feedback-critical
   titlebar: '#000000',
   scheme: 'dark',
 }
@@ -178,6 +188,8 @@ const light: Tokens = {
   placeholder: '#696a73', // --input-placeholder-text-default
   borderNormal: '#97979f66', // --border-normal
   scrim: '#00000085', // --background-scrim
+  interactive: '#595a63', // --interactive-text-default
+  critical: '#b92733', // --text-feedback-critical
   titlebar: '#f3f3f4',
   scheme: 'light',
 }
@@ -303,6 +315,8 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--placeholder', k.placeholder)
   r.style.setProperty('--border-normal', k.borderNormal)
   r.style.setProperty('--scrim', k.scrim)
+  r.style.setProperty('--interactive', k.interactive)
+  r.style.setProperty('--critical', k.critical)
   r.style.setProperty('--titlebar', k.titlebar)
   r.style.setProperty('--wash', k.wash ?? k.rail)
   r.dataset.scheme = k.scheme
