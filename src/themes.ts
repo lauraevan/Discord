@@ -35,6 +35,10 @@ export type Tokens = {
   inputBorder: string
   /** --input-placeholder-text-default */
   placeholder: string
+  /** --border-normal, the edge on modals and inputs */
+  borderNormal: string
+  /** --background-scrim, the wash behind a modal */
+  scrim: string
   titlebar: string
   /** optional decorative wash painted behind the sidebar + chat */
   wash?: string
@@ -87,6 +91,8 @@ const dark: Tokens = {
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#8f9097', // --input-placeholder-text-default
+  borderNormal: '#97979f33', // --border-normal
+  scrim: '#000000b8', // --background-scrim
   titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
@@ -112,6 +118,8 @@ const ash: Tokens = {
   inputBg: '#00000014', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#a4a5ab', // --input-placeholder-text-default
+  borderNormal: '#97979f33', // --border-normal
+  scrim: '#000000b8', // --background-scrim
   titlebar: '#2c2d32',
   scheme: 'dark',
 }
@@ -137,6 +145,8 @@ const onyx: Tokens = {
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f3d', // --input-border-default
   placeholder: '#7d7e87', // --input-placeholder-text-default
+  borderNormal: '#97979f3d', // --border-normal
+  scrim: '#000000b8', // --background-scrim
   titlebar: '#000000',
   scheme: 'dark',
 }
@@ -166,6 +176,8 @@ const light: Tokens = {
   inputBg: '#00000005', // --input-background-default
   inputBorder: '#97979f66', // --input-border-default
   placeholder: '#696a73', // --input-placeholder-text-default
+  borderNormal: '#97979f66', // --border-normal
+  scrim: '#00000085', // --background-scrim
   titlebar: '#f3f3f4',
   scheme: 'light',
 }
@@ -289,6 +301,8 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--input-bg', k.inputBg)
   r.style.setProperty('--input-border', k.inputBorder)
   r.style.setProperty('--placeholder', k.placeholder)
+  r.style.setProperty('--border-normal', k.borderNormal)
+  r.style.setProperty('--scrim', k.scrim)
   r.style.setProperty('--titlebar', k.titlebar)
   r.style.setProperty('--wash', k.wash ?? k.rail)
   r.dataset.scheme = k.scheme

@@ -1682,7 +1682,8 @@ body.resizing .side-grip {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  /* --background-scrim: #000000b8 dark, #00000085 light */
+  background: var(--scrim);
   display: grid;
   place-items: center;
   z-index: 40;
@@ -1692,21 +1693,28 @@ body.resizing .side-grip {
   background: rgba(0, 0, 0, 0.25);
 }
 
+/* Discord's modal, off its stylesheet: --modal-background under a 1px
+ * --border-normal edge, a --radius-md corner, and --shadow-medium rather than
+ * the --shadow-high every popout gets. Its small size is 442px wide, and
+ * --custom-modal-padding is --space-24 on every inside edge. The confirmation
+ * layout centres its content and sets the title at 24px/30px bold. */
 .modal {
-  width: 420px;
-  border-radius: 8px;
+  width: calc(442px * var(--u));
+  border-radius: calc(12px * var(--u));
   background: var(--card);
+  border: 1px solid var(--border-normal);
   overflow: hidden;
-  box-shadow: var(--shadow-border), var(--shadow-high);
+  box-shadow: var(--shadow-medium);
 }
 
 .modal-head {
-  padding: 20px 16px 6px;
+  padding: calc(24px * var(--u)) calc(24px * var(--u)) calc(8px * var(--u));
   text-align: center;
 }
 
 .modal-head h3 {
-  font-size: 18.64px;
+  font-size: calc(24px * var(--u));
+  line-height: calc(30px * var(--u));
   font-weight: 700;
   color: var(--strong);
 }
@@ -1719,7 +1727,7 @@ body.resizing .side-grip {
 }
 
 .modal-body {
-  padding: 6px 16px 18px;
+  padding: calc(8px * var(--u)) calc(24px * var(--u)) calc(16px * var(--u));
 }
 
 .field-label {
@@ -1803,7 +1811,7 @@ body.resizing .side-grip {
 
 .modal-foot {
   background: var(--side);
-  padding: 14px 16px;
+  padding: calc(16px * var(--u)) calc(24px * var(--u)) calc(24px * var(--u));
   display: flex;
   justify-content: flex-end;
   gap: 10px;
