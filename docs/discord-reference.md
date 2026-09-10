@@ -21,8 +21,12 @@ at a screenshot. Each has a tool that queries it.
 | `discord-css.css.gz` | every CSS chunk the canary client ships, concatenated — 8.9 MB, ~8,100 class names. Discord builds with CSS modules and keeps the source name in front of the hash, so `.messageContent__abc12` is still legible. Same repo, `css/*.css`. | `tools/dcss.py`, `tools/dtheme.py` |
 | — | Discord's Zendesk help centre as Markdown, hourly, on the `data` branch of [Wumpus-Central/blog-tracker](https://github.com/Wumpus-Central/blog-tracker) at `support/{id}.md`. Not vendored; fetched when needed. `state.json` indexes 512 articles. | — |
 
-`tools/strings.py has "..."` is the one to reach for first: it answers "is this
-our wording or Discord's?" and exits non-zero when it is ours. `tools/dcss.py
+`tools/strings.py has "..."` is the one to reach for first, with one asymmetry
+that matters: a hit proves the string is Discord's, verbatim, while a miss
+proves nothing. The table is what the scraper found in the chunks it had, not
+Discord's whole en-US catalogue — plainly real labels like "My Account" and
+"Password and Authentication" are simply not in it. Confirm with a hit, explore
+with `near`, and never treat MISSING as a defect to fix. `tools/dcss.py
 rule <name>` prints what Discord actually wrote for a component, and
 `tools/dtheme.py` resolves a theme token through Discord's `color-mix` chain to
 the hex the client paints.

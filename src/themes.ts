@@ -23,6 +23,12 @@ export type Tokens = {
   border: string
   /** --border-strong, the heavier of Discord's two border tokens */
   borderStrong: string
+  /** --scrollbar-auto-thumb, the 14px bar Discord puts on settings and modals */
+  scrollbar: string
+  /** --scrollbar-thin-thumb, the 8px bar on the channel list, members and chat */
+  scrollbarThin: string
+  /** --background-surface-highest — the tooltip's fill, and its pointer's */
+  tip: string
   titlebar: string
   /** optional decorative wash painted behind the sidebar + chat */
   wash?: string
@@ -69,6 +75,9 @@ const dark: Tokens = {
   strong: '#fbfbfb', // --text-strong
   border: '#97979f1f', // --border-subtle
   borderStrong: '#97979f70', // --border-strong
+  scrollbar: '#666770', // --scrollbar-auto-thumb
+  scrollbarThin: '#5f606a', // --scrollbar-thin-thumb
+  tip: '#2c2d32', // --background-surface-highest
   titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
@@ -88,6 +97,9 @@ const ash: Tokens = {
   strong: '#ffffff',
   border: '#97979f1f',
   borderStrong: '#97979f70', // --border-strong
+  scrollbar: '#7d7e87', // --scrollbar-auto-thumb
+  scrollbarThin: '#767780', // --scrollbar-thin-thumb
+  tip: '#3f4048', // --background-surface-highest
   titlebar: '#2c2d32',
   scheme: 'dark',
 }
@@ -107,6 +119,9 @@ const onyx: Tokens = {
   strong: '#dcdcdf',
   border: '#97979f33',
   borderStrong: '#97979f70', // --border-strong
+  scrollbar: '#595a63', // --scrollbar-auto-thumb
+  scrollbarThin: '#595a63', // --scrollbar-thin-thumb
+  tip: '#17181b', // --background-surface-highest
   titlebar: '#000000',
   scheme: 'dark',
 }
@@ -130,6 +145,9 @@ const light: Tokens = {
   strong: '#28282d',
   border: '#97979f47',
   borderStrong: '#97979f85', // --border-strong
+  scrollbar: '#8f9097', // --scrollbar-auto-thumb
+  scrollbarThin: '#8b8c94', // --scrollbar-thin-thumb
+  tip: '#ffffff', // --background-surface-highest
   titlebar: '#f3f3f4',
   scheme: 'light',
 }
@@ -247,6 +265,9 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--strong', k.strong)
   r.style.setProperty('--border', k.border)
   r.style.setProperty('--border-strong', k.borderStrong)
+  r.style.setProperty('--scrollbar', k.scrollbar)
+  r.style.setProperty('--scrollbar-thin', k.scrollbarThin)
+  r.style.setProperty('--tip-bg', k.tip)
   r.style.setProperty('--titlebar', k.titlebar)
   r.style.setProperty('--wash', k.wash ?? k.rail)
   r.dataset.scheme = k.scheme

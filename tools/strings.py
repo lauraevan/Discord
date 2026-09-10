@@ -13,8 +13,12 @@ in here verbatim.
     tools/strings.py has <literal> ...  whether each literal exists verbatim
     tools/strings.py near <literal>     strings sharing words with the literal
 
-`has` is the one that matters: it answers "is this our wording or Discord's?"
-and exits non-zero if any literal is absent.
+`has` is the one that matters — but read the asymmetry carefully. A hit proves
+the string is Discord's, verbatim. A miss proves nothing: the table is what the
+scraper found in the chunks it had, not Discord's whole en-US catalogue, and
+plainly real labels ("My Account", "Password and Authentication") are simply
+absent from it. So use a hit to confirm, and use `near` to see whether Discord
+words the same idea differently — never treat MISSING as a defect to fix.
 """
 import json
 import os
