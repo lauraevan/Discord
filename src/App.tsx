@@ -877,6 +877,44 @@ function Client({
         setMuted((m) => !m)
         return
       }
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'd') {
+        e.preventDefault()
+        setDeafened((d) => !d)
+        return
+      }
+      if (mod && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault()
+        setPrefs((p) => ({ ...p, streamerMode: !p.streamerMode }))
+        return
+      }
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault()
+        setCreatingServer(true)
+        return
+      }
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault()
+        // Discord's Upload a File opens the picker straight away
+        document.querySelector<HTMLInputElement>('.composer input[type=file]')?.click()
+        return
+      }
+      if (mod && !e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault()
+        document.querySelector<HTMLInputElement>('.chat-header [aria-label="Search"]')?.focus()
+        return
+      }
+      if (mod && !e.shiftKey && e.key.toLowerCase() === 'e') {
+        e.preventDefault()
+        setPicker({ target: 'composer', at: { x: 760, y: 360 }, view: 'emoji' })
+        return
+      }
+      if (e.shiftKey && e.key === 'PageUp') {
+        e.preventDefault()
+        // Jump to First Unread Message: the first thing said after your mark
+        const first = thread.find((m) => m.time > (lastRead[key] ?? 0))
+        if (first) jumpTo(first.id)
+        return
+      }
       if (e.key === 'Escape' && !anyOverlay) {
         if (e.shiftKey) markServerRead()
         else if (replyTo) setReplyTo(null)
@@ -886,7 +924,7 @@ function Client({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [anyOverlay, markRead, markServerRead, replyTo, query])
+  }, [anyOverlay, markRead, markServerRead, replyTo, query, thread, lastRead, key, jumpTo])
 
   /* ------------------------------------------------------------- render */
 

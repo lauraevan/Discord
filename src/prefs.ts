@@ -181,6 +181,11 @@ export const LOCALES: [string, string, string][] = [
  * The keybind actions the client lists that a browser can actually honour.
  * Names are Discord's own action ids.
  */
+/**
+ * Discord's keybind table, ids and all. Every one of these is bound in
+ * src/App.tsx except Navigate Back and Navigate Forward, which need a route
+ * history this page does not keep — tools/keys.mjs covers the rest.
+ */
 export const KEYBINDS: [string, string, string][] = [
   ['QUICKSWITCHER_SHOW', 'Quick Switcher', 'Ctrl + K'],
   ['TOGGLE_MUTE', 'Toggle Mute', 'Ctrl + Shift + M'],
