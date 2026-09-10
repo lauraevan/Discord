@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  DAILY_CAP,
   HEARTBEAT_INTERVAL_S,
+  acceptLabel,
+  capLiftsAt,
+  isVideoQuest,
   nextBeatMs,
   ORB_MULTIPLIER,
   QUESTS,
@@ -18,6 +22,7 @@ import {
   questState,
   sortQuests,
   taskLabel,
+  timeUntil,
   collectibleReward,
   taskOf,
   timeLeft,
@@ -73,11 +78,14 @@ export function QuestsPage({
   onEnroll,
   onBeat,
   onClaim,
+  teen,
 }: {
   status: Record<string, QuestUserStatus>
   orbs: number
   multiplier: boolean
   account: Account
+  /** 13 to 17, the ages Discord caps at three Quests a day */
+  teen?: boolean
   /** collectible ids already owned, for the Orbs shelf */
   owned: string[]
   onBuy: (id: string, price: number) => void
@@ -91,6 +99,12 @@ export function QuestsPage({
   const [sortOpen, setSortOpen] = useState(false)
   const [tab, setTab] = useState<'all' | 'claimed'>('all')
   const [openId, setOpenId] = useState<string | null>(null)
+  const [why, setWhy] = useState(false)
+  /* "press the ellipsis on the Quest in-app promotion ... and then select Hide
+     This ... If you hide all the in-app promotions of a specific Quest, you can
+     still view and accept the Quest in Quest Home" — so a hidden Quest keeps
+     its card and loses its promotion. */
+  const [hidden, setHidden] = useState<string[]>([])
 
   const quests: Quest[] = QUESTS.map((q) => ({ ...q, userStatus: status[q.id] ?? null }))
   const ordered = sortQuests(quests, sort)
@@ -117,6 +131,9 @@ export function QuestsPage({
       )
     : []
   const shown = tab === 'claimed' ? ordered.filter(isClaimed) : live
+  /* The cap is Discord's: three a day for 13 to 17, lifting 24 hours after the
+     third completion. Rewards already earned can still be claimed. */
+  const capAt = teen ? capLiftsAt(quests) : null
 
   return (
     <main className="chat quests">
@@ -159,6 +176,25 @@ export function QuestsPage({
       </header>
 
       <div className="quests-body">
+        {capAt ? (
+          <div className={'quest-cap' + (why ? ' open' : '')}>
+            <div className="quest-cap-row">
+              <ClockIcon size={16} />
+              <b>You've reached your daily Quest limit</b>
+              <button className="quest-cap-why" onClick={() => setWhy((v) => !v)}>
+                Why?
+              </button>
+            </div>
+            {why ? (
+              <p className="quest-cap-detail">
+                If you are between the ages of 13 and 17, you can complete {DAILY_CAP} Quests
+                per day. The timer counts down 24 hours from when you completed your third
+                Quest, so you'll be able to accept new Quests {timeUntil(capAt)}. You can still
+                claim rewards for Quests you completed beforehand.
+              </p>
+            ) : null}
+          </div>
+        ) : null}
         {hit ? (
           <>
             <h2 className="quests-shelf-title">
@@ -167,7 +203,17 @@ export function QuestsPage({
             {results.length ? (
               <div className="quests-grid">
                 {results.map((q) => (
-                  <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+                  <QuestCard
+                    key={q.id}
+                    quest={q}
+                    hidden={hidden.includes(q.id)}
+                    onHide={() =>
+                      setHidden((all) =>
+                        all.includes(q.id) ? all.filter((x) => x !== q.id) : [...all, q.id],
+                      )
+                    }
+                    onOpen={() => setOpenId(q.id)}
+                  />
                 ))}
               </div>
             ) : (
@@ -180,7 +226,17 @@ export function QuestsPage({
             {shown.length ? (
               <div className="quests-grid">
                 {shown.map((q) => (
-                  <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+                  <QuestCard
+                    key={q.id}
+                    quest={q}
+                    hidden={hidden.includes(q.id)}
+                    onHide={() =>
+                      setHidden((all) =>
+                        all.includes(q.id) ? all.filter((x) => x !== q.id) : [...all, q.id],
+                      )
+                    }
+                    onOpen={() => setOpenId(q.id)}
+                  />
                 ))}
               </div>
             ) : (
@@ -249,7 +305,17 @@ export function QuestsPage({
 
             <div className="quests-grid">
               {shown.map((q) => (
-                <QuestCard key={q.id} quest={q} onOpen={() => setOpenId(q.id)} />
+                <QuestCard
+                    key={q.id}
+                    quest={q}
+                    hidden={hidden.includes(q.id)}
+                    onHide={() =>
+                      setHidden((all) =>
+                        all.includes(q.id) ? all.filter((x) => x !== q.id) : [...all, q.id],
+                      )
+                    }
+                    onOpen={() => setOpenId(q.id)}
+                  />
               ))}
             </div>
 
@@ -271,6 +337,7 @@ export function QuestsPage({
           onClose={() => setOpenId(null)}
           onEnroll={onEnroll}
           onBeat={onBeat}
+          capped={capAt != null}
           onClaim={onClaim}
         />
       ) : null}
@@ -424,18 +491,54 @@ const endsOn = (at: number) => {
   return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
-function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
+function QuestCard({
+  quest,
+  onOpen,
+  hidden,
+  onHide,
+}: {
+  quest: Quest
+  onOpen: () => void
+  /** the in-app promotion has been hidden; the card stays in Quest Home */
+  hidden?: boolean
+  onHide?: () => void
+}) {
   const task = taskOf(quest)
   const value = progressOf(quest)
   const state = questState(quest)
   const pct = Math.round((value / task.target) * 100)
+  const [menu, setMenu] = useState(false)
   return (
+    <div className={'quest-card-wrap' + (hidden ? ' hidden-promo' : '')}>
+      {onHide ? (
+        <>
+          <button
+            className="quest-card-more"
+            aria-label="More"
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenu((v) => !v)
+            }}
+          >
+            <MoreIcon size={18} />
+          </button>
+          {menu ? (
+            <div className="quest-card-menu" onMouseLeave={() => setMenu(false)}>
+              <button
+                onClick={() => {
+                  setMenu(false)
+                  onHide()
+                }}
+              >
+                {hidden ? 'Unhide This' : 'Hide This'}
+              </button>
+            </div>
+          ) : null}
+        </>
+      ) : null}
     <button className={'quest-card ' + state} onClick={onOpen}>
       <span className="quest-card-art">
         <QuestPoster quest={quest} />
-        <span className="quest-card-more" aria-hidden>
-          <MoreIcon size={18} />
-        </span>
         {state === 'claimed' ? (
           <span className="quest-card-badge done">
             <CheckSmallIcon size={13} />
@@ -458,6 +561,7 @@ function QuestCard({ quest, onOpen }: { quest: Quest; onOpen: () => void }) {
         <span className="quest-card-ends">Ends {endsOn(quest.config.expiresAt)}</span>
       </span>
     </button>
+    </div>
   )
 }
 
@@ -503,6 +607,7 @@ function OrbsHero() {
 function QuestSheet({
   quest,
   multiplier,
+  capped,
   onClose,
   onEnroll,
   onBeat,
@@ -510,6 +615,8 @@ function QuestSheet({
 }: {
   quest: Quest
   multiplier: boolean
+  /** the daily cap is in force: no new Quests, but rewards still claim */
+  capped?: boolean
   onClose: () => void
   onEnroll: (q: Quest) => void
   onBeat: (questId: string, seconds: number, terminal?: boolean) => void
@@ -568,13 +675,32 @@ function QuestSheet({
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  /*
+   * "The video pauses if you switch windows, but don't worry - your progress is
+   * saved and you can resume watching later." — Discord's Quests FAQ. Stopping
+   * sends the terminal beat, which is what saves the progress, so the same call
+   * the pause button makes does both.
+   */
+  useEffect(() => {
+    if (!running || !isVideoQuest(quest)) return
+    const away = () => document.visibilityState === 'hidden' && stopRef.current?.()
+    document.addEventListener('visibilitychange', away)
+    window.addEventListener('blur', away)
+    return () => {
+      document.removeEventListener('visibilitychange', away)
+      window.removeEventListener('blur', away)
+    }
+  }, [running, quest])
+
   // leaving with the task running is what the client sends a terminal beat for
   useEffect(() => () => stopRef.current?.(), [])
   const stopRef = useRef<(() => void) | null>(null)
   stopRef.current = running ? stop : null
 
   const pct = Math.min(100, (value / task.target) * 100)
-  const payout = orbValue(quest) * (multiplier ? ORB_MULTIPLIER : 1)
+  // Orbs are whole; the 1.2x lands on a round number for every quest here, but
+  // a future one need not, and Discord does not pay a fraction of an Orb
+  const payout = Math.round(orbValue(quest) * (multiplier ? ORB_MULTIPLIER : 1))
 
   return (
     <div className="overlay" onMouseDown={onClose}>
@@ -641,17 +767,19 @@ function QuestSheet({
             </span>
           ) : isComplete(quest) ? (
             <button className="btn-primary" onClick={() => onClaim(quest, payout)}>
-              Claim {payout.toLocaleString()} Orbs
+              Claim Reward
             </button>
           ) : !isEnrolled(quest) ? (
             <button
               className="btn-primary"
+              disabled={capped}
+              title={capped ? "You've reached your daily Quest limit" : undefined}
               onClick={() => {
                 onEnroll(quest)
                 setStarted(true)
               }}
             >
-              Accept Quest
+              {acceptLabel(quest)}
             </button>
           ) : (
             <button

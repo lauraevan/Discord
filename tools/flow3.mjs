@@ -287,7 +287,24 @@ await step('a quest enrols, runs, completes and pays out', async () => {
   await p.click('.quest-sheet-foot .btn-primary')
   await p.waitForTimeout(300)
   const orbs = await p.locator('.quests-orbs').innerText()
-  expect(orbs.replace(/\D/g, '') === '1500', 'wrong payout with the Nitro multiplier: ' + orbs)
+  // 750 orbs at Nitro's 1.2x, which is the multiplier Discord's Orbs FAQ names
+  expect(orbs.replace(/\D/g, '') === '900', 'wrong payout with the Nitro multiplier: ' + orbs)
+  await p.click('.quest-sheet-foot .btn-ghost')
+  await p.waitForTimeout(200)
+  await p.clock.runFor(1000)
+
+  // a second one, so the Shop step below has enough Orbs to spend: Watch
+  // Together pays 1,500, which is 1,800 at the same multiplier
+  await p.click('.quests-body > .quests-grid .quest-card:has-text("Watch Together")')
+  await p.waitForTimeout(300)
+  await p.click('.quest-sheet-foot .btn-primary')
+  await p.waitForTimeout(200)
+  await p.clock.runFor(1_000_000)
+  await p.waitForTimeout(300)
+  await p.click('.quest-sheet-foot .btn-primary')
+  await p.waitForTimeout(300)
+  const total = await p.locator('.quests-orbs').innerText()
+  expect(total.replace(/\D/g, '') === '2700', 'wrong running total: ' + total)
   await p.click('.quest-sheet-foot .btn-ghost')
   await p.waitForTimeout(200)
   await p.clock.runFor(1000)

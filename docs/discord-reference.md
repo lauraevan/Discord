@@ -408,6 +408,49 @@ strip along the bottom — are from the client.
 
 ## Quests
 
+### Where the rules come from
+
+Discord's help centre is mirrored as Markdown, hourly, in
+[Wumpus-Central/blog-tracker](https://github.com/Wumpus-Central/blog-tracker)
+on its `data` branch — `data/support/{id}.md` — which is reachable where
+support.discord.com is not. The rules the Quests tab enforces are quoted from
+there rather than remembered, and each quote sits in `src/quests.ts` beside the
+constant it sets:
+
+| article | id | what it settles |
+| --- | --- | --- |
+| Discord Quests FAQ | 22225719947543 | the two accept labels, "Claim Reward", the 13-to-17 daily cap of three and its 24-hour timer, "Hide This", the video quest pausing when you switch windows |
+| Discord Orbs FAQ | 30593690165783 | Nitro's Orbs multiplier — **1.2x**, where this had 2 |
+| Nitro Quest Perk | 29790581779735 | Quest avatar decorations last two months, and Nitro extends them |
+| Discord Cloud Play Quests | 35372187686295 | the Cloud Play quest type and its "Try Game" |
+
+`tools/quests.mjs` asserts them.
+
+### What is not here
+
+The quests themselves. Real Discord quests are game-publisher promotions and
+Discord publishes no list of them; no GitHub archive carries one, and every
+quest tracker that does is a site the egress policy blocks. The quests on the
+tab are Discord's own first-party Activities, which are real products with real
+names, and the tab's *behaviour* is Discord's. Inventing "Play <real game> for
+15 minutes" would be inventing a quest.
+
+### Profile effects
+
+Not implemented, and deliberately. `Infinitay/discord-collectibles-archive`
+carries Discord's real effect definitions — `discord-data/profile-effects/*.json`
+and `discord-data/raw/user-profile-effects.json`, with every effect's name,
+description, accessibility label, animation type and per-layer sprite with its
+duration, loop, position and z-index — but every layer's `src` is on
+cdn.discordapp.com, which is blocked. Checked and rejected: Dev-Rick-C137/
+Discord-Shop-Assets (Google Drive, effects not published), CustomEffects/
+CustomEffects with its DefaultEffects and db repos (community art, not
+Discord's), DTACat's themes (they link Discord's CDN), uhidontkno/
+DiscordAvatarDecorations (decorations only), the npm registry, and archive.org
+(blocked). Names without artwork is what the Shop already does; drawing them
+would be worse.
+
+
 The quest object, as the client parses it:
 
 ```

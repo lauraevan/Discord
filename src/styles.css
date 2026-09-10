@@ -7610,10 +7610,93 @@ body.streamer .invite-row code {
   height: 100%;
 }
 
+/* the card's own promotion menu — Discord's "Hide This" lives here */
+.quest-card-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.quest-card-wrap > .quest-card {
+  width: 100%;
+}
+
+.quest-card-wrap.hidden-promo .quest-card-art {
+  opacity: 0.5;
+}
+
+.quest-card-menu {
+  position: absolute;
+  right: 6px;
+  top: 38px;
+  z-index: 3;
+  min-width: 132px;
+  padding: calc(6px * var(--u));
+  border-radius: calc(6px * var(--u));
+  background: var(--menu);
+  box-shadow:
+    0 8px 20px rgb(0 0 0 / 0.45),
+    inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.quest-card-menu button {
+  width: 100%;
+  height: calc(32px * var(--u));
+  padding: 0 calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  font-size: calc(14px * var(--u));
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+}
+
+.quest-card-menu button:hover {
+  background: var(--blurple);
+  color: #fff;
+}
+
+/* the daily-Quest cap, and the Why? that opens Discord's explanation */
+.quest-cap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.quest-cap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.quest-cap-why {
+  margin-left: auto;
+  padding: 0 10px;
+  height: 26px;
+  border-radius: 4px;
+  background: var(--btn2);
+  color: var(--strong);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.quest-cap-detail {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .quest-card-more {
   position: absolute;
   right: 6px;
   top: 6px;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 28px;
@@ -7625,7 +7708,9 @@ body.streamer .invite-row code {
   transition: opacity 0.1s ease-out;
 }
 
-.quest-card:hover .quest-card-more {
+.quest-card-wrap:hover .quest-card-more,
+.quest-card-menu ~ .quest-card-more,
+.quest-card-more:focus-visible {
   opacity: 1;
 }
 

@@ -416,6 +416,17 @@ export function taskLabel(t: QuestTask) {
 }
 
 /** "3d left", "18h left" — the client's own countdown format. */
+/** The same clock as timeLeft, phrased as a wait rather than as a countdown. */
+export function timeUntil(at: number, from = Date.now()) {
+  const ms = at - from
+  if (ms <= 0) return 'now'
+  const days = Math.floor(ms / DAY)
+  if (days >= 1) return `in ${days} day${days === 1 ? '' : 's'}`
+  const hours = Math.floor(ms / 3600e3)
+  if (hours >= 1) return `in ${hours} hour${hours === 1 ? '' : 's'}`
+  return `in ${Math.max(1, Math.floor(ms / 60e3))} minutes`
+}
+
 export function timeLeft(at: number, from = Date.now()) {
   const ms = at - from
   if (ms <= 0) return 'Expired'
@@ -452,8 +463,63 @@ export function sortQuests(list: Quest[], order: SortOrderValue) {
 export const orbValue = (q: Quest) =>
   q.config.rewardsConfig.rewards.reduce((n, r) => n + (r.orbQuantity ?? 0), 0)
 
-/** Nitro's MORE_QUEST_ORBS perk; the client shows it as a multiplier pill. */
-export const ORB_MULTIPLIER = 2
+/* ------------------------------------------- Discord's own rules for Quests
+ *
+ * Read out of Discord's own help centre rather than guessed at: the Quests FAQ
+ * (support article 22225719947543), the Orbs FAQ (30593690165783) and the
+ * Nitro Quest Perk article (29790581779735), all mirrored as Markdown in
+ * Wumpus-Central/blog-tracker, which tracks Discord's Zendesk hourly.
+ */
+
+/**
+ * Nitro's MORE_QUEST_ORBS perk; the client shows it as a multiplier pill.
+ * "Discord Nitro subscribers can claim 1.2x more Orbs when they complete
+ * Quests with Orb rewards" — the Orbs FAQ. This was 2.
+ */
+export const ORB_MULTIPLIER = 1.2
+
+/**
+ * "If you are between the ages of 13 and 17, you will only be able to complete
+ * three Quests per day." — the Quests FAQ.
+ */
+export const DAILY_CAP = 3
+/** The ages the cap applies to, inclusive. */
+export const DAILY_CAP_AGES: [number, number] = [13, 17]
+/**
+ * "The daily Quest timer begins counting down 24 hours from when you complete
+ * your third Quest of the day."
+ */
+export const DAILY_CAP_WINDOW_MS = 24 * 3600e3
+
+/**
+ * "Normally, avatar decorations earned through Quests are available for two
+ * months." — the Nitro Quest Perk article.
+ */
+export const QUEST_DECORATION_DAYS = 60
+
+/**
+ * The label on the accept button. The FAQ names two: "press Accept Quest for a
+ * Play Quest or Start Video Quest for a Video Quest".
+ */
+export const acceptLabel = (q: Quest) => (isVideoQuest(q) ? 'Start Video Quest' : 'Accept Quest')
+
+/**
+ * When the daily cap lifts, or null while it has not been reached.
+ *
+ * Discord counts the 24 hours from the third completion rather than from the
+ * first — its own worked example is "if you complete your third Quest at
+ * 2:00 PM, you'll be able to accept new Quests starting at 2:00 PM the next
+ * day" — so this reads the third-oldest completion still inside the window.
+ */
+export function capLiftsAt(list: Quest[], now = Date.now()): number | null {
+  const done = list
+    .map((q) => q.userStatus?.completedAt)
+    .filter((t): t is number => t != null && now - t < DAILY_CAP_WINDOW_MS)
+    .sort((a, b) => a - b)
+  if (done.length < DAILY_CAP) return null
+  const at = done[DAILY_CAP - 1] + DAILY_CAP_WINDOW_MS
+  return at > now ? at : null
+}
 
 /** A fresh user status, as the enroll endpoint returns it. */
 export const enroll = (q: Quest): QuestUserStatus => ({

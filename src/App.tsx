@@ -52,6 +52,7 @@ import {
 } from './data'
 import { SPRITE } from './emoji'
 import { defaultPrefs, type Prefs } from './prefs'
+import { ageOn } from './auth'
 import type { MdContext } from './markdown'
 import { matches, parseQuery } from './search'
 import {
@@ -195,6 +196,12 @@ export default function App() {
 }
 
 function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
+  /* Discord caps 13-to-17-year-olds at three Quests a day; the date of birth
+     the account registered with is what decides it. */
+  const teen = (() => {
+    const n = ageOn(me.birthday)
+    return n >= 13 && n <= 17
+  })()
   const [servers, setServers] = useState<Server[]>(() =>
     load(K.servers, [makeServer(`${me.displayName}'s server`)], isServers),
   )
@@ -1011,6 +1018,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
               onEnroll={enrollQuest}
               onBeat={beatQuest}
+              teen={teen}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
             />
           ) : (
@@ -1041,6 +1049,7 @@ function Client({ me, onSignOut }: { me: Credential; onSignOut: () => void }) {
               onEquip={(id) => setAccount((a) => ({ ...a, decoration: id }))}
               onEnroll={enrollQuest}
               onBeat={beatQuest}
+              teen={teen}
               onClaim={(q, payout) => claimQuest(q.id, payout)}
             />
           ) : homeView === 'shop' ? (
