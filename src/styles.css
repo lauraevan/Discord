@@ -3581,6 +3581,77 @@ h3.md-h {
   resize: vertical;
 }
 
+/* --control-input-height-md, and the text input's box */
+.set-select {
+  width: 100%;
+  height: calc(40px * var(--u));
+  padding: 0 calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  font-size: calc(16px * var(--u));
+  transition: border-color 0.2s ease-in-out;
+}
+
+.set-field-note {
+  margin-top: calc(8px * var(--u));
+  /* text-sm/normal */
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--muted);
+}
+
+/* .checkbox_d9161f: 20px square, a 2px --interactive-text-default edge and
+   --radius-xs, filled brand with a white tick when it is on. */
+.set-check {
+  display: flex;
+  align-items: center;
+  gap: calc(10px * var(--u));
+  padding: calc(6px * var(--u)) 0;
+  cursor: pointer;
+}
+
+.set-check input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.set-check-box {
+  flex: 0 0 calc(20px * var(--u));
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  border: calc(2px * var(--u)) solid var(--interactive);
+  border-radius: calc(4px * var(--u));
+  display: grid;
+  place-items: center;
+  color: transparent;
+}
+
+.set-check input:checked + .set-check-box {
+  background: var(--blurple);
+  border-color: var(--blurple);
+  color: #fff;
+}
+
+.set-check input:focus-visible + .set-check-box {
+  box-shadow: 0 0 0 calc(2px * var(--u)) var(--blurple);
+}
+
+.set-check-box svg {
+  width: calc(14px * var(--u));
+  height: calc(14px * var(--u));
+}
+
+.set-check-label {
+  /* text-sm/normal */
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--text);
+}
+
 .set-unavailable {
   display: flex;
   flex-direction: column;
@@ -3977,6 +4048,14 @@ h3.md-h {
   align-items: flex-start;
 }
 
+.srv-icon-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  flex: 0 0 auto;
+}
+
 .srv-icon {
   width: calc(100px * var(--u));
   height: calc(100px * var(--u));
@@ -3987,6 +4066,54 @@ h3.md-h {
   font-weight: 700;
   color: #fff;
   flex: 0 0 calc(100px * var(--u));
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.srv-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.srv-icon-note {
+  /* text-xxs/normal, the size Discord sets the minimum under an uploader */
+  font-size: calc(10px * var(--u));
+  line-height: calc(12px * var(--u));
+  color: var(--muted);
+  text-align: center;
+}
+
+.srv-icon-note b {
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Discord's small secondary button: --control-input-height-sm tall */
+.srv-icon-upload {
+  height: calc(32px * var(--u));
+  white-space: nowrap;
+  padding: 0 calc(12px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--hover);
+  color: var(--text);
+  font-size: calc(14px * var(--u));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.srv-icon-upload:hover {
+  background: var(--selected);
+}
+
+.srv-icon-remove {
+  font-size: calc(14px * var(--u));
+  color: var(--critical);
+  cursor: pointer;
+}
+
+.srv-icon-remove:hover {
+  text-decoration: underline;
 }
 
 .srv-overview-fields {

@@ -239,6 +239,71 @@ export function Field({
   )
 }
 
+/**
+ * A labelled select. Discord's settings selects are a custom combobox rather
+ * than a native one, but they carry the same box: --input-background-default
+ * over a 1px --input-border-default, an 8px radius, 16px text, and
+ * --control-input-height-md (40px) tall.
+ */
+export function Select({
+  label,
+  note,
+  value,
+  options,
+  onChange,
+}: {
+  label?: string
+  note?: string
+  value: string
+  options: readonly (readonly [string, string])[]
+  onChange: (v: string) => void
+}) {
+  const id = useId()
+  return (
+    <div className="set-field">
+      {label ? <label htmlFor={id}>{label}</label> : null}
+      <select id={id} className="set-select" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map(([v, l]) => (
+          <option key={v} value={v}>
+            {l}
+          </option>
+        ))}
+      </select>
+      {note ? <div className="set-field-note">{note}</div> : null}
+    </div>
+  )
+}
+
+/**
+ * A checkbox row. Discord's system-message settings are checkboxes, not
+ * switches: a 20px square with a 2px --interactive-text-default edge and a
+ * 4px radius, filled brand with a white tick when it is on.
+ */
+export function Check({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <label className="set-check">
+      <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
+      <span className="set-check-box" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14">
+          <path
+            fill="currentColor"
+            d="M9 20.42 2.79 14.21l2.83-2.83L9 14.77l9.88-9.88 2.83 2.83L9 20.42Z"
+          />
+        </svg>
+      </span>
+      <span className="set-check-label">{label}</span>
+    </label>
+  )
+}
+
 /** The grey card Discord uses for a read-only or not-applicable surface. */
 export function Unavailable({ what, why }: { what: string; why: string }) {
   return (

@@ -7,6 +7,7 @@ import {
   KeywordPreset,
   PERMISSION_GROUPS,
   CAPS,
+  SystemChannelFlags,
   ROLE_COLORS,
   SERVER_CAPS,
   VerificationLevel,
@@ -33,10 +34,12 @@ import {
   UserIcon,
 } from '../ui/Icons'
 import {
+  Check,
   Divider,
   Field,
   Note,
   Radio,
+  Select,
   SettingsLayer,
   Slider,
   Sub,
@@ -48,6 +51,41 @@ import {
 import { Avatar } from './UserArea'
 import { DISCOVERY_CATEGORIES } from './Discover'
 import { LOCALES } from '../prefs'
+
+/**
+ * The only five inactive timeouts Discord's client offers, in seconds — its
+ * own AFK_TIMEOUTS.
+ */
+const AFK_TIMEOUTS = [
+  ['60', '1 Minute'],
+  ['300', '5 Minutes'],
+  ['900', '15 Minutes'],
+  ['1800', '30 Minutes'],
+  ['3600', '1 Hour'],
+] as const
+
+/**
+ * The four system messages, each paired with the SystemChannelFlags bit that
+ * *suppresses* it. The wording is Discord's own.
+ */
+const SYSTEM_MESSAGES = [
+  [
+    SystemChannelFlags.SUPPRESS_JOIN_NOTIFICATIONS,
+    'Send a random welcome message when someone joins this server.',
+  ],
+  [
+    SystemChannelFlags.SUPPRESS_JOIN_NOTIFICATION_REPLIES,
+    'Prompt members to reply to welcome messages with a sticker.',
+  ],
+  [
+    SystemChannelFlags.SUPPRESS_PREMIUM_SUBSCRIPTIONS,
+    'Send a message when someone boosts this server.',
+  ],
+  [
+    SystemChannelFlags.SUPPRESS_GUILD_REMINDER_NOTIFICATIONS,
+    'Send helpful tips for server setup.',
+  ],
+] as const
 
 /**
  * Server Settings.
@@ -82,6 +120,19 @@ export function ServerSettings({
   const [addRoleOpen, setAddRoleOpen] = useState(false)
   const [auditWho, setAuditWho] = useState('')
   const [auditWhat, setAuditWhat] = useState('')
+  const iconFile = useRef<HTMLInputElement>(null)
+
+  /** Overview's icon picker takes an image and keeps it as a data URL. */
+  const pickIcon = (f: File | undefined) => {
+    if (!f) return
+    const r = new FileReader()
+    r.onload = () =>
+      onPatch((sv) => ({ ...sv, icon: String(r.result) }), {
+        action: 'Server icon updated',
+        target: server.name,
+      })
+    r.readAsDataURL(f)
+  }
 
   /**
    * The audit rows the pane shows. Discord keeps 45 days of audit log
@@ -200,8 +251,43 @@ export function ServerSettings({
         <>
           <Title>Server Overview</Title>
           <div className="srv-overview">
-            <div className="srv-icon" style={{ background: server.color }}>
-              {server.initials}
+            {/* Discord's icon block: the preview, the minimum-size note, an
+                Upload Image button, and Remove once there is one to remove. */}
+            <div className="srv-icon-col">
+              <button
+                className={'srv-icon' + (server.icon ? ' has-icon' : '')}
+                style={server.icon ? undefined : { background: server.color }}
+                onClick={() => iconFile.current?.click()}
+                aria-label="Upload a server icon"
+              >
+                {server.icon ? <img src={server.icon} alt="" /> : server.initials}
+              </button>
+              <input
+                ref={iconFile}
+                type="file"
+                accept="image/*"
+                hidden
+                onChange={(e) => pickIcon(e.target.files?.[0])}
+              />
+              <div className="srv-icon-note">
+                Minimum Size: <b>128x128</b>
+              </div>
+              <button className="srv-icon-upload" onClick={() => iconFile.current?.click()}>
+                Upload Image
+              </button>
+              {server.icon ? (
+                <button
+                  className="srv-icon-remove"
+                  onClick={() =>
+                    onPatch((sv) => ({ ...sv, icon: undefined }), {
+                      action: 'Server icon removed',
+                      target: server.name,
+                    })
+                  }
+                >
+                  Remove
+                </button>
+              ) : null}
             </div>
             <div className="srv-overview-fields">
               <Field
@@ -246,6 +332,75 @@ export function ServerSettings({
             placeholder="Tell people what your server is about."
             onChange={(description) => onPatch((s) => ({ ...s, description }))}
           />
+          <Divider />
+          {/* Discord's AFK pair. The note is its own, and the five timeouts
+              are the only values the client offers. */}
+          <Sub>Inactive Channel</Sub>
+          <Select
+            value={server.afkChannelId ?? ''}
+            options={[
+              ['', 'No Inactive Channel'] as const,
+              ...server.channels
+                .filter((c) => c.kind === 'voice')
+                .map((c) => [c.id, c.name] as const),
+            ]}
+            onChange={(id) =>
+              onPatch((sv) => ({ ...sv, afkChannelId: id || null }), {
+                action: id ? 'Inactive channel set' : 'Inactive channel cleared',
+                target: server.channels.find((c) => c.id === id)?.name ?? server.name,
+              })
+            }
+          />
+          <Sub>Inactive Timeout</Sub>
+          <Select
+            value={String(server.afkTimeout ?? 300)}
+            note="Automatically move members to this channel and mute them when they have been idle for longer than the inactive timeout. This does not affect browsers."
+            options={AFK_TIMEOUTS}
+            onChange={(v) =>
+              onPatch((sv) => ({ ...sv, afkTimeout: Number(v) }), {
+                action: `Set the inactive timeout to ${Number(v) / 60} minutes`,
+                target: server.name,
+              })
+            }
+          />
+
+          <Divider />
+          {/* System messages: the channel, then the four suppression bits.
+              Discord stores them inverted — a set bit *suppresses* — so the
+              checkbox is on when the bit is clear. */}
+          <Sub>System Messages Channel</Sub>
+          <Select
+            value={server.systemChannelId ?? ''}
+            options={[
+              ['', 'No System Messages'] as const,
+              ...server.channels
+                .filter((c) => c.kind === 'text' || c.kind === 'announcement')
+                .map((c) => [c.id, `#${c.name}`] as const),
+            ]}
+            onChange={(id) =>
+              onPatch((sv) => ({ ...sv, systemChannelId: id || null }), {
+                action: id ? 'System messages channel set' : 'System messages cleared',
+                target: server.channels.find((c) => c.id === id)?.name ?? server.name,
+              })
+            }
+          />
+          {SYSTEM_MESSAGES.map(([bit, label]) => (
+            <Check
+              key={bit}
+              label={label}
+              value={((server.systemFlags ?? 0) & bit) === 0}
+              onChange={(on) =>
+                onPatch(
+                  (sv) => ({
+                    ...sv,
+                    systemFlags: on ? (sv.systemFlags ?? 0) & ~bit : (sv.systemFlags ?? 0) | bit,
+                  }),
+                  { action: on ? 'System message enabled' : 'System message suppressed', target: label },
+                )
+              }
+            />
+          ))}
+
           <Divider />
           <Sub>Default Notification Settings</Sub>
           <Note>

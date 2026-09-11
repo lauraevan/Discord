@@ -496,41 +496,51 @@ export const initialsOf = (name: string) =>
     .join('')
     .toUpperCase()
 
-/** The one server the account starts with — the user's own, and empty. */
-export const makeServer = (name: string, color = '#5865f2'): Server => ({
-  id: uid('srv'),
-  name,
-  initials: initialsOf(name),
-  color,
-  categories: [
-    { id: 'text', name: 'Text Channels' },
-    { id: 'voice', name: 'Voice Channels' },
-  ],
-  // Discord gives a new server exactly these two, which is also what keeps the
-  // welcome checklist up until you build the channel list out
-  channels: [
-    { id: uid('ch'), name: 'general', kind: 'text', categoryId: 'text' },
-    { id: uid('ch'), name: 'General', kind: 'voice', categoryId: 'voice' },
-  ],
-  // every server has @everyone; Discord shows it at the bottom of the role list
-  roles: [
-    {
-      id: 'everyone',
-      name: '@everyone',
-      color: null,
-      hoist: false,
-      mentionable: false,
-      permissions: DEFAULT_PERMISSIONS,
-    },
-  ],
-  emojis: [],
-  invites: [],
-  bans: [],
-  audit: [],
-  notifyLevel: 1,
-  boostTier: 0,
-  createdAt: Date.now(),
-})
+/**
+ * The one server the account starts with — the user's own, and empty.
+ *
+ * Discord gives a new server exactly two channels, which is also what keeps
+ * the welcome checklist up until you build the channel list out. The text one
+ * is where its system messages go, so it is lifted out to be named twice.
+ */
+export const makeServer = (name: string, color = '#5865f2'): Server => {
+  const general = { id: uid('ch'), name: 'general', kind: 'text' as const, categoryId: 'text' }
+  return {
+    id: uid('srv'),
+    name,
+    initials: initialsOf(name),
+    color,
+    categories: [
+      { id: 'text', name: 'Text Channels' },
+      { id: 'voice', name: 'Voice Channels' },
+    ],
+    channels: [general, { id: uid('ch'), name: 'General', kind: 'voice', categoryId: 'voice' }],
+    // every server has @everyone; Discord shows it at the bottom of the role list
+    roles: [
+      {
+        id: 'everyone',
+        name: '@everyone',
+        color: null,
+        hoist: false,
+        mentionable: false,
+        permissions: DEFAULT_PERMISSIONS,
+      },
+    ],
+    emojis: [],
+    invites: [],
+    bans: [],
+    audit: [],
+    notifyLevel: 1,
+    boostTier: 0,
+    // Discord's own defaults for a fresh guild: system messages in #general
+    // with nothing suppressed, no inactive channel, a five-minute timeout.
+    systemChannelId: general.id,
+    systemFlags: 0,
+    afkChannelId: null,
+    afkTimeout: 300,
+    createdAt: Date.now(),
+  }
+}
 
 /** Invite codes are 8 characters of Discord's alphabet. */
 export const inviteCode = () => {
