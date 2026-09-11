@@ -35,6 +35,12 @@ export type Tokens = {
   scrollbarThin: string
   /** --background-surface-highest — the tooltip's fill, and its pointer's */
   tip: string
+  /**
+   * --modal-background, which --modal-footer-background also resolves to: the
+   * refresh paints a modal's footer the same colour as its body, where the
+   * 2023 client dropped it to a darker bar.
+   */
+  modalBg: string
   /** --input-background-default: a black wash over whatever is behind it */
   inputBg: string
   /** --input-border-default, heavier than --border-subtle */
@@ -125,6 +131,7 @@ const dark: Tokens = {
   scrollbar: '#666770', // --scrollbar-auto-thumb
   scrollbarThin: '#5f606a', // --scrollbar-thin-thumb
   tip: '#2c2d32', // --background-surface-highest
+  modalBg: '#242429', // --modal-background
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#8f9097', // --input-placeholder-text-default
@@ -166,6 +173,7 @@ const ash: Tokens = {
   scrollbar: '#7d7e87', // --scrollbar-auto-thumb
   scrollbarThin: '#767780', // --scrollbar-thin-thumb
   tip: '#3f4048', // --background-surface-highest
+  modalBg: '#383b40', // --modal-background
   inputBg: '#00000014', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#a4a5ab', // --input-placeholder-text-default
@@ -207,6 +215,7 @@ const onyx: Tokens = {
   scrollbar: '#595a63', // --scrollbar-auto-thumb
   scrollbarThin: '#595a63', // --scrollbar-thin-thumb
   tip: '#17181b', // --background-surface-highest
+  modalBg: '#0a0a0c', // --modal-background
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f3d', // --input-border-default
   placeholder: '#7d7e87', // --input-placeholder-text-default
@@ -252,6 +261,7 @@ const light: Tokens = {
   scrollbar: '#8f9097', // --scrollbar-auto-thumb
   scrollbarThin: '#8b8c94', // --scrollbar-thin-thumb
   tip: '#ffffff', // --background-surface-highest
+  modalBg: '#ffffff', // --modal-background
   inputBg: '#00000005', // --input-background-default
   inputBorder: '#97979f66', // --input-border-default
   placeholder: '#696a73', // --input-placeholder-text-default
@@ -392,6 +402,7 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--scrollbar', k.scrollbar)
   r.style.setProperty('--scrollbar-thin', k.scrollbarThin)
   r.style.setProperty('--tip-bg', k.tip)
+  r.style.setProperty('--modal-bg', k.modalBg)
   r.style.setProperty('--input-bg', k.inputBg)
   r.style.setProperty('--input-border', k.inputBorder)
   r.style.setProperty('--placeholder', k.placeholder)

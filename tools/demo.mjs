@@ -21,13 +21,13 @@ await say('links: [the docs](https://discord.com) · https://example.com · #gen
 await say(':joy::fire::100:')
 // react to the code block message
 await p.locator('.group').nth(3).hover()
-await p.locator('.group').nth(3).locator('.msg-actions button').first().click()
+await p.locator('.group').nth(3).locator('.msg-acts [aria-label="Add reaction"]').click()
 await p.waitForSelector('.picker')
 await p.fill('.picker-search input', 'fire')
 await p.click('.picker-cell')
 await p.waitForTimeout(150)
 await p.locator('.group').nth(3).hover()
-await p.locator('.group').nth(3).locator('.msg-actions button').first().click()
+await p.locator('.group').nth(3).locator('.msg-acts [aria-label="Add reaction"]').click()
 await p.waitForSelector('.picker')
 await p.fill('.picker-search input', '100')
 await p.click('.picker-cell')
@@ -47,7 +47,7 @@ if (process.argv[3]) {
 }
 if (process.argv[4]) {
   await p.locator('.group').last().hover()
-  await p.locator('.group').last().locator('.msg-actions button').first().click()
+  await p.locator('.group').last().locator('.msg-acts [aria-label="Add reaction"]').click()
   await p.waitForSelector('.picker')
   await p.waitForTimeout(300)
   await p.screenshot({ path: process.argv[4] })
