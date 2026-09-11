@@ -3652,6 +3652,50 @@ h3.md-h {
   color: var(--text);
 }
 
+/* Discord's filled brand button, at --control-input-height-md */
+.set-upload {
+  height: calc(40px * var(--u));
+  padding: 0 calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--blurple);
+  color: #fff;
+  font-size: calc(14px * var(--u));
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: calc(16px * var(--u));
+}
+
+.set-upload:hover {
+  background: #4752c4;
+}
+
+.set-upload:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.set-error {
+  margin: calc(-8px * var(--u)) 0 calc(16px * var(--u));
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--critical);
+}
+
+/* The requirements Discord lists under an uploader */
+.set-reqs {
+  list-style: none;
+  margin-bottom: calc(20px * var(--u));
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--u));
+}
+
+.set-reqs li {
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--muted);
+}
+
 .set-unavailable {
   display: flex;
   flex-direction: column;
@@ -3732,7 +3776,7 @@ h3.md-h {
   align-items: center;
   gap: calc(16px * var(--u));
   padding: 0 calc(16px * var(--u)) calc(16px * var(--u));
-  margin-top: -40px;
+  margin-top: calc(-40px * var(--u));
 }
 
 .acct-avatar {

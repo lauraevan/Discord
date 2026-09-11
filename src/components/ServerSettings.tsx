@@ -19,8 +19,7 @@ import {
   type Role,
   type Server,
 } from '../data'
-import { EMOJI } from '../emoji'
-import { EmojiByName, EmojiGlyph } from '../markdown'
+import { EmojiByName, GuildEmojiGlyph } from '../markdown'
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -116,11 +115,47 @@ export function ServerSettings({
   const [roleTab, setRoleTab] = useState<'display' | 'permissions' | 'members'>('display')
   const [roleQuery, setRoleQuery] = useState('')
   const [permQuery, setPermQuery] = useState('')
-  const [emojiQuery, setEmojiQuery] = useState('')
+  const [emojiError, setEmojiError] = useState('')
   const [addRoleOpen, setAddRoleOpen] = useState(false)
   const [auditWho, setAuditWho] = useState('')
   const [auditWhat, setAuditWhat] = useState('')
   const iconFile = useRef<HTMLInputElement>(null)
+
+  const emojiFile = useRef<HTMLInputElement>(null)
+
+  /**
+   * Upload an emoji. Discord's rules, checked in its own order: the slot
+   * count, then the 256 KB ceiling, then the name — which it derives from the
+   * file name, lower-cased, with anything but a letter, digit or underscore
+   * dropped, and which has to survive that at two characters or more.
+   */
+  const addEmoji = (f: File | undefined) => {
+    if (!f) return
+    setEmojiError('')
+    if (server.emojis.length >= SERVER_CAPS.emoji[server.boostTier]) {
+      setEmojiError('Maximum number of emojis reached (' + SERVER_CAPS.emoji[server.boostTier] + ')')
+      return
+    }
+    if (f.size > CAPS.emojiKb * 1024) {
+      setEmojiError(`Emoji must be under ${CAPS.emojiKb} KB in size.`)
+      return
+    }
+    const name = f.name
+      .replace(/\.[^.]+$/, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '')
+    if (name.length < 2) {
+      setEmojiError('Name must be at least 2 characters long')
+      return
+    }
+    const r = new FileReader()
+    r.onload = () =>
+      onPatch(
+        (sv) => ({ ...sv, emojis: [...sv.emojis, { id: uid('emo'), name, url: String(r.result) }] }),
+        { action: 'Emoji added', target: `:${name}:` },
+      )
+    r.readAsDataURL(f)
+  }
 
   /** Overview's icon picker takes an image and keeps it as a data URL. */
   const pickIcon = (f: File | undefined) => {
@@ -739,51 +774,36 @@ export function ServerSettings({
         <>
           <Title>Emoji</Title>
           <Note>
-            {server.emojis.length} of {SERVER_CAPS.emoji[server.boostTier]} slots used — a server
-            starts with 50 and boosts take it to 100, 150 and 250. Anyone in the server can use
-            them; animated GIF emoji may be used by members with Nitro. Upload needs a file host,
-            so this picks from the bundled set instead.
+            Add up to {SERVER_CAPS.emoji[server.boostTier]} custom emoji that anyone can use in
+            this server. Animated GIF emoji may be used by members with Discord Nitro. Emoji names
+            must be at least 2 characters long and can only contain alphanumeric characters and
+            underscores. Emoji must be under {CAPS.emojiKb} KB in size.
           </Note>
-          <div className="emoji-add">
-            <input
-              value={emojiQuery}
-              placeholder="Search the set to add an emoji"
-              aria-label="Search emoji"
-              onChange={(e) => setEmojiQuery(e.target.value)}
-            />
-          </div>
-          {emojiQuery.trim() ? (
-            <div className="emoji-results">
-              {EMOJI.filter((e) => e.name.includes(emojiQuery.trim().toLowerCase()))
-                .slice(0, 24)
-                .map((e) => (
-                  <button
-                    key={e.code}
-                    className="emoji-result"
-                    onClick={() => {
-                      onPatch(
-                        (s) =>
-                          s.emojis.some((x) => x.name === e.name) ||
-                          s.emojis.length >= SERVER_CAPS.emoji[s.boostTier]
-                            ? s
-                            : {
-                                ...s,
-                                emojis: [
-                                  ...s.emojis,
-                                  { id: uid('emo'), name: e.name, code: e.code },
-                                ],
-                              },
-                        { action: 'Emoji added', target: `:${e.name}:` },
-                      )
-                      setEmojiQuery('')
-                    }}
-                  >
-                    <EmojiGlyph code={e.code} alt={e.name} />
-                    <span>:{e.name}:</span>
-                  </button>
-                ))}
-            </div>
-          ) : null}
+          <button
+            className="set-upload"
+            disabled={server.emojis.length >= SERVER_CAPS.emoji[server.boostTier]}
+            onClick={() => emojiFile.current?.click()}
+          >
+            Upload Emoji
+          </button>
+          <input
+            ref={emojiFile}
+            type="file"
+            accept="image/png,image/jpeg,image/gif,image/webp,image/avif"
+            hidden
+            onChange={(e) => addEmoji(e.target.files?.[0])}
+          />
+          {emojiError ? <div className="set-error">{emojiError}</div> : null}
+          {/* Discord's own requirements list, under the button */}
+          <ul className="set-reqs">
+            <li>File type: JPEG, PNG, GIF, WEBP, AVIF</li>
+            <li>Recommended file size: {CAPS.emojiKb} KB</li>
+            <li>Recommended dimensions: 128x128</li>
+            <li>
+              Naming: Emoji names must be at least 2 characters long and can only contain
+              alphanumeric characters and underscores
+            </li>
+          </ul>
           <div className="emoji-table">
             <div className="emoji-table-head">
               <span>IMAGE</span>
@@ -793,7 +813,7 @@ export function ServerSettings({
             </div>
             {server.emojis.map((e) => (
               <div className="emoji-row" key={e.id}>
-                <EmojiGlyph code={e.code} alt={e.name} />
+                <GuildEmojiGlyph emoji={e} />
                 <span className="emoji-name">:{e.name}:</span>
                 <span className="emoji-by">
                   <Avatar account={account} size={20} status={false} />

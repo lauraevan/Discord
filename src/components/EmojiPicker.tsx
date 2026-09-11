@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CATEGORIES, EMOJI } from '../emoji'
-import { EmojiByName, EmojiGlyph } from '../markdown'
+import { EmojiByName, EmojiGlyph, GuildEmojiGlyph } from '../markdown'
 import {
   GifIcon,
   SearchIcon,
@@ -47,6 +47,11 @@ export function EmojiPicker({
   view?: PickerView
   server?: Server | null
   gifs?: FavouriteGif[]
+  /**
+   * Picking an emoji does not close the picker: Discord inserts it in the
+   * message box and leaves the picker up so you can pick another. Whoever
+   * opened it for a reaction closes it themselves.
+   */
   onPick: (name: string) => void
   onSticker?: (id: string) => void
   onGif?: (id: string) => void
@@ -58,7 +63,9 @@ export function EmojiPicker({
   const gifScroller = useRef<HTMLDivElement>(null)
   const [view, setView] = useState<PickerView>(initialView)
   const [q, setQ] = useState('')
-  const [hover, setHover] = useState(EMOJI[0])
+  // holds either a unicode emoji (name + code) or one of the server's own
+  // (name + url), so the footer can preview both
+  const [hover, setHover] = useState<{ name: string; code?: string; url?: string }>(EMOJI[0])
   const ref = useRef<HTMLDivElement>(null)
   const scroller = useRef<HTMLDivElement>(null)
 
@@ -88,6 +95,7 @@ export function EmojiPicker({
   const stickers = (server?.stickers ?? []).filter(
     (st) => !term || st.name.toLowerCase().includes(term) || st.related.includes(term),
   )
+  const own = (server?.emojis ?? []).filter((e) => !term || e.name.includes(term))
   const sounds = (server?.sounds ?? []).filter(
     (sd) => !term || sd.name.toLowerCase().includes(term),
   )
@@ -286,6 +294,19 @@ export function EmojiPicker({
       ) : (
       <div className="picker-body">
         <div className="picker-rail">
+          {own.length ? (
+            <button
+              aria-label={server?.name ?? 'Server'}
+              title={server?.name ?? 'Server'}
+              onClick={() =>
+                scroller.current
+                  ?.querySelector('[data-cat="own"]')
+                  ?.scrollIntoView({ block: 'start' })
+              }
+            >
+              <GuildEmojiGlyph emoji={own[0]} />
+            </button>
+          ) : null}
           {groups.map((g) => (
             <button
               key={g.id}
@@ -302,6 +323,25 @@ export function EmojiPicker({
           ))}
         </div>
         <div className="picker-grid" ref={scroller}>
+          {/* Discord lists the server's own emoji above the unicode set */}
+          {own.length ? (
+            <div data-cat="own">
+              <div className="picker-cat">{server?.name ?? 'Server'}</div>
+              <div className="picker-row">
+                {own.map((e) => (
+                  <button
+                    key={e.id}
+                    className="picker-cell"
+                    aria-label={`:${e.name}:`}
+                    onMouseEnter={() => setHover(e)}
+                    onClick={() => onPick(e.name)}
+                  >
+                    <GuildEmojiGlyph emoji={e} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {groups.map((g) => (
             <div key={g.id} data-cat={g.id}>
               <div className="picker-cat">{g.label}</div>
@@ -312,10 +352,7 @@ export function EmojiPicker({
                     className="picker-cell"
                     aria-label={`:${e.name}:`}
                     onMouseEnter={() => setHover(e)}
-                    onClick={() => {
-                      onPick(e.name)
-                      onClose()
-                    }}
+                    onClick={() => onPick(e.name)}
                   >
                     <EmojiGlyph code={e.code} alt={e.name} />
                   </button>
@@ -323,13 +360,15 @@ export function EmojiPicker({
               </div>
             </div>
           ))}
-          {!groups.length ? <div className="picker-empty">No emoji matched.</div> : null}
+          {!groups.length && !own.length ? (
+            <div className="picker-empty">No emoji matched.</div>
+          ) : null}
         </div>
         </div>
       )}
       {view === 'emoji' ? (
         <div className="picker-foot">
-          <EmojiGlyph code={hover.code} alt={hover.name} />
+          <GuildEmojiGlyph emoji={hover} />
           <span>:{hover.name}:</span>
         </div>
       ) : null}

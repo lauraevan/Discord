@@ -234,6 +234,8 @@ export const CAPS = {
   channelsPerCategory: 50,
   categories: 50,
   roleNameChars: 100,
+  /** "Emoji must be under 256 KB in size." — Discord's own Emoji page */
+  emojiKb: 256,
   /** "Each channel and DM supports up to 250 pinned messages." — Pin Messages FAQ */
   pins: 250,
   inviteCodes: 999,
@@ -292,7 +294,11 @@ export type Role = {
   permissions: string[]
 }
 
-export type GuildEmoji = { id: string; name: string; code: string }
+/**
+ * A server emoji. An uploaded one carries `url` (a data URL); `code` is a
+ * twemoji codepoint, kept for emoji saved before uploading worked.
+ */
+export type GuildEmoji = { id: string; name: string; code?: string; url?: string }
 
 /** A server sticker. Discord gives a server 5 slots before boosts. */
 export type GuildSticker = {

@@ -15,6 +15,8 @@ import { byChar, byName } from './emoji'
 
 export type MdContext = {
   channels?: { id: string; name: string }[]
+  /** the server's own emoji, so a :shortcode: for one resolves to its image */
+  emojis?: { name: string; code?: string; url?: string }[]
   members?: { id: string; name: string; color?: string }[]
   /** highlights the message when the reader is mentioned */
   self?: string
@@ -47,6 +49,30 @@ export function EmojiGlyph({ code, alt, big }: { code: string; alt: string; big?
       <use href={`#e-${code}`} />
     </svg>
   )
+}
+
+/**
+ * A server's own emoji. An uploaded one is an <img> of its data URL; one saved
+ * before uploading worked still carries a twemoji codepoint.
+ */
+export function GuildEmojiGlyph({
+  emoji,
+  big,
+}: {
+  emoji: { name: string; code?: string; url?: string }
+  big?: boolean
+}) {
+  if (emoji.url)
+    return (
+      <img
+        className={'emoji' + (big ? ' jumbo' : '')}
+        src={emoji.url}
+        alt={`:${emoji.name}:`}
+        draggable={false}
+      />
+    )
+  if (emoji.code) return <EmojiGlyph code={emoji.code} alt={`:${emoji.name}:`} big={big} />
+  return null
 }
 
 /** Surrogate-aware: pulls one user-perceived character off the front. */
@@ -147,6 +173,15 @@ function plain(src: string, ctx: MdContext, jumbo: boolean): ReactNode[] {
 
     if (src[i] === ':') {
       const m = /^:([a-z0-9_+-]{2,40}):/i.exec(rest)
+      // a server's own emoji wins over the unicode table, the way Discord's
+      // autocomplete puts the server's first
+      const own = m && ctx.emojis?.find((x) => x.name === m[1].toLowerCase())
+      if (m && own) {
+        flush()
+        out.push(<GuildEmojiGlyph key={key++} emoji={own} big={jumbo} />)
+        i += m[0].length
+        continue
+      }
       const e = m && byName[m[1].toLowerCase()]
       if (m && e) {
         flush()

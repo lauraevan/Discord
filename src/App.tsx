@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ChannelSidebar } from './components/ChannelSidebar'
 import { ChannelSettings } from './components/ChannelSettings'
 import { ChatFeed, ChatHeader } from './components/Chat'
@@ -948,9 +948,13 @@ function Client({
       ? (server?.categories.find((c) => c.id === channelModal.categoryId)?.name ?? 'this server')
       : ''
 
+  /** the composer's insert-at-caret, handed back by the composer itself */
+  const composerInject = useRef<((text: string) => void) | null>(null)
+
   const md: MdContext = {
     spoilers: prefs.renderSpoilers,
     channels: server?.channels ?? [],
+    emojis: server?.emojis ?? [],
     members: [{ id: 'self', name: account.name, color: account.color }],
     self: account.name,
     onChannel: (id) => setActiveChannel(id),
@@ -1514,6 +1518,8 @@ function Client({
                     onApps={() => setAppsPanel(true)}
                     premiumType={premiumType}
                     automod={server?.automod}
+                    emojis={server.emojis}
+                    inject={composerInject}
                     onGiftNitro={() => {
                       setActiveServer(null)
                       setHomeView('nitro')
@@ -1707,8 +1713,13 @@ function Client({
           view={picker.view}
           server={server}
           onPick={(name) => {
-            if (picker.target === 'composer') send(`:${name}:`)
-            else react(picker.target, name, picker.sup)
+            // Discord's picker inserts into the message box and stays open;
+            // only a reaction target closes it
+            if (picker.target === 'composer') composerInject.current?.(`:${name}: `)
+            else {
+              react(picker.target, name, picker.sup)
+              setPicker(null)
+            }
           }}
           onSticker={(id) => sendSticker(id)}
           gifs={account.gifs ?? []}

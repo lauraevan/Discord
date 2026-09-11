@@ -9,6 +9,9 @@ await p.goto('file://' + process.cwd() + '/dist/index.html')
 await p.waitForTimeout(500)
 await p.click('[aria-label="User settings"]')
 await p.waitForSelector('.settings-layer', { timeout: 3000 })
+// the layer springs in on a 64ms delay, so it is still transparent the
+// instant the selector resolves
+await p.waitForTimeout(500)
 await p.screenshot({ path: process.argv[2] })
 await p.click('.settings-item:has-text("Appearance")')
 await p.waitForTimeout(250)

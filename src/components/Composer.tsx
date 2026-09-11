@@ -7,6 +7,7 @@ import {
   type Attachment,
   type AutoModRule,
   type Channel,
+  type GuildEmoji,
   type Message,
   convertEmoticons,
 } from "../data";
@@ -16,7 +17,7 @@ import type { Prefs } from "../prefs";
 import { fileIcon, fileSize, isImage } from "../files";
 import { messageLimit, uploadLimitMb, type PremiumTypeValue } from "../nitro";
 import { EMOJI } from "../emoji";
-import { EmojiGlyph } from "../markdown";
+import { GuildEmojiGlyph } from "../markdown";
 import {
   AppsIcon,
   ChevronRightIcon,
@@ -46,6 +47,8 @@ type Suggestion = {
   hint?: string;
   insert: string;
   code?: string;
+  /** set on one of the server's own emoji: its picture, as a data URL */
+  url?: string;
 };
 
 /**
@@ -57,6 +60,7 @@ function useAutocomplete(
   caret: number,
   channels: Channel[],
   account: Account,
+  emojis: GuildEmoji[],
 ) {
   return useMemo(() => {
     const upto = value.slice(0, caret);
@@ -86,14 +90,24 @@ function useAutocomplete(
       ].filter((s) => s.label.toLowerCase().includes(q) || s.hint!.includes(q));
     } else if (sigil === ":") {
       if (term.length < 1) return null;
-      items = EMOJI.filter((e) => e.name.includes(q))
-        .slice(0, 10)
-        .map((e) => ({
+      // the server's own emoji come first, the way Discord's list does
+      items = [
+        ...emojis
+          .filter((e) => e.name.includes(q))
+          .map((e) => ({
+            key: e.id,
+            label: `:${e.name}:`,
+            insert: `:${e.name}: `,
+            code: e.code,
+            url: e.url,
+          })),
+        ...EMOJI.filter((e) => e.name.includes(q)).map((e) => ({
           key: e.code,
           label: `:${e.name}:`,
           insert: `:${e.name}: `,
           code: e.code,
-        }));
+        })),
+      ].slice(0, 10);
     } else {
       items = Object.keys(SLASH)
         .filter((n) => n.startsWith(q))
@@ -106,7 +120,7 @@ function useAutocomplete(
     }
     if (!items.length) return null;
     return { sigil, start, items: items.slice(0, 10) };
-  }, [value, caret, channels, account]);
+  }, [value, caret, channels, account, emojis]);
 }
 
 /**
@@ -150,6 +164,8 @@ export function Composer({
   premiumType,
   onGiftNitro,
   automod,
+  emojis = [],
+  inject,
 }: {
   /** the composer's own display settings */
   prefs: Prefs
@@ -170,6 +186,14 @@ export function Composer({
   onGiftNitro: () => void;
   /** the server's AutoMod rules, which block a message before it is sent */
   automod?: AutoModRule[];
+  /** the server's own emoji, for the `:` autocomplete */
+  emojis?: GuildEmoji[];
+  /**
+   * A seam for the expression picker. Discord's picker inserts at the caret
+   * rather than sending, and the composer owns the text, so it hands the
+   * insert back out through this ref.
+   */
+  inject?: { current: ((text: string) => void) | null };
 }) {
   const [value, setValue] = useState("");
   const [blocked, setBlocked] = useState<string | null>(null);
@@ -213,7 +237,7 @@ export function Composer({
       ]);
     r.readAsDataURL(f);
   };
-  const ac = useAutocomplete(value, caret, channels, account);
+  const ac = useAutocomplete(value, caret, channels, account, emojis);
 
   useEffect(() => {
     if (replyTo) input.current?.focus();
@@ -229,6 +253,30 @@ export function Composer({
 
   // clamp rather than reset from an effect: the list shrinks as you type
   const sel = ac ? Math.min(pick, ac.items.length - 1) : 0;
+
+  /**
+   * Insert at the caret. Discord's expression picker puts the emoji in the
+   * message box rather than sending it, and leaves the picker open, so this
+   * is what it calls.
+   */
+  useEffect(() => {
+    if (!inject) return;
+    inject.current = (text: string) => {
+      const el = input.current;
+      const at = el?.selectionStart ?? value.length;
+      const end = el?.selectionEnd ?? at;
+      setValue(value.slice(0, at) + text + value.slice(end));
+      const c = at + text.length;
+      requestAnimationFrame(() => {
+        el?.focus();
+        el?.setSelectionRange(c, c);
+        setCaret(c);
+      });
+    };
+    return () => {
+      inject.current = null;
+    };
+  }, [inject, value]);
 
   const accept = (s: Suggestion) => {
     if (!ac) return;
@@ -335,7 +383,9 @@ export function Composer({
                 accept(s);
               }}
             >
-              {s.code ? <EmojiGlyph code={s.code} alt={s.label} /> : null}
+              {s.url || s.code ? (
+                <GuildEmojiGlyph emoji={{ name: s.label, code: s.code, url: s.url }} />
+              ) : null}
               <span className="ac-label">{s.label}</span>
               {s.hint ? <span className="ac-hint">{s.hint}</span> : null}
             </button>

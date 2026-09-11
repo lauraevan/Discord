@@ -156,13 +156,20 @@ await step('server settings: audit log recorded it', async () => {
   await p.click('.settings-item:has-text("Audit Log")')
   if (!(await p.locator('.audit-row').count())) throw new Error('empty audit log')
 })
-await step('server settings: add an emoji', async () => {
+await step('server settings: upload an emoji', async () => {
   await p.click('.server-header')
   await p.click('.ctx-item:has-text("Server Settings")')
   await p.click('.settings-item:has-text("Emoji")')
-  await p.fill('[aria-label="Search emoji"]', 'fire')
-  await p.click('.emoji-result')
-  if (!(await p.locator('.emoji-row').count())) throw new Error('emoji not added')
+  // a 1x1 transparent PNG, well under Discord's 256 KB ceiling
+  await p.setInputFiles('.settings-content input[type=file]', {
+    name: 'blobfire.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+      'base64',
+    ),
+  })
+  await p.waitForSelector('.emoji-row', { timeout: 3000 })
 })
 await step('server settings: mint an invite', async () => {
   await p.click('.server-header')
