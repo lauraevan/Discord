@@ -1733,10 +1733,6 @@ function Template({ server }: { server: Server }) {
         </span>
         <code>https://discord.new/{code}</code>
       </div>
-      <Note>
-        The link is the shape Discord mints. It resolves on Discord's side, so it will not open
-        anything from here.
-      </Note>
     </>
   )
 }
@@ -1747,11 +1743,18 @@ function Vanity({ server, onPatch }: { server: Server; onPatch: Patch }) {
   return (
     <>
       <Title>Custom Invite Link</Title>
+      <Note>
+        Bring others to your server easily with your own customized invite link. Heads up though,
+        anyone with the link can join and you'll need at least one text channel that is open to
+        all server members.
+      </Note>
+      {/* Discord gates the vanity URL behind Level 3, and says how far off it
+          is on the perks list rather than in a paragraph here. */}
       {unlocked ? null : (
-        <Note>
-          Level 3 unlocks this. The server is Level {server.boostTier} with{' '}
-          {server.boosts ?? 0} boosts — {BOOST_TIERS[3] - (server.boosts ?? 0)} more to go.
-        </Note>
+        <div className="set-locked">
+          Boost this server to Level 3 to unlock a custom invite link —{' '}
+          {BOOST_TIERS[3] - (server.boosts ?? 0)} more Boosts to go.
+        </div>
       )}
       <div className="srv-vanity">
         <span>discord.gg/</span>
@@ -2086,8 +2089,9 @@ function AutoMod({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>AutoMod</Title>
       <Note>
-        The trigger and action numbers are Discord's own. A rule that blocks a message really
-        blocks it — the composer refuses to send one that matches.
+        Set up rules for moderation in your server to automatically filter content and post
+        alerts to keep your server safe around the clock. Users with Admin permissions will be
+        ignored from AutoMod rules.
       </Note>
       <div className="srv-automod-add">
         {Object.entries(TRIGGER_LABEL).map(([t, label]) => (
@@ -2216,7 +2220,7 @@ function Discovery({ server, onPatch }: { server: Server; onPatch: Patch }) {
     [
       members >= 500,
       '500 or more members',
-      `This server has ${members}, because there is no account server behind the page for anyone else to join from.`,
+      `This server has ${members}.`,
     ],
     [
       weeks >= 8,
@@ -2391,12 +2395,13 @@ function Community({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>Enable Community</Title>
       <Note>
-        A community server needs a rules channel and a channel for Discord's own updates, and
-        Discord requires verification and the content filter turned up before it will switch on.
+        Community Servers are larger spaces built around shared interests. Enabling Community
+        requires setting up safety settings, Rules and Updates channels, and moderation
+        settings.
       </Note>
       <Toggle
         label="Community enabled"
-        note="Adds the rules and updates channels, and the Server Guide."
+        note="Community Servers are required to have a rules channel and a Community Updates channel where Discord can send important community server updates."
         value={community != null}
         onChange={(on) =>
           onPatch(
@@ -2471,8 +2476,7 @@ function Onboarding({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>Onboarding</Title>
       <Note>
-        Discord requires a community server, a default channel, and questions before onboarding
-        can be turned on. The default channels are the ones a new member sees first.
+        Choose the top channels that all new members should start with.
       </Note>
       <Sub>Default channels ({defaults.length})</Sub>
       <ul className="srv-onboarding">
@@ -2504,8 +2508,7 @@ function ServerGuide({ server }: { server: Server }) {
     <>
       <Title>Server Guide</Title>
       <Note>
-        The guide is built out of the server's own channels: the ones to read first, and the ones
-        to say hello in.
+        Set up your Server Guide to help new members get started.
       </Note>
       <div className="srv-guide">
         <h4>Resources</h4>

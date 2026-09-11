@@ -4443,6 +4443,20 @@ h3.md-h {
   border-radius: calc(8px * var(--u));
 }
 
+/* the line Discord puts over a control a boost level still gates */
+.set-locked {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  padding: calc(10px * var(--u)) calc(12px * var(--u));
+  margin-bottom: calc(12px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--hover);
+  font-size: calc(14px * var(--u));
+  line-height: calc(18px * var(--u));
+  color: var(--muted);
+}
+
 .table-empty.tall {
   padding-block: calc(60px * var(--u));
 }
