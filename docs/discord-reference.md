@@ -364,8 +364,17 @@ it dimmer than it is. Running tally, frame cost against capture gain:
 | header rules at 7.6% rather than 4.5% | +0.005 | +0.002 |
 | title bar 30 and headers 48, rail 72 | +0.056 | -0.116 |
 | no Support Tools button in the title bar | +0.008 | -0.020 |
+| chat header's right group: both ends on the capture | +0.060 | -0.105 |
 
-The frame is at 1.35 where it could be 1.10, and the capture at 2.83 where it
+The chat header's right-hand group is the newest of these and the clearest:
+every length in it had been fitted to the frame, and against the captures the
+whole group sat left — its right-most ink on 1348 where the capture has 1351,
+its left-most on 950.5 where the capture has 956.5. Moving it 3 right, taking
+the search box to Discord's own `max-width: 244px` and closing the four gaps by
+1 real px each puts all three ends on the capture exactly and takes the headers
+region from 4.965 to 4.015.
+
+The frame is at 1.45 where it could be 1.10, and the capture at 2.64 where it
 started at 4.59. Eighteen of the twenty landmarks in `tools/landmarks.mjs` —
 whose expectations are read off the captures, not remembered — now measure
 exactly zero, against fourteen before.
