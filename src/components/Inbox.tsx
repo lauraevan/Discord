@@ -98,15 +98,12 @@ export function Inbox({
                 <b>You're all caught up!</b>
                 <span>Nothing unread in this server.</span>
               </>
-            ) : tab === 'mentions' ? (
-              <>
-                <b>No mentions</b>
-                <span>Nobody has mentioned you — there is nobody else here to do it.</span>
-              </>
             ) : (
+              // Discord's own two lines for an empty Inbox tab, rather than a
+              // sentence here about why it is empty
               <>
-                <b>Nothing for you yet</b>
-                <span>For You surfaces posts Discord picks for you, which needs their servers.</span>
+                <b>It's quiet for now...</b>
+                <span>No activity over the last 7 days</span>
               </>
             )}
           </div>

@@ -18,8 +18,6 @@ export type MdContext = {
   /** the server's own emoji, so a :shortcode: for one resolves to its image */
   emojis?: { name: string; code?: string; url?: string }[]
   members?: { id: string; name: string; color?: string }[]
-  /** highlights the message when the reader is mentioned */
-  self?: string
   onChannel?: (id: string) => void
   /**
    * "Show spoiler content" — Discord's three-way setting. `always` reveals

@@ -13,9 +13,9 @@ export function TitleBar({
   return (
     <header className="titlebar">
       <div className="win-title">
-        <span className="mark">
-          {initials}
-        </span>
+        {/* on Home there is no guild to mark, and Discord shows the title on
+            its own rather than an empty tile beside it */}
+        {initials ? <span className="mark">{initials}</span> : null}
         <span className="wt">{title}</span>
       </div>
       <div className="win-actions">

@@ -1049,7 +1049,6 @@ function Client({
     channels: server?.channels ?? [],
     emojis: server?.emojis ?? [],
     members: [{ id: 'self', name: account.name, color: account.color }],
-    self: account.name,
     onChannel: (id) => setActiveChannel(id),
   }
 

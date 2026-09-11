@@ -98,13 +98,6 @@ export function HomeSidebar({
           </button>
         </Tooltip>
       </div>
-      <div className="dm-empty">
-        <p>No conversations yet.</p>
-        <span>
-          Direct messages need someone to message — that takes an account server, which a page
-          does not have.
-        </span>
-      </div>
     </div>
   )
 }

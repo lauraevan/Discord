@@ -13,6 +13,13 @@ const cases = {
   'v3 server (no roles)': { 'discord-ui:v3:servers': '[{"id":"s","name":"X","initials":"X","color":"#000","categories":[],"channels":[]}]' },
   'v4 server missing audit': { 'discord-ui:v4:servers': '[{"id":"s","name":"X","initials":"X","color":"#000","categories":[],"channels":[],"roles":[],"emojis":[],"invites":[]}]' },
   'nothing stored': {},
+  // the remembered view: a corrupt one, and one naming a server and channel
+  // that no longer exist, both have to fall back rather than blank the client
+  'unparseable view': { 'discord-ui:v4:view': '{oh no' },
+  'view of the wrong shape': { 'discord-ui:v4:view': '{"server":7,"channels":[]}' },
+  'view pointing at a server that is gone': {
+    'discord-ui:v4:view': '{"server":"ghost","channels":{"ghost":"nope"},"collapsed":[],"muted":false,"deafened":false}',
+  },
   // corrupt credentials or a session naming an account that is gone must fall
   // back to the account screens rather than a blank client
   'bad credentials': { 'discord-ui:v4:credentials': '[{"username":5}]', __auth: 'register' },
