@@ -4420,6 +4420,26 @@ h3.md-h {
   gap: calc(12px * var(--u));
 }
 
+/* Dragging a channel row: the held row fades, the row it will land above
+   takes a brand line, and an empty category lights up as a target. */
+.srv-channels li[draggable='true'] {
+  cursor: grab;
+}
+
+.srv-channels li.dragging {
+  opacity: 0.4;
+}
+
+.srv-channels li.drop-before {
+  box-shadow: inset 0 calc(2px * var(--u)) 0 var(--blurple);
+}
+
+.srv-cat.drop {
+  outline: calc(2px * var(--u)) solid var(--blurple);
+  outline-offset: calc(-2px * var(--u));
+  border-radius: calc(8px * var(--u));
+}
+
 .ban-row {
   display: flex;
   align-items: center;

@@ -135,10 +135,35 @@ await p.waitForTimeout(400)
 
 const logged = (await p.locator('.audit-row').allInnerTexts()).join(' | ')
 check('creating a channel is audited', /channel created/i.test(logged), logged)
-check(
-  'and the pane names Discord\'s 45-day retention',
-  (await p.locator('.settings-pane').first().innerText()).includes('45 days'),
-)
+// Discord keeps 45 days of audit log and no more. Its page does not say so
+// anywhere, so the check has to be behavioural: age one entry past the line
+// and it should be gone, while one inside it stays.
+const before45 = await p.locator('.audit-row').count()
+await p.evaluate(() => {
+  const k = 'discord-ui:v4:servers'
+  const servers = JSON.parse(localStorage.getItem(k) ?? '[]')
+  for (const sv of servers) {
+    sv.audit.unshift(
+      { id: 'old', time: Date.now() - 46 * 864e5, action: 'Channel created', target: 'ancient' },
+      { id: 'recent', time: Date.now() - 44 * 864e5, action: 'Channel created', target: 'lately' },
+    )
+  }
+  localStorage.setItem(k, JSON.stringify(servers))
+  window.dispatchEvent(new StorageEvent('storage', { key: k }))
+})
+await p.reload()
+await p.waitForTimeout(600)
+await p.click('.server-header')
+await p.click('.ctx-item:has-text("Server Settings")')
+await p.waitForSelector('.settings-layer')
+await p.locator('.settings-item:has-text("Audit Log")').first().click()
+await p.waitForTimeout(400)
+const aged = (await p.locator('.audit-row').allInnerTexts()).join(' | ')
+check('an entry inside 45 days survives a reload', aged.includes('lately'), aged)
+check('an entry past 45 days is dropped', !aged.includes('ancient'), aged)
+check('the rest of the log is still there', (await p.locator('.audit-row').count()) > before45, {
+  before45,
+})
 const actions = await p.locator('.audit-filter select').nth(1).locator('option').allInnerTexts()
 check('Filter by Action lists what happened', actions[0] === 'All Actions' && actions.length > 1, actions)
 const all = await p.locator('.audit-row').count()

@@ -796,10 +796,6 @@ export function ServerSettings({
 
           {roleTab === 'members' && role.id !== 'everyone' ? (
             <>
-              <Note>
-                Roles are handed out here. This server has one member — you — because there is no
-                account server behind the page to hold anybody else.
-              </Note>
               <div className="role-members">
                 <div className="member-table-row">
                   <Avatar account={account} size={32} status={false} />
@@ -1113,11 +1109,8 @@ export function ServerSettings({
       {section === 'audit_log' ? (
         <>
           <Title>Audit Log</Title>
-          <Note>
-            A record of the changes made in this server. Every entry below is a real action you
-            took here. Discord keeps {CAPS.auditLogDays} days of it.
-          </Note>
-          {/* Discord's two filters, by member and by action type */}
+          {/* Discord's two filters, by member and by action type. Its page
+              carries no description under the title — just these. */}
           <div className="audit-filters">
             <label className="audit-filter">
               <span>Filter by User</span>
@@ -1158,9 +1151,7 @@ export function ServerSettings({
               ))
             ) : (
               <div className="table-empty">
-                {server.audit.length
-                  ? 'No results found'
-                  : 'Nothing has happened in this server yet.'}
+                {server.audit.length ? 'No results found' : 'No Logs Yet'}
               </div>
             )}
           </div>
@@ -1230,45 +1221,114 @@ type Patch = (fn: (s: Server) => Server, audit?: { action: string; target: strin
 /** CHANNELS — the list, with the categories and the ordering. */
 function Channels({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const [name, setName] = useState('')
+  // the id lives in a ref as well as in state: dragover and drop can arrive in
+  // the same tick as dragstart, before React has flushed the state
+  const held = useRef<string | null>(null)
+  const [drag, setDrag] = useState<string | null>(null)
+  const [over, setOver] = useState<string | null>(null)
   const inCategory = (id: string | null) => server.channels.filter((c) => c.categoryId === id)
+
+  /**
+   * Drop a channel. `before` is the channel it lands above, or null to put it
+   * at the end of that category's run. The sidebar reads its order straight
+   * off this array, so moving a channel here is a splice.
+   */
+  const drop = (dragId: string, categoryId: string | null, before: string | null) => {
+    const moving = server.channels.find((c) => c.id === dragId)
+    if (!moving || dragId === before) return
+    onPatch(
+      (s) => {
+        const held = s.channels.find((c) => c.id === dragId)
+        if (!held) return s
+        const rest = s.channels.filter((c) => c.id !== dragId)
+        const next = { ...held, categoryId }
+        if (before) rest.splice(rest.findIndex((c) => c.id === before), 0, next)
+        else {
+          let last = -1
+          rest.forEach((c, i) => {
+            if (c.categoryId === categoryId) last = i
+          })
+          rest.splice(last + 1, 0, next)
+        }
+        return { ...s, channels: rest }
+      },
+      { action: 'Channel moved', target: moving.name },
+    )
+  }
+
   return (
     <>
       <Title>Channels</Title>
-      <Note>
-        Categories and channels, in the order the sidebar shows them. Dragging is not wired up;
-        the arrows move a channel between categories.
-      </Note>
+      <Note>Categories and channels, in the order the sidebar shows them. Drag to reorder.</Note>
       <div className="srv-channels">
         {[null, ...server.categories.map((c) => c.id)].map((catId) => {
           const cat = server.categories.find((c) => c.id === catId)
           const rows = inCategory(catId)
           if (catId !== null && rows.length === 0 && cat == null) return null
           return (
-            <section key={catId ?? 'none'} className="srv-cat">
+            <section
+              key={catId ?? 'none'}
+              className={'srv-cat' + (over === (catId ?? 'none') ? ' drop' : '')}
+              onDragOver={(e) => {
+                if (!held.current) return
+                e.preventDefault()
+                setOver(catId ?? 'none')
+              }}
+              onDragLeave={() => setOver((o) => (o === (catId ?? 'none') ? null : o))}
+              onDrop={(e) => {
+                e.preventDefault()
+                if (held.current) drop(held.current, catId, null)
+                held.current = null
+                setDrag(null)
+                setOver(null)
+              }}
+            >
               <h4>{cat ? cat.name : 'No category'}</h4>
               {rows.length === 0 ? (
                 <div className="table-empty">Nothing in here.</div>
               ) : (
                 <ul>
                   {rows.map((ch) => (
-                    <li key={ch.id}>
+                    <li
+                      key={ch.id}
+                      draggable
+                      className={
+                        (drag === ch.id ? 'dragging' : '') + (over === ch.id ? ' drop-before' : '')
+                      }
+                      onDragStart={(e) => {
+                        held.current = ch.id
+                        setDrag(ch.id)
+                        e.dataTransfer.effectAllowed = 'move'
+                        // Firefox refuses to start a drag with no payload
+                        e.dataTransfer.setData('text/plain', ch.id)
+                      }}
+                      onDragEnd={() => {
+                        held.current = null
+                        setDrag(null)
+                        setOver(null)
+                      }}
+                      onDragOver={(e) => {
+                        if (!held.current || held.current === ch.id) return
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setOver(ch.id)
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (held.current) drop(held.current, catId, ch.id)
+                        held.current = null
+                        setDrag(null)
+                        setOver(null)
+                      }}
+                    >
                       <span className="srv-chan-kind">{ch.kind}</span>
                       <b>{ch.name}</b>
+                      {/* the select is the same move without a mouse */}
                       <select
                         value={ch.categoryId ?? ''}
-                        onChange={(e) =>
-                          onPatch(
-                            (s) => ({
-                              ...s,
-                              channels: s.channels.map((c) =>
-                                c.id === ch.id
-                                  ? { ...c, categoryId: e.target.value || null }
-                                  : c,
-                              ),
-                            }),
-                            { action: 'Channel moved', target: ch.name },
-                          )
-                        }
+                        aria-label={`Category for ${ch.name}`}
+                        onChange={(e) => drop(ch.id, e.target.value || null, null)}
                       >
                         <option value="">No category</option>
                         {server.categories.map((c) => (
