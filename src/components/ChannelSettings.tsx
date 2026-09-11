@@ -120,16 +120,25 @@ export function ChannelSettings({
                 interval, unless they have Manage Channel or Manage Messages permissions.
               </Note>
               <div className="slowmode">
-                <input
-                  type="range"
-                  min={0}
-                  max={SLOWMODE_STEPS.length - 1}
-                  value={Math.max(0, SLOWMODE_STEPS.indexOf(ov.draft.slowmode))}
-                  aria-label="Slowmode"
-                  onChange={(e) =>
-                    ov.patch((d) => ({ ...d, slowmode: SLOWMODE_STEPS[Number(e.target.value)] }))
+                <div
+                  className="dslider"
+                  style={
+                    {
+                      '--fill': `${(Math.max(0, SLOWMODE_STEPS.indexOf(ov.draft.slowmode)) / (SLOWMODE_STEPS.length - 1)) * 100}%`,
+                    } as React.CSSProperties
                   }
-                />
+                >
+                  <input
+                    type="range"
+                    min={0}
+                    max={SLOWMODE_STEPS.length - 1}
+                    value={Math.max(0, SLOWMODE_STEPS.indexOf(ov.draft.slowmode))}
+                    aria-label="Slowmode"
+                    onChange={(e) =>
+                      ov.patch((d) => ({ ...d, slowmode: SLOWMODE_STEPS[Number(e.target.value)] }))
+                    }
+                  />
+                </div>
                 <span>{slowmodeLabel(ov.draft.slowmode)}</span>
               </div>
               {forum ? (

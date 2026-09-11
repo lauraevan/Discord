@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import {
   bannerColorOf,
   statusLabel,
@@ -283,11 +284,14 @@ export function UserSettings({
             ]}
           />
           <Divider />
+          {/* the two Appearance sliders Discord dashes: its font ladder is
+              12/14/16/18/20/24, and message spacing 0/4/8/16/24 */}
           <Slider
             label="Chat Font Scaling"
             value={prefs.fontScale}
             min={12}
             max={24}
+            marks={[12, 14, 16, 18, 20, 24]}
             suffix="px"
             onChange={(v) => set('fontScale', v)}
           />
@@ -296,6 +300,7 @@ export function UserSettings({
             value={prefs.spaceBetween}
             min={0}
             max={24}
+            marks={[0, 4, 8, 16, 24]}
             onChange={(v) => set('spaceBetween', v)}
           />
           <Slider
@@ -1166,17 +1171,12 @@ function Profiles({
           {tab === 'server' ? (
             <div className="set-field">
               <label>SERVER</label>
-              <select
-                className="field"
+              <Dropdown
+                aria-label="Server"
                 value={serverId}
-                onChange={(e) => setServerId(e.target.value)}
-              >
-                {servers.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                options={servers.map((sv) => ({ value: sv.id, label: sv.name }))}
+                onChange={setServerId}
+              />
             </div>
           ) : null}
 

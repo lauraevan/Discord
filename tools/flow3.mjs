@@ -6,6 +6,7 @@
  * same heartbeat path the client uses rather than a shortcut in the app.
  */
 import { chromium } from 'playwright'
+import { pick } from './pick.mjs'
 import { readFileSync } from 'node:fs'
 
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
@@ -52,11 +53,11 @@ await step('the register form rejects a bad username', async () => {
 await step('and a date of birth under thirteen', async () => {
   await p.fill('#r-username', 'nova')
   const year = String(new Date().getFullYear() - 5)
-  await p.selectOption('#r-day', '1')
-  await p.selectOption('.auth-dob select:nth-of-type(1)', 'January').catch(() => {})
-  const selects = p.locator('.auth-dob select')
-  await selects.nth(1).selectOption('January')
-  await selects.nth(2).selectOption(year)
+  // the date of birth is three of Discord's comboboxes, not native selects
+  const dob = p.locator('.auth-dob .dd')
+  await pick(p, dob.nth(0), '1')
+  await pick(p, dob.nth(1), 'January')
+  await pick(p, dob.nth(2), year)
   await p.click('.auth-submit')
   await p.waitForTimeout(150)
   const text = (await p.locator('.auth-label.bad').allInnerTexts()).join(' ')
@@ -64,7 +65,7 @@ await step('and a date of birth under thirteen', async () => {
 })
 
 await step('a valid registration signs you in', async () => {
-  await p.locator('.auth-dob select').nth(2).selectOption('2000')
+  await pick(p, p.locator('.auth-dob .dd').nth(2), '2000')
   await p.click('.auth-submit')
   await p.waitForTimeout(600)
   expect(await p.locator('.user-card .name').innerText() === 'Nova', 'not signed in as Nova')
@@ -450,6 +451,9 @@ await step('an age-restricted channel opens on the gate, then lets you in', asyn
   await p.locator('.row.active [aria-label="Edit channel"]').click({ force: true })
   await p.waitForSelector('.settings-layer', { timeout: 4000 })
   await p.locator('.set-row:has-text("Age-Restricted") .switch').click()
+  // channel settings buffers its edits, the way Discord's does
+  await p.click('.save-go')
+  await p.waitForTimeout(200)
   await p.keyboard.press('Escape')
   await p.waitForTimeout(400)
   expect((await p.locator('.age-gate').count()) === 1, 'no age gate')

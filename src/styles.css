@@ -18,6 +18,8 @@
   --chat: #1a1a1e;
   /* --background-base-low: the settings layer's content region */
   --base-low: #202024;
+  --slider-track: #474752;
+  --control-brand: #949cf7;
   --card: #222327;
   /* floating surfaces sit a shade over the card: the 1:1 capture reads the
      plus menu as rgb(40,39,44) where the composer under it is rgb(35,34,39) */
@@ -3561,10 +3563,8 @@ h3.md-h {
   color: var(--muted);
 }
 
-.set-slider input[type='range'] {
-  width: 100%;
+.set-slider .dslider {
   margin-top: calc(8px * var(--u));
-  accent-color: var(--blurple);
 }
 
 .set-radios {
@@ -3668,6 +3668,255 @@ h3.md-h {
 .set-field textarea {
   min-height: calc(84px * var(--u));
   resize: vertical;
+}
+
+/* ==========================================================================
+   Slider
+
+   Discord's, off its own stylesheet: an 8px --slider-track-background bar on
+   a 4px radius, filled --control-brand-foreground-new, with a 16px white
+   grabber on a 1px --border-normal ring and --shadow-low under it. The marked
+   variant carries 24px dashes and 12/16 values beneath.
+
+   A real <input type="range"> stays underneath — only its painted parts are
+   replaced — so the arrow keys, Home/End and the screen reader still work.
+   ========================================================================== */
+
+.dslider {
+  position: relative;
+  height: calc(24px * var(--u));
+}
+
+.dslider.has-marks {
+  /* 16 to the bar's underside, then Discord's 12px dash, 4px gap and 16px
+     value — its own 48 */
+  height: calc(48px * var(--u));
+}
+
+.dslider input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: calc(24px * var(--u));
+  background: none;
+  margin: 0;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
+
+/* .bar_a562c8 + .barFill_a562c8, drawn as one gradient stop */
+.dslider input[type='range']::-webkit-slider-runnable-track {
+  height: calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  background: linear-gradient(
+    to right,
+    var(--control-brand) 0 var(--fill),
+    var(--slider-track) var(--fill) 100%
+  );
+}
+
+.dslider input[type='range']::-moz-range-track {
+  height: calc(8px * var(--u));
+  border-radius: calc(4px * var(--u));
+  background: linear-gradient(
+    to right,
+    var(--control-brand) 0 var(--fill),
+    var(--slider-track) var(--fill) 100%
+  );
+}
+
+/* .grabber_a562c8 */
+.dslider input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: calc(16px * var(--u));
+  height: calc(16px * var(--u));
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--border-normal);
+  box-shadow: var(--shadow-low);
+  box-sizing: border-box;
+  /* centres the 16px grabber on the 8px bar */
+  margin-top: calc(-4px * var(--u));
+  cursor: ew-resize;
+}
+
+.dslider input[type='range']::-moz-range-thumb {
+  width: calc(16px * var(--u));
+  height: calc(16px * var(--u));
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid var(--border-normal);
+  box-shadow: var(--shadow-low);
+  box-sizing: border-box;
+  cursor: ew-resize;
+}
+
+.dslider input[type='range']:focus-visible::-webkit-slider-thumb {
+  outline: calc(2px * var(--u)) solid var(--control-brand);
+  outline-offset: calc(2px * var(--u));
+}
+
+/* .mark_a562c8 — the dash sits under the bar, the value under the dash */
+.dslider-marks {
+  position: absolute;
+  inset-inline: 0;
+  /* the input box is 24 tall with an 8px bar centred in it, so its underside
+     is 16 down — start the dashes there and they hang off the bar rather than
+     disappearing behind it */
+  top: calc(16px * var(--u));
+  height: calc(32px * var(--u));
+  pointer-events: none;
+}
+
+.dslider-mark {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(4px * var(--u));
+  font-size: calc(12px * var(--u));
+  line-height: calc(16px * var(--u));
+  font-weight: 500;
+  color: var(--interactive);
+}
+
+.dslider-mark i {
+  width: calc(2px * var(--u));
+  height: calc(12px * var(--u));
+  border-radius: calc(12px * var(--u));
+  background: var(--slider-track);
+}
+
+/* ==========================================================================
+   Select (src/ui/Select.tsx)
+
+   Discord's own, out of its stylesheet. The control is the text input's box;
+   the popout hangs 8px under it, square across the top and rounded at the
+   bottom, which is Discord's own shape rather than a slip here.
+   ========================================================================== */
+
+.dd {
+  position: relative;
+}
+
+/* .select_a16aea */
+.dd-control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  padding-block: calc(8px * var(--u));
+  padding-inline: calc(12px * var(--u)) calc(8px * var(--u));
+  min-height: calc(40px * var(--u));
+  border-radius: calc(4px * var(--u));
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text);
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.dd-control:hover:not(.disabled) {
+  border-color: var(--border-strong);
+}
+
+.dd-control:focus-visible {
+  outline: none;
+  border-color: var(--blurple);
+}
+
+.dd-control.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* .value_a16aea / .placeholder_a16aea */
+.dd-value,
+.dd-placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-placeholder {
+  color: var(--placeholder);
+}
+
+.dd-control svg {
+  width: calc(20px * var(--u));
+  height: calc(20px * var(--u));
+  color: var(--interactive);
+  transition: transform var(--dur-open, 150ms) var(--ease-out, ease);
+}
+
+.dd-control.open svg {
+  transform: rotate(180deg);
+}
+
+/* .popout_a16aea */
+.dd-popout {
+  position: absolute;
+  z-index: 30;
+  inset-inline: 0;
+  top: 100%;
+  margin-top: calc(8px * var(--u));
+  max-height: 40vh;
+  overflow-y: auto;
+  background: var(--menu);
+  border: 1px solid var(--border);
+  border-radius: 0 0 calc(4px * var(--u)) calc(4px * var(--u));
+  box-shadow: var(--shadow-high);
+  animation: select-in 100ms ease;
+  transform-origin: top center;
+}
+
+/* .option_a16aea */
+.dd-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  padding: calc(12px * var(--u));
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
+  font-weight: 400;
+  color: var(--interactive);
+  cursor: pointer;
+}
+
+.dd-option span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-option.active:not(.disabled) {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+.dd-option[aria-selected='true'] {
+  background: var(--selected);
+  color: var(--strong);
+  font-weight: 500;
+}
+
+/* .selectedIcon_a16aea */
+.dd-option svg {
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
+  color: var(--blurple);
+}
+
+.dd-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* --control-input-height-md, and the text input's box */
@@ -5498,19 +5747,18 @@ body.streamer .invite-row code {
 .slowmode {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: calc(14px * var(--u));
 }
 
-.slowmode input {
+.slowmode .dslider {
   flex: 1;
-  accent-color: var(--blurple);
 }
 
 .slowmode span {
-  font-size: 13.05px;
+  font-size: calc(14px * var(--u));
   font-weight: 600;
   color: var(--text);
-  min-width: 60px;
+  min-width: calc(64px * var(--u));
 }
 
 /* the custom status line under your name in the account panel */
@@ -13181,7 +13429,9 @@ img.wumpus {
   flex: 1;
 }
 
-.audit-filter span {
+/* the label only — a descendant selector here also caught the combobox's
+   value and every one of its options */
+.audit-filter > span {
   font-size: calc(12px * var(--u));
   font-weight: 700;
   letter-spacing: 0.02em;

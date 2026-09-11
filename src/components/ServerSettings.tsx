@@ -49,6 +49,7 @@ import {
   useDraft,
   type NavItem,
 } from './SettingsLayer'
+import { Select as Dropdown } from '../ui/Select'
 import { Avatar } from './UserArea'
 import { DISCOVERY_CATEGORIES } from './Discover'
 import { LOCALES } from '../prefs'
@@ -451,8 +452,8 @@ export function ServerSettings({
           <Divider />
           {/* Discord's AFK pair. The note is its own, and the five timeouts
               are the only values the client offers. */}
-          <Sub>Inactive Channel</Sub>
           <Select
+            label="Inactive Channel"
             value={ov.draft.afkChannelId ?? ''}
             options={[
               ['', 'No Inactive Channel'] as const,
@@ -462,8 +463,8 @@ export function ServerSettings({
             ]}
             onChange={(id) => ov.patch((d) => ({ ...d, afkChannelId: id || null }))}
           />
-          <Sub>Inactive Timeout</Sub>
           <Select
+            label="Inactive Timeout"
             value={String(ov.draft.afkTimeout)}
             note="Automatically move members to this channel and mute them when they have been idle for longer than the inactive timeout. This does not affect browsers."
             options={AFK_TIMEOUTS}
@@ -474,8 +475,8 @@ export function ServerSettings({
           {/* System messages: the channel, then the four suppression bits.
               Discord stores them inverted — a set bit *suppresses* — so the
               checkbox is on when the bit is clear. */}
-          <Sub>System Messages Channel</Sub>
           <Select
+            label="System Messages Channel"
             value={ov.draft.systemChannelId ?? ''}
             options={[
               ['', 'No System Messages'] as const,
@@ -1114,21 +1115,29 @@ export function ServerSettings({
           <div className="audit-filters">
             <label className="audit-filter">
               <span>Filter by User</span>
-              <select value={auditWho} onChange={(e) => setAuditWho(e.target.value)}>
-                <option value="">All Users</option>
-                <option value={account.handle}>{account.name}</option>
-              </select>
+              <Dropdown
+                aria-label="Filter by User"
+                value={auditWho}
+                options={[
+                  { value: '', label: 'All Users' },
+                  { value: account.handle, label: account.name },
+                ]}
+                onChange={setAuditWho}
+              />
             </label>
             <label className="audit-filter">
               <span>Filter by Action</span>
-              <select value={auditWhat} onChange={(e) => setAuditWhat(e.target.value)}>
-                <option value="">All Actions</option>
-                {[...new Set(server.audit.map((a) => a.action))].sort().map((act) => (
-                  <option key={act} value={act}>
-                    {act}
-                  </option>
-                ))}
-              </select>
+              <Dropdown
+                aria-label="Filter by Action"
+                value={auditWhat}
+                options={[
+                  { value: '', label: 'All Actions' },
+                  ...[...new Set(server.audit.map((a) => a.action))]
+                    .sort()
+                    .map((act) => ({ value: act, label: act })),
+                ]}
+                onChange={setAuditWhat}
+              />
             </label>
           </div>
           <div className="audit">
@@ -1331,18 +1340,16 @@ function Channels({ server, onPatch }: { server: Server; onPatch: Patch }) {
                       <span className="srv-chan-kind">{ch.kind}</span>
                       <b>{ch.name}</b>
                       {/* the select is the same move without a mouse */}
-                      <select
-                        value={ch.categoryId ?? ''}
+                      <Dropdown
+                        className="srv-chan-cat"
                         aria-label={`Category for ${ch.name}`}
-                        onChange={(e) => drop(ch.id, e.target.value || null, null)}
-                      >
-                        <option value="">No category</option>
-                        {server.categories.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
+                        value={ch.categoryId ?? ''}
+                        options={[
+                          { value: '', label: 'No category' },
+                          ...server.categories.map((c) => ({ value: c.id, label: c.name })),
+                        ]}
+                        onChange={(v) => drop(ch.id, v || null, null)}
+                      />
                       <button
                         className="icon-btn"
                         aria-label={`Delete ${ch.name}`}
@@ -1683,25 +1690,19 @@ function Widget({ server, onPatch }: { server: Server; onPatch: Patch }) {
       />
       <div className="set-field">
         <label>INVITE CHANNEL</label>
-        <select
-          className="field"
+        <Dropdown
+          aria-label="Invite Channel"
           value={widget.channelId ?? ''}
-          onChange={(e) =>
-            onPatch((s) => ({
-              ...s,
-              widget: { ...widget, channelId: e.target.value || null },
-            }))
+          options={[
+            { value: '', label: 'No invite' },
+            ...server.channels
+              .filter((c) => c.kind === 'text')
+              .map((c) => ({ value: c.id, label: `#${c.name}` })),
+          ]}
+          onChange={(v) =>
+            onPatch((s) => ({ ...s, widget: { ...widget, channelId: v || null } }))
           }
-        >
-          <option value="">No invite</option>
-          {server.channels
-            .filter((c) => c.kind === 'text')
-            .map((c) => (
-              <option key={c.id} value={c.id}>
-                #{c.name}
-              </option>
-            ))}
-        </select>
+        />
       </div>
       <Sub>JSON API</Sub>
       <pre className="srv-code">
@@ -1924,25 +1925,22 @@ function Webhooks({ server, onPatch }: { server: Server; onPatch: Patch }) {
                   https://discord.com/api/webhooks/{h.id}/{h.token}
                 </span>
               </div>
-              <select
+              <Dropdown
+                className="webhook-channel"
+                aria-label={`Channel for ${h.name}`}
                 value={h.channelId}
-                onChange={(e) =>
+                options={server.channels
+                  .filter((c) => c.kind === 'text')
+                  .map((c) => ({ value: c.id, label: `#${c.name}` }))}
+                onChange={(v) =>
                   onPatch((s) => ({
                     ...s,
                     webhooks: (s.webhooks ?? []).map((x) =>
-                      x.id === h.id ? { ...x, channelId: e.target.value } : x,
+                      x.id === h.id ? { ...x, channelId: v } : x,
                     ),
                   }))
                 }
-              >
-                {server.channels
-                  .filter((c) => c.kind === 'text')
-                  .map((c) => (
-                    <option key={c.id} value={c.id}>
-                      #{c.name}
-                    </option>
-                  ))}
-              </select>
+              />
               <button
                 className="icon-btn"
                 aria-label={`Delete ${h.name}`}
@@ -2290,21 +2288,16 @@ function Discovery({ server, onPatch }: { server: Server; onPatch: Patch }) {
 
       <div className="set-field">
         <label htmlFor="disc-primary">PRIMARY CATEGORY</label>
-        <select
+        <Dropdown
           id="disc-primary"
-          className="field"
+          aria-label="Primary Category"
           value={d?.primaryCategory ?? ''}
-          onChange={(e) =>
-            patchDiscovery((v) => ({ ...v, primaryCategory: e.target.value || null }))
-          }
-        >
-          <option value="">Pick a category</option>
-          {DISCOVERY_CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: '', label: 'Pick a category' },
+            ...DISCOVERY_CATEGORIES.map((c) => ({ value: c, label: c })),
+          ]}
+          onChange={(v) => patchDiscovery((x) => ({ ...x, primaryCategory: v || null }))}
+        />
       </div>
 
       <div className="set-field">
@@ -2335,18 +2328,16 @@ function Discovery({ server, onPatch }: { server: Server; onPatch: Patch }) {
 
       <div className="set-field">
         <label htmlFor="disc-lang">PREFERRED LANGUAGE</label>
-        <select
+        <Dropdown
           id="disc-lang"
-          className="field"
+          aria-label="Preferred Language"
           value={d?.language ?? 'en-US'}
-          onChange={(e) => patchDiscovery((v) => ({ ...v, language: e.target.value }))}
-        >
-          {LOCALES.map(([id, native, english]) => (
-            <option key={id} value={id}>
-              {native === english ? native : `${native} — ${english}`}
-            </option>
-          ))}
-        </select>
+          options={LOCALES.map(([id, native, english]) => ({
+            value: id,
+            label: native === english ? native : `${native} — ${english}`,
+          }))}
+          onChange={(v) => patchDiscovery((x) => ({ ...x, language: v }))}
+        />
       </div>
 
       <div className="set-field">
@@ -2426,41 +2417,31 @@ function Community({ server, onPatch }: { server: Server; onPatch: Patch }) {
         <>
           <div className="set-field">
             <label>RULES OR GUIDELINES CHANNEL</label>
-            <select
-              className="field"
+            <Dropdown
+              aria-label="Rules or Guidelines Channel"
               value={community.rulesChannelId ?? ''}
-              onChange={(e) =>
+              options={text.map((c) => ({ value: c.id, label: `#${c.name}` }))}
+              onChange={(v) =>
                 onPatch((s) => ({
                   ...s,
-                  community: { ...community, rulesChannelId: e.target.value || null },
+                  community: { ...community, rulesChannelId: v || null },
                 }))
               }
-            >
-              {text.map((c) => (
-                <option key={c.id} value={c.id}>
-                  #{c.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
           <div className="set-field">
             <label>COMMUNITY UPDATES CHANNEL</label>
-            <select
-              className="field"
+            <Dropdown
+              aria-label="Community Updates Channel"
               value={community.updatesChannelId ?? ''}
-              onChange={(e) =>
+              options={text.map((c) => ({ value: c.id, label: `#${c.name}` }))}
+              onChange={(v) =>
                 onPatch((s) => ({
                   ...s,
-                  community: { ...community, updatesChannelId: e.target.value || null },
+                  community: { ...community, updatesChannelId: v || null },
                 }))
               }
-            >
-              {text.map((c) => (
-                <option key={c.id} value={c.id}>
-                  #{c.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </>
       ) : null}

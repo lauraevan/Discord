@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import { uid, type Server, type ServerEvent } from '../data'
 import { CalendarIcon, CloseIcon, SpeakerIcon, StageIcon } from '../ui/Icons'
 
@@ -188,14 +189,15 @@ function CreateEvent({
           </div>
           <div className="set-field">
             <label>LOCATION</label>
-            <select value={where} onChange={(e) => setWhere(e.target.value)}>
-              {spots.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-              <option value="else">Somewhere Else</option>
-            </select>
+            <Dropdown
+              aria-label="Location"
+              value={where}
+              options={[
+                ...spots.map((c) => ({ value: c.id, label: c.name })),
+                { value: 'else', label: 'Somewhere Else' },
+              ]}
+              onChange={setWhere}
+            />
           </div>
           {where === 'else' ? (
             <div className="set-field">

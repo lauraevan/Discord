@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import type { Account, Poll } from '../data'
 import { byName } from '../emoji'
 import { EmojiGlyph } from '../markdown'
@@ -80,13 +81,12 @@ export function CreatePoll({
           <div className="poll-opts">
             <label>
               Duration
-              <select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
-                {DURATIONS.map(([label, ms]) => (
-                  <option key={label} value={ms}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+              <Dropdown
+                aria-label="Duration"
+                value={String(duration)}
+                options={DURATIONS.map(([label, ms]) => ({ value: String(ms), label }))}
+                onChange={(v) => setDuration(Number(v))}
+              />
             </label>
             <div className="set-row">
               <div className="set-row-main">

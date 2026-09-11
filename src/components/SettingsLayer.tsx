@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { CloseIcon } from '../ui/Icons'
+import { Select as Dropdown } from '../ui/Select'
 
 export type NavItem =
   | { head: string }
@@ -196,6 +197,31 @@ export function Toggle({
   )
 }
 
+/**
+ * Discord's slider, off its own stylesheet:
+ *
+ *   --grabber-size: 16px
+ *   .bar_a562c8     { background: var(--slider-track-background);
+ *                     border-radius: 4px; height: 8px }
+ *   .barFill_a562c8 { background: var(--control-brand-foreground-new) }
+ *   .grabber_a562c8 { border: 1px solid var(--border-normal);
+ *                     border-radius: 50%; box-shadow: var(--shadow-low);
+ *                     height/width: var(--grabber-size);
+ *                     background-color: var(--white) }
+ *   .markDash_a562c8  { background: var(--slider-track-background);
+ *                       height: 24px; width: 2px; border-radius: 12px }
+ *   .markValue_a562c8 { color: var(--text-subtle); font-size: 12px;
+ *                       font-weight: 500; line-height: 16px }
+ *   .hasMarks_a562c8  { --bar-offset: 24px }
+ *
+ * The fill is --control-brand-foreground-new (#949cf7), a lighter blurple
+ * than a primary button's --brand-500; they really are different colours in
+ * the client.
+ *
+ * A real <input type="range"> stays underneath rather than a div that listens
+ * for drags: it is what gives the control arrow keys, Home/End, page steps and
+ * a screen reader that knows what it is. Only its painted parts are replaced.
+ */
 export function Slider({
   label,
   value,
@@ -203,6 +229,7 @@ export function Slider({
   max,
   step = 1,
   suffix = '',
+  marks,
   onChange,
 }: {
   label: string
@@ -211,8 +238,11 @@ export function Slider({
   max: number
   step?: number
   suffix?: string
+  /** the values Discord dashes under the bar, e.g. the font-scale stops */
+  marks?: number[]
   onChange: (v: number) => void
 }) {
+  const pct = ((value - min) / (max - min)) * 100
   return (
     <div className="set-slider">
       <div className="set-row-label">
@@ -222,15 +252,34 @@ export function Slider({
           {suffix}
         </span>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        aria-label={label}
-        onChange={(e) => onChange(Number(e.target.value))}
-      />
+      <div
+        className={'dslider' + (marks ? ' has-marks' : '')}
+        style={{ '--fill': `${pct}%` } as React.CSSProperties}
+      >
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          aria-label={label}
+          onChange={(e) => onChange(Number(e.target.value))}
+        />
+        {marks ? (
+          <div className="dslider-marks" aria-hidden="true">
+            {marks.map((m) => (
+              <span
+                className="dslider-mark"
+                key={m}
+                style={{ insetInlineStart: `${((m - min) / (max - min)) * 100}%` }}
+              >
+                <i />
+                {m}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -307,9 +356,8 @@ export function Field({
 
 /**
  * A labelled select. Discord's settings selects are a custom combobox rather
- * than a native one, but they carry the same box: --input-background-default
- * over a 1px --input-border-default, an 8px radius, 16px text, and
- * --control-input-height-md (40px) tall.
+ * than a native one; src/ui/Select.tsx is that combobox, built off the
+ * client's own stylesheet.
  */
 export function Select({
   label,
@@ -328,13 +376,13 @@ export function Select({
   return (
     <div className="set-field">
       {label ? <label htmlFor={id}>{label}</label> : null}
-      <select id={id} className="set-select" value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map(([v, l]) => (
-          <option key={v} value={v}>
-            {l}
-          </option>
-        ))}
-      </select>
+      <Dropdown
+        id={id}
+        aria-label={label}
+        value={value}
+        options={options.map(([v, l]) => ({ value: v, label: l }))}
+        onChange={onChange}
+      />
       {note ? <div className="set-field-note">{note}</div> : null}
     </div>
   )

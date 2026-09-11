@@ -49,6 +49,14 @@ export type Tokens = {
   interactive: string
   /** --text-feedback-critical: the red on a destructive menu item */
   critical: string
+  /** --slider-track-background, the unfilled half of a slider */
+  sliderTrack: string
+  /**
+   * --control-brand-foreground-new. The refresh's slider fill and radio dot
+   * are a lighter blurple than --brand-500, which is why they read as a
+   * different colour from a primary button.
+   */
+  controlBrand: string
   titlebar: string
   /** optional decorative wash painted behind the sidebar + chat */
   wash?: string
@@ -106,6 +114,8 @@ const dark: Tokens = {
   scrim: '#000000b8', // --background-scrim
   interactive: '#abacb2', // --interactive-text-default
   critical: '#f87e7a', // --text-feedback-critical
+  sliderTrack: '#474752', // --slider-track-background
+  controlBrand: '#949cf7', // --control-brand-foreground-new
   titlebar: '#121214', // --background-base-lowest
   scheme: 'dark',
 }
@@ -136,6 +146,8 @@ const ash: Tokens = {
   scrim: '#000000b8', // --background-scrim
   interactive: '#c5c6ca', // --interactive-text-default
   critical: '#ffa09b', // --text-feedback-critical
+  sliderTrack: '#595963', // --slider-track-background
+  controlBrand: '#949cf7', // --control-brand-foreground-new
   titlebar: '#2c2d32',
   scheme: 'dark',
 }
@@ -166,6 +178,8 @@ const onyx: Tokens = {
   scrim: '#000000b8', // --background-scrim
   interactive: '#96979e', // --interactive-text-default
   critical: '#eb5f5e', // --text-feedback-critical
+  sliderTrack: '#383840', // --slider-track-background
+  controlBrand: '#949cf7', // --control-brand-foreground-new
   titlebar: '#000000',
   scheme: 'dark',
 }
@@ -200,6 +214,8 @@ const light: Tokens = {
   scrim: '#00000085', // --background-scrim
   interactive: '#595a63', // --interactive-text-default
   critical: '#b92733', // --text-feedback-critical
+  sliderTrack: '#c4c7c9', // --slider-track-background
+  controlBrand: '#5966f2', // --control-brand-foreground-new
   titlebar: '#f3f3f4',
   scheme: 'light',
 }
@@ -329,6 +345,8 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--scrim', k.scrim)
   r.style.setProperty('--interactive', k.interactive)
   r.style.setProperty('--critical', k.critical)
+  r.style.setProperty('--slider-track', k.sliderTrack)
+  r.style.setProperty('--control-brand', k.controlBrand)
   r.style.setProperty('--titlebar', k.titlebar)
   r.style.setProperty('--wash', k.wash ?? k.rail)
   r.dataset.scheme = k.scheme

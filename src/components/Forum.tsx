@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import { ForumLayout, ForumSort, uid, type Account, type Channel, type Message } from '../data'
 import { renderMarkdown, type MdContext } from '../markdown'
 import { ForumIcon, GalleryIcon, ListViewIcon, PlusIcon, SearchIcon, ThreadsIcon } from '../ui/Icons'
@@ -45,10 +46,16 @@ export function ForumView({
           <input placeholder="Search posts" aria-label="Search posts" />
           <SearchIcon />
         </div>
-        <select value={sort} onChange={(e) => setSort(e.target.value as 'activity' | 'date')}>
-          <option value="activity">Latest Activity</option>
-          <option value="date">Date Posted</option>
-        </select>
+        <Dropdown
+          className="forum-sort"
+          aria-label="Sort posts"
+          value={sort}
+          options={[
+            { value: 'activity', label: 'Latest Activity' },
+            { value: 'date', label: 'Date Posted' },
+          ]}
+          onChange={(v) => setSort(v as 'activity' | 'date')}
+        />
         <Tooltip label={gallery ? 'List View' : 'Gallery View'} side="below">
           <button
             className="forum-layout"

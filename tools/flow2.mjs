@@ -1,5 +1,6 @@
 import { chromium } from 'playwright'
 import { readFileSync as __readSession } from 'node:fs'
+import { pick } from './pick.mjs'
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 const p = await b.newPage({ viewport: { width: 1558, height: 860 } })
 await p.addInitScript(__readSession('tools/session.js', 'utf8'))
@@ -147,7 +148,7 @@ await step('server discovery: the checklist answers from the server itself', asy
   const after = await p.locator('.discovery-check.ok').count()
   if (after !== before + 1) throw new Error(`met ${before} then ${after}`)
   // the listing keeps what it is given
-  await p.selectOption('#disc-primary', 'Gaming')
+  await pick(p, '#disc-primary', 'Gaming')
   await p.click('.discovery-pick:has-text("Music")')
   await p.fill('#disc-term', 'raiding')
   await p.press('#disc-term', 'Enter')

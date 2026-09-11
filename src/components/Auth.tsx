@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import {
   DISPLAY_NAME_MAX,
   MONTHS,
@@ -320,30 +321,34 @@ export function RegisterScreen({
             Date of Birth
           </Label>
           <div className="auth-dob">
-            <select id="r-day" className="auth-select" value={day} onChange={(e) => setDay(e.target.value)}>
-              <option value="">Day</option>
-              {Array.from({ length: dayCount }, (_, i) => (
-                <option key={i + 1} value={String(i + 1)}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
-            <select className="auth-select" value={month} onChange={(e) => setMonth(e.target.value)}>
-              <option value="">Month</option>
-              {MONTHS.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-            <select className="auth-select" value={year} onChange={(e) => setYear(e.target.value)}>
-              <option value="">Year</option>
-              {Array.from({ length: 100 }, (_, i) => THIS_YEAR - i).map((y) => (
-                <option key={y} value={String(y)}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            <Dropdown
+              id="r-day"
+              aria-label="Day"
+              placeholder="Day"
+              value={day}
+              options={Array.from({ length: dayCount }, (_, i) => ({
+                value: String(i + 1),
+                label: String(i + 1),
+              }))}
+              onChange={setDay}
+            />
+            <Dropdown
+              aria-label="Month"
+              placeholder="Month"
+              value={month}
+              options={MONTHS.map((m) => ({ value: m, label: m }))}
+              onChange={setMonth}
+            />
+            <Dropdown
+              aria-label="Year"
+              placeholder="Year"
+              value={year}
+              options={Array.from({ length: 100 }, (_, i) => THIS_YEAR - i).map((y) => ({
+                value: String(y),
+                label: String(y),
+              }))}
+              onChange={setYear}
+            />
           </div>
         </div>
 

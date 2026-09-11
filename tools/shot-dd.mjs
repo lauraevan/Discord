@@ -1,0 +1,15 @@
+import { chromium } from 'playwright'
+import { readFileSync } from 'node:fs'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 900 } })
+await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(600)
+await p.click('.server-tile.srv'); await p.waitForTimeout(300)
+await p.click('.server-header'); await p.waitForSelector('.ctx-item')
+await p.click('.ctx-item:has-text("Server Settings")')
+await p.waitForSelector('.settings-layer'); await p.waitForTimeout(400)
+await p.locator('.dd-control').nth(1).click()
+await p.waitForTimeout(300)
+await p.screenshot({ path: process.argv[2] })
+await b.close()

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Select as Dropdown } from '../ui/Select'
 import type { Account } from '../data'
 import { byName, EMOJI } from '../emoji'
 import { EmojiGlyph } from '../markdown'
@@ -87,11 +88,12 @@ export function CustomStatus({
             </div>
           ) : null}
           <label className="set-field-label">CLEAR AFTER</label>
-          <select value={clear} onChange={(e) => setClear(e.target.value)}>
-            {CLEAR_AFTER.map(([label]) => (
-              <option key={label}>{label}</option>
-            ))}
-          </select>
+          <Dropdown
+            aria-label="Clear After"
+            value={clear}
+            options={CLEAR_AFTER.map(([label]) => ({ value: label, label }))}
+            onChange={setClear}
+          />
         </div>
         <div className="modal-foot">
           <button className="btn-ghost" onClick={onClose}>
