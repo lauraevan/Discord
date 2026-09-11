@@ -243,6 +243,20 @@ export function Composer({
     if (replyTo) input.current?.focus();
   }, [replyTo]);
 
+  // every popout in Discord closes on Escape; these two only closed on a click
+  // away, which also meant the click that closed them was swallowed
+  useEffect(() => {
+    if (!plusOpen && !schedOpen) return;
+    const key = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      setPlusOpen(false);
+      setSchedOpen(false);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [plusOpen, schedOpen]);
+
   // the composer grows with the message, the way Discord's does
   useEffect(() => {
     const el = input.current;

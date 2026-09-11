@@ -14,7 +14,7 @@ const shot = async (name, fn) => {
 }
 await p.click('.server-tile.srv')
 await p.waitForTimeout(400)
-console.log('composer buttons:', await p.locator('.composer-actions button, .composer-tools button').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label'))))
+console.log('composer buttons:', await p.locator('.composer-acts button').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label'))))
 await shot('20-emoji', async () => {
   await p.click('[aria-label="Emoji"], [aria-label="Select emoji"]')
   await p.waitForTimeout(400)
@@ -31,11 +31,14 @@ await shot('22-sticker', async () => {
 })
 await shot('23-plus', async () => {
   await p.keyboard.press('Escape')
-  await p.click('.composer-plus, [aria-label="Upload a File"], [aria-label="Attach"]')
+  await p.click('[aria-label="Upload a file"]')
   await p.waitForTimeout(400)
 })
 await shot('24-ctx', async () => {
-  await p.keyboard.press('Escape')
+  // the plus menu above closes on a click away rather than on Escape, and
+  // until it does its own click-away listener eats the next click
+  await p.mouse.click(780, 300)
+  await p.waitForTimeout(300)
   await p.click('.composer-input')
   await p.fill('.composer-input', 'right click me')
   await p.press('.composer-input', 'Enter')
