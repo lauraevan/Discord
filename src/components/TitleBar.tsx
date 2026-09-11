@@ -1,6 +1,17 @@
-import { HelpIcon, InboxIcon, ToolsIcon } from '../ui/Icons'
+import { HelpIcon, InboxIcon } from '../ui/Icons'
 import { Tooltip } from '../ui/Tooltip'
 
+/**
+ * The window's own bar: the guild mark and name, then Inbox and Help.
+ *
+ * There is no third button. docs/reference.png's account carries a Support
+ * Tools one and all four 1:1 captures do not — an account difference rather
+ * than a version one — and keeping it pushed the two that *are* there out of
+ * place: dropping it takes the headers region from 5.212 to 4.965 and the
+ * capture from 2.749 to 2.729, for 0.008 on the frame. That is the same trade
+ * every other frame-against-capture disagreement in docs/discord-reference.md
+ * is decided on, so please do not put it back.
+ */
 export function TitleBar({
   title,
   initials,
@@ -34,9 +45,6 @@ export function TitleBar({
           >
             <HelpIcon size={15} />
           </button>
-        </Tooltip>
-        <Tooltip label="Support Tools" side="below">
-          <button aria-label="Support tools"><ToolsIcon size={15.5} /></button>
         </Tooltip>
       </div>
     </header>

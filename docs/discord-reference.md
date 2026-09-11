@@ -345,7 +345,11 @@ are native screenshots at 1:1. That difference decides which to believe:
     sizes agreeing everywhere else;
   - the title bar's third button — the frame's account carries a Support Tools
     button and the captures' does not, which is an account difference rather
-    than a version one, so the app keeps it.
+    than a version one. The app followed the frame here and kept it, which made
+    this the one disagreement decided the other way; it is now dropped like the
+    rest. Four captures to one frame, and the frame's extra button pushes the
+    two the captures do have out of place, which is what the headers region was
+    charging for.
 
 The frame charges for every one of these, and it should: a kernel that spreads
 a 40px block's edges reads it as 41.25, and one that spreads a 1px line reads
@@ -359,6 +363,7 @@ it dimmer than it is. Running tally, frame cost against capture gain:
 | rail: 40px tile on a 48px pitch | +0.045 | -0.021 |
 | header rules at 7.6% rather than 4.5% | +0.005 | +0.002 |
 | title bar 30 and headers 48, rail 72 | +0.056 | -0.116 |
+| no Support Tools button in the title bar | +0.008 | -0.020 |
 
 The frame is at 1.35 where it could be 1.10, and the capture at 2.83 where it
 started at 4.59. Eighteen of the twenty landmarks in `tools/landmarks.mjs` —
