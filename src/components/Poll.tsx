@@ -4,6 +4,7 @@ import type { Account, Poll } from '../data'
 import { byName } from '../emoji'
 import { EmojiGlyph } from '../markdown'
 import { CheckIcon, CloseIcon, PlusIcon } from '../ui/Icons'
+import { Switch } from './SettingsLayer'
 
 /** The durations Discord's poll composer offers. */
 const DURATIONS: [string, number][] = [
@@ -92,15 +93,11 @@ export function CreatePoll({
               <div className="set-row-main">
                 <div className="set-row-label">Allow multiple answers</div>
               </div>
-              <button
-                role="switch"
-                aria-checked={multi}
-                aria-label="Allow multiple answers"
-                className={'switch' + (multi ? ' on' : '')}
-                onClick={() => setMulti((m) => !m)}
-              >
-                <span />
-              </button>
+              <Switch
+                checked={multi}
+                label="Allow multiple answers"
+                onChange={setMulti}
+              />
             </div>
           </div>
         </div>

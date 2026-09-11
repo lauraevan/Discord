@@ -42,6 +42,7 @@ import {
   SettingsLayer,
   Slider,
   Sub,
+  Switch,
   Title,
   SaveBar,
   Toggle,
@@ -393,6 +394,9 @@ export function ServerSettings({
                 ) : (
                   ov.draft.name.slice(0, 2).toUpperCase()
                 )}
+                <span className="srv-icon-badge" aria-hidden="true">
+                  <PlusIcon />
+                </span>
               </button>
               <input
                 ref={iconFile}
@@ -423,22 +427,6 @@ export function ServerSettings({
                 maxLength={100}
                 onChange={(name) => ov.patch((d) => ({ ...d, name }))}
               />
-              <div className="set-field">
-                <label>ICON COLOR</label>
-                <div className="swatch-row">
-                  {ROLE_COLORS.slice(0, 10).map((c) => (
-                    <button
-                      key={c}
-                      className={'swatch' + (c === ov.draft.color ? ' on' : '')}
-                      style={{ background: c }}
-                      aria-label={c}
-                      onClick={() => ov.patch((d) => ({ ...d, color: c }))}
-                    >
-                      {c === ov.draft.color ? <CheckIcon /> : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
           </div>
           <Field
@@ -770,12 +758,10 @@ export function ServerSettings({
                             <div className="set-row-label">{label}</div>
                             <div className="set-row-note">{note}</div>
                           </div>
-                          <button
-                            role="switch"
-                            aria-checked={rd.draft.permissions.includes(id)}
-                            aria-label={label}
-                            className={'switch' + (rd.draft.permissions.includes(id) ? ' on' : '')}
-                            onClick={() =>
+                          <Switch
+                            checked={rd.draft.permissions.includes(id)}
+                            label={label}
+                            onChange={() =>
                               rd.patch((d) => ({
                                 ...d,
                                 permissions: d.permissions.includes(id)
@@ -783,9 +769,7 @@ export function ServerSettings({
                                   : [...d.permissions, id],
                               }))
                             }
-                          >
-                            <span />
-                          </button>
+                          />
                         </div>
                       </div>
                     ))}

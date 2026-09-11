@@ -41,6 +41,24 @@ export type Tokens = {
   inputBorder: string
   /** --input-placeholder-text-default */
   placeholder: string
+  /** --text-link. An input takes this on its border while it has focus. */
+  link: string
+  /** --switch-background-default, the unchecked track */
+  switchBg: string
+  /** --switch-border-default */
+  switchBorder: string
+  /** --switch-border-hover */
+  switchBorderHover: string
+  /** --switch-border-selected-default, the edge once the track goes blurple */
+  switchBorderOn: string
+  /** --switch-thumb-background-default */
+  switchThumb: string
+  /** --switch-thumb-icon-default, the cross inside the unchecked knob */
+  switchIcon: string
+  /** --checkbox-background-default */
+  checkboxBg: string
+  /** --checkbox-border-default, much heavier than an input's edge */
+  checkboxBorder: string
   /** --border-normal, the edge on modals and inputs */
   borderNormal: string
   /** --background-scrim, the wash behind a modal */
@@ -110,6 +128,15 @@ const dark: Tokens = {
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#8f9097', // --input-placeholder-text-default
+  link: '#4d96ee', // --text-link
+  switchBg: '#0000001f', // --switch-background-default
+  switchBorder: '#97979f33', // --switch-border-default
+  switchBorderHover: '#97979f66', // --switch-border-hover
+  switchBorderOn: '#97979f1f', // --switch-border-selected-default
+  switchThumb: '#ffffff', // --switch-thumb-background-default
+  switchIcon: '#2e3036', // --switch-thumb-icon-default
+  checkboxBg: '#00000014', // --checkbox-background-default
+  checkboxBorder: '#97979fa3', // --checkbox-border-default
   borderNormal: '#97979f33', // --border-normal
   scrim: '#000000b8', // --background-scrim
   interactive: '#abacb2', // --interactive-text-default
@@ -142,6 +169,15 @@ const ash: Tokens = {
   inputBg: '#00000014', // --input-background-default
   inputBorder: '#97979f33', // --input-border-default
   placeholder: '#a4a5ab', // --input-placeholder-text-default
+  link: '#76aff6', // --text-link
+  switchBg: '#0000001f', // --switch-background-default
+  switchBorder: '#97979f33', // --switch-border-default
+  switchBorderHover: '#97979f66', // --switch-border-hover
+  switchBorderOn: '#97979f1f', // --switch-border-selected-default
+  switchThumb: '#ffffff', // --switch-thumb-background-default
+  switchIcon: '#2e3036', // --switch-thumb-icon-default
+  checkboxBg: '#00000014', // --checkbox-background-default
+  checkboxBorder: '#97979fa3', // --checkbox-border-default
   borderNormal: '#97979f33', // --border-normal
   scrim: '#000000b8', // --background-scrim
   interactive: '#c5c6ca', // --interactive-text-default
@@ -174,6 +210,15 @@ const onyx: Tokens = {
   inputBg: '#0000001f', // --input-background-default
   inputBorder: '#97979f3d', // --input-border-default
   placeholder: '#7d7e87', // --input-placeholder-text-default
+  link: '#2781e7', // --text-link
+  switchBg: '#0000001f', // --switch-background-default
+  switchBorder: '#97979f33', // --switch-border-default
+  switchBorderHover: '#97979f66', // --switch-border-hover
+  switchBorderOn: '#97979f33', // --switch-border-selected-default
+  switchThumb: '#ffffff', // --switch-thumb-background-default
+  switchIcon: '#2e3036', // --switch-thumb-icon-default
+  checkboxBg: '#00000014', // --checkbox-background-default
+  checkboxBorder: '#97979fa3', // --checkbox-border-default
   borderNormal: '#97979f3d', // --border-normal
   scrim: '#000000b8', // --background-scrim
   interactive: '#96979e', // --interactive-text-default
@@ -210,6 +255,15 @@ const light: Tokens = {
   inputBg: '#00000005', // --input-background-default
   inputBorder: '#97979f66', // --input-border-default
   placeholder: '#696a73', // --input-placeholder-text-default
+  link: '#006dd4', // --text-link
+  switchBg: '#00000005', // --switch-background-default
+  switchBorder: '#00000029', // --switch-border-default
+  switchBorderHover: '#00000070', // --switch-border-hover
+  switchBorderOn: '#97979f47', // --switch-border-selected-default
+  switchThumb: '#61636e', // --switch-thumb-background-default
+  switchIcon: '#ffffff', // --switch-thumb-icon-default
+  checkboxBg: '#0000000a', // --checkbox-background-default
+  checkboxBorder: '#85858c', // --checkbox-border-default
   borderNormal: '#97979f66', // --border-normal
   scrim: '#00000085', // --background-scrim
   interactive: '#595a63', // --interactive-text-default
@@ -341,6 +395,15 @@ export function applyTheme(t: Theme) {
   r.style.setProperty('--input-bg', k.inputBg)
   r.style.setProperty('--input-border', k.inputBorder)
   r.style.setProperty('--placeholder', k.placeholder)
+  r.style.setProperty('--link', k.link)
+  r.style.setProperty('--switch-bg', k.switchBg)
+  r.style.setProperty('--switch-border', k.switchBorder)
+  r.style.setProperty('--switch-border-hover', k.switchBorderHover)
+  r.style.setProperty('--switch-border-on', k.switchBorderOn)
+  r.style.setProperty('--switch-thumb', k.switchThumb)
+  r.style.setProperty('--switch-icon', k.switchIcon)
+  r.style.setProperty('--checkbox-bg', k.checkboxBg)
+  r.style.setProperty('--checkbox-border', k.checkboxBorder)
   r.style.setProperty('--border-normal', k.borderNormal)
   r.style.setProperty('--scrim', k.scrim)
   r.style.setProperty('--interactive', k.interactive)

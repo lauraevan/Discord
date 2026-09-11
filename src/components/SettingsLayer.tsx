@@ -162,6 +162,65 @@ export const Note = ({ children }: { children: ReactNode }) => (
 
 export const Divider = () => <div className="set-divider" />
 
+/**
+ * Discord's switch. The knob carries a glyph — a cross while it is off, a
+ * tick once it is on — which is what tells it apart from every generic
+ * toggle; both are a pair of 2.25px bars drawn inside the knob's own 20px
+ * box. See the `.switch` block in styles.css for where the geometry comes
+ * from.
+ */
+export function Switch({
+  checked,
+  label,
+  disabled,
+  onChange,
+}: {
+  checked: boolean
+  label: string
+  disabled?: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      aria-disabled={disabled || undefined}
+      disabled={disabled}
+      className={'switch' + (checked ? ' on' : '')}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="switch-thumb">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+          {checked ? (
+            <>
+              <path
+                fill="currentColor"
+                d="M7.89561 14.8538L6.30462 13.2629L14.3099 5.25755L15.9009 6.84854L7.89561 14.8538Z"
+              />
+              <path
+                fill="currentColor"
+                d="M4.08643 11.0903L5.67742 9.49929L9.4485 13.2704L7.85751 14.8614L4.08643 11.0903Z"
+              />
+            </>
+          ) : (
+            <>
+              <path
+                fill="currentColor"
+                d="M5.13231 6.72963L6.7233 5.13864L14.855 13.2704L13.2641 14.8614L5.13231 6.72963Z"
+              />
+              <path
+                fill="currentColor"
+                d="M13.2641 5.13864L14.855 6.72963L6.7233 14.8614L5.13231 13.2704L13.2641 5.13864Z"
+              />
+            </>
+          )}
+        </svg>
+      </span>
+    </button>
+  )
+}
+
 export function Toggle({
   label,
   note,
@@ -182,17 +241,7 @@ export function Toggle({
         <div className="set-row-label">{label}</div>
         {note ? <div className="set-row-note">{note}</div> : null}
       </div>
-      <button
-        role="switch"
-        aria-checked={value}
-        aria-label={label}
-        aria-disabled={disabled || undefined}
-        disabled={disabled}
-        className={'switch' + (value ? ' on' : '')}
-        onClick={() => onChange(!value)}
-      >
-        <span />
-      </button>
+      <Switch checked={value} label={label} disabled={disabled} onChange={onChange} />
     </div>
   )
 }
@@ -406,7 +455,7 @@ export function Check({
     <label className="set-check">
       <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} />
       <span className="set-check-box" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="14" height="14">
+        <svg viewBox="0 0 24 24" width="18" height="18">
           <path
             fill="currentColor"
             d="M9 20.42 2.79 14.21l2.83-2.83L9 14.77l9.88-9.88 2.83 2.83L9 20.42Z"
