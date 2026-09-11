@@ -53,6 +53,20 @@ import { Avatar } from './UserArea'
 import { DISCOVERY_CATEGORIES } from './Discover'
 import { LOCALES } from '../prefs'
 
+/**
+ * What Discord's Invites table puts in the Expires column: the time left on
+ * the link, or "Never" for one with no max age.
+ */
+function expiresIn(i: { createdAt: number; maxAge: number }) {
+  if (!i.maxAge) return 'Never'
+  const left = i.createdAt + i.maxAge * 1000 - Date.now()
+  if (left <= 0) return 'Expired'
+  const h = Math.round(left / 36e5)
+  if (h >= 48) return `${Math.round(h / 24)} days`
+  if (h >= 1) return `${h} hours`
+  return `${Math.max(1, Math.round(left / 6e4))} minutes`
+}
+
 /** A stable stand-in so the role draft has something to hold with no role open. */
 const NO_ROLE = {
   name: '',
@@ -128,6 +142,8 @@ export function ServerSettings({
   const [permQuery, setPermQuery] = useState('')
   const [emojiError, setEmojiError] = useState('')
   const [addRoleOpen, setAddRoleOpen] = useState(false)
+  const [memberQuery, setMemberQuery] = useState('')
+  const [banQuery, setBanQuery] = useState('')
   const [auditWho, setAuditWho] = useState('')
   const [auditWhat, setAuditWhat] = useState('')
   const iconFile = useRef<HTMLInputElement>(null)
@@ -263,6 +279,10 @@ export function ServerSettings({
     { sep: true },
     { id: 'delete', label: 'Delete Server', danger: true },
   ]
+
+  const bans = server.bans.filter((b) =>
+    [b.id, b.name].some((t) => t.toLowerCase().includes(banQuery.trim().toLowerCase())),
+  )
 
   const role = server.roles.find((r) => r.id === roleId) ?? null
 
@@ -872,6 +892,15 @@ export function ServerSettings({
       {section === 'members' ? (
         <>
           <Title>Members — 1</Title>
+          <div className="member-search">
+            <SearchIcon />
+            <input
+              value={memberQuery}
+              placeholder="Search Members"
+              aria-label="Search Members"
+              onChange={(e) => setMemberQuery(e.target.value)}
+            />
+          </div>
           <div className="member-table">
             <div className="member-table-head">
               <span>NAME</span>
@@ -879,6 +908,9 @@ export function ServerSettings({
               <span>JOINED DISCORD</span>
               <span>ROLES</span>
             </div>
+            {[account.name, account.handle].some((t) =>
+              t.toLowerCase().includes(memberQuery.trim().toLowerCase()),
+            ) ? (
             <div className="member-table-row">
               <span className="mt-name">
                 <Avatar account={account} size={32} status={false} />
@@ -949,6 +981,9 @@ export function ServerSettings({
                 </span>
               </span>
             </div>
+            ) : (
+              <div className="table-empty">No members matched.</div>
+            )}
           </div>
         </>
       ) : null}
@@ -975,7 +1010,7 @@ export function ServerSettings({
               Create Invite
             </button>
           </div>
-          <Note>Here is a list of every invite currently active on this server.</Note>
+          <Note>Here's a list of all active invite links. You can revoke any one.</Note>
           <div className="invite-table">
             <div className="invite-head">
               <span>INVITER</span>
@@ -994,7 +1029,7 @@ export function ServerSettings({
                 <span>
                   {i.uses} / {i.maxUses || '∞'}
                 </span>
-                <span>7 days</span>
+                <span>{expiresIn(i)}</span>
                 <button
                   aria-label="Revoke invite"
                   onClick={() =>
@@ -1009,7 +1044,7 @@ export function ServerSettings({
               </div>
             ))}
             {!server.invites.length ? (
-              <div className="table-empty">There are no active invites.</div>
+              <div className="table-empty">No invites yet</div>
             ) : null}
           </div>
         </>
@@ -1017,11 +1052,61 @@ export function ServerSettings({
 
       {section === 'bans' ? (
         <>
-          <Title>Bans — {server.bans.length}</Title>
+          {/* Discord's title is a plural rule, not a count beside a word:
+              "No Bans" at zero, "1 Ban", then "{n} Bans". */}
+          <Title>
+            {server.bans.length === 0
+              ? 'No Bans'
+              : server.bans.length === 1
+                ? '1 Ban'
+                : `${server.bans.length} Bans`}
+          </Title>
           <Note>
-            Bans by name. Since you are the only member, this list stays empty unless you add one.
+            Bans by default are by account and IP. A user can circumvent an IP ban by using a
+            proxy. Ban circumvention can be made very hard by enabling phone verification in{' '}
+            <button className="md-link" onClick={() => setSection('safety')}>
+              Safety Setup
+            </button>
+            .
           </Note>
-          {!server.bans.length ? <div className="table-empty">No Bans</div> : null}
+          <div className="member-search">
+            <SearchIcon />
+            <input
+              value={banQuery}
+              placeholder="Search Bans by User Id or Username"
+              aria-label="Search Bans"
+              onChange={(e) => setBanQuery(e.target.value)}
+            />
+          </div>
+          {bans.length ? (
+            <div className="member-table">
+              {bans.map((b) => (
+                <div className="ban-row" key={b.id}>
+                  <span className="mt-name">
+                    <b>{b.name}</b>
+                    <i>{b.reason}</i>
+                  </span>
+                  <button
+                    className="btn-secondary"
+                    onClick={() =>
+                      onPatch((sv) => ({ ...sv, bans: sv.bans.filter((x) => x.id !== b.id) }), {
+                        action: 'Ban revoked',
+                        target: b.name,
+                      })
+                    }
+                  >
+                    Revoke Ban
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="table-empty">
+              {banQuery.trim()
+                ? 'We looked as hard as we could, but no banned users were found matching that search.'
+                : 'No Bans'}
+            </div>
+          )}
         </>
       ) : null}
 
