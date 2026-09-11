@@ -1878,6 +1878,9 @@ body.resizing .side-grip {
   font-size: calc(16px * var(--u));
   line-height: calc(18px * var(--u));
   font-weight: 500;
+  /* Discord's buttons never wrap their label; they shrink the row instead */
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background-color 0.2s ease;
 }
 
@@ -4438,6 +4441,10 @@ h3.md-h {
   outline: calc(2px * var(--u)) solid var(--blurple);
   outline-offset: calc(-2px * var(--u));
   border-radius: calc(8px * var(--u));
+}
+
+.table-empty.tall {
+  padding-block: calc(60px * var(--u));
 }
 
 .ban-row {

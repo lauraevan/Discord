@@ -1193,16 +1193,22 @@ export function ServerSettings({
       ) ? (
         <>
           <Title>{(nav.find((n) => 'id' in n && n.id === section) as { label: string }).label}</Title>
-          <Unavailable
-            what="Not available in a page"
-            why={
-              section === 'integrations' || section === 'app_directory'
-                ? 'Bots and apps are programs on Discord’s side; there is nothing here for them to connect to.'
-                : section === 'role_subscriptions' || section === 'guild_products'
+          {/* Apps are the one of these where Discord's own empty state is
+              simply true of this page, so it gets that rather than a card
+              explaining the page. The rest need billing or a decision Discord
+              makes about a real server, and say so. */}
+          {section === 'integrations' || section === 'app_directory' ? (
+            <div className="table-empty tall">No apps have been installed in this server yet</div>
+          ) : (
+            <Unavailable
+              what="Not available in a page"
+              why={
+                section === 'role_subscriptions' || section === 'guild_products'
                   ? 'Selling anything needs Discord’s billing systems and a payout account.'
                   : 'The partner programme and analytics are decided by Discord about a real server.'
-            }
-          />
+              }
+            />
+          )}
         </>
       ) : null}
     </SettingsLayer>
@@ -1401,9 +1407,8 @@ function Stickers({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>Stickers</Title>
       <Note>
-        {stickers.length} of {slots} slots used. A server starts with five and each boost level
-        adds ten more, to sixty. Every sticker is filed under an emoji, which is what people
-        search it by.
+        {stickers.length} of {slots} slots used. Stickers can be static (JPG, PNG) or animated
+        (APNG, GIF). Stickers must be exactly 320 x 320 pixels and no larger than 512 KB.
       </Note>
       <div className="set-row-add">
         <input
@@ -1509,8 +1514,7 @@ function Soundboard({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>Soundboard</Title>
       <Note>
-        {sounds.length} of {slots} slots used. Playing one needs an audio file and a voice
-        connection, neither of which a page has, so these are the entries rather than the sounds.
+        {sounds.length} of {slots} slots used.
       </Note>
       <div className="set-row-add">
         <input
@@ -1606,10 +1610,7 @@ function ServerTagSection({ server, onPatch }: { server: Server; onPatch: Patch 
   return (
     <>
       <Title>Server Tag</Title>
-      <Note>
-        Four characters members can wear beside their name, with a badge from one of the packs.
-        Discord unlocks the packs per server; all four are offered here.
-      </Note>
+      <Note>You may use max 4 characters, alphabet (A-Z) and numbers.</Note>
       <div className="srv-tag-row">
         <Field
           label="TAG"
@@ -1668,10 +1669,10 @@ function Widget({ server, onPatch }: { server: Server; onPatch: Patch }) {
   const widget = server.widget ?? { enabled: false, channelId: null }
   return (
     <>
-      <Title>Widget</Title>
+      <Title>Server Widget</Title>
       <Toggle
-        label="Enable server widget"
-        note="Lets a website show who is online and offer an invite."
+        label="Enable Server Widget"
+        note="Embed an HTML widget on your website to display your online members, voice channels, and invite link."
         value={widget.enabled}
         onChange={(enabled) =>
           onPatch((s) => ({ ...s, widget: { ...widget, enabled } }), {
@@ -1702,12 +1703,14 @@ function Widget({ server, onPatch }: { server: Server; onPatch: Patch }) {
             ))}
         </select>
       </div>
-      <Sub>Widget endpoints</Sub>
+      <Sub>JSON API</Sub>
       <pre className="srv-code">
-        https://discord.com/api/guilds/{server.id}/widget.json{'\n'}
+        https://discord.com/api/guilds/{server.id}/widget.json
+      </pre>
+      <Sub>Premade Widget</Sub>
+      <pre className="srv-code">
         https://discord.com/api/guilds/{server.id}/widget.png?style=banner2
       </pre>
-      <Note>Both are Discord's own endpoints, and both need a real server behind them.</Note>
     </>
   )
 }
@@ -1869,8 +1872,8 @@ function Webhooks({ server, onPatch }: { server: Server; onPatch: Patch }) {
     <>
       <Title>Webhooks</Title>
       <Note>
-        A webhook is a URL that posts into a channel. These are minted in Discord's own shape;
-        nothing will receive a POST, since there is no server on the other end.
+        Webhooks are a simple way to post messages from other apps and websites into Discord using
+        internet magic.
       </Note>
       <div className="set-row-add">
         <input
