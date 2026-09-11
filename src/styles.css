@@ -1193,6 +1193,9 @@ body.resizing .side-grip {
   margin-right: -2.9px;
   display: flex;
   align-items: center;
+  /* a flex item will not shrink below its content unless it is told it may,
+     and without this the search box's `flex: 0 1` never gets a chance */
+  min-width: 0;
   /* the last of the three: 14.7 left the group 4 real px wide across its four
      gaps, and 13.9 lands its left-most ink on the capture's 956.5 exactly.
      A genuine optimum — 13.6 and 14.2 are both worse. Headers 4.373 -> 4.015. */
@@ -1221,11 +1224,19 @@ body.resizing .side-grip {
 
 .searchbox {
   margin-left: -1px;
-  /* Discord's own: .search__49676 { flex: 0 1 244px; max-width: 244px }, and
-     244 * --u is 195.2. It is also the 3 real px the group had to lose. */
+  /*
+   * Discord's own: .search__49676 { flex: 0 1 244px; max-width: 244px;
+   * width: clamp(var(--space-64), 100cqi - 320px, 244px) }. 244 * --u is
+   * 195.2, and the clamp's floor, --space-64, is 51.2. The clamp is a
+   * container query standing in for what flex already does, so this shrinks
+   * the same way with `flex: 0 1` and a min-width: without it the group is
+   * 402 wide whatever the window is, and the page scrolls sideways under
+   * about 880.
+   */
   width: 195.2px;
   height: 26px;
-  flex: 0 0 195.2px;
+  flex: 0 1 195.2px;
+  min-width: 51.2px;
   position: relative;
   top: 1px;
   border-radius: 4px;
