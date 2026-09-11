@@ -6,23 +6,34 @@ import { Tooltip } from '../ui/Tooltip'
 function RailItem({
   label,
   active,
+  unread,
+  mentions = 0,
   className = '',
   onClick,
   children,
 }: {
   label: string
   active?: boolean
+  /** anything unread here, which Discord shows as the pill at its smallest */
+  unread?: boolean
+  /** how many unread messages mention the reader, badged on the tile */
+  mentions?: number
   className?: string
   onClick?: () => void
   children: ReactNode
 }) {
   return (
     <Tooltip label={label}>
-      <div className={'server' + (active ? ' active' : '')}>
+      <div className={'server' + (active ? ' active' : '') + (unread ? ' unread' : '')}>
         <span className="server-pill" />
         <button className={'server-tile ' + className} onClick={onClick} aria-label={label}>
           {children}
         </button>
+        {mentions > 0 ? (
+          <span className="server-badge" aria-label={`${mentions} mentions`}>
+            {mentions > 99 ? '99+' : mentions}
+          </span>
+        ) : null}
       </div>
     </Tooltip>
   )
@@ -36,6 +47,7 @@ export function ServerRail({
   onCreate,
   discover = false,
   onDiscover,
+  state = {},
 }: {
   servers: Server[]
   activeId: string | null
@@ -45,6 +57,8 @@ export function ServerRail({
   /** Discover is open, so the compass takes the pill the way a server does */
   discover?: boolean
   onDiscover?: () => void
+  /** per server: anything unread, and how many messages mention the reader */
+  state?: Record<string, { unread: boolean; mentions: number }>
 }) {
   return (
     <nav className="rail">
@@ -63,6 +77,8 @@ export function ServerRail({
             key={s.id}
             label={s.name}
             active={s.id === activeId}
+            unread={s.id !== activeId && !!state[s.id]?.unread}
+            mentions={s.id === activeId ? 0 : (state[s.id]?.mentions ?? 0)}
             className="srv"
             onClick={() => onSelect(s.id)}
           >

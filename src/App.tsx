@@ -61,7 +61,7 @@ import {
 import { SPRITE } from './emoji'
 import { defaultPrefs, type Prefs } from './prefs'
 import { ageOn, hashPassword, makeSalt } from './auth'
-import type { MdContext } from './markdown'
+import { mentionsSelf, type MdContext } from './markdown'
 import { matches, parseQuery } from './search'
 import {
   isAccount,
@@ -501,6 +501,38 @@ function Client({
     }
     return out
   }, [server, messages, lastRead, keyOf, mutes, notify])
+
+  /**
+   * What the rail shows on each server: a dot when anything is unread, and a
+   * count of the messages that mention you. Discord draws the first as the
+   * pill at its smallest and the second as a red badge on the tile, and both
+   * have to look across every server rather than only the one open — which is
+   * what `unread` above does.
+   */
+  const railState = useMemo(() => {
+    const out: Record<string, { unread: boolean; mentions: number }> = {}
+    const now = Date.now()
+    for (const sv of servers) {
+      let unread = false
+      let mentions = 0
+      for (const c of sv.channels) {
+        const k = keyOf(sv, c)
+        const mark = lastRead[k] ?? 0
+        const mutedUntil = c.id in mutes ? mutes[c.id] : undefined
+        const isMuted = c.id in mutes && (mutedUntil === null || (mutedUntil ?? 0) > now)
+        if (isMuted || notify[c.id] === 2) continue
+        for (const m of messages[k] ?? []) {
+          if (m.time <= mark || m.author === account.handle) continue
+          unread = true
+          // a mention is counted even in a muted channel in Discord, but a
+          // channel set to Nothing suppresses it, which the skip above covers
+          if (mentionsSelf(m.text, account.name)) mentions += 1
+        }
+      }
+      out[sv.id] = { unread, mentions }
+    }
+    return out
+  }, [servers, messages, lastRead, keyOf, mutes, notify, account.handle, account.name])
 
   // Discord's unread bar counts what other people said, never what you said:
   // sending is itself a read, so your own message never sits under a NEW line
@@ -1136,6 +1168,7 @@ function Client({
           <ServerRail
             servers={servers}
             activeId={activeServer}
+            state={railState}
             onSelect={(id) => {
               setDiscover(null)
               setActiveServer(id)

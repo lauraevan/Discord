@@ -300,9 +300,39 @@ textarea {
   transition: transform 0.15s ease-out, opacity 0.1s;
 }
 
+/* Discord shows the pill at its smallest — 8 of the active pill's 40 — for a
+   server that has something unread, and grows it on hover the way any other
+   tile does. */
+.server.unread .server-pill {
+  opacity: 1;
+}
+
 .server:hover .server-pill {
   opacity: 1;
   transform: translateY(-50%) scaleY(0.45);
+}
+
+/* .numberBadge: the red count Discord pins to the bottom-right corner of a
+   tile, ringed in the rail's own colour so it reads as cut out of it */
+.server-badge {
+  position: absolute;
+  /* the 40px tile is centred in a 72px row, so its right edge is 16 in — the
+     badge straddles that corner rather than sitting inside it */
+  inset-inline-end: calc(12px * var(--u));
+  bottom: calc(-4px * var(--u));
+  min-width: calc(8px * var(--u));
+  height: calc(16px * var(--u));
+  padding: 0 calc(4px * var(--u));
+  border-radius: calc(16px * var(--u));
+  border: calc(2px * var(--u)) solid var(--rail);
+  box-sizing: content-box;
+  background: #d93d45;
+  color: #fff;
+  font-size: calc(12px * var(--u));
+  line-height: calc(16px * var(--u));
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
 }
 
 .server.active .server-pill,
@@ -2162,9 +2192,11 @@ body.resizing .side-grip {
   text-decoration: underline;
 }
 
+/* --mention-background and --mention-foreground, on .mention's own
+   `border-radius: 3px; padding: 0 2px` */
 .md-mention {
-  background: color-mix(in srgb, var(--blurple) 26%, transparent);
-  color: #c9cdfb;
+  background: rgb(89 102 242 / 0.24);
+  color: #a8baff;
   border-radius: 3px;
   padding: 0 2px;
   font-weight: 500;
@@ -2316,6 +2348,28 @@ h3.md-h {
   padding: 1px 5px;
   font-size: 9.32px;
   letter-spacing: 0.4px;
+}
+
+/* .mentioned__5126c: an amber wash with a 2px --icon-feedback-warning bar
+   down the left edge. Discord's hover is *lighter* than its resting state
+   here, which is its own oddity rather than one of mine. */
+.group.mentioned {
+  background: rgb(247 163 0 / 0.08);
+  position: relative;
+}
+
+.group.mentioned:hover {
+  background: rgb(247 163 0 / 0.04);
+}
+
+.group.mentioned::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: calc(2px * var(--u));
+  background: #eb9900;
+  pointer-events: none;
 }
 
 .group:hover {

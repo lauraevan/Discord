@@ -13,7 +13,13 @@ import {
 } from '../data'
 import { byName } from '../emoji'
 import { ServerOnboarding } from './Onboarding'
-import { EmojiByName, EmojiGlyph, renderMarkdown, type MdContext } from '../markdown'
+import {
+  EmojiByName,
+  EmojiGlyph,
+  mentionsSelf,
+  renderMarkdown,
+  type MdContext,
+} from '../markdown'
 import type { Prefs } from '../prefs'
 import {
   BellIcon,
@@ -502,6 +508,9 @@ export function ChatFeed({
         lastDay = day
         const parent = m.replyTo ? all.find((x) => x.id === m.replyTo) : undefined
         const isUnread = unreadFrom !== null && m.time >= unreadFrom
+        // Discord washes a message that mentions you in amber and runs a bar
+        // down its left edge; your own message never mentions you
+        const mentioned = m.author !== account.handle && mentionsSelf(m.text, account.name)
 
         if (m.type && m.type !== 'DEFAULT') {
           return (
@@ -530,7 +539,12 @@ export function ChatFeed({
             ) : null}
 
             <div
-              className={'group' + (grouped && !newDay ? ' grouped' : '') + (m.pinned ? ' pinned' : '')}
+              className={
+                'group' +
+                (grouped && !newDay ? ' grouped' : '') +
+                (m.pinned ? ' pinned' : '') +
+                (mentioned ? ' mentioned' : '')
+              }
               onContextMenu={(e) => {
                 e.preventDefault()
                 onContext(m, point(e))

@@ -75,6 +75,21 @@ export function GuildEmojiGlyph({
   return null
 }
 
+/**
+ * Does this message mention the reader? Discord paints a message that does in
+ * an amber wash with a bar down its left edge, and counts it on the rail — so
+ * both of those need the same answer, and it lives here beside the parser
+ * that draws the pill.
+ *
+ * `@everyone` and `@here` count, and a name match is anchored the way the
+ * parser's is: the run after the @ has to *start* with the name.
+ */
+export function mentionsSelf(text: string, name: string) {
+  if (/(^|\s)@(everyone|here)\b/.test(text)) return true
+  const at = new RegExp(`(^|\\s)@${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+  return at.test(text)
+}
+
 /** Surrogate-aware: pulls one user-perceived character off the front. */
 function firstChar(s: string, i: number) {
   const cp = s.codePointAt(i)!
@@ -206,9 +221,21 @@ function plain(src: string, ctx: MdContext, jumbo: boolean): ReactNode[] {
       }
     }
 
-    if (src[i] === '@' && ctx.members) {
-      const m = /^@([\w .-]{1,40})/.exec(rest)
-      const hit = m && ctx.members.find((u) => m[1].toLowerCase().startsWith(u.name.toLowerCase()))
+    if (src[i] === '@') {
+      // @everyone and @here are Discord's, not a member's, and are pills too
+      const all = /^@(everyone|here)\b/.exec(rest)
+      if (all) {
+        flush()
+        out.push(
+          <span key={key++} className="md-mention">
+            @{all[1]}
+          </span>,
+        )
+        i += all[0].length
+        continue
+      }
+      const m = ctx.members && /^@([\w .-]{1,40})/.exec(rest)
+      const hit = m && ctx.members!.find((u) => m[1].toLowerCase().startsWith(u.name.toLowerCase()))
       if (m && hit) {
         flush()
         out.push(
