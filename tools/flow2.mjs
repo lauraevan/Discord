@@ -102,6 +102,10 @@ await step('server settings: create + edit a role', async () => {
   await p.fill('[aria-label="Search permissions"]', 'kick')
   if ((await p.locator('.perm').count()) !== 1) throw new Error('permission search did not narrow')
   await p.fill('[aria-label="Search permissions"]', '')
+  // the draft spans both tabs, and nothing lands until Save Changes
+  await p.click('.save-go')
+  await p.waitForTimeout(200)
+  if (await p.locator('.save-bar').count()) throw new Error('the save bar stayed up')
   // roles are handed out on the third tab
   await p.click('.role-tab:has-text("Manage Members")')
   await p.click('.role-members button:has-text("Add")')
@@ -118,6 +122,8 @@ await step('a role the member holds colours their name', async () => {
   await p.click('.settings-item:has-text("Roles")')
   await p.click('.role-name:has-text("moderator")')
   await p.click('.swatch:not(.none) >> nth=0')
+  await p.click('.save-go')
+  await p.waitForTimeout(200)
   await p.keyboard.press('Escape')
   await p.waitForTimeout(300)
   await p.click('[aria-label="Toggle member list"]')

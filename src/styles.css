@@ -3272,17 +3272,14 @@ h3.md-h {
   background: #d22d3914;
 }
 
-/* .contentRegion + .contentRegionScroller */
+/* .contentRegion. The scroller is a child so the notice region can be
+   absolute to this and stay put while the pane scrolls under it. */
 .settings-pane {
   flex: 1 1 calc(800px * var(--u));
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
+  position: relative;
   height: 100%;
   background: var(--base-low);
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 /* .contentColumn.contentColumnDefault */
@@ -3359,6 +3356,95 @@ h3.md-h {
 .settings-close button:hover + span,
 .settings-close button:active + span {
   color: var(--strong);
+}
+
+/* .noticeRegion__23e6b — outside the scroller, pinned to the bottom of the
+   content region, the same width as the column it covers */
+.settings-notice {
+  position: absolute;
+  bottom: 0;
+  inset-inline: 0 calc(71px * var(--u));
+  max-width: calc(740px * var(--u));
+  padding: 0 calc(20px * var(--u)) calc(20px * var(--u));
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Discord's unsaved-changes bar. It rides the client's default spring up from
+   80px, which is the same one the AutoMod refusal over the composer takes. */
+.save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(16px * var(--u));
+  padding: calc(10px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: var(--rail);
+  box-shadow: 0 calc(8px * var(--u)) calc(16px * var(--u)) rgb(0 0 0 / 0.24);
+  pointer-events: auto;
+  animation: notice-in var(--dur-default) var(--ease-default);
+}
+
+.save-bar-text {
+  /* text-md/medium */
+  font-size: calc(16px * var(--u));
+  line-height: calc(20px * var(--u));
+  font-weight: 500;
+  color: var(--text);
+  padding-inline-start: calc(6px * var(--u));
+}
+
+.save-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: calc(8px * var(--u));
+  flex: 0 0 auto;
+}
+
+/* Reset is Discord's borderless button: no fill, underlines on hover */
+.save-reset {
+  height: calc(32px * var(--u));
+  padding: 0 calc(12px * var(--u));
+  border-radius: calc(8px * var(--u));
+  color: var(--text);
+  font-size: calc(14px * var(--u));
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.save-reset:hover {
+  text-decoration: underline;
+}
+
+/* --status-positive-background */
+.save-go {
+  height: calc(32px * var(--u));
+  padding: 0 calc(16px * var(--u));
+  border-radius: calc(8px * var(--u));
+  background: #248045;
+  color: #fff;
+  font-size: calc(14px * var(--u));
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.save-go:hover {
+  background: #1a6334;
+}
+
+/* .contentRegionScroller — the pane's own scroller, so the notice above can
+   stay put while this moves */
+.settings-scroll {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* --- controls ----------------------------------------------------------- */

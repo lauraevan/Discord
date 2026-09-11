@@ -1,4 +1,4 @@
-import { useEffect, useId, type ReactNode } from 'react'
+import { useEffect, useId, useState, type ReactNode } from 'react'
 import { CloseIcon } from '../ui/Icons'
 
 export type NavItem =
@@ -16,12 +16,15 @@ export function SettingsLayer({
   section,
   onSection,
   onClose,
+  notice,
   children,
 }: {
   nav: NavItem[]
   section: string
   onSection: (id: string) => void
   onClose: () => void
+  /** the unsaved-changes bar, which rides in Discord's noticeRegion */
+  notice?: ReactNode
   children: ReactNode
 }) {
   useEffect(() => {
@@ -63,16 +66,79 @@ export function SettingsLayer({
         </div>
       </nav>
       <div className="settings-pane">
-        <div className="settings-content">{children}</div>
-        {/* Discord's toolsContainer: a 60px column immediately right of the
-            content column, not a corner the button is pinned into. */}
-        <div className="settings-tools">
-          <div className="settings-close">
-            <button onClick={onClose} aria-label="Close">
-              <CloseIcon />
-            </button>
-            <span>ESC</span>
+        <div className="settings-scroll">
+          <div className="settings-content">{children}</div>
+          {/* Discord's toolsContainer: a 60px column immediately right of the
+              content column, not a corner the button is pinned into. */}
+          <div className="settings-tools">
+            <div className="settings-close">
+              <button onClick={onClose} aria-label="Close">
+                <CloseIcon />
+              </button>
+              <span>ESC</span>
+            </div>
           </div>
+        </div>
+        {/* .noticeRegion, which sits outside the scroller so the bar stays
+            pinned to the bottom of the pane however far down you are */}
+        {notice}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------- unsaved changes */
+
+/**
+ * Discord's settings panes buffer their edits. A field writes to a draft, a
+ * bar slides up over the pane saying "Careful — you have unsaved changes!",
+ * and nothing is committed until Save Changes; Reset throws the draft away.
+ *
+ * The draft is replaced whenever `source` changes identity — which covers both
+ * a successful save (the committed object is new) and the pane being pointed
+ * at something else (another role, another server).
+ */
+export function useDraft<T extends object>(source: T) {
+  const [base, setBase] = useState(source)
+  const [draft, setDraft] = useState(source)
+  if (base !== source) {
+    setBase(source)
+    setDraft(source)
+  }
+  return {
+    draft: base === source ? draft : source,
+    patch: (fn: (d: T) => T) => setDraft(fn),
+    reset: () => setDraft(source),
+    dirty: JSON.stringify(draft) !== JSON.stringify(source),
+  }
+}
+
+/**
+ * The bar itself. Discord parks it in `noticeRegion` — absolute to the content
+ * region, 20px off the bottom, the same 740px wide as the column — and rides
+ * it up on the client's default spring.
+ */
+export function SaveBar({
+  open,
+  onReset,
+  onSave,
+}: {
+  open: boolean
+  onReset: () => void
+  onSave: () => void
+}) {
+  if (!open) return null
+  return (
+    <div className="settings-notice">
+      <div className="save-bar">
+        <span className="save-bar-text">Careful — you have unsaved changes!</span>
+        <div className="save-bar-actions">
+          <button className="save-reset" onClick={onReset}>
+            Reset
+          </button>
+          <button className="save-go" onClick={onSave}>
+            Save Changes
+          </button>
         </div>
       </div>
     </div>

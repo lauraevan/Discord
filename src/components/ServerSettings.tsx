@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   AutoModAction,
   AutoModTrigger,
@@ -43,13 +43,24 @@ import {
   Slider,
   Sub,
   Title,
+  SaveBar,
   Toggle,
   Unavailable,
+  useDraft,
   type NavItem,
 } from './SettingsLayer'
 import { Avatar } from './UserArea'
 import { DISCOVERY_CATEGORIES } from './Discover'
 import { LOCALES } from '../prefs'
+
+/** A stable stand-in so the role draft has something to hold with no role open. */
+const NO_ROLE = {
+  name: '',
+  color: null as string | null,
+  hoist: false,
+  mentionable: false,
+  permissions: [] as string[],
+}
 
 /**
  * The only five inactive timeouts Discord's client offers, in seconds — its
@@ -121,6 +132,37 @@ export function ServerSettings({
   const [auditWhat, setAuditWhat] = useState('')
   const iconFile = useRef<HTMLInputElement>(null)
 
+  /**
+   * Overview's draft. Discord does not commit a settings field as you type it
+   * — the pane buffers every change and the save bar carries them over
+   * together. Only the fields Overview owns are drafted, so that an emoji
+   * upload or an invite minted in another pane does not throw the draft away.
+   */
+  const source = useMemo(
+    () => ({
+      name: server.name,
+      color: server.color,
+      icon: server.icon,
+      description: server.description ?? '',
+      afkChannelId: server.afkChannelId ?? null,
+      afkTimeout: server.afkTimeout ?? 300,
+      systemChannelId: server.systemChannelId ?? null,
+      systemFlags: server.systemFlags ?? 0,
+      notifyLevel: server.notifyLevel,
+    }),
+    [server],
+  )
+  const ov = useDraft(source)
+  const saveOverview = () =>
+    onPatch(
+      (sv) => ({
+        ...sv,
+        ...ov.draft,
+        initials: ov.draft.name.slice(0, 2).toUpperCase(),
+      }),
+      { action: 'Server settings updated', target: ov.draft.name },
+    )
+
   const emojiFile = useRef<HTMLInputElement>(null)
 
   /**
@@ -161,11 +203,7 @@ export function ServerSettings({
   const pickIcon = (f: File | undefined) => {
     if (!f) return
     const r = new FileReader()
-    r.onload = () =>
-      onPatch((sv) => ({ ...sv, icon: String(r.result) }), {
-        action: 'Server icon updated',
-        target: server.name,
-      })
+    r.onload = () => ov.patch((d) => ({ ...d, icon: String(r.result) }))
     r.readAsDataURL(f)
   }
 
@@ -228,6 +266,31 @@ export function ServerSettings({
 
   const role = server.roles.find((r) => r.id === roleId) ?? null
 
+  /**
+   * The role editor's draft. Discord's Edit Role is the other pane the help
+   * centre shows the save bar on — "Press Save Changes to confirm your
+   * selection" — and it covers Display and Permissions together, so switching
+   * tabs keeps what you have not saved. Manage Members is not in it: handing a
+   * role out takes effect at once there, as it does in the client.
+   */
+  const roleSource = useMemo(
+    () =>
+      role
+        ? {
+            name: role.name,
+            color: role.color,
+            hoist: role.hoist,
+            mentionable: role.mentionable,
+            permissions: role.permissions,
+          }
+        : NO_ROLE,
+    [role],
+  )
+  const rd = useDraft(roleSource)
+  const saveRole = () => {
+    if (role) patchRole(role.id, (r) => ({ ...r, ...rd.draft }), 'Role updated')
+  }
+
   // @everyone is the floor and always sits last, however the others are ordered
   const ranked = [
     ...server.roles.filter((r) => r.id !== 'everyone'),
@@ -281,6 +344,15 @@ export function ServerSettings({
         setRoleId(null)
       }}
       onClose={onClose}
+      notice={
+        <SaveBar
+          open={
+            (section === 'overview' && ov.dirty) || (section === 'roles' && !!role && rd.dirty)
+          }
+          onReset={section === 'overview' ? ov.reset : rd.reset}
+          onSave={section === 'overview' ? saveOverview : saveRole}
+        />
+      }
     >
       {section === 'overview' ? (
         <>
@@ -290,12 +362,16 @@ export function ServerSettings({
                 Upload Image button, and Remove once there is one to remove. */}
             <div className="srv-icon-col">
               <button
-                className={'srv-icon' + (server.icon ? ' has-icon' : '')}
-                style={server.icon ? undefined : { background: server.color }}
+                className={'srv-icon' + (ov.draft.icon ? ' has-icon' : '')}
+                style={ov.draft.icon ? undefined : { background: ov.draft.color }}
                 onClick={() => iconFile.current?.click()}
                 aria-label="Upload a server icon"
               >
-                {server.icon ? <img src={server.icon} alt="" /> : server.initials}
+                {ov.draft.icon ? (
+                  <img src={ov.draft.icon} alt="" />
+                ) : (
+                  ov.draft.name.slice(0, 2).toUpperCase()
+                )}
               </button>
               <input
                 ref={iconFile}
@@ -310,15 +386,10 @@ export function ServerSettings({
               <button className="srv-icon-upload" onClick={() => iconFile.current?.click()}>
                 Upload Image
               </button>
-              {server.icon ? (
+              {ov.draft.icon ? (
                 <button
                   className="srv-icon-remove"
-                  onClick={() =>
-                    onPatch((sv) => ({ ...sv, icon: undefined }), {
-                      action: 'Server icon removed',
-                      target: server.name,
-                    })
-                  }
+                  onClick={() => ov.patch((d) => ({ ...d, icon: undefined }))}
                 >
                   Remove
                 </button>
@@ -327,14 +398,9 @@ export function ServerSettings({
             <div className="srv-overview-fields">
               <Field
                 label="SERVER NAME"
-                value={server.name}
+                value={ov.draft.name}
                 maxLength={100}
-                onChange={(name) =>
-                  onPatch((s) => ({ ...s, name, initials: name.slice(0, 2).toUpperCase() }), {
-                    action: 'Server name updated',
-                    target: name,
-                  })
-                }
+                onChange={(name) => ov.patch((d) => ({ ...d, name }))}
               />
               <div className="set-field">
                 <label>ICON COLOR</label>
@@ -342,17 +408,12 @@ export function ServerSettings({
                   {ROLE_COLORS.slice(0, 10).map((c) => (
                     <button
                       key={c}
-                      className={'swatch' + (c === server.color ? ' on' : '')}
+                      className={'swatch' + (c === ov.draft.color ? ' on' : '')}
                       style={{ background: c }}
                       aria-label={c}
-                      onClick={() =>
-                        onPatch((s) => ({ ...s, color: c }), {
-                          action: 'Server icon changed',
-                          target: server.name,
-                        })
-                      }
+                      onClick={() => ov.patch((d) => ({ ...d, color: c }))}
                     >
-                      {c === server.color ? <CheckIcon /> : null}
+                      {c === ov.draft.color ? <CheckIcon /> : null}
                     </button>
                   ))}
                 </div>
@@ -361,42 +422,32 @@ export function ServerSettings({
           </div>
           <Field
             label="SERVER DESCRIPTION"
-            value={server.description ?? ''}
+            value={ov.draft.description}
             maxLength={120}
             textarea
             placeholder="Tell people what your server is about."
-            onChange={(description) => onPatch((s) => ({ ...s, description }))}
+            onChange={(description) => ov.patch((d) => ({ ...d, description }))}
           />
           <Divider />
           {/* Discord's AFK pair. The note is its own, and the five timeouts
               are the only values the client offers. */}
           <Sub>Inactive Channel</Sub>
           <Select
-            value={server.afkChannelId ?? ''}
+            value={ov.draft.afkChannelId ?? ''}
             options={[
               ['', 'No Inactive Channel'] as const,
               ...server.channels
                 .filter((c) => c.kind === 'voice')
                 .map((c) => [c.id, c.name] as const),
             ]}
-            onChange={(id) =>
-              onPatch((sv) => ({ ...sv, afkChannelId: id || null }), {
-                action: id ? 'Inactive channel set' : 'Inactive channel cleared',
-                target: server.channels.find((c) => c.id === id)?.name ?? server.name,
-              })
-            }
+            onChange={(id) => ov.patch((d) => ({ ...d, afkChannelId: id || null }))}
           />
           <Sub>Inactive Timeout</Sub>
           <Select
-            value={String(server.afkTimeout ?? 300)}
+            value={String(ov.draft.afkTimeout)}
             note="Automatically move members to this channel and mute them when they have been idle for longer than the inactive timeout. This does not affect browsers."
             options={AFK_TIMEOUTS}
-            onChange={(v) =>
-              onPatch((sv) => ({ ...sv, afkTimeout: Number(v) }), {
-                action: `Set the inactive timeout to ${Number(v) / 60} minutes`,
-                target: server.name,
-              })
-            }
+            onChange={(v) => ov.patch((d) => ({ ...d, afkTimeout: Number(v) }))}
           />
 
           <Divider />
@@ -405,33 +456,25 @@ export function ServerSettings({
               checkbox is on when the bit is clear. */}
           <Sub>System Messages Channel</Sub>
           <Select
-            value={server.systemChannelId ?? ''}
+            value={ov.draft.systemChannelId ?? ''}
             options={[
               ['', 'No System Messages'] as const,
               ...server.channels
                 .filter((c) => c.kind === 'text' || c.kind === 'announcement')
                 .map((c) => [c.id, `#${c.name}`] as const),
             ]}
-            onChange={(id) =>
-              onPatch((sv) => ({ ...sv, systemChannelId: id || null }), {
-                action: id ? 'System messages channel set' : 'System messages cleared',
-                target: server.channels.find((c) => c.id === id)?.name ?? server.name,
-              })
-            }
+            onChange={(id) => ov.patch((d) => ({ ...d, systemChannelId: id || null }))}
           />
           {SYSTEM_MESSAGES.map(([bit, label]) => (
             <Check
               key={bit}
               label={label}
-              value={((server.systemFlags ?? 0) & bit) === 0}
+              value={(ov.draft.systemFlags & bit) === 0}
               onChange={(on) =>
-                onPatch(
-                  (sv) => ({
-                    ...sv,
-                    systemFlags: on ? (sv.systemFlags ?? 0) & ~bit : (sv.systemFlags ?? 0) | bit,
-                  }),
-                  { action: on ? 'System message enabled' : 'System message suppressed', target: label },
-                )
+                ov.patch((d) => ({
+                  ...d,
+                  systemFlags: on ? d.systemFlags & ~bit : d.systemFlags | bit,
+                }))
               }
             />
           ))}
@@ -443,13 +486,8 @@ export function ServerSettings({
             preferences will receive a notification for every message sent in this server.
           </Note>
           <Radio
-            value={String(server.notifyLevel) as '0' | '1'}
-            onChange={(v) =>
-              onPatch((s) => ({ ...s, notifyLevel: Number(v) as 0 | 1 }), {
-                action: 'Default notifications changed',
-                target: v === '0' ? 'All Messages' : 'Only @mentions',
-              })
-            }
+            value={String(ov.draft.notifyLevel) as '0' | '1'}
+            onChange={(v) => ov.patch((d) => ({ ...d, notifyLevel: Number(v) as 0 | 1 }))}
             options={[
               ['0', 'All Messages'],
               ['1', 'Only @mentions'],
@@ -603,9 +641,11 @@ export function ServerSettings({
           </button>
           <div className="role-edit-head">
             {role.id === 'everyone' ? null : (
-              <span className="role-dot" style={{ background: role.color ?? '#99aab5' }} />
+              <span className="role-dot" style={{ background: rd.draft.color ?? '#99aab5' }} />
             )}
-            <Title>Edit Role — {role.name}</Title>
+            {/* the header previews the draft, so the name and colour you are
+                picking are the ones you see */}
+            <Title>Edit Role — {rd.draft.name}</Title>
           </div>
 
           {/* Discord splits the editor in three. @everyone has no display of
@@ -636,9 +676,9 @@ export function ServerSettings({
             <>
               <Field
                 label="ROLE NAME"
-                value={role.name}
+                value={rd.draft.name}
                 maxLength={CAPS.roleNameChars}
-                onChange={(name) => patchRole(role.id, (r) => ({ ...r, name }), 'Role renamed')}
+                onChange={(name) => rd.patch((d) => ({ ...d, name }))}
               />
               <div className="set-field">
                 <label>ROLE COLOR</label>
@@ -647,25 +687,21 @@ export function ServerSettings({
                 </Note>
                 <div className="swatch-row wrap">
                   <button
-                    className={'swatch none' + (role.color === null ? ' on' : '')}
+                    className={'swatch none' + (rd.draft.color === null ? ' on' : '')}
                     aria-label="Default Color"
-                    onClick={() =>
-                      patchRole(role.id, (r) => ({ ...r, color: null }), 'Role color changed')
-                    }
+                    onClick={() => rd.patch((d) => ({ ...d, color: null }))}
                   >
                     <CloseIcon />
                   </button>
                   {ROLE_COLORS.map((c) => (
                     <button
                       key={c}
-                      className={'swatch' + (c === role.color ? ' on' : '')}
+                      className={'swatch' + (c === rd.draft.color ? ' on' : '')}
                       style={{ background: c }}
                       aria-label={c}
-                      onClick={() =>
-                        patchRole(role.id, (r) => ({ ...r, color: c }), 'Role color changed')
-                      }
+                      onClick={() => rd.patch((d) => ({ ...d, color: c }))}
                     >
-                      {c === role.color ? <CheckIcon /> : null}
+                      {c === rd.draft.color ? <CheckIcon /> : null}
                     </button>
                   ))}
                 </div>
@@ -673,15 +709,13 @@ export function ServerSettings({
               <Divider />
               <Toggle
                 label="Display role members separately from online members"
-                value={role.hoist}
-                onChange={(hoist) => patchRole(role.id, (r) => ({ ...r, hoist }), 'Role hoist changed')}
+                value={rd.draft.hoist}
+                onChange={(hoist) => rd.patch((d) => ({ ...d, hoist }))}
               />
               <Toggle
                 label="Allow anyone to @mention this role"
-                value={role.mentionable}
-                onChange={(mentionable) =>
-                  patchRole(role.id, (r) => ({ ...r, mentionable }), 'Role mentionable changed')
-                }
+                value={rd.draft.mentionable}
+                onChange={(mentionable) => rd.patch((d) => ({ ...d, mentionable }))}
               />
             </>
           ) : null}
@@ -717,20 +751,16 @@ export function ServerSettings({
                           </div>
                           <button
                             role="switch"
-                            aria-checked={role.permissions.includes(id)}
+                            aria-checked={rd.draft.permissions.includes(id)}
                             aria-label={label}
-                            className={'switch' + (role.permissions.includes(id) ? ' on' : '')}
+                            className={'switch' + (rd.draft.permissions.includes(id) ? ' on' : '')}
                             onClick={() =>
-                              patchRole(
-                                role.id,
-                                (r) => ({
-                                  ...r,
-                                  permissions: r.permissions.includes(id)
-                                    ? r.permissions.filter((p) => p !== id)
-                                    : [...r.permissions, id],
-                                }),
-                                'Role permissions updated',
-                              )
+                              rd.patch((d) => ({
+                                ...d,
+                                permissions: d.permissions.includes(id)
+                                  ? d.permissions.filter((pp) => pp !== id)
+                                  : [...d.permissions, id],
+                              }))
                             }
                           >
                             <span />
