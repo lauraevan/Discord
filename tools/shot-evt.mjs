@@ -1,0 +1,20 @@
+import { chromium } from 'playwright'
+import { readFileSync } from 'node:fs'
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
+const p = await b.newPage({ viewport: { width: 1558, height: 900 } })
+const errs = []
+p.on('pageerror', (e) => errs.push(String(e).split('\n')[0]))
+await p.addInitScript(readFileSync('tools/session.js', 'utf8'))
+await p.goto('file://' + process.cwd() + '/dist/index.html')
+await p.waitForTimeout(600)
+await p.click('.server-tile.srv'); await p.waitForTimeout(300)
+await p.click('.row.nav:has-text("Events")')
+await p.waitForSelector('.events')
+await p.click('.events-head .btn-primary:has-text("Create Event")')
+await p.waitForSelector('.modal')
+await p.waitForTimeout(400)
+await p.click('[aria-label="Start Date"]')
+await p.waitForTimeout(300)
+await p.screenshot({ path: process.argv[2] })
+console.log('errors:', errs.length ? errs : 'none')
+await b.close()

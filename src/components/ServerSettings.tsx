@@ -2152,21 +2152,19 @@ function AutoMod({ server, onPatch }: { server: Server; onPatch: Patch }) {
               {r.trigger === AutoModTrigger.DEFAULT_KEYWORD_LIST ? (
                 <div className="srv-presets">
                   {Object.entries(KeywordPreset).map(([label, value]) => (
-                    <label key={label}>
-                      <input
-                        type="checkbox"
-                        checked={r.presets.includes(value)}
-                        onChange={(e) =>
-                          patchRule(r.id, (x) => ({
-                            ...x,
-                            presets: e.target.checked
-                              ? [...x.presets, value]
-                              : x.presets.filter((p) => p !== value),
-                          }))
-                        }
-                      />
-                      {label.replace('_', ' ').toLowerCase()}
-                    </label>
+                    <Check
+                      key={label}
+                      label={label.replace('_', ' ').toLowerCase()}
+                      value={r.presets.includes(value)}
+                      onChange={(on) =>
+                        patchRule(r.id, (x) => ({
+                          ...x,
+                          presets: on
+                            ? [...x.presets, value]
+                            : x.presets.filter((pp) => pp !== value),
+                        }))
+                      }
+                    />
                   ))}
                 </div>
               ) : null}

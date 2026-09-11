@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Select as Dropdown } from '../ui/Select'
+import { DatePicker, TIMES } from '../ui/DatePicker'
 import { uid, type Server, type ServerEvent } from '../data'
 import { CalendarIcon, CloseIcon, SpeakerIcon, StageIcon } from '../ui/Icons'
 
@@ -169,8 +170,14 @@ function CreateEvent({
   const [topic, setTopic] = useState('')
   const [where, setWhere] = useState<string>(spots[0]?.id ?? 'else')
   const [place, setPlace] = useState('')
-  const iso = new Date(Date.now() + 864e5).toISOString().slice(0, 16)
-  const [start, setStart] = useState(iso)
+  // Discord splits the start into a date and a time, and defaults to tomorrow
+  const soon = new Date(Date.now() + 864e5)
+  const [day, setDay] = useState(
+    `${soon.getFullYear()}-${String(soon.getMonth() + 1).padStart(2, '0')}-${String(soon.getDate()).padStart(2, '0')}`,
+  )
+  const [time, setTime] = useState(`${String(soon.getHours()).padStart(2, '0')}:00`)
+  const today = new Date()
+  const minDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
 
   return (
     <div className="overlay" onMouseDown={onClose}>
@@ -205,13 +212,29 @@ function CreateEvent({
               <input value={place} onChange={(e) => setPlace(e.target.value)} />
             </div>
           ) : null}
-          <div className="set-field">
-            <label>START DATE</label>
-            <input
-              type="datetime-local"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-            />
+          {/* Discord asks for the date and the time separately, and neither
+              is the browser's own control */}
+          <div className="event-start">
+            <div className="set-field">
+              <label htmlFor="evt-date">START DATE</label>
+              <DatePicker
+                id="evt-date"
+                aria-label="Start Date"
+                value={day}
+                min={minDay}
+                onChange={setDay}
+              />
+            </div>
+            <div className="set-field">
+              <label htmlFor="evt-time">START TIME</label>
+              <Dropdown
+                id="evt-time"
+                aria-label="Start Time"
+                value={time}
+                options={TIMES}
+                onChange={setTime}
+              />
+            </div>
           </div>
         </div>
         <div className="modal-foot">
@@ -226,7 +249,7 @@ function CreateEvent({
                 id: uid('evt'),
                 name: name.trim(),
                 description: topic.trim(),
-                start: new Date(start).getTime(),
+                start: new Date(`${day}T${time}`).getTime(),
                 channelId: where === 'else' ? null : where,
                 location: where === 'else' ? place.trim() : '',
                 interested: [],

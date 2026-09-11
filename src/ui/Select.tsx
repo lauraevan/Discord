@@ -1,5 +1,7 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CheckIcon, ChevronDownIcon } from './Icons'
+import { box, vh } from '../zoom'
 
 export type Option = { value: string; label: string; disabled?: boolean }
 
@@ -61,6 +63,11 @@ export function Select({
   const root = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLDivElement>(null)
   const typed = useRef({ term: '', at: 0 })
+  // the popout is portalled to the body: inside a modal or a scroller it would
+  // otherwise be clipped by the overflow that keeps those in their box
+  const [at, setAt] = useState<{ left: number; top: number; width: number; up: boolean } | null>(
+    null,
+  )
 
   const index = useMemo(() => options.findIndex((o) => o.value === value), [options, value])
   const current = index >= 0 ? options[index] : null
@@ -70,10 +77,36 @@ export function Select({
     if (open) setActive(index >= 0 ? index : 0)
   }, [open, index])
 
+  // measure before paint, and keep measuring while anything under it scrolls
+  useLayoutEffect(() => {
+    if (!open) {
+      setAt(null)
+      return
+    }
+    const place = () => {
+      const el = root.current?.firstElementChild
+      if (!el) return
+      const b = box(el)
+      const room = vh() - b.bottom
+      setAt({ left: b.left, top: b.bottom, width: b.width, up: room < 200 && b.top > room })
+    }
+    place()
+    window.addEventListener('scroll', place, true)
+    window.addEventListener('resize', place)
+    return () => {
+      window.removeEventListener('scroll', place, true)
+      window.removeEventListener('resize', place)
+    }
+  }, [open])
+
   useEffect(() => {
     if (!open) return
     const away = (e: MouseEvent) => {
-      if (!root.current?.contains(e.target as Node)) setOpen(false)
+      const t = e.target as Node
+      // the popout is on the body, so "outside" is outside both parts
+      if (root.current?.contains(t)) return
+      if ((t as Element).closest?.('.dd-popout')) return
+      setOpen(false)
     }
     // defer, so the click that opened it does not close it again
     const t = setTimeout(() => document.addEventListener('mousedown', away))
@@ -164,8 +197,15 @@ export function Select({
         </span>
         <ChevronDownIcon />
       </div>
-      {open ? (
-        <div className="dd-popout" id={listId} role="listbox" ref={list}>
+      {open && at
+        ? createPortal(
+        <div
+          className={'dd-popout' + (at.up ? ' up' : '')}
+          id={listId}
+          role="listbox"
+          ref={list}
+          style={{ left: at.left, top: at.top, width: at.width }}
+        >
           {options.map((o, i) => (
             <div
               key={o.value}
@@ -184,8 +224,10 @@ export function Select({
               {o.value === value ? <CheckIcon /> : null}
             </div>
           ))}
-        </div>
-      ) : null}
+        </div>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

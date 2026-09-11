@@ -3667,7 +3667,121 @@ h3.md-h {
 
 .set-field textarea {
   min-height: calc(84px * var(--u));
-  resize: vertical;
+  /* Discord's textareas carry no grip in the corner — that diagonal is the
+     browser's, and it is as much a tell as a native select */
+  resize: none;
+}
+
+/* ==========================================================================
+   Date picker (src/ui/DatePicker.tsx)
+
+   `<input type="date">` hands the browser's own calendar to the page, the
+   same way a native select hands over its list. This is a month grid in a
+   popout instead, on the combobox's control and popout.
+   ========================================================================== */
+
+.dpick {
+  position: relative;
+}
+
+.event-start {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(12px * var(--u));
+}
+
+.dpick-popout {
+  position: fixed;
+  z-index: 300;
+  margin-top: calc(8px * var(--u));
+  padding: calc(12px * var(--u));
+  width: calc(252px * var(--u));
+  background: var(--menu);
+  border: 1px solid var(--border);
+  border-radius: calc(8px * var(--u));
+  box-shadow: var(--shadow-high);
+  animation: select-in 100ms ease;
+  transform-origin: top center;
+}
+
+.dpick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(8px * var(--u));
+}
+
+.dpick-head span {
+  font-size: calc(14px * var(--u));
+  font-weight: 600;
+  color: var(--strong);
+}
+
+.dpick-head button {
+  display: grid;
+  place-items: center;
+  width: calc(28px * var(--u));
+  height: calc(28px * var(--u));
+  border-radius: calc(4px * var(--u));
+  color: var(--interactive);
+  cursor: pointer;
+}
+
+.dpick-head button:hover {
+  background: var(--hover);
+  color: var(--strong);
+}
+
+.dpick-head svg {
+  width: calc(18px * var(--u));
+  height: calc(18px * var(--u));
+}
+
+.dpick-dow,
+.dpick-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.dpick-dow span {
+  text-align: center;
+  padding-block: calc(4px * var(--u));
+  font-size: calc(12px * var(--u));
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.dpick-day {
+  height: calc(32px * var(--u));
+  border-radius: calc(4px * var(--u));
+  font-size: calc(14px * var(--u));
+  color: var(--text);
+  cursor: pointer;
+}
+
+.dpick-day.outside {
+  color: var(--muted);
+  opacity: 0.55;
+}
+
+.dpick-day:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+/* today keeps a ring; the chosen day is filled */
+.dpick-day.today:not(.on) {
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.dpick-day.on {
+  background: var(--blurple);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dpick-day:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 /* ==========================================================================
@@ -3861,10 +3975,8 @@ h3.md-h {
 
 /* .popout_a16aea */
 .dd-popout {
-  position: absolute;
-  z-index: 30;
-  inset-inline: 0;
-  top: 100%;
+  position: fixed;
+  z-index: 300;
   margin-top: calc(8px * var(--u));
   max-height: 40vh;
   overflow-y: auto;
@@ -3877,6 +3989,13 @@ h3.md-h {
 }
 
 /* .option_a16aea */
+/* flipped above the control when there is no room under it */
+.dd-popout.up {
+  transform: translateY(calc(-100% - 16px * var(--u)));
+  transform-origin: bottom center;
+  border-radius: calc(4px * var(--u)) calc(4px * var(--u)) 0 0;
+}
+
 .dd-option {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -6021,8 +6140,8 @@ body.streamer .invite-row code {
 }
 
 .forum-composer textarea {
-  min-height: 90px;
-  resize: vertical;
+  min-height: calc(112px * var(--u));
+  resize: none;
 }
 
 .forum-composer-foot {

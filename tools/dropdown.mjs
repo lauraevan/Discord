@@ -103,6 +103,45 @@ ok((await control.innerText()).trim() === '1 Minute', 'Home reaches the first')
 // changed until it is pressed
 ok(await p.locator('.save-bar').count(), 'all of that went into the draft, not the server')
 
+// the popouts are portalled to the body, so a modal's overflow cannot cut
+// them in half — which it did while they were absolute inside the field
+// out of the settings layer first — Events is a sidebar row behind it, and
+// the draft left open above would swallow the clicks
+await p.keyboard.press('Escape')
+await p.waitForTimeout(200)
+await p.keyboard.press('Escape')
+await p.waitForSelector('.settings-layer', { state: 'detached', timeout: 4000 })
+await p.waitForTimeout(300)
+await p.click('.row.nav:has-text("Events")')
+await p.waitForSelector('.events')
+await p.click('.events-head .btn-primary:has-text("Create Event")')
+await p.waitForSelector('.modal')
+await p.waitForTimeout(300)
+ok(
+  (await p.locator('.modal input[type="datetime-local"], .modal select').count()) === 0,
+  'the event form has no browser-drawn date or select control',
+)
+const dateField = p.locator('.dpick .dd-control[aria-label="Start Date"]')
+await dateField.click()
+await p.waitForSelector('.dpick-popout')
+const cal = await p.locator('.dpick-popout').boundingBox()
+const modal = await p.locator('.modal').boundingBox()
+ok(
+  cal.y >= 0 && cal.y + cal.height <= 900 + 1,
+  'the calendar is on screen in full',
+  { cal, modal },
+)
+ok((await p.locator('.dpick-day').count()) === 42, 'it lays out six full weeks')
+ok((await p.locator('.dpick-day.today').count()) === 1, 'today is marked')
+ok((await p.locator('.dpick-day:disabled').count()) > 0, 'days before today are dead')
+const before = await dateField.innerText()
+await p.click('[aria-label="Next month"]')
+await p.waitForTimeout(150)
+await p.locator('.dpick-day:not(.outside):not(:disabled)').nth(9).click()
+await p.waitForTimeout(200)
+ok(!(await p.locator('.dpick-popout').count()), 'picking a day closes the calendar')
+ok((await dateField.innerText()) !== before, 'and the field takes the new date')
+
 console.log('errors:', errs.length ? errs : 'none')
 if (errs.length) fails++
 console.log(fails ? `${fails} dropdown check(s) failed` : 'all dropdown checks pass')
