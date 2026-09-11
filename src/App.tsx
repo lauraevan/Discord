@@ -76,6 +76,9 @@ import {
   isSession,
   isSubscription,
   isThemeId,
+  isView,
+  DEFAULT_VIEW,
+  type View,
   K,
   load,
   purgeOldSchemas,
@@ -278,13 +281,71 @@ function Client({
     load<Record<string, number>>(K.reads, {}, (v): v is Record<string, number> => !!v && typeof v === 'object'),
   )
 
-  const [activeServer, setActiveServer] = useState<string | null>(servers[0]?.id ?? null)
-  const [activeChannel, setActiveChannel] = useState<string>(servers[0]?.channels?.[0]?.id ?? '')
+  /**
+   * Where the reader left off. Discord reopens the channel you were last in,
+   * keeps the categories you collapsed and remembers whether your mic was
+   * muted; an app that forgets all three on reload reads as a demo. Ids that
+   * no longer exist are dropped rather than trusted.
+   */
+  const view = useMemo(() => {
+    // a missing key is a first run, which opens the first server — not Home,
+    // which is what a *stored* null means
+    const stored = load<View | null>(K.view, null, (x): x is View | null => x === null || isView(x))
+    const v = stored ?? { ...DEFAULT_VIEW, server: servers[0]?.id ?? null }
+    const server = servers.find((s) => s.id === v.server) ?? null
+    const channels = server?.channels ?? servers[0]?.channels ?? []
+    const remembered = v.channels[server?.id ?? '']
+    return {
+      ...v,
+      server: server?.id ?? null,
+      channel:
+        channels.find((c) => c.id === remembered && c.kind !== 'voice')?.id ??
+        channels.find((c) => c.kind !== 'voice')?.id ??
+        '',
+    }
+    // seeded once, at mount: this is where the reader *was*, not a live mirror
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const [activeServer, setActiveServer] = useState<string | null>(view.server)
+  const [activeChannel, setActiveChannel] = useState<string>(view.channel)
   // Discord asks once per session before opening an age-restricted channel
   const [nsfwOk, setNsfwOk] = useState<string[]>([])
-  const [collapsed, setCollapsed] = useState<string[]>([])
-  const [muted, setMuted] = useState(true)
-  const [deafened, setDeafened] = useState(false)
+  const [collapsed, setCollapsed] = useState<string[]>(view.collapsed)
+  const [muted, setMuted] = useState(view.muted)
+  const [deafened, setDeafened] = useState(view.deafened)
+
+  /**
+   * The channel to open in a server: the one you were last in there, the way
+   * Discord returns you to it, falling back to its first readable channel.
+   */
+  const lastChannelIn = (id: string) => {
+    const s = servers.find((x) => x.id === id)
+    const remembered = load(K.view, DEFAULT_VIEW, isView).channels[id]
+    return (
+      s?.channels.find((c) => c.id === remembered && c.kind !== 'voice')?.id ??
+      s?.channels.find((c) => c.kind !== 'voice')?.id ??
+      ''
+    )
+  }
+
+  /**
+   * Keep the remembered view up to date. The per-server channel map is merged
+   * rather than replaced, so switching servers and back returns you to the
+   * channel you were in rather than the first one.
+   */
+  useEffect(() => {
+    const prev = load(K.view, DEFAULT_VIEW, isView)
+    save(K.view, {
+      server: activeServer,
+      channels: activeServer
+        ? { ...prev.channels, [activeServer]: activeChannel }
+        : prev.channels,
+      collapsed,
+      muted,
+      deafened,
+    })
+  }, [activeServer, activeChannel, collapsed, muted, deafened])
   const [voice, setVoice] = useState<string | null>(null)
 
   const [creatingServer, setCreatingServer] = useState(false)
@@ -1078,8 +1139,7 @@ function Client({
             onSelect={(id) => {
               setDiscover(null)
               setActiveServer(id)
-              const s = servers.find((x) => x.id === id)
-              setActiveChannel(s?.channels.find((c) => c.kind !== 'voice')?.id ?? '')
+              setActiveChannel(lastChannelIn(id))
             }}
             onHome={() => {
               setDiscover(null)

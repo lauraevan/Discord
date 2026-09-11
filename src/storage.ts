@@ -36,6 +36,51 @@ export const K = {
   notes: `${PREFIX}notes`,
   /** where the channel list was last dragged to */
   sidebar: `${PREFIX}sidebar`,
+  /**
+   * Where the reader was. A client that forgets the channel you were in, the
+   * categories you collapsed and whether your mic was muted reads as a demo
+   * the moment you reload it, so all of that is kept here.
+   */
+  view: `${PREFIX}view`,
+}
+
+/** The remembered view: see `K.view`. */
+export type View = {
+  /** the server last open, or null for Home */
+  server: string | null
+  /** the channel last open in each server, keyed by server id */
+  channels: Record<string, string>
+  /** the ids of the categories that are collapsed */
+  collapsed: string[]
+  muted: boolean
+  deafened: boolean
+}
+
+/**
+ * `muted: true` is not a guess: docs/refs/febf1f6c.jpg — the 1:1 capture the
+ * whole app is scored against — shows the mic muted, red pill and all, and
+ * starting unmuted costs 0.38 on that region. Persisting it means a reader
+ * who unmutes stays unmuted; only the first run follows the capture.
+ */
+export const DEFAULT_VIEW: View = {
+  server: null,
+  channels: {},
+  collapsed: [],
+  muted: true,
+  deafened: false,
+}
+
+export function isView(v: unknown): v is View {
+  return (
+    isObj(v) &&
+    (v.server === null || isStr(v.server)) &&
+    isObj(v.channels) &&
+    Object.values(v.channels).every(isStr) &&
+    Array.isArray(v.collapsed) &&
+    v.collapsed.every(isStr) &&
+    typeof v.muted === 'boolean' &&
+    typeof v.deafened === 'boolean'
+  )
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> =>

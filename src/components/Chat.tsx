@@ -22,6 +22,7 @@ import {
   HashIcon,
   MegaphoneIcon,
   MemberListIcon,
+  CaretIcon,
   ForwardIcon,
   MoreIcon,
   PencilIcon,
@@ -38,7 +39,7 @@ import {
 } from '../ui/Icons'
 import { FILTERS } from '../search'
 import { fileIcon, fileSize, isGif, isImage } from '../files'
-import { springScrollIntoView } from '../motion'
+import { springScroll, springScrollIntoView } from '../motion'
 import { DisplayName } from '../ui/DisplayName'
 import { Tooltip } from '../ui/Tooltip'
 import { box, point } from '../zoom'
@@ -392,6 +393,9 @@ export function ChatFeed({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [draft, setDraft] = useState('')
+  // Discord floats a round button over the list once you have scrolled away
+  // from the newest message, and takes it away again when you are back
+  const [away, setAway] = useState(false)
 
   /**
    * Following a reply back to what it answers: Discord scrolls the message
@@ -425,6 +429,17 @@ export function ChatFeed({
     if (el) el.scrollTop = el.scrollHeight
   }, [messages.length, channel.id])
 
+  // "near the bottom" rather than "at it": a list settles a pixel or two off,
+  // and a button that flickers there would be worse than none
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const check = () => setAway(el.scrollHeight - el.scrollTop - el.clientHeight > 120)
+    check()
+    el.addEventListener('scroll', check, { passive: true })
+    return () => el.removeEventListener('scroll', check)
+  }, [channel.id, messages.length])
+
   // when App points at a message to edit, seed the draft from it
   useLayoutEffect(() => {
     if (editingId) setDraft(all.find((m) => m.id === editingId)?.text ?? '')
@@ -437,7 +452,23 @@ export function ChatFeed({
 
   let lastDay = ''
   return (
-    <div className="feed" ref={ref}>
+    <div className="feed-wrap">
+      {/* .jumpToPresentButtonContainer: pinned 16 off the bottom-right of the
+          list, over it rather than in it */}
+      {away ? (
+        <div className="jump-present">
+          <button
+            aria-label="Jump To Present"
+            onClick={() => {
+              const el = ref.current
+              if (el) springScroll(el, el.scrollHeight - el.clientHeight)
+            }}
+          >
+            <CaretIcon />
+          </button>
+        </div>
+      ) : null}
+      <div className="feed" ref={ref}>
       {/* a brand new server shows the checklist in place of the channel intro,
           the way Discord does until the server has been used */}
       {server && showChecklist ? (
@@ -757,6 +788,7 @@ export function ChatFeed({
           </div>
         )
       })}
+      </div>
     </div>
   )
 }
