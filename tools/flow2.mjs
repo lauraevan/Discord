@@ -191,7 +191,11 @@ await step('channel settings: slowmode + topic', async () => {
   await p.waitForSelector('.settings-layer')
   await p.getByLabel('CHANNEL TOPIC').fill('a topic worth reading twice')
   await p.locator('[aria-label="Slowmode"]').fill('5')
+  // the slider reads the draft straight away; the channel only takes it on Save
   if ((await p.locator('.slowmode span').innerText()) !== '1 min') throw new Error('slowmode label wrong')
+  await p.click('.save-go')
+  await p.waitForTimeout(250)
+  if (await p.locator('.save-bar').count()) throw new Error('the save bar stayed up')
 })
 await step('a channel topic reaches the header, and opens in full', async () => {
   // the topic was set by the step above

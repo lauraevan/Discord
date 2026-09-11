@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   ForumLayout,
   ForumSort,
@@ -12,11 +12,13 @@ import {
   Field,
   Note,
   Radio,
+  SaveBar,
   SettingsLayer,
   Sub,
   Title,
   Toggle,
   Unavailable,
+  useDraft,
   type NavItem,
 } from './SettingsLayer'
 
@@ -51,6 +53,26 @@ export function ChannelSettings({
   const voice = channel.kind === 'voice'
   const forum = channel.kind === 'forum' || channel.kind === 'media'
 
+  /**
+   * Overview's draft. Discord's channel Overview carries the same
+   * unsaved-changes bar Server Settings does: the fields write here and Save
+   * Changes carries them over together.
+   */
+  const source = useMemo(
+    () => ({
+      name: channel.name,
+      topic: channel.topic ?? '',
+      slowmode: channel.slowmode ?? 0,
+      nsfw: !!channel.nsfw,
+      forumLayout: channel.forumLayout ?? ForumLayout.LIST,
+      forumSort: channel.forumSort ?? ForumSort.LATEST_ACTIVITY,
+    }),
+    [channel],
+  )
+  const ov = useDraft(source)
+  const save = () =>
+    onPatch((c) => ({ ...c, ...ov.draft }), { action: 'Channel updated', target: ov.draft.name })
+
   const nav: NavItem[] = [
     { head: channel.name },
     { id: 'overview', label: 'Overview' },
@@ -61,30 +83,35 @@ export function ChannelSettings({
   ]
 
   return (
-    <SettingsLayer nav={nav} section={section} onSection={setSection} onClose={onClose}>
+    <SettingsLayer
+      nav={nav}
+      section={section}
+      onSection={setSection}
+      onClose={onClose}
+      notice={
+        <SaveBar open={section === 'overview' && ov.dirty} onReset={ov.reset} onSave={save} />
+      }
+    >
       {section === 'overview' ? (
         <>
           <Title>Overview</Title>
           <Field
             label="CHANNEL NAME"
-            value={channel.name}
+            value={ov.draft.name}
             maxLength={100}
             onChange={(name) =>
-              onPatch((c) => ({ ...c, name: name.toLowerCase().replace(/\s+/g, '-') }), {
-                action: 'Channel renamed',
-                target: name,
-              })
+              ov.patch((d) => ({ ...d, name: name.toLowerCase().replace(/\s+/g, '-') }))
             }
           />
           {!voice ? (
             <>
               <Field
                 label="CHANNEL TOPIC"
-                value={channel.topic ?? ''}
+                value={ov.draft.topic}
                 maxLength={1024}
                 textarea
                 placeholder="Let everyone know how to use this channel!"
-                onChange={(topic) => onPatch((c) => ({ ...c, topic }))}
+                onChange={(topic) => ov.patch((d) => ({ ...d, topic }))}
               />
               <Divider />
               <Sub>Slowmode</Sub>
@@ -97,16 +124,13 @@ export function ChannelSettings({
                   type="range"
                   min={0}
                   max={SLOWMODE_STEPS.length - 1}
-                  value={Math.max(0, SLOWMODE_STEPS.indexOf(channel.slowmode ?? 0))}
+                  value={Math.max(0, SLOWMODE_STEPS.indexOf(ov.draft.slowmode))}
                   aria-label="Slowmode"
                   onChange={(e) =>
-                    onPatch(
-                      (c) => ({ ...c, slowmode: SLOWMODE_STEPS[Number(e.target.value)] }),
-                      { action: 'Slowmode changed', target: channel.name },
-                    )
+                    ov.patch((d) => ({ ...d, slowmode: SLOWMODE_STEPS[Number(e.target.value)] }))
                   }
                 />
-                <span>{slowmodeLabel(channel.slowmode ?? 0)}</span>
+                <span>{slowmodeLabel(ov.draft.slowmode)}</span>
               </div>
               {forum ? (
                 <>
@@ -127,14 +151,9 @@ export function ChannelSettings({
                         key={value}
                         className={
                           'layout-pick' +
-                          ((channel.forumLayout ?? ForumLayout.LIST) === value ? ' on' : '')
+                          (ov.draft.forumLayout === value ? ' on' : '')
                         }
-                        onClick={() =>
-                          onPatch((c) => ({ ...c, forumLayout: value }), {
-                            action: 'Forum layout changed',
-                            target: label,
-                          })
-                        }
+                        onClick={() => ov.patch((d) => ({ ...d, forumLayout: value }))}
                       >
                         <img src={LAYOUT_ART[`../assets/forum/${art}.webp`]} alt="" draggable={false} />
                         <span>{label}</span>
@@ -146,17 +165,12 @@ export function ChannelSettings({
                   <Sub>Default Sort Order</Sub>
                   <Note>Choose the order posts are shown in by default.</Note>
                   <Radio
-                    value={String(channel.forumSort ?? ForumSort.LATEST_ACTIVITY)}
+                    value={String(ov.draft.forumSort)}
                     options={[
                       [String(ForumSort.LATEST_ACTIVITY), 'Latest Activity'],
                       [String(ForumSort.CREATION_DATE), 'Date Posted'],
                     ]}
-                    onChange={(v) =>
-                      onPatch((c) => ({ ...c, forumSort: Number(v) as ForumSort }), {
-                        action: 'Forum sort changed',
-                        target: channel.name,
-                      })
-                    }
+                    onChange={(v) => ov.patch((d) => ({ ...d, forumSort: Number(v) as ForumSort }))}
                   />
                 </>
               ) : null}
@@ -164,13 +178,8 @@ export function ChannelSettings({
               <Toggle
                 label="Age-Restricted Channel"
                 note="Users will need to confirm they are of over legal age to view in the content in this channel."
-                value={!!channel.nsfw}
-                onChange={(nsfw) =>
-                  onPatch((c) => ({ ...c, nsfw }), {
-                    action: nsfw ? 'Channel marked age-restricted' : 'Age restriction removed',
-                    target: channel.name,
-                  })
-                }
+                value={ov.draft.nsfw}
+                onChange={(nsfw) => ov.patch((d) => ({ ...d, nsfw }))}
               />
             </>
           ) : (

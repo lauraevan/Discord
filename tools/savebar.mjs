@@ -101,6 +101,30 @@ const role = await p.evaluate(() => {
 ok(!!role, 'the role name saved')
 ok(role?.permissions?.includes('ADMINISTRATOR'), 'the permission saved with it')
 
+// channel settings carries the same bar
+await p.keyboard.press('Escape')
+await p.waitForTimeout(300)
+await p.locator('.sidebar-scroll .row:not(.nav)').first().hover()
+await p.locator('.sidebar-scroll .row:not(.nav)').first().locator('[aria-label="Edit channel"]').click()
+await p.waitForSelector('.settings-layer')
+await p.waitForTimeout(300)
+ok(!(await p.locator('.save-bar').count()), 'channel settings opens clean')
+await p.getByLabel('CHANNEL TOPIC').fill('a topic worth reading twice')
+await p.waitForSelector('.save-bar', { timeout: 2000 })
+ok(
+  !(await p.locator('.header-topic').count()),
+  'the header does not take the topic while the bar is up',
+)
+await p.click('.save-go')
+await p.waitForTimeout(250)
+ok(!(await p.locator('.save-bar').count()), 'saving the channel puts the bar down')
+await p.keyboard.press('Escape')
+await p.waitForTimeout(300)
+ok(
+  (await p.locator('.header-topic').innerText()).startsWith('a topic'),
+  'and the topic reaches the header',
+)
+
 console.log('errors:', errs.length ? errs : 'none')
 if (errs.length) fails++
 console.log(fails ? `${fails} save-bar check(s) failed` : 'all save-bar checks pass')
