@@ -497,7 +497,7 @@ function Client({
     setNavVersion((v) => v + 1)
   }, [navSnapshot])
 
-  const restoreNavigation = (snapshot: NavSnapshot) => {
+  const restoreNavigation = useCallback((snapshot: NavSnapshot) => {
     restoringNavRef.current = true
     setDiscover(snapshot.discover)
     setActiveServer(snapshot.server)
@@ -508,16 +508,16 @@ function Client({
     setInboxOpen(false)
     setPinsOpen(false)
     setThreadsOpen(false)
-  }
+  }, [])
 
-  const navigateHistory = (delta: -1 | 1) => {
+  const navigateHistory = useCallback((delta: -1 | 1) => {
     const nextIndex = navIndexRef.current + delta
     const next = navHistoryRef.current[nextIndex]
     if (!next) return
     navIndexRef.current = nextIndex
     restoreNavigation(next)
     setNavVersion((v) => v + 1)
-  }
+  }, [restoreNavigation])
 
   // navVersion is a render trigger for ref-backed history availability.
   void navVersion
