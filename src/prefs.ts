@@ -7,10 +7,12 @@
  */
 
 export type MessageDisplay = 'cozy' | 'compact'
+export type UiDensity = 'compact' | 'default' | 'spacious'
 export type NotifyLevel = 0 | 1 | 2
 
 export type Prefs = {
   /* Appearance */
+  uiDensity: UiDensity
   messageDisplay: MessageDisplay
   fontScale: number
   spaceBetween: number
@@ -87,6 +89,7 @@ export type Prefs = {
 }
 
 export const defaultPrefs: Prefs = {
+  uiDensity: 'default',
   messageDisplay: 'cozy',
   fontScale: 16,
   spaceBetween: 16,
@@ -178,13 +181,8 @@ export const LOCALES: [string, string, string][] = [
 ]
 
 /**
- * The keybind actions the client lists that a browser can actually honour.
- * Names are Discord's own action ids.
- */
-/**
- * Discord's keybind table, ids and all. Every one of these is bound in
- * src/App.tsx except Navigate Back and Navigate Forward, which need a route
- * history this page does not keep — tools/keys.mjs covers the rest.
+ * Discord's keybind table, ids and all. These are wired in src/App.tsx,
+ * including the desktop navigation-history shortcuts.
  */
 export const KEYBINDS: [string, string, string][] = [
   ['QUICKSWITCHER_SHOW', 'Quick Switcher', 'Ctrl + K'],
