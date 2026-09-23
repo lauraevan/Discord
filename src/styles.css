@@ -5529,6 +5529,47 @@ h3.md-h {
 
 /* --- appearance prefs applied for real ---------------------------------- */
 
+/*
+ * UI Density is separate from app zoom in current Discord. Default remains the
+ * measured geometry above; Compact and Spacious only change the rhythm of
+ * repeatable rows, preserving panel widths, icon sizes and typography.
+ */
+body[data-ui-density='compact'] .row {
+  height: 24px;
+  margin-bottom: 1px;
+}
+
+body[data-ui-density='spacious'] .row {
+  height: 30px;
+  margin-bottom: 3px;
+}
+
+body[data-ui-density='compact'] .member {
+  height: calc(38px * var(--u));
+}
+
+body[data-ui-density='spacious'] .member {
+  height: calc(46px * var(--u));
+}
+
+body[data-ui-density='compact'] .settings-item {
+  padding-block: calc(4px * var(--u));
+  margin-bottom: calc(1px * var(--u));
+}
+
+body[data-ui-density='spacious'] .settings-item {
+  padding-block: calc(8px * var(--u));
+  margin-bottom: calc(3px * var(--u));
+}
+
+body[data-ui-density='compact'] .category {
+  min-height: 18px;
+}
+
+body[data-ui-density='spacious'] .category {
+  min-height: 24px;
+}
+
 .msg-line {
   font-size: calc(var(--msg-font, 16px) * var(--u));
 }
