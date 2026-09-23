@@ -120,7 +120,7 @@ export function UserSettings({
     { head: 'User Settings' },
     { id: 'account', label: 'My Account' },
     { id: 'profiles', label: 'Profiles' },
-    { id: 'content_social', label: 'Content & Social' },
+    { id: 'content_social', label: 'Messaging Permissions' },
     { id: 'data_privacy', label: 'Data & Privacy' },
     { id: 'family_center', label: 'Family Center' },
     { id: 'authorized_apps', label: 'Authorized Apps' },
