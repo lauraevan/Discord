@@ -134,17 +134,32 @@ aggregate is not.
 
 ## User Settings sections
 
-Extracted from the client's page-name map. Sidebar groups follow the client.
+The base page map below came from the shipped client bundle. Keep it synchronized
+with Discord's rolling Settings redesign rather than treating an older bundle
+snapshot as permanent ground truth.
 
-**User Settings** — My Account · Profiles · Content & Social · Data & Privacy ·
-Family Center · Authorized Apps · Devices · Connections · Clips · Friend Requests
+### Current desktop deltas — September 2026
+
+- **Content & Social** is now **Messaging Permissions**.
+- **Activity Settings** is now **Games & Apps**.
+- Discord's June 2026 Account redesign moved **Devices**, **Family Center**,
+  **Account Standing**, and **Multi-Factor Authentication** into nested Account
+  pages instead of treating them as unrelated top-level destinations.
+- Appearance now includes **UI Density** with Compact, Default, and Spacious
+  choices; this is independent from app Zoom and chat-message density.
+
+**User Settings** — My Account · Profiles · Messaging Permissions · Data & Privacy ·
+Authorized Apps · Connections · Clips · Friend Requests
+
+**Account nested pages** — Devices · Family Center · Account Standing ·
+Multi-Factor Authentication
 
 **Billing Settings** — Nitro · Server Boost · Subscriptions · Gift Inventory · Billing
 
 **App Settings** — Appearance · Accessibility · Voice & Video · Text & Images ·
 Notifications · Keybinds · Language · Streamer Mode · Advanced
 
-**Activity Settings** — Activity Privacy · Registered Games · Game Overlay
+**Games & Apps** — Activity Privacy · Registered Games · Game Overlay
 
 Then What's New, and Log Out.
 
