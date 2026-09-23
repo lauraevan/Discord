@@ -147,7 +147,7 @@ export function UserSettings({
     { id: 'streamer_mode', label: 'Streamer Mode' },
     { id: 'advanced', label: 'Advanced' },
     { sep: true },
-    { head: 'Activity Settings' },
+    { head: 'Games & Apps' },
     { id: 'activity_privacy', label: 'Activity Privacy' },
     { id: 'registered_games', label: 'Registered Games' },
     { id: 'overlay', label: 'Game Overlay' },
@@ -229,6 +229,17 @@ export function UserSettings({
       {section === 'appearance' ? (
         <>
           <Title>Appearance</Title>
+          <Sub>UI Density</Sub>
+          <Radio
+            value={prefs.uiDensity}
+            onChange={(v) => set('uiDensity', v)}
+            options={[
+              ['compact', 'Compact', 'Fit more of the app on screen at once.'],
+              ['default', 'Default', 'Discord’s standard desktop spacing.'],
+              ['spacious', 'Spacious', 'Add more room between interface elements.'],
+            ]}
+          />
+          <Divider />
           <Sub>Theme</Sub>
           <Toggle
             label="Sync with computer"
