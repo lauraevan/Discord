@@ -439,6 +439,88 @@ function Client({
   const [notify, setNotify] = useState<Record<string, 0 | 1 | 2>>({})
   /** the sidebar's Events and Browse Channels rows open over the chat */
   const [serverView, setServerView] = useState<'events' | 'browse' | null>(null)
+
+  /*
+   * Desktop navigation history. Discord exposes this directly in the titlebar
+   * now, so keep a compact history of the navigable surfaces instead of
+   * rendering decorative arrows that do nothing.
+   */
+  type NavSnapshot = {
+    server: string | null
+    channel: string
+    home: HomeView
+    discover: DiscoverTab | null
+    friends: 'online' | 'all' | 'pending' | 'blocked' | 'add'
+    serverView: 'events' | 'browse' | null
+  }
+  const navHistoryRef = useRef<NavSnapshot[]>([])
+  const navIndexRef = useRef(-1)
+  const restoringNavRef = useRef(false)
+  const [navVersion, setNavVersion] = useState(0)
+  const navSnapshot = useMemo<NavSnapshot>(
+    () => ({
+      server: activeServer,
+      channel: activeChannel,
+      home: homeView,
+      discover,
+      friends: friendsTab,
+      serverView,
+    }),
+    [activeServer, activeChannel, homeView, discover, friendsTab, serverView],
+  )
+
+  useEffect(() => {
+    if (restoringNavRef.current) {
+      restoringNavRef.current = false
+      return
+    }
+    const history = navHistoryRef.current
+    const index = navIndexRef.current
+    const current = history[index]
+    if (
+      current &&
+      current.server === navSnapshot.server &&
+      current.channel === navSnapshot.channel &&
+      current.home === navSnapshot.home &&
+      current.discover === navSnapshot.discover &&
+      current.friends === navSnapshot.friends &&
+      current.serverView === navSnapshot.serverView
+    ) {
+      return
+    }
+
+    const next = history.slice(0, index + 1)
+    next.push(navSnapshot)
+    if (next.length > 80) next.shift()
+    navHistoryRef.current = next
+    navIndexRef.current = next.length - 1
+    setNavVersion((v) => v + 1)
+  }, [navSnapshot])
+
+  const restoreNavigation = (snapshot: NavSnapshot) => {
+    restoringNavRef.current = true
+    setDiscover(snapshot.discover)
+    setActiveServer(snapshot.server)
+    setActiveChannel(snapshot.channel)
+    setHomeView(snapshot.home)
+    setFriendsTab(snapshot.friends)
+    setServerView(snapshot.serverView)
+    setInboxOpen(false)
+    setPinsOpen(false)
+    setThreadsOpen(false)
+  }
+
+  const navigateHistory = (delta: -1 | 1) => {
+    const nextIndex = navIndexRef.current + delta
+    const next = navHistoryRef.current[nextIndex]
+    if (!next) return
+    navIndexRef.current = nextIndex
+    restoreNavigation(next)
+    setNavVersion((v) => v + 1)
+  }
+
+  // navVersion is a render trigger for ref-backed history availability.
+  void navVersion
   /** Discord's Select Friends, behind the DM list's + and New Group DM */
   const [selectFriends, setSelectFriends] = useState(false)
   /** false when closed, otherwise the section to open Server Settings on */
@@ -1144,6 +1226,10 @@ function Client({
               : (server?.name ?? 'Discord')
         }
         initials={activeServer === null ? '' : (server?.initials ?? 'D')}
+        canBack={navIndexRef.current > 0}
+        canForward={navIndexRef.current >= 0 && navIndexRef.current < navHistoryRef.current.length - 1}
+        onBack={() => navigateHistory(-1)}
+        onForward={() => navigateHistory(1)}
         onInbox={() => setInboxOpen((v) => !v)}
       />
       {inboxOpen ? (
