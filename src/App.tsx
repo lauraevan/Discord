@@ -551,6 +551,7 @@ function Client({
     r.setProperty('--app-zoom', String(prefs.zoom / 100))
     r.setProperty('--app-saturate', String(prefs.saturation / 100))
     r.setProperty('--link-underline', prefs.underlineLinks ? 'underline' : 'none')
+    document.body.dataset.uiDensity = prefs.uiDensity
     document.body.classList.toggle('compact', prefs.messageDisplay === 'compact')
     document.body.classList.toggle('reduced-motion', prefs.reducedMotion)
     document.body.classList.toggle('streamer', prefs.streamerMode)
@@ -1053,6 +1054,16 @@ function Client({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const mod = e.ctrlKey || e.metaKey
+      if (e.altKey && !mod && !e.shiftKey && e.key === 'ArrowLeft') {
+        e.preventDefault()
+        navigateHistory(-1)
+        return
+      }
+      if (e.altKey && !mod && !e.shiftKey && e.key === 'ArrowRight') {
+        e.preventDefault()
+        navigateHistory(1)
+        return
+      }
       if (mod && e.key.toLowerCase() === 'k') {
         e.preventDefault()
         setSwitcher(true)
@@ -1108,9 +1119,22 @@ function Client({
         else markRead()
       }
     }
+    const onMouseHistory = (e: MouseEvent) => {
+      if (e.button === 3) {
+        e.preventDefault()
+        navigateHistory(-1)
+      } else if (e.button === 4) {
+        e.preventDefault()
+        navigateHistory(1)
+      }
+    }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [anyOverlay, markRead, markServerRead, replyTo, query, thread, lastRead, key, jumpTo])
+    window.addEventListener('mouseup', onMouseHistory)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('mouseup', onMouseHistory)
+    }
+  }, [anyOverlay, markRead, markServerRead, replyTo, query, thread, lastRead, key, jumpTo, navigateHistory])
 
   /* ------------------------------------------------------------- render */
 
